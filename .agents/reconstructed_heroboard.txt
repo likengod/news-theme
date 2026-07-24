@@ -1,0 +1,1638 @@
+Created At: 2026-07-19T03:21:56Z
+Completed At: 2026-07-19T03:21:56Z
+File Path: `file:///c:/Users/gorillatech/Music/TodayTripura/src/components/site/HeroBoard.tsx`
+Total Lines: 462
+Total Bytes: 23372
+Showing lines 1 to 120
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: 
+2: import { useEffect, useState } from "react";
+3: import { top, grid, lead, viewsFor, formatViews } from "@/lib/news-data";
+4: import { LiveVideo } from "./LiveVideo";
+5: import { Views } from "./Views";
+6: import Advertisement from "./Advertisement";
+7: import { ArchiveFinder } from "./ArchiveFinder";
+8: import { loadAds, type AdSlideItem } from "@/lib/site-content";
+9: import { useHomepageConfig } from "@/hooks/use-homepage-config";
+10: import { articlesByCategory } from "@/lib/homepage-config";
+11: import { SocialIcons } from "./SocialIcons";
+12: 
+13: 
+14: 
+15: type Item = { kicker?: string; title: string; excerpt?: string; img?: string };
+16: 
+17: const leftItems: Item[] = [
+18:   { kicker: "Health", title: "Why postpartum depression went untreated for thousands of years", excerpt: "Ei mei scripta intellegat. Verear voluptaria eam at, consul putent eu vel. Pro saepe maluisset ne, audire maiorum forensibus eos." },
+19:   { kicker: "Food", title: "Extra $2.50 for half a prawn? Diner unhappy about $8.50 laksa", excerpt: "Justo fabulas singulis at pri, saepe luptatum mei an. Duo idque solet scribentur eu, natum iudico labore te eos, no." },
+20:   { kicker: "Tech", title: "Did You Know You Can Unsend and Edit Text Messages on Your iPhone", excerpt: "Usu tantas omittantur ut, per te modo appetere senserit. Ei ius aperiam tincidunt, ea sit natum iisque repudiandae.", img: top[2].img },
+21:   { kicker: "Politics", title: "EU governments present bill to reserve 3rd of parliament seats", excerpt: "Duo dolorum mandamus mnesarchum te. Sit ridens persius ex. Vel noluisse perpetua consequat ex, has nostro antiopam eu." },
+22:   { kicker: "Climate", title: "Record heatwave pushes power grids to the brink across southern Europe", excerpt: "Operators in Spain, Italy and Greece warned of rolling blackouts as demand from cooling systems hit all-time highs this week." },
+23: ];
+24: 
+25: const bottomItems: Item[] = [
+26:   {
+27:     kicker: "Markets",
+28:     title: "Wall Street closes higher as Federal Reserve signals patience on rate cuts and traders bet on a softer landing for the US economy heading into year-end",
+29:     excerpt: "The S&P 500 and Nasdaq notched fresh records after Chair Powell told lawmakers the central bank can afford to wait before easing policy further. Treasury yields slipped across the curve as traders dialed back bets on an imminent cut, while the dollar weakened against a basket of major peers. Bank stocks led the advance, with regional lenders rallying on hopes that a steeper yield curve will revive net interest margins into the new year as deposit costs finally begin to ease.",
+30:   },
+31:   {
+32:     kicker: "Business",
+33:     title: "Boeing wins record $14 billion order as Gulf carrier expands long-haul fleet across Asia and Europe",
+34:     excerpt: "The deal — covering 40 widebody jets with options for 20 more — marks the planemaker's largest single order of the year and lifts its backlog past 5,500 aircraft. Executives said the agreement underscores resurgent long-haul demand out of the Gulf as carriers race to add capacity on routes to Asia, Africa and the Americas. Deliveries are expected to begin in late 2027 and stretch into the following decade, giving Boeing's South Carolina widebody line a multi-year runway just as it stabilizes production after a turbulent stretch on the 787 and 777X programs.",
+35:   },
+36:   {
+37:     kicker: "Tech",
+38:     title: "Nvidia briefly tops $4 trillion as AI chip demand shows no sign of cooling",
+39:     excerpt: "Shares climbed 2.6% in early trading, pushing the chipmaker past Apple and Microsoft to become the most valuable listed company in the world.",
+40:   },
+41:   {
+42:     kicker: "Crypto",
+43:     title: "Bitcoin breaks $112,000 as spot ETFs log record weekly inflows",
+44:     excerpt: "More than $3.2 billion flowed into US-listed spot bitcoin funds last week, with BlackRock's IBIT alone accounting for nearly half of the total.",
+45:   },
+46:   {
+47:     kicker: "Markets",
+48:     title: "Oil slips below $78 as OPEC+ signals gradual supply return",
+49:     excerpt: "Brent crude eased after the producer group confirmed it will unwind voluntary cuts in monthly tranches through the second half of the year.",
+50:   },
+51:   {
+52:     kicker: "Business",
+53:     title: "Tesla unveils next-gen robotaxi platform with sub-$25K price tag",
+54:     excerpt: "Elon Musk said production will begin in Texas next year, with the company targeting one million autonomous units annually by 2028.",
+55:   },
+56: ];
+57: 
+58: 
+59: const popularItems = [
+60:   { title: "Europe must forge a new role in the global economy", by: "Claire", img: lead.img },
+61:   { title: "Why postpartum depression went untreated for thousands of years", by: "Claire", img: top[1].img },
+62:   { title: "Global economic growth forecasts slashed", by: "Claire", img: grid[2].img },
+63:   { title: "Extra $2.50 for half a prawn? Diner unhappy about $8.50 laksa", by: "Lucas", img: grid[1].img },
+64: ];
+65: 
+66: const AUTHORS = ["Claire Bennett", "Lucas Hayes", "Maya Chen", "Daniel Cole", "Priya Raman", "Noah Whitfield"];
+67: function authorFor(seed?: string) {
+68:   if (!seed) return AUTHORS[0];
+69:   let h = 0;
+70:   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+71:   return AUTHORS[h % AUTHORS.length];
+72: }
+73: 
+74: function MinRead({ seed, kicker }: { seed?: string; kicker?: string }) {
+75:   return (
+76:     <span className="mt-3 inline-flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+77:       <span className="font-medium text-foreground">By {authorFor(seed)}</span>
+78:       {seed && <Views count={viewsFor(seed)} />}
+79:       {kicker && <span className="kicker whitespace-nowrap text-[10px]">{kicker}</span>}
+80:     </span>
+81:   );
+82: }
+83: 
+84: function HeadlineArticle({ item, dense = false }: { item: Item; dense?: boolean }) {
+85:   return (
+86:     <a href="/article/sample" className="group block">
+87:       {item.img && (
+88:         <div className="mb-3 overflow-hidden">
+89:           <img
+90:             src={item.img}
+91:             alt={item.title}
+92:             loading="lazy"
+93:             className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+94:           />
+95:         </div>
+96:       )}
+97:       <h3 className={`headline text-foreground group-hover:underline ${dense ? "text-lg" : "text-xl"}`}>
+98:         {item.title}
+99:       </h3>
+100:       {item.excerpt && (
+101:         <p className="mt-2 line-clamp-2 text-sm leading-snug text-muted-foreground">{item.excerpt}</p>
+102:       )}
+103:       <MinRead seed={item.title} kicker={item.kicker} />
+104:     </a>
+105:   );
+106: }
+107: 
+108: 
+109: 
+110: export function HeroBoard() {
+111:   const cfg = useHomepageConfig();
+112:   const [adSlides, setAdSlides] = useState<AdSlideItem[]>(() => loadAds());
+113:   useEffect(() => {
+114:     const sync = () => setAdSlides(loadAds());
+115:     window.addEventListener("nt:ads-updated", sync);
+116:     window.addEventListener("storage", sync);
+117:     return () => {
+118:       window.removeEventListener("nt:ads-updated", sync);
+119:       window.removeEventListener("storage", sync);
+120:     };
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+    time: new Date(articles[0].date).toLocaleDateString(),
+    img: articles[0].featuredImage,
+    views: articles[0].views || 0,
+    slug: articles[0].slug
+  } : {
+    ...lead,
+    slug: "sample"
+  };
+
+  const activeTop = hasDbArticles ? articles.slice(1, 4).map(a => ({
+    kicker: a.category,
+    title: a.title,
+    time: new Date(a.date).toLocaleDateString(),
+    img: a.featuredImage,
+    views: a.views || 0,
+    slug: a.slug
+  })) : top.map(t => ({ ...t, slug: "sample" }));
+
+  const activeGrid = hasDbArticles ? articles.slice(4, 7).map(a => ({
+    kicker: a.category,
+    title: a.title,
+    excerpt: a.excerpt || a.content?.replace(/<[^>]*>/g, '').slice(0, 100) + "...",
+    img: a.featuredImage,
+    author: a.author || "Newsroom",
+    views: a.views || 0,
+    slug: a.slug
+  })) : grid.map(g => ({ ...g, slug: "sample" }));
+
+  const activeLeftItems = hasDbArticles ? articles.slice(7, 12).map(a => ({
+    kicker: a.category,
+    title: a.title,
+    excerpt: a.excerpt || a.content?.replace(/<[^>]*>/g, '').slice(0, 100) + "...",
+    img: a.featuredImage,
+    slug: a.slug
+  })) : leftItems.map(l => ({ ...l, slug: "sample" }));
+
+  const activeBottomItems = hasDbArticles ? articles.slice(12, 18).map(a => ({
+    kicker: a.category,
+    title: a.title,
+    excerpt: a.excerpt || a.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...",
+    img: a.featuredImage || "/placeholder.svg",
+    slug: a.slug
+  })) : bottomItems.map(b => ({ ...b, slug: "sample", img: grid[Math.floor(Math.random() * grid.length)].img }));
+
+  const activePopularItems = hasDbArticles ? articles.slice(18, 22).map(a => ({
+    title: a.title,
+    by: a.author || "Newsroom",
+    img: a.featuredImage,
+    views: a.views || 0,
+    slug: a.slug
+  })) : popularItems.map(p => ({ ...p, slug: "sample" }));
+
+  const opinionItems = [
+    { title: "A state campsite reservation bill heads for the governor's desk", by: "Claire", img: grid[0].img, slug: "sample" },
+    { title: "Did You Know You Can Unsend and Edit Text Messages on Your iPhone", by: "Lucas", img: top[2].img, slug: "sample" },
+    { title: "Who is Andrew Yang, the Internet's Favorite Candidate? | 2020 Presidential Candidate", by: "Neil", img: top[0].img, slug: "sample" },
+    { title: "Artist / Teacher in Classical Voice job with us", by: "Claire", img: grid[1].img, slug: "sample" },
+    { title: "Fed minutes hint at slower pace of rate cuts through summer", by: "Maya", img: grid[2].img, slug: "sample" },
+    { title: "Inside the boardroom battle reshaping Europe's largest carmaker", by: "Daniel", img: top[1].img, slug: "sample" },
+  ];
+
+  const activeOpinionItems = hasDbArticles ? articles.slice(22, 28).map(a => ({
+    title: a.title,
+    by: a.author || "Newsroom",
+    img: a.featuredImage || "/placeholder.svg",
+    slug: a.slug
+  })) : opinionItems;
+
+  const cultureItems = [
+    { title: "Bob Dylan: Icon of 20th Century Music", excerpt: "Duo dolorum mandamus mnesarchum te. Sit ridens persius ex. Vel noluisse perpetua consequat ex, has nostro antiopam eu. Nec esse meis eu.", date: "Jul 21, 2019", kicker: "Music", img: top[0].img, play: true, slug: "sample" },
+    { title: "Bob Dylan: The Best Collection of 1963", excerpt: "Labore nonumes te vel, vis id errem tantas tempor. Solet quidam salutatus at quo. Tantas comprehensam te sea, usu sanctus similique ei.", date: "Jan 20, 2018", kicker: "Music", img: top[1].img, slug: "sample" },
+    { title: "Top 20 Female CEOs In Tech Corporates", excerpt: "Duo dolorum mandamus mnesarchum te. Sit ridens persius ex. Vel noluisse perpetua consequat ex, has nostro antiopam eu.", date: "Apr 23, 2017", kicker: "Business", img: grid[0].img, slug: "sample" },
+    { title: "Everything about Bitcoin explained in this article", excerpt: "Quo natum nemore putant in, his te case habemus. Nulla detraxit explicari in vim. Id eam magna omnesque.", date: "Nov 11, 2015", kicker: "Crypto", img: grid[2].img, slug: "sample" },
+  ];
+
+  const activeCultureItems = hasDbArticles ? articles.slice(28, 32).map((a, idx) => ({
+    title: a.title,
+    excerpt: a.excerpt || a.content?.replace(/<[^>]*>/g, '').slice(0, 100) + "...",
+    date: new Date(a.date).toLocaleDateString(),
+    kicker: a.category,
+    img: a.featuredImage || "/placeholder.svg",
+    play: idx === 0,
+    slug: a.slug
+  })) : cultureItems;
+  return (
+    <section className="border-b border-border py-8">
+      <div className="grid gap-8 lg:grid-cols-12">
+        {/* MAIN AREA: left headlines + center hero + bottom 4 cards */}
+        <div className="lg:col-span-9">
+          <div className="grid gap-8 lg:grid-cols-12">
+            {/* LEFT — stacked headline list */}
+                      <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                        {(featured as { dek?: string; excerpt?: string }).dek ?? (featured as { excerpt?: string }).excerpt ?? ""}
+                      </p>
+                      <MinRead seed={featured.title} kicker={kicker} />
+                    </a>
+                  </article>
+                );
+              })()}
+
+                );
+              })()}
+
+
+            </div>
+          </div>
+
+          {/* BOTTOM ROW — Politics-style section: 2 image cards + stacked text column */}
+          <div className="mt-10 border-t border-border pt-6">
+            <h3
+              className="mb-6 font-bold uppercase tracking-[0.25em]"
+              style={{ color: cfg.heroTopStories.color, fontSize: `${cfg.heroTopStories.fontSize}px` }}
+            >
+              {cfg.heroTopStories.title}
+            </h3>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {/* Card 1 — image on top */}
+              <a href="/article/sample" className="group block">
+                <div className="overflow-hidden">
+                  <img
+                    src={grid[0].img}
+                    alt={bottomItems[0].title}
+                    loading="lazy"
+                    className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <h3 className="headline mt-4 text-xl text-foreground group-hover:underline [-webkit-line-clamp:3] [max-height:none]">
+                  {bottomItems[0].title}
+                </h3>
+                <p className="mt-2 text-sm leading-snug text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden [&::first-letter]:font-serif [&::first-letter]:float-left [&::first-letter]:mr-2 [&::first-letter]:text-5xl [&::first-letter]:font-bold [&::first-letter]:leading-[0.9] [&::first-letter]:text-foreground">
+                      <MinRead seed={featured.title} kicker={kicker} />
+                    </a>
+                  </article>
+                );
+              })()}
+
+
+            </div>
+                    {/* BOTTOM ROW — Politics-style section: 2 image cards + stacked text column */}
+          <div className="mt-10 border-t border-border pt-6">
+            <h3
+              className="mb-6 font-bold uppercase tracking-[0.25em]"
+              style={{ color: cfg.heroTopStories.color, fontSize: `${cfg.heroTopStories.fontSize}px` }}
+            >
+              {cfg.heroTopStories.title}
+            </h3>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {/* Card 1 — image on top */}
+              <a href={activeBottomItems[0].slug ? `/article/${activeBottomItems[0].slug}` : "/article/sample"} className="group block">
+                {activeBottomItems[0].img && (
+                  <div className="overflow-hidden">
+                <div className="overflow-hidden">
+                  <img
+                    src={grid[0].img}
+                    alt={bottomItems[0].title}
+                    loading="lazy"
+                    className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <h3 className="headline mt-4 text-xl text-foreground group-hover:underline [-webkit-line-clamp:3] [max-height:none]">
+                  {bottomItems[0].title}
+                </h3>
+                <p className="mt-2 text-sm leading-snug text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden [&::first-letter]:font-serif [&::first-letter]:float-left [&::first-letter]:mr-2 [&::first-letter]:text-5xl [&::first-letter]:font-bold [&::first-letter]:leading-[0.9] [&::first-letter]:text-foreground">
+                  {bottomItems[0].excerpt}
+                </p>
+                <MinRead seed={bottomItems[0].title} kicker={bottomItems[0].kicker} />
+              </a>
+
+              {/* Card 2 — image on top */}
+              <a href="/article/sample" className="group block">
+                <div className="overflow-hidden">
+                  <img
+                    src={grid[1].img}
+                    alt={bottomItems[1].title}
+                    loading="lazy"
+                    className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <h3 className="headline mt-4 text-xl text-foreground group-hover:underline line-clamp-2 [-webkit-line-clamp:2] [max-height:none]">
+                  {bottomItems[1].title}
+                </h3>
+                <p className="mt-2 text-sm leading-snug text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden [&::first-letter]:font-serif [&::first-letter]:float-left [&::first-letter]:mr-2 [&::first-letter]:text-5xl [&::first-letter]:font-bold [&::first-letter]:leading-[0.9] [&::first-letter]:text-foreground">
+                  {bottomItems[1].excerpt}
+                </p>
+                <MinRead seed={bottomItems[1].title} kicker={bottomItems[1].kicker} />
+              </a>
+
+              {/* Column 3 — two text-only stories stacked */}
+              <div className="divide-y divide-border">
+                <div className="pb-5">
+                  <HeadlineArticle item={bottomItems[2]} dense />
+                </div>
+                <div className="py-5">
+                  <HeadlineArticle item={bottomItems[3]} dense />
+                </div>
+                <div className="pt-5">
+                  <HeadlineArticle item={bottomItems[4]} dense />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* MUSIC / CULTURE row — 4 columns with image + views overlay */}
+          <div className="mt-10 border-t border-border pt-6">
+            <h3
+              className="mb-6 font-bold uppercase tracking-[0.25em]"
+              style={{ color: cfg.heroCultureMusic.color, fontSize: `${cfg.heroCultureMusic.fontSize}px` }}
+            >
+              {cfg.heroCultureMusic.title}
+            </h3>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                { title: "Bob Dylan: Icon of 20th Century Music", excerpt: "Duo dolorum mandamus mnesarchum te. Sit ridens persius ex. Vel noluisse perpetua consequat ex, has nostro antiopam eu. Nec esse meis eu.", date: "Jul 21, 2019", kicker: "Music", img: top[0].img, play: true },
+                { title: "Bob Dylan: The Best Collection of 1963", excerpt: "Labore nonumes te vel, vis id errem tantas tempor. Solet quidam salutatus at quo. Tantas comprehensam te sea, usu sanctus similique ei.", date: "Jan 20, 2018", kicker: "Music", img: top[1].img },
+                { title: "Top 20 Female CEOs In Tech Corporates", excerpt: "Duo dolorum mandamus mnesarchum te. Sit ridens persius ex. Vel noluisse perpetua consequat ex, has nostro antiopam eu.", date: "Apr 23, 2017", kicker: "Business", img: grid[0].img },
+                { title: "Everything about Bitcoin explained in this article", excerpt: "Quo natum nemore putant in, his te case habemus. Nulla detraxit explicari in vim. Id eam magna omnesque.", date: "Nov 11, 2015", kicker: "Crypto", img: grid[2].img },
+              ].map((c) => (
+                <a key={c.title} href="/article/sample" className="group block">
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={c.img}
+                      alt={c.title}
+                      loading="lazy"
+                      className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    {c.play && (
+                      <span className="absolute inset-0 grid place-items-center">
+                        <span className="grid h-12 w-12 place-items-center rounded-full border-2 border-white/90 bg-black/30 text-white">▶</span>
+                      </span>
+                    )}
+                    <span className="absolute bottom-2 left-2 bg-black px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-white">
+                      {formatViews(viewsFor(c.title))} views
+                    </span>
+                  </div>
+                  <h4 className="headline mt-3 text-lg leading-tight text-foreground group-hover:underline">
+                    {c.title}
+                  </h4>
+                  <p className="mt-2 line-clamp-3 text-sm leading-snug text-muted-foreground">
+                    {c.excerpt}
+                  </p>
+                  <p className="mt-3 flex items-center gap-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+                    <span>{c.date}</span>
+                    <span>·</span>
+                    <span className="kicker text-[10px]">{c.kicker}</span>
+                  </p>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT — opinion / signup / most commented / popular */}
+        <aside className="space-y-6 lg:col-span-3 lg:border-l lg:border-border lg:pl-6">
+          <h3
+            className="rule-top font-bold uppercase tracking-[0.25em]"
+            style={{ color: cfg.heroOpinion.color, fontSize: `${cfg.heroOpinion.fontSize}px` }}
+          >
+            {cfg.heroOpinion.title}
+          </h3>
+          <ul className="space-y-5">
+            {[
+              { title: "A state campsite reservation bill heads for the governor's desk", by: "Claire", img: grid[0].img },
+              { title: "Did You Know You Can Unsend and Edit Text Messages on Your iPhone", by: "Lucas", img: top[2].img },
+              { title: "Who is Andrew Yang, the Internet's Favorite Candidate? | 2020 Presidential Candidate", by: "Neil", img: top[0].img },
+              { title: "Artist / Teacher in Classical Voice job with us", by: "Claire", img: grid[1].img },
+              { title: "Fed minutes hint at slower pace of rate cuts through summer", by: "Maya", img: grid[2].img },
+              { title: "Inside the boardroom battle reshaping Europe's largest carmaker", by: "Daniel", img: top[1].img },
+            ].map((o) => (
+              <li key={o.title}>
+                <a href="/article/sample" className="group flex gap-3">
+                  <img src={o.img} alt="" className="h-14 w-14 shrink-0 object-cover" />
+                  <div>
+                    <p className="font-serif text-sm font-bold leading-snug text-foreground group-hover:underline line-clamp-2">
+                      {o.title}
+                    </p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      by {o.by} · <Views count={viewsFor(o.title)} />
+                    </p>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+
+
+            >
+              {cfg.heroPopular.title}
+            </h3>
+            <ul className="mt-4 space-y-4">
+              {activePopularItems.map((p) => (
+            <ul className="mt-4 space-y-4">
+              {activePopularItems.map((p) => (
+                <li key={p.title}>
+                  <a href={p.slug ? `/article/${p.slug}` : "/article/sample"} className="group flex gap-3">
+                    <img src={p.img} alt="" className="h-14 w-14 shrink-0 object-cover" />
+                    <div>
+                      <p className="font-serif text-sm font-bold leading-snug text-foreground group-hover:underline line-clamp-2">
+                        {p.title}
+                      </p>
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        by {p.by} · <Views count={p.views || viewsFor(p.title)} />
+                      </p>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Archive finder */}
+          <ArchiveFinder />
+
+          {/* Tags */}
+          <div>
+            <div className="bg-foreground py-2 text-center text-xs font-bold uppercase tracking-[0.3em] text-background">
+              Tags
+            </div>
+            <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-2">
+              {[
+                { t: "Author", size: "text-sm" },
+                { t: "Blog", size: "text-lg font-bold" },
+                { t: "History", size: "text-sm" },
+                { t: "Lifestyle", size: "text-sm" },
+                { t: "Music", size: "text-sm" },
+                { t: "Politics", size: "text-2xl font-bold" },
+                { t: "Travel", size: "text-lg" },
+                { t: "WordPress", size: "text-2xl font-bold" },
+                { t: "World", size: "text-lg" },
+                { t: "Markets", size: "text-xl font-bold" },
+                { t: "Crypto", size: "text-sm" },
+                { t: "Tech", size: "text-lg font-bold" },
+                { t: "Business", size: "text-sm" },
+                { t: "Startups", size: "text-base" },
+                { t: "Opinion", size: "text-lg" },
+                { t: "Sports", size: "text-sm" },
+                { t: "Health", size: "text-base font-bold" },
+                { t: "Science", size: "text-sm" },
+                { t: "Climate", size: "text-lg" },
+                { t: "Culture", size: "text-base" },
+                { t: "Film", size: "text-sm" },
+                { t: "Food", size: "text-xl font-bold" },
+              ].map((tag) => (
+                <a key={tag.t} href="/article/sample" className={`${tag.size} font-serif text-foreground hover:underline`}>
+                  {tag.t}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Follow */}
+          <div>
+            <div className="bg-foreground py-2 text-center text-xs font-bold uppercase tracking-[0.3em] text-background">
+              Follow
+            </div>
+            <div className="mt-4 flex flex-nowrap items-center justify-center">
+              <SocialIcons
+                only={["facebook", "twitter", "youtube", "whatsapp", "telegram"]}
+                size="md"
+              />
+            </div>
+
+          </div>
+
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function MarketChart() {
+  const pts = [60, 58, 55, 50, 46, 44, 40, 35, 30, 28, 25, 22, 20, 18, 22, 28, 32, 35, 40, 45, 52, 56, 58, 55, 50, 48];
+  const w = 600;
+  const h = 140;
+  const max = Math.max(...pts);
+  const min = Math.min(...pts);
+  const stepX = w / (pts.length - 1);
+  const norm = (v: number) => h - ((v - min) / (max - min)) * h;
+  const d = pts.map((v, i) => `${i === 0 ? "M" : "L"} ${i * stepX} ${norm(v)}`).join(" ");
+  const area = `${d} L ${w} ${h} L 0 ${h} Z`;
+
+  return (
+    <div className="border border-border bg-card p-4 text-left">
+      <div className="flex items-baseline justify-between">
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">S&amp;P 500 (^GSPC)</p>
+          <p className="mt-1 font-mono text-2xl font-bold text-foreground">
+            5,693.31{" "}
+            <span className="text-base font-semibold text-[#dc2626]">-18.89 (-0.33%)</span>
+          </p>
+        </div>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+      </div>
+      <svg viewBox={`0 0 ${w} ${h}`} className="mt-3 w-full" preserveAspectRatio="none">
+        <path d={area} fill="#dc2626" fillOpacity="0.12" />
+        <path d={d} fill="none" stroke="#dc2626" strokeWidth="1.5" />
+      </svg>
+      <div className="mt-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+        <span>10:00 AM</span>
+        <span>12:00 PM</span>
+        <span>2:00 PM</span>
+        <span>4:00 PM</span>
+      </div>
+    </div>
+  );
+}
+
+  tanstackStart({
+    serverFns: {
+      disableCsrfMiddlewareWarning: true,
+    },
+  })
+9:00:19 am [vite] (client) hmr update /src/styles.css?direct, /src/routes/auth.tsx, /src/routes/auth.tsx?tsr-split=component
+9:00:19 am [vite] (ssr) page reload src/routes/auth.tsx
+9:00:19 am [vite] (ssr) program reload
+9:01:27 am [vite] (client) hmr update /src/styles.css?direct, /src/routes/auth.tsx, /src/routes/auth.tsx?tsr-split=component
+9:01:27 am [vite] (ssr) page reload src/routes/auth.tsx
+9:13:44 am [vite] (client) hmr update /src/styles.css?direct
+9:13:44 am [vite] (ssr) page reload src/lib/db.server.ts
+9:13:58 am [vite] (client) hmr update /src/styles.css?direct, /src/routes/__root.tsx
+9:13:58 am [vite] (ssr) page reload src/routes/__root.tsx
+[MySQL] Starting database initialization...
+[MySQL] Database is not configured yet. Setup Wizard is required.
+TanStack Start server functions are not protected by the CSRF middleware.
+
+Server functions are same-origin RPC endpoints and should be protected from cross-site requests.
+
+Add the CSRF middleware in src/start.ts:
+
+  const csrfMiddleware = createCsrfMiddleware({
+    filter: (ctx) => ctx.handlerType === 'serverFn',
+  })
+
+  export const startInstance = createStart(() => ({
+    requestMiddleware: [csrfMiddleware],
+  }))
+
+If you intentionally handle CSRF another way, disable this warning:
+
+  tanstackStart({
+    serverFns: {
+      disableCsrfMiddlewareWarning: true,
+    },
+  })
+9:13:58 am [vite] (client) [console.error] [__root beforeLoad] Setup check error: ReferenceError: redirect is not defined
+    at Object.beforeLoad (http://localhost:8080/src/routes/__root.tsx?t=1784432638256:108:5)
+    at async loadMatches (http://localhost:8080/node_modules/.vite/deps/@tanstack_router-core.js?v=9f0ff390:1704:31)
+    at async http://localhost:8080/node_modules/.vite/deps/@tanstack_router-core.js?v=9f0ff390:2910:7
+9:14:02 am [vite] (client) hmr update /src/styles.css?direct, /src/routes/__root.tsx
+9:14:02 am [vite] (ssr) page reload src/routes/__root.tsx
+9:14:02 am [vite] (ssr) program reload
+[MySQL] Starting database initialization...
+[MySQL] Database is not configured yet. Setup Wizard is required.
+TanStack Start server functions are not protected by the CSRF middleware.
+
+Server functions are same-origin RPC endpoints and should be protected from cross-site requests.
+
+Add the CSRF middleware in src/start.ts:
+
+  const csrfMiddleware = createCsrfMiddleware({
+    filter: (ctx) => ctx.handlerType === 'serverFn',
+  })
+
+  export const startInstance = createStart(() => ({
+    requestMiddleware: [csrfMiddleware],
+  }))
+
+If you intentionally handle CSRF another way, disable this warning:
+
+  tanstackStart({
+    serverFns: {
+      disableCsrfMiddlewareWarning: true,
+    },
+  })
+9:14:12 am [vite] (client) page reload src/routeTree.gen.ts
+9:14:12 am [vite] (ssr) page reload src/routeTree.gen.ts
+9:14:12 am [vite] (ssr) program reload
+[MySQL] Starting database initialization...
+[MySQL] Database is not configured yet. Setup Wizard is required.
+9:14:13 am [vite] (client) [console.error] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <StartClient>
+      <Await promise={Promise}>
+        <AwaitInner promise={Promise}>
+          <RouterProvider router={{...}}>
+            <RouterContextProvider router={{...}}>
+              <Matches>
+                <SafeFragment fallback={null}>
+                  <Transitioner>
+                  <MatchesInner>
+                    <CatchBoundary getResetKey={function getResetKey} errorComponent={function ErrorComponent} ...>
+                      <CatchBoundaryImpl getResetKey={function getResetKey} onCatch={function}>
+                        <MatchImpl matchId="__root__/">
+                          <MatchView router={{...}} matchId="__root__/" resetKey={0} matchState={{routeId:"_...", ...}}>
+                            <RootShell>
+                              <html
+                                lang="en"
+                                data-tsd-source="/src/routes/__root.tsx:120:5"
+-                               style={{color-scheme:"light"}}
+                              >
+
+9:19:09 am [vite] (client) hmr update /src/styles.css?direct, /src/routes/setup.tsx, /src/routes/setup.tsx?tsr-split=component
+9:19:09 am [vite] (ssr) page reload src/routes/setup.tsx
+9:19:09 am [vite] (ssr) program reload
+[MySQL] Starting database initialization...
+[MySQL] Database is not configured yet. Setup Wizard is required.
+TanStack Start server functions are not protected by the CSRF middleware.
+
+Server functions are same-origin RPC endpoints and should be protected from cross-site requests.
+
+Add the CSRF middleware in src/start.ts:
+
+  const csrfMiddleware = createCsrfMiddleware({
+    filter: (ctx) => ctx.handlerType === 'serverFn',
+  })
+
+  export const startInstance = createStart(() => ({
+    requestMiddleware: [csrfMiddleware],
+  }))
+
+If you intentionally handle CSRF another way, disable this warning:
+
+  tanstackStart({
+    serverFns: {
+      disableCsrfMiddlewareWarning: true,
+    },
+  })
+[MySQL] Starting database initialization...
+[MySQL] Seeding administrator user...
+[MySQL] Seeding default categories...
+[MySQL] Seeding default tags...
+[MySQL] Seeding default articles...
+[MySQL] Database initialization completed successfully!
+9:20:14 am [vite] (client) [console.error] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <StartClient>
+      <Await promise={Promise}>
+        <AwaitInner promise={Promise}>
+          <RouterProvider router={{...}}>
+            <RouterContextProvider router={{...}}>
+              <Matches>
+                <SafeFragment fallback={null}>
+                  <Transitioner>
+                  <MatchesInner>
+                    <CatchBoundary getResetKey={function getResetKey} errorComponent={function ErrorComponent} ...>
+                      <CatchBoundaryImpl getResetKey={function getResetKey} onCatch={function}>
+                        <MatchImpl matchId="__root__/">
+                          <MatchView router={{...}} matchId="__root__/" resetKey={0} matchState={{routeId:"_...", ...}}>
+                            <RootShell>
+                              <html
+                                lang="en"
+                                data-tsd-source="/src/routes/__root.tsx:120:5"
+-                               style={{color-scheme:"light"}}
+                              >
+
+9:20:42 am [vite] (client) warning: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts:114:33 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:client
+  File: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts
+9:20:42 am [vite] (client) warning: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts:172:34 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:client
+  File: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts
+9:20:42 am [vite] (client) warning: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts:228:38 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:client
+  File: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts
+9:20:42 am [vite] (client) warning: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts:278:33 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:client
+  File: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts
+9:20:42 am [vite] (client) warning: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts:400:36 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:client
+  File: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts
+9:20:42 am [vite] (client) warning: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts:413:33 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:client
+  File: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts
+9:20:42 am [vite] (ssr) warning: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts?tss-serverfn-split:114:33 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:ssr
+  File: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts?tss-serverfn-split
+9:20:42 am [vite] (ssr) warning: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts?tss-serverfn-split:172:34 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:ssr
+  File: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts?tss-serverfn-split
+9:20:42 am [vite] (ssr) warning: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts?tss-serverfn-split:228:38 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:ssr
+  File: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts?tss-serverfn-split
+9:20:42 am [vite] (ssr) warning: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts?tss-serverfn-split:278:33 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:ssr
+  File: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts?tss-serverfn-split
+9:20:42 am [vite] (ssr) warning: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts?tss-serverfn-split:400:36 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:ssr
+  File: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts?tss-serverfn-split
+9:20:42 am [vite] (ssr) warning: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts?tss-serverfn-split:413:33 createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+  Plugin: tanstack-start-core::server-fn:ssr
+  File: C:/Users/gorillatech/Music/TodayTripura/src/lib/journalist.functions.ts?tss-serverfn-split
+9:22:39 am [vite] (client) hmr update /src/styles.css?direct, /src/components/site/NotFound.tsx, /src/components/site/Masthead.tsx, /src/components/site/Ticker.tsx, /src/components/site/TopBar.tsx, /src/components/site/HeroBoard.tsx, /src/components/site/LiveVideo.tsx, /src/components/site/Columnists.tsx, /src/components/site/NewsGrid.tsx, /src/components/site/MarketsMagazine.tsx, /src/routes/admin.homepage.tsx?tsr-split=component, /src/components/site/Views.tsx, /src/routes/category.$slug.tsx?tsr-split=component and 3 more
+9:22:39 am [vite] (ssr) page reload src/lib/news-data.ts
+9:22:39 am [vite] (ssr) program reload
+[MySQL] Starting database initialization...
+TanStack Start server functions are not protected by the CSRF middleware.
+
+Server functions are same-origin RPC endpoints and should be protected from cross-site requests.
+
+Add the CSRF middleware in src/start.ts:
+
+  const csrfMiddleware = createCsrfMiddleware({
+    filter: (ctx) => ctx.handlerType === 'serverFn',
+  })
+
+  export const startInstance = createStart(() => ({
+    requestMiddleware: [csrfMiddleware],
+  }))
+// MISSING LINE 759
+// MISSING LINE 760
+// MISSING LINE 761
+// MISSING LINE 762
+// MISSING LINE 763
+// MISSING LINE 764
+// MISSING LINE 765
+// MISSING LINE 766
+// MISSING LINE 767
+// MISSING LINE 768
+// MISSING LINE 769
+// MISSING LINE 770
+// MISSING LINE 771
+// MISSING LINE 772
+// MISSING LINE 773
+// MISSING LINE 774
+// MISSING LINE 775
+// MISSING LINE 776
+// MISSING LINE 777
+// MISSING LINE 778
+// MISSING LINE 779
+// MISSING LINE 780
+// MISSING LINE 781
+// MISSING LINE 782
+// MISSING LINE 783
+// MISSING LINE 784
+// MISSING LINE 785
+// MISSING LINE 786
+// MISSING LINE 787
+// MISSING LINE 788
+// MISSING LINE 789
+// MISSING LINE 790
+// MISSING LINE 791
+// MISSING LINE 792
+// MISSING LINE 793
+// MISSING LINE 794
+// MISSING LINE 795
+// MISSING LINE 796
+// MISSING LINE 797
+// MISSING LINE 798
+// MISSING LINE 799
+// MISSING LINE 800
+// MISSING LINE 801
+// MISSING LINE 802
+// MISSING LINE 803
+// MISSING LINE 804
+// MISSING LINE 805
+// MISSING LINE 806
+// MISSING LINE 807
+// MISSING LINE 808
+// MISSING LINE 809
+// MISSING LINE 810
+// MISSING LINE 811
+// MISSING LINE 812
+// MISSING LINE 813
+// MISSING LINE 814
+// MISSING LINE 815
+// MISSING LINE 816
+// MISSING LINE 817
+// MISSING LINE 818
+// MISSING LINE 819
+// MISSING LINE 820
+// MISSING LINE 821
+// MISSING LINE 822
+// MISSING LINE 823
+// MISSING LINE 824
+// MISSING LINE 825
+// MISSING LINE 826
+// MISSING LINE 827
+// MISSING LINE 828
+// MISSING LINE 829
+// MISSING LINE 830
+// MISSING LINE 831
+// MISSING LINE 832
+// MISSING LINE 833
+// MISSING LINE 834
+// MISSING LINE 835
+// MISSING LINE 836
+// MISSING LINE 837
+// MISSING LINE 838
+// MISSING LINE 839
+// MISSING LINE 840
+// MISSING LINE 841
+// MISSING LINE 842
+// MISSING LINE 843
+// MISSING LINE 844
+// MISSING LINE 845
+// MISSING LINE 846
+// MISSING LINE 847
+// MISSING LINE 848
+// MISSING LINE 849
+// MISSING LINE 850
+// MISSING LINE 851
+// MISSING LINE 852
+// MISSING LINE 853
+// MISSING LINE 854
+// MISSING LINE 855
+// MISSING LINE 856
+// MISSING LINE 857
+// MISSING LINE 858
+// MISSING LINE 859
+// MISSING LINE 860
+// MISSING LINE 861
+// MISSING LINE 862
+// MISSING LINE 863
+// MISSING LINE 864
+// MISSING LINE 865
+// MISSING LINE 866
+// MISSING LINE 867
+// MISSING LINE 868
+// MISSING LINE 869
+// MISSING LINE 870
+// MISSING LINE 871
+// MISSING LINE 872
+// MISSING LINE 873
+// MISSING LINE 874
+// MISSING LINE 875
+// MISSING LINE 876
+// MISSING LINE 877
+// MISSING LINE 878
+// MISSING LINE 879
+// MISSING LINE 880
+// MISSING LINE 881
+// MISSING LINE 882
+// MISSING LINE 883
+// MISSING LINE 884
+// MISSING LINE 885
+// MISSING LINE 886
+// MISSING LINE 887
+// MISSING LINE 888
+// MISSING LINE 889
+// MISSING LINE 890
+// MISSING LINE 891
+// MISSING LINE 892
+// MISSING LINE 893
+// MISSING LINE 894
+// MISSING LINE 895
+// MISSING LINE 896
+// MISSING LINE 897
+// MISSING LINE 898
+// MISSING LINE 899
+// MISSING LINE 900
+// MISSING LINE 901
+// MISSING LINE 902
+// MISSING LINE 903
+// MISSING LINE 904
+// MISSING LINE 905
+// MISSING LINE 906
+// MISSING LINE 907
+// MISSING LINE 908
+// MISSING LINE 909
+// MISSING LINE 910
+// MISSING LINE 911
+// MISSING LINE 912
+// MISSING LINE 913
+// MISSING LINE 914
+// MISSING LINE 915
+// MISSING LINE 916
+// MISSING LINE 917
+// MISSING LINE 918
+// MISSING LINE 919
+// MISSING LINE 920
+// MISSING LINE 921
+// MISSING LINE 922
+// MISSING LINE 923
+// MISSING LINE 924
+// MISSING LINE 925
+// MISSING LINE 926
+// MISSING LINE 927
+// MISSING LINE 928
+// MISSING LINE 929
+// MISSING LINE 930
+// MISSING LINE 931
+// MISSING LINE 932
+// MISSING LINE 933
+// MISSING LINE 934
+// MISSING LINE 935
+// MISSING LINE 936
+// MISSING LINE 937
+// MISSING LINE 938
+// MISSING LINE 939
+// MISSING LINE 940
+// MISSING LINE 941
+// MISSING LINE 942
+// MISSING LINE 943
+// MISSING LINE 944
+// MISSING LINE 945
+// MISSING LINE 946
+// MISSING LINE 947
+// MISSING LINE 948
+// MISSING LINE 949
+// MISSING LINE 950
+// MISSING LINE 951
+// MISSING LINE 952
+// MISSING LINE 953
+// MISSING LINE 954
+// MISSING LINE 955
+// MISSING LINE 956
+// MISSING LINE 957
+// MISSING LINE 958
+// MISSING LINE 959
+// MISSING LINE 960
+// MISSING LINE 961
+// MISSING LINE 962
+// MISSING LINE 963
+// MISSING LINE 964
+// MISSING LINE 965
+// MISSING LINE 966
+// MISSING LINE 967
+// MISSING LINE 968
+// MISSING LINE 969
+// MISSING LINE 970
+// MISSING LINE 971
+// MISSING LINE 972
+// MISSING LINE 973
+// MISSING LINE 974
+// MISSING LINE 975
+// MISSING LINE 976
+// MISSING LINE 977
+// MISSING LINE 978
+// MISSING LINE 979
+// MISSING LINE 980
+// MISSING LINE 981
+// MISSING LINE 982
+// MISSING LINE 983
+// MISSING LINE 984
+// MISSING LINE 985
+// MISSING LINE 986
+// MISSING LINE 987
+// MISSING LINE 988
+// MISSING LINE 989
+// MISSING LINE 990
+// MISSING LINE 991
+// MISSING LINE 992
+// MISSING LINE 993
+// MISSING LINE 994
+// MISSING LINE 995
+// MISSING LINE 996
+// MISSING LINE 997
+// MISSING LINE 998
+// MISSING LINE 999
+// MISSING LINE 1000
+// MISSING LINE 1001
+// MISSING LINE 1002
+// MISSING LINE 1003
+// MISSING LINE 1004
+// MISSING LINE 1005
+// MISSING LINE 1006
+// MISSING LINE 1007
+// MISSING LINE 1008
+// MISSING LINE 1009
+// MISSING LINE 1010
+// MISSING LINE 1011
+// MISSING LINE 1012
+// MISSING LINE 1013
+// MISSING LINE 1014
+// MISSING LINE 1015
+// MISSING LINE 1016
+// MISSING LINE 1017
+// MISSING LINE 1018
+// MISSING LINE 1019
+// MISSING LINE 1020
+// MISSING LINE 1021
+// MISSING LINE 1022
+// MISSING LINE 1023
+// MISSING LINE 1024
+// MISSING LINE 1025
+// MISSING LINE 1026
+// MISSING LINE 1027
+// MISSING LINE 1028
+// MISSING LINE 1029
+// MISSING LINE 1030
+// MISSING LINE 1031
+// MISSING LINE 1032
+// MISSING LINE 1033
+// MISSING LINE 1034
+// MISSING LINE 1035
+// MISSING LINE 1036
+// MISSING LINE 1037
+// MISSING LINE 1038
+// MISSING LINE 1039
+// MISSING LINE 1040
+// MISSING LINE 1041
+// MISSING LINE 1042
+// MISSING LINE 1043
+// MISSING LINE 1044
+// MISSING LINE 1045
+// MISSING LINE 1046
+// MISSING LINE 1047
+// MISSING LINE 1048
+// MISSING LINE 1049
+// MISSING LINE 1050
+// MISSING LINE 1051
+// MISSING LINE 1052
+// MISSING LINE 1053
+// MISSING LINE 1054
+// MISSING LINE 1055
+// MISSING LINE 1056
+// MISSING LINE 1057
+// MISSING LINE 1058
+// MISSING LINE 1059
+// MISSING LINE 1060
+// MISSING LINE 1061
+// MISSING LINE 1062
+// MISSING LINE 1063
+// MISSING LINE 1064
+// MISSING LINE 1065
+// MISSING LINE 1066
+// MISSING LINE 1067
+// MISSING LINE 1068
+// MISSING LINE 1069
+// MISSING LINE 1070
+// MISSING LINE 1071
+// MISSING LINE 1072
+// MISSING LINE 1073
+// MISSING LINE 1074
+// MISSING LINE 1075
+// MISSING LINE 1076
+// MISSING LINE 1077
+// MISSING LINE 1078
+// MISSING LINE 1079
+// MISSING LINE 1080
+// MISSING LINE 1081
+// MISSING LINE 1082
+// MISSING LINE 1083
+// MISSING LINE 1084
+// MISSING LINE 1085
+// MISSING LINE 1086
+// MISSING LINE 1087
+// MISSING LINE 1088
+// MISSING LINE 1089
+// MISSING LINE 1090
+// MISSING LINE 1091
+// MISSING LINE 1092
+// MISSING LINE 1093
+// MISSING LINE 1094
+// MISSING LINE 1095
+// MISSING LINE 1096
+// MISSING LINE 1097
+// MISSING LINE 1098
+// MISSING LINE 1099
+// MISSING LINE 1100
+// MISSING LINE 1101
+// MISSING LINE 1102
+// MISSING LINE 1103
+// MISSING LINE 1104
+// MISSING LINE 1105
+// MISSING LINE 1106
+// MISSING LINE 1107
+// MISSING LINE 1108
+// MISSING LINE 1109
+// MISSING LINE 1110
+// MISSING LINE 1111
+// MISSING LINE 1112
+// MISSING LINE 1113
+// MISSING LINE 1114
+// MISSING LINE 1115
+// MISSING LINE 1116
+// MISSING LINE 1117
+// MISSING LINE 1118
+// MISSING LINE 1119
+// MISSING LINE 1120
+// MISSING LINE 1121
+// MISSING LINE 1122
+// MISSING LINE 1123
+// MISSING LINE 1124
+// MISSING LINE 1125
+// MISSING LINE 1126
+// MISSING LINE 1127
+// MISSING LINE 1128
+// MISSING LINE 1129
+// MISSING LINE 1130
+// MISSING LINE 1131
+// MISSING LINE 1132
+// MISSING LINE 1133
+// MISSING LINE 1134
+// MISSING LINE 1135
+// MISSING LINE 1136
+// MISSING LINE 1137
+// MISSING LINE 1138
+// MISSING LINE 1139
+// MISSING LINE 1140
+// MISSING LINE 1141
+// MISSING LINE 1142
+// MISSING LINE 1143
+// MISSING LINE 1144
+// MISSING LINE 1145
+// MISSING LINE 1146
+// MISSING LINE 1147
+// MISSING LINE 1148
+// MISSING LINE 1149
+// MISSING LINE 1150
+// MISSING LINE 1151
+// MISSING LINE 1152
+// MISSING LINE 1153
+// MISSING LINE 1154
+// MISSING LINE 1155
+// MISSING LINE 1156
+// MISSING LINE 1157
+// MISSING LINE 1158
+// MISSING LINE 1159
+// MISSING LINE 1160
+// MISSING LINE 1161
+// MISSING LINE 1162
+// MISSING LINE 1163
+// MISSING LINE 1164
+// MISSING LINE 1165
+// MISSING LINE 1166
+// MISSING LINE 1167
+// MISSING LINE 1168
+// MISSING LINE 1169
+// MISSING LINE 1170
+// MISSING LINE 1171
+// MISSING LINE 1172
+// MISSING LINE 1173
+// MISSING LINE 1174
+// MISSING LINE 1175
+// MISSING LINE 1176
+// MISSING LINE 1177
+// MISSING LINE 1178
+// MISSING LINE 1179
+// MISSING LINE 1180
+// MISSING LINE 1181
+// MISSING LINE 1182
+// MISSING LINE 1183
+// MISSING LINE 1184
+// MISSING LINE 1185
+// MISSING LINE 1186
+// MISSING LINE 1187
+// MISSING LINE 1188
+// MISSING LINE 1189
+// MISSING LINE 1190
+// MISSING LINE 1191
+// MISSING LINE 1192
+// MISSING LINE 1193
+// MISSING LINE 1194
+// MISSING LINE 1195
+// MISSING LINE 1196
+// MISSING LINE 1197
+// MISSING LINE 1198
+// MISSING LINE 1199
+// MISSING LINE 1200
+// MISSING LINE 1201
+// MISSING LINE 1202
+// MISSING LINE 1203
+// MISSING LINE 1204
+// MISSING LINE 1205
+// MISSING LINE 1206
+// MISSING LINE 1207
+// MISSING LINE 1208
+// MISSING LINE 1209
+// MISSING LINE 1210
+// MISSING LINE 1211
+// MISSING LINE 1212
+// MISSING LINE 1213
+// MISSING LINE 1214
+// MISSING LINE 1215
+// MISSING LINE 1216
+// MISSING LINE 1217
+// MISSING LINE 1218
+// MISSING LINE 1219
+// MISSING LINE 1220
+// MISSING LINE 1221
+// MISSING LINE 1222
+// MISSING LINE 1223
+// MISSING LINE 1224
+// MISSING LINE 1225
+// MISSING LINE 1226
+// MISSING LINE 1227
+// MISSING LINE 1228
+// MISSING LINE 1229
+// MISSING LINE 1230
+// MISSING LINE 1231
+// MISSING LINE 1232
+// MISSING LINE 1233
+// MISSING LINE 1234
+// MISSING LINE 1235
+// MISSING LINE 1236
+// MISSING LINE 1237
+// MISSING LINE 1238
+// MISSING LINE 1239
+// MISSING LINE 1240
+// MISSING LINE 1241
+// MISSING LINE 1242
+// MISSING LINE 1243
+// MISSING LINE 1244
+// MISSING LINE 1245
+// MISSING LINE 1246
+// MISSING LINE 1247
+// MISSING LINE 1248
+// MISSING LINE 1249
+// MISSING LINE 1250
+// MISSING LINE 1251
+// MISSING LINE 1252
+// MISSING LINE 1253
+// MISSING LINE 1254
+// MISSING LINE 1255
+// MISSING LINE 1256
+// MISSING LINE 1257
+// MISSING LINE 1258
+// MISSING LINE 1259
+// MISSING LINE 1260
+// MISSING LINE 1261
+// MISSING LINE 1262
+// MISSING LINE 1263
+// MISSING LINE 1264
+// MISSING LINE 1265
+// MISSING LINE 1266
+// MISSING LINE 1267
+// MISSING LINE 1268
+// MISSING LINE 1269
+// MISSING LINE 1270
+// MISSING LINE 1271
+// MISSING LINE 1272
+// MISSING LINE 1273
+// MISSING LINE 1274
+// MISSING LINE 1275
+// MISSING LINE 1276
+// MISSING LINE 1277
+// MISSING LINE 1278
+// MISSING LINE 1279
+// MISSING LINE 1280
+// MISSING LINE 1281
+// MISSING LINE 1282
+// MISSING LINE 1283
+// MISSING LINE 1284
+// MISSING LINE 1285
+// MISSING LINE 1286
+// MISSING LINE 1287
+// MISSING LINE 1288
+// MISSING LINE 1289
+// MISSING LINE 1290
+// MISSING LINE 1291
+// MISSING LINE 1292
+// MISSING LINE 1293
+// MISSING LINE 1294
+// MISSING LINE 1295
+// MISSING LINE 1296
+// MISSING LINE 1297
+// MISSING LINE 1298
+// MISSING LINE 1299
+// MISSING LINE 1300
+// MISSING LINE 1301
+// MISSING LINE 1302
+// MISSING LINE 1303
+// MISSING LINE 1304
+// MISSING LINE 1305
+// MISSING LINE 1306
+// MISSING LINE 1307
+// MISSING LINE 1308
+// MISSING LINE 1309
+// MISSING LINE 1310
+// MISSING LINE 1311
+// MISSING LINE 1312
+// MISSING LINE 1313
+// MISSING LINE 1314
+// MISSING LINE 1315
+// MISSING LINE 1316
+// MISSING LINE 1317
+// MISSING LINE 1318
+// MISSING LINE 1319
+// MISSING LINE 1320
+// MISSING LINE 1321
+// MISSING LINE 1322
+// MISSING LINE 1323
+// MISSING LINE 1324
+// MISSING LINE 1325
+// MISSING LINE 1326
+// MISSING LINE 1327
+// MISSING LINE 1328
+// MISSING LINE 1329
+// MISSING LINE 1330
+// MISSING LINE 1331
+// MISSING LINE 1332
+// MISSING LINE 1333
+// MISSING LINE 1334
+// MISSING LINE 1335
+// MISSING LINE 1336
+// MISSING LINE 1337
+// MISSING LINE 1338
+// MISSING LINE 1339
+// MISSING LINE 1340
+// MISSING LINE 1341
+// MISSING LINE 1342
+// MISSING LINE 1343
+// MISSING LINE 1344
+// MISSING LINE 1345
+// MISSING LINE 1346
+// MISSING LINE 1347
+// MISSING LINE 1348
+// MISSING LINE 1349
+// MISSING LINE 1350
+// MISSING LINE 1351
+// MISSING LINE 1352
+// MISSING LINE 1353
+// MISSING LINE 1354
+// MISSING LINE 1355
+// MISSING LINE 1356
+// MISSING LINE 1357
+// MISSING LINE 1358
+// MISSING LINE 1359
+// MISSING LINE 1360
+// MISSING LINE 1361
+// MISSING LINE 1362
+// MISSING LINE 1363
+// MISSING LINE 1364
+// MISSING LINE 1365
+// MISSING LINE 1366
+// MISSING LINE 1367
+// MISSING LINE 1368
+// MISSING LINE 1369
+// MISSING LINE 1370
+// MISSING LINE 1371
+// MISSING LINE 1372
+// MISSING LINE 1373
+// MISSING LINE 1374
+// MISSING LINE 1375
+// MISSING LINE 1376
+// MISSING LINE 1377
+// MISSING LINE 1378
+// MISSING LINE 1379
+// MISSING LINE 1380
+// MISSING LINE 1381
+// MISSING LINE 1382
+// MISSING LINE 1383
+// MISSING LINE 1384
+// MISSING LINE 1385
+// MISSING LINE 1386
+// MISSING LINE 1387
+// MISSING LINE 1388
+// MISSING LINE 1389
+// MISSING LINE 1390
+// MISSING LINE 1391
+// MISSING LINE 1392
+// MISSING LINE 1393
+// MISSING LINE 1394
+// MISSING LINE 1395
+// MISSING LINE 1396
+// MISSING LINE 1397
+// MISSING LINE 1398
+// MISSING LINE 1399
+// MISSING LINE 1400
+// MISSING LINE 1401
+// MISSING LINE 1402
+// MISSING LINE 1403
+// MISSING LINE 1404
+// MISSING LINE 1405
+// MISSING LINE 1406
+// MISSING LINE 1407
+// MISSING LINE 1408
+// MISSING LINE 1409
+// MISSING LINE 1410
+// MISSING LINE 1411
+// MISSING LINE 1412
+// MISSING LINE 1413
+// MISSING LINE 1414
+// MISSING LINE 1415
+// MISSING LINE 1416
+// MISSING LINE 1417
+// MISSING LINE 1418
+// MISSING LINE 1419
+// MISSING LINE 1420
+// MISSING LINE 1421
+// MISSING LINE 1422
+// MISSING LINE 1423
+// MISSING LINE 1424
+// MISSING LINE 1425
+// MISSING LINE 1426
+// MISSING LINE 1427
+// MISSING LINE 1428
+// MISSING LINE 1429
+// MISSING LINE 1430
+// MISSING LINE 1431
+// MISSING LINE 1432
+// MISSING LINE 1433
+// MISSING LINE 1434
+// MISSING LINE 1435
+// MISSING LINE 1436
+// MISSING LINE 1437
+// MISSING LINE 1438
+// MISSING LINE 1439
+// MISSING LINE 1440
+// MISSING LINE 1441
+// MISSING LINE 1442
+// MISSING LINE 1443
+// MISSING LINE 1444
+// MISSING LINE 1445
+// MISSING LINE 1446
+// MISSING LINE 1447
+// MISSING LINE 1448
+// MISSING LINE 1449
+// MISSING LINE 1450
+// MISSING LINE 1451
+// MISSING LINE 1452
+// MISSING LINE 1453
+// MISSING LINE 1454
+// MISSING LINE 1455
+// MISSING LINE 1456
+// MISSING LINE 1457
+// MISSING LINE 1458
+// MISSING LINE 1459
+// MISSING LINE 1460
+// MISSING LINE 1461
+// MISSING LINE 1462
+// MISSING LINE 1463
+// MISSING LINE 1464
+// MISSING LINE 1465
+// MISSING LINE 1466
+// MISSING LINE 1467
+// MISSING LINE 1468
+// MISSING LINE 1469
+// MISSING LINE 1470
+// MISSING LINE 1471
+// MISSING LINE 1472
+// MISSING LINE 1473
+// MISSING LINE 1474
+// MISSING LINE 1475
+// MISSING LINE 1476
+// MISSING LINE 1477
+// MISSING LINE 1478
+// MISSING LINE 1479
+// MISSING LINE 1480
+// MISSING LINE 1481
+// MISSING LINE 1482
+// MISSING LINE 1483
+// MISSING LINE 1484
+// MISSING LINE 1485
+// MISSING LINE 1486
+// MISSING LINE 1487
+// MISSING LINE 1488
+// MISSING LINE 1489
+// MISSING LINE 1490
+// MISSING LINE 1491
+// MISSING LINE 1492
+// MISSING LINE 1493
+// MISSING LINE 1494
+// MISSING LINE 1495
+// MISSING LINE 1496
+// MISSING LINE 1497
+// MISSING LINE 1498
+// MISSING LINE 1499
+  })
+
+  export const startInstance = createStart(() => ({
+    requestMiddleware: [csrfMiddleware],
+  }))
+
+If you intentionally handle CSRF another way, disable this warning:
+
+  tanstackStart({
+    serverFns: {
+      disableCsrfMiddlewareWarning: true,
+    },
+  })
+[MySQL] Database initialization completed successfully!
+9:55:12 am [vite] (client) hmr update /src/styles.css?direct, /src/components/site/HeroBoard.tsx
+9:55:12 am [vite] (ssr) page reload src/components/site/HeroBoard.tsx
+9:55:14 am [vite] (client) hmr update /src/styles.css?direct, /src/components/site/HeroBoard.tsx
+9:55:14 am [vite] (ssr) page reload src/components/site/HeroBoard.tsx
+TanStack Start server functions are not protected by the CSRF middleware.
+
+Server functions are same-origin RPC endpoints and should be protected from cross-site requests.
+
+Add the CSRF middleware in src/start.ts:
+
+  const csrfMiddleware = createCsrfMiddleware({
+    filter: (ctx) => ctx.handlerType === 'serverFn',
+  })
+
+  export const startInstance = createStart(() => ({
+    requestMiddleware: [csrfMiddleware],
+  }))
+
+If you intentionally handle CSRF another way, disable this warning:
+
+  tanstackStart({
+    serverFns: {
+      disableCsrfMiddlewareWarning: true,
+    },
+  })
+9:55:32 am [vite] (client) [console.error] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <StartClient>
+      <Await promise={Promise}>
+        <AwaitInner promise={Promise}>
+          <RouterProvider router={{...}}>
+            <RouterContextProvider router={{...}}>
+              <Matches>
+                <SafeFragment fallback={null}>
+                  <Transitioner>
+                  <MatchesInner>
+                    <CatchBoundary getResetKey={function getResetKey} errorComponent={function ErrorComponent} ...>
+                      <CatchBoundaryImpl getResetKey={function getResetKey} onCatch={function}>
+                        <MatchImpl matchId="__root__/">
+                          <MatchView router={{...}} matchId="__root__/" resetKey={0} matchState={{routeId:"_...", ...}}>
+                            <RootShell>
+                              <html
+                                lang="en"
+                                data-tsd-source="/src/routes/__root.tsx:120:5"
+-                               style={{color-scheme:"light"}}
+                              >
+
+9:55:51 am [vite] (client) [console.error] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <StartClient>
+      <Await promise={Promise}>
+        <AwaitInner promise={Promise}>
+          <RouterProvider router={{...}}>
+            <RouterContextProvider router={{...}}>
+              <Matches>
+                <SafeFragment fallback={null}>
+                  <Transitioner>
+                  <MatchesInner>
+                    <CatchBoundary getResetKey={function getResetKey} errorComponent={function ErrorComponent} ...>
+                      <CatchBoundaryImpl getResetKey={function getResetKey} onCatch={function}>
+                        <MatchImpl matchId="__root__/">
+                          <MatchView router={{...}} matchId="__root__/" resetKey={0} matchState={{routeId:"_...", ...}}>
+                            <RootShell>
+                              <html
+                                lang="en"
+                                data-tsd-source="/src/routes/__root.tsx:120:5"
+-                               style={{color-scheme:"light"}}
+                              >
+
+9:55:59 am [vite] (client) [console.error] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <StartClient>
+      <Await promise={Promise}>
+        <AwaitInner promise={Promise}>
+          <RouterProvider router={{...}}>
+            <RouterContextProvider router={{...}}>
+              <Matches>
+                <SafeFragment fallback={null}>
+                  <Transitioner>
+                  <MatchesInner>
+                    <CatchBoundary getResetKey={function getResetKey} errorComponent={function ErrorComponent} ...>
+                      <CatchBoundaryImpl getResetKey={function getResetKey} onCatch={function}>
+                        <MatchImpl matchId="__root__/">
+                          <MatchView router={{...}} matchId="__root__/" resetKey={0} matchState={{routeId:"_...", ...}}>
+                            <RootShell>
+                              <html
+                                lang="en"
+                                data-tsd-source="/src/routes/__root.tsx:120:5"
+-                               style={{color-scheme:"light"}}
+                              >
+
+

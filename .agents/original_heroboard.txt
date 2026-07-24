@@ -1,0 +1,128 @@
+Created At: 2026-07-19T03:21:56Z
+Completed At: 2026-07-19T03:21:56Z
+File Path: `file:///c:/Users/gorillatech/Music/TodayTripura/src/components/site/HeroBoard.tsx`
+Total Lines: 462
+Total Bytes: 23372
+Showing lines 1 to 120
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: 
+2: import { useEffect, useState } from "react";
+3: import { top, grid, lead, viewsFor, formatViews } from "@/lib/news-data";
+4: import { LiveVideo } from "./LiveVideo";
+5: import { Views } from "./Views";
+6: import Advertisement from "./Advertisement";
+7: import { ArchiveFinder } from "./ArchiveFinder";
+8: import { loadAds, type AdSlideItem } from "@/lib/site-content";
+9: import { useHomepageConfig } from "@/hooks/use-homepage-config";
+10: import { articlesByCategory } from "@/lib/homepage-config";
+11: import { SocialIcons } from "./SocialIcons";
+12: 
+13: 
+14: 
+15: type Item = { kicker?: string; title: string; excerpt?: string; img?: string };
+16: 
+17: const leftItems: Item[] = [
+18:   { kicker: "Health", title: "Why postpartum depression went untreated for thousands of years", excerpt: "Ei mei scripta intellegat. Verear voluptaria eam at, consul putent eu vel. Pro saepe maluisset ne, audire maiorum forensibus eos." },
+19:   { kicker: "Food", title: "Extra $2.50 for half a prawn? Diner unhappy about $8.50 laksa", excerpt: "Justo fabulas singulis at pri, saepe luptatum mei an. Duo idque solet scribentur eu, natum iudico labore te eos, no." },
+20:   { kicker: "Tech", title: "Did You Know You Can Unsend and Edit Text Messages on Your iPhone", excerpt: "Usu tantas omittantur ut, per te modo appetere senserit. Ei ius aperiam tincidunt, ea sit natum iisque repudiandae.", img: top[2].img },
+21:   { kicker: "Politics", title: "EU governments present bill to reserve 3rd of parliament seats", excerpt: "Duo dolorum mandamus mnesarchum te. Sit ridens persius ex. Vel noluisse perpetua consequat ex, has nostro antiopam eu." },
+22:   { kicker: "Climate", title: "Record heatwave pushes power grids to the brink across southern Europe", excerpt: "Operators in Spain, Italy and Greece warned of rolling blackouts as demand from cooling systems hit all-time highs this week." },
+23: ];
+24: 
+25: const bottomItems: Item[] = [
+26:   {
+27:     kicker: "Markets",
+28:     title: "Wall Street closes higher as Federal Reserve signals patience on rate cuts and traders bet on a softer landing for the US economy heading into year-end",
+29:     excerpt: "The S&P 500 and Nasdaq notched fresh records after Chair Powell told lawmakers the central bank can afford to wait before easing policy further. Treasury yields slipped across the curve as traders dialed back bets on an imminent cut, while the dollar weakened against a basket of major peers. Bank stocks led the advance, with regional lenders rallying on hopes that a steeper yield curve will revive net interest margins into the new year as deposit costs finally begin to ease.",
+30:   },
+31:   {
+32:     kicker: "Business",
+33:     title: "Boeing wins record $14 billion order as Gulf carrier expands long-haul fleet across Asia and Europe",
+34:     excerpt: "The deal — covering 40 widebody jets with options for 20 more — marks the planemaker's largest single order of the year and lifts its backlog past 5,500 aircraft. Executives said the agreement underscores resurgent long-haul demand out of the Gulf as carriers race to add capacity on routes to Asia, Africa and the Americas. Deliveries are expected to begin in late 2027 and stretch into the following decade, giving Boeing's South Carolina widebody line a multi-year runway just as it stabilizes production after a turbulent stretch on the 787 and 777X programs.",
+35:   },
+36:   {
+37:     kicker: "Tech",
+38:     title: "Nvidia briefly tops $4 trillion as AI chip demand shows no sign of cooling",
+39:     excerpt: "Shares climbed 2.6% in early trading, pushing the chipmaker past Apple and Microsoft to become the most valuable listed company in the world.",
+40:   },
+41:   {
+42:     kicker: "Crypto",
+43:     title: "Bitcoin breaks $112,000 as spot ETFs log record weekly inflows",
+44:     excerpt: "More than $3.2 billion flowed into US-listed spot bitcoin funds last week, with BlackRock's IBIT alone accounting for nearly half of the total.",
+45:   },
+46:   {
+47:     kicker: "Markets",
+48:     title: "Oil slips below $78 as OPEC+ signals gradual supply return",
+49:     excerpt: "Brent crude eased after the producer group confirmed it will unwind voluntary cuts in monthly tranches through the second half of the year.",
+50:   },
+51:   {
+52:     kicker: "Business",
+53:     title: "Tesla unveils next-gen robotaxi platform with sub-$25K price tag",
+54:     excerpt: "Elon Musk said production will begin in Texas next year, with the company targeting one million autonomous units annually by 2028.",
+55:   },
+56: ];
+57: 
+58: 
+59: const popularItems = [
+60:   { title: "Europe must forge a new role in the global economy", by: "Claire", img: lead.img },
+61:   { title: "Why postpartum depression went untreated for thousands of years", by: "Claire", img: top[1].img },
+62:   { title: "Global economic growth forecasts slashed", by: "Claire", img: grid[2].img },
+63:   { title: "Extra $2.50 for half a prawn? Diner unhappy about $8.50 laksa", by: "Lucas", img: grid[1].img },
+64: ];
+65: 
+66: const AUTHORS = ["Claire Bennett", "Lucas Hayes", "Maya Chen", "Daniel Cole", "Priya Raman", "Noah Whitfield"];
+67: function authorFor(seed?: string) {
+68:   if (!seed) return AUTHORS[0];
+69:   let h = 0;
+70:   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+71:   return AUTHORS[h % AUTHORS.length];
+72: }
+73: 
+74: function MinRead({ seed, kicker }: { seed?: string; kicker?: string }) {
+75:   return (
+76:     <span className="mt-3 inline-flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+77:       <span className="font-medium text-foreground">By {authorFor(seed)}</span>
+78:       {seed && <Views count={viewsFor(seed)} />}
+79:       {kicker && <span className="kicker whitespace-nowrap text-[10px]">{kicker}</span>}
+80:     </span>
+81:   );
+82: }
+83: 
+84: function HeadlineArticle({ item, dense = false }: { item: Item; dense?: boolean }) {
+85:   return (
+86:     <a href="/article/sample" className="group block">
+87:       {item.img && (
+88:         <div className="mb-3 overflow-hidden">
+89:           <img
+90:             src={item.img}
+91:             alt={item.title}
+92:             loading="lazy"
+93:             className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+94:           />
+95:         </div>
+96:       )}
+97:       <h3 className={`headline text-foreground group-hover:underline ${dense ? "text-lg" : "text-xl"}`}>
+98:         {item.title}
+99:       </h3>
+100:       {item.excerpt && (
+101:         <p className="mt-2 line-clamp-2 text-sm leading-snug text-muted-foreground">{item.excerpt}</p>
+102:       )}
+103:       <MinRead seed={item.title} kicker={item.kicker} />
+104:     </a>
+105:   );
+106: }
+107: 
+108: 
+109: 
+110: export function HeroBoard() {
+111:   const cfg = useHomepageConfig();
+112:   const [adSlides, setAdSlides] = useState<AdSlideItem[]>(() => loadAds());
+113:   useEffect(() => {
+114:     const sync = () => setAdSlides(loadAds());
+115:     window.addEventListener("nt:ads-updated", sync);
+116:     window.addEventListener("storage", sync);
+117:     return () => {
+118:       window.removeEventListener("nt:ads-updated", sync);
+119:       window.removeEventListener("storage", sync);
+120:     };
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

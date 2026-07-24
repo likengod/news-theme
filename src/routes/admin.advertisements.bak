@@ -1,0 +1,720 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { toast } from "sonner";
+import {
+  Plus,
+  Trash2,
+  Save,
+  Image as ImageIcon,
+  RotateCcw,
+  Trash,
+  Upload,
+  FolderOpen,
+  X,
+  ExternalLink,
+  Info,
+  Clock,
+  Sparkles,
+  Eye,
+  EyeOff,
+  Code,
+  Layers,
+  FileCode,
+} from "lucide-react";
+import {
+  loadAds,
+  saveAds,
+  trashAds,
+  loadTrash,
+  restoreFromTrash,
+  purgeFromTrash,
+  processExpiredAds,
+  loadAdRotation,
+  saveAdRotation,
+  loadAdSlotMode,
+  saveAdSlotMode,
+  loadAdSlotScript,
+  saveAdSlotScript,
+  type AdSlideItem,
+  type AdSlot,
+  type AdType,
+  type AdSlotMode,
+} from "@/lib/site-content";
+import { LibraryPicker } from "@/components/admin/MediaField";
+import { trackUpload } from "@/lib/media-library";
+import { ScriptAdRenderer } from "@/components/site/ScriptAdRenderer";
+import { DualImageCell } from "@/components/admin/advertisements/DualImageCell";
+
+const formatExpiresAt = (expiresVal: any): string => {
+  if (!expiresVal) return "";
+  try {
+    const d = expiresVal instanceof Date ? expiresVal : new Date(expiresVal);
+    if (!isNaN(d.getTime())) {
+      const pad = (n: number) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+    if (typeof expiresVal === "string") {
+      return expiresVal.slice(0, 10);
+    }
+  } catch (e) {
+    console.error("formatExpiresAt error:", e);
+  }
+  return "";
+};
+
+export const Route = createFileRoute("/admin/advertisements")({
+  component: AdvertisementsPage,
+});
+
+function uid() {
+  return `ad-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+type SlotMeta = {
+  key: AdSlot;
+  label: string;
+  orientation: "Portrait" | "Landscape" | "Portrait + Landscape";
+  ratio: string;
+  size: string;
+  shownOn: string;
+};
+
+const SLOTS: SlotMeta[] = [
+  {
+    key: "home1",
+    label: "Home 1",
+    orientation: "Portrait",
+    ratio: "3:4",
+    size: "600 × 800 px",
+    shownOn: "Home page — sidebar next to hero board",
+  },
+  {
+    key: "home2",
+    label: "Home 2",
+    orientation: "Landscape",
+    ratio: "~2:1",
+    size: "406 × 196 px",
+    shownOn: "Home page — Markets Magazine sidebar slideshow",
+  },
+  {
+    key: "ad3",
+    label: "Ad 3",
+    orientation: "Portrait",
+    ratio: "3:4",
+    size: "600 × 800 px",
+    shownOn: "Article & Category pages — sidebar ('Your Ad Here')",
+  },
+  {
+    key: "popup",
+    label: "Popup",
+    orientation: "Portrait + Landscape",
+    ratio: "3:4 (mobile) · 16:9 (desktop)",
+    size: "600 × 800 px (mobile) · 1200 × 675 px (desktop)",
+    shownOn: "Article pages — popup modal 7 seconds after open",
+  },
+  {
+    key: "leaderboard",
+    label: "Leaderboard",
+    orientation: "Landscape",
+    ratio: "~8:1",
+    size: "728 × 90 px, 970 × 250 px, etc.",
+    shownOn: "Header or top of pages",
+  },
+];
+
+type Tab = AdSlot | "trash";
+
+function daysLeft(deletedAt?: string | null) {
+  if (!deletedAt) return 0;
+  const ms = 30 * 24 * 60 * 60 * 1000 - (Date.now() - new Date(deletedAt).getTime());
+  return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
+}
+
+
+
+const SAMPLE_GOOGLE_ADSENSE = `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1234567890123456" crossorigin="anonymous"></script>
+<!-- Responsive Ad -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-1234567890123456"
+     data-ad-slot="1234567890"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>`;
+
+function AdvertisementsPage() {
+  const [tab, setTab] = useState<Tab>("home1");
+  const [ads, setAds] = useState<AdSlideItem[]>([]);
+  const [trash, setTrash] = useState<AdSlideItem[]>([]);
+  const [rotation, setRotation] = useState<number>(5);
+  const [slotMode, setSlotMode] = useState<AdSlotMode>("image");
+  const [slotScript, setSlotScript] = useState<string>("");
+  const [previewSlotScript, setPreviewSlotScript] = useState<boolean>(false);
+  const [showDemoGuide, setShowDemoGuide] = useState<boolean>(false);
+  const [previewScriptId, setPreviewScriptId] = useState<string | null>(null);
+  const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    processExpiredAds();
+    setAds(loadAds("home1"));
+    setTrash(loadTrash());
+    setSlotMode(loadAdSlotMode("home1"));
+    setSlotScript(loadAdSlotScript("home1"));
+  }, []);
+
+  useEffect(() => {
+    if (tab === "trash") {
+      setTrash(loadTrash());
+    } else {
+      setAds(loadAds(tab));
+      setRotation(loadAdRotation(tab));
+      setSlotMode(loadAdSlotMode(tab));
+      setSlotScript(loadAdSlotScript(tab));
+      setPreviewSlotScript(false);
+    }
+  }, [tab]);
+
+  const isTrash = tab === "trash";
+  const slot = (isTrash ? "home1" : tab) as AdSlot;
+  const activeSlot = SLOTS.find((s) => s.key === slot);
+  const hasScriptAdActive = slotMode === "script";
+
+  const slotCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    SLOTS.forEach((s) => {
+      counts[s.key] = loadAds(s.key).length;
+    });
+    return counts;
+  }, [ads, tab]);
+
+  const trashCount = useMemo(() => loadTrash().length, [tab, trash]);
+
+  const update = (id: string, patch: Partial<AdSlideItem>) =>
+    setAds((prev) => prev.map((a) => (a.id === id ? { ...a, ...patch } : a)));
+
+  const remove = (id: string) => {
+    trashAds([id], slot);
+    setAds(loadAds(slot));
+    setTrash(loadTrash());
+    toast.success("Moved to Trash (recoverable for 30 days)");
+  };
+
+  const handleAddAd = () => {
+    const newId = uid();
+    setAds((prev) => [
+      ...prev,
+      {
+        id: newId,
+        type: "image",
+        scriptCode: "",
+        image: "",
+        href: "#",
+        label: "Sponsored",
+        expiresAt: null,
+      },
+    ]);
+    setNewlyAddedId(newId);
+    toast.success(`New ad slide added to ${activeSlot?.label ?? slot}!`);
+    setTimeout(() => {
+      if (tableRef.current) {
+        tableRef.current.scrollTop = tableRef.current.scrollHeight;
+      }
+    }, 100);
+  };
+
+  const onSave = () => {
+    saveAdSlotMode(slot, slotMode);
+    if (slotMode === "script") {
+      saveAdSlotScript(slot, slotScript);
+      toast.success(`Saved 3rd Party Script Ad integration for ${activeSlot?.label ?? slot}`);
+    } else {
+      const cleaned = ads.filter((a) =>
+        (a.image || a.imagePortrait || a.imageLandscape || "").trim().length > 0
+      );
+      saveAds(cleaned, slot);
+      saveAdRotation(slot, rotation);
+      setAds(cleaned);
+      const slotLabel = activeSlot?.label ?? slot;
+      toast.success(
+        `Saved ${cleaned.length} custom banner slide${cleaned.length === 1 ? "" : "s"} to ${slotLabel} (rotates every ${rotation}s)`
+      );
+    }
+  };
+
+  const onRestore = (id: string) => {
+    restoreFromTrash(id);
+    setTrash(loadTrash());
+    toast.success("Restored ad slide");
+  };
+
+  const onPurge = (id: string) => {
+    purgeFromTrash(id);
+    setTrash(loadTrash());
+    toast.success("Permanently deleted");
+  };
+
+  return (
+    <div className="space-y-5 pb-12">
+      {/* Top Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Advertisements</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Manage rotating ad slides for your site. Support custom images, videos, and 3rd party script ads (Google AdSense, Bing Ads).
+          </p>
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-px">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {SLOTS.map((s) => {
+            const isActive = tab === s.key;
+            const count = slotCounts[s.key] || 0;
+            return (
+              <button
+                key={s.key}
+                onClick={() => setTab(s.key)}
+                className={`group flex items-center gap-2 rounded-t-lg border-b-2 px-4 py-2.5 text-sm font-semibold transition-all ${
+                  isActive
+                    ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                    : "border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <span>{s.label}</span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${
+                    isActive
+                      ? "bg-slate-700 text-slate-100"
+                      : "bg-slate-200 text-slate-600 group-hover:bg-slate-300"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Trash Tab */}
+        <button
+          onClick={() => setTab("trash")}
+          className={`flex items-center gap-2 rounded-t-lg border-b-2 px-4 py-2.5 text-sm font-semibold transition-all ${
+            tab === "trash"
+              ? "border-red-600 bg-red-600 text-white shadow-xs"
+              : "border-transparent text-slate-500 hover:bg-red-50 hover:text-red-600"
+          }`}
+        >
+          <Trash className="h-4 w-4" />
+          <span>Trash</span>
+          {trashCount > 0 && (
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${
+                tab === "trash" ? "bg-red-800 text-red-100" : "bg-red-100 text-red-700"
+              }`}
+            >
+              {trashCount}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Active Tab Info & Rotation Settings Bar */}
+      {!isTrash && activeSlot && (
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="rounded-md bg-slate-900 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
+                {activeSlot.label}
+              </span>
+              <span className="rounded-md bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700 border border-indigo-100">
+                {activeSlot.orientation} ({activeSlot.size})
+              </span>
+              <span className="text-slate-600 font-medium">
+                <strong>Where:</strong> {activeSlot.shownOn}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDemoGuide((v) => !v)}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition"
+              >
+                {showDemoGuide ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {showDemoGuide ? "Hide guide" : "View preview guide"}
+              </button>
+
+              <div
+                className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors ${
+                  hasScriptAdActive
+                    ? "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
+                    : "border-slate-200 bg-slate-50 text-slate-700"
+                }`}
+                title={
+                  hasScriptAdActive
+                    ? "Ad rotation is disabled when 3rd party script ads (Google AdSense, Bing Ads) are present to comply with their policies."
+                    : undefined
+                }
+              >
+                <Clock className="h-3.5 w-3.5 text-slate-400" />
+                <label className="text-xs font-semibold whitespace-nowrap">Rotate every</label>
+                <input
+                  type="number"
+                  disabled={hasScriptAdActive}
+                  min={1}
+                  max={120}
+                  value={rotation}
+                  onChange={(e) => setRotation(Math.max(1, Number(e.target.value) || 1))}
+                  className={`w-14 rounded border px-2 py-0.5 text-xs font-bold text-center focus:outline-none transition-colors ${
+                    hasScriptAdActive
+                      ? "border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed"
+                      : "border-slate-300 bg-white text-slate-700 focus:border-slate-900"
+                  }`}
+                />
+                <span className="text-xs text-slate-500">sec</span>
+                {hasScriptAdActive && (
+                  <span className="ml-1 rounded-sm bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-700 uppercase tracking-wider">
+                    Disabled
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Warning notice when rotation is disabled due to script ads */}
+          {hasScriptAdActive && (
+            <div className="mt-3 flex items-start gap-2.5 rounded-lg bg-amber-50/70 p-3 text-xs text-amber-800 border border-amber-200/80 animate-in fade-in duration-300">
+              <Info className="h-4 w-4 shrink-0 text-amber-600 mt-0.5 animate-pulse" />
+              <div>
+                <strong>Ad Rotation Disabled:</strong> A 3rd Party Script Ad (Google AdSense, Bing Ads, etc.) is active in this slot. Automatic slide rotation is disabled to comply with search engine/ad network policies against rapid automated refreshes, which can lead to account suspension.
+              </div>
+            </div>
+          )}
+
+          {/* Optional Visual Preview Guide */}
+          {showDemoGuide && (
+            <div className="mt-3.5 pt-3.5 border-t border-slate-100 flex flex-wrap items-center gap-4 text-xs text-slate-600 bg-slate-50/70 p-3 rounded-lg">
+              <div className="font-semibold text-slate-900">Ad Types Supported:</div>
+              <div className="flex items-center gap-2">
+                <span className="inline-block h-3 w-3 rounded-full bg-indigo-600" />
+                <span>Custom Image Banner (Portrait / Landscape)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-block h-3 w-3 rounded-full bg-purple-600" />
+                <span>Google AdSense / Bing / 3rd Party JS &amp; HTML Script</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Integration Mode Switcher for Active Tab */}
+      {!isTrash && (
+        <div className="flex items-center gap-2 border-b border-slate-200 pb-4">
+          <button
+            type="button"
+            onClick={() => { setSlotMode("image"); saveAdSlotMode(slot, "image"); }}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+              slotMode === "image"
+                ? "bg-slate-900 text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            Custom Banner Slideshow
+          </button>
+          <button
+            type="button"
+            onClick={() => { setSlotMode("script"); saveAdSlotMode(slot, "script"); }}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+              slotMode === "script"
+                ? "bg-slate-900 text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            Google AdSense / 3rd Party Script
+          </button>
+        </div>
+      )}
+
+      {/* Main Tab Content */}
+      {isTrash ? (
+        trash.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
+            <Trash className="mb-3 h-8 w-8 text-slate-400" />
+            <h3 className="text-base font-semibold text-slate-800">Trash is empty</h3>
+            <p className="mt-1 text-xs text-slate-500">Deleted ad slides will appear here and can be restored within 30 days.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between rounded-lg bg-amber-50 px-4 py-2 text-xs text-amber-800 border border-amber-200">
+              <div className="flex items-center gap-2 font-medium">
+                <Info className="h-4 w-4 shrink-0 text-amber-600" />
+                Items in trash are automatically purged 30 days after deletion.
+              </div>
+            </div>
+            {trash.map((ad) => (
+              <div
+                key={ad.id}
+                className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between shadow-xs hover:border-slate-300 transition"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center">
+                    {ad.type === "script" ? (
+                      <Code className="h-6 w-6 text-purple-600" />
+                    ) : ad.image ? (
+                      <img src={ad.image} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+                        No img
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-xs">
+                    <div className="font-semibold text-slate-900 max-w-md truncate">
+                      {ad.type === "script" ? "3rd Party Script Ad" : ad.image || "(no image set)"}
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-slate-500">
+                      <span>Slot: <strong className="uppercase text-slate-700">{ad.slot ?? "home1"}</strong></span>
+                      <span>•</span>
+                      <span>Deleted: {ad.deletedAt ? new Date(ad.deletedAt).toLocaleDateString() : "—"}</span>
+                      <span>•</span>
+                      <span className={daysLeft(ad.deletedAt) <= 5 ? "text-red-600 font-bold" : "font-semibold"}>
+                        {daysLeft(ad.deletedAt)} days remaining
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => onRestore(ad.id)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" /> Restore
+                  </button>
+                  <button
+                    onClick={() => onPurge(ad.id)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-red-50 px-3.5 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete forever
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      ) : slotMode === "script" ? (
+        <div className="space-y-6">
+
+        
+        /* Single 3rd Party Script Integration Card */
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <label className="flex items-center gap-2 text-xs font-bold text-slate-800">
+              <Code className="h-4.5 w-4.5 text-purple-600" />
+              <span>Paste 3rd-Party Script HTML/JS Code (Google AdSense, Bing Ads, Custom Script)</span>
+            </label>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setSlotScript((s) => (s ? s + "\n\n" : "") + SAMPLE_GOOGLE_ADSENSE)
+                }
+                className="text-xs font-semibold text-purple-700 hover:underline transition"
+              >
+                + Insert AdSense Example
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewSlotScript((v) => !v)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                {previewSlotScript ? "Hide Preview" : "Preview Script"}
+              </button>
+            </div>
+          </div>
+
+          <textarea
+            rows={8}
+            value={slotScript}
+            onChange={(e) => setSlotScript(e.target.value)}
+            placeholder="<!-- Paste your code here. e.g. -->&#10;<script async src='https://pagead2.googlesyndication.com...'></script>&#10;<ins class='adsbygoogle' ...></ins>&#10;<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>"
+            className="w-full rounded-xl border border-slate-200 bg-slate-900 p-4 font-mono text-xs text-emerald-400 placeholder:text-slate-600 focus:border-slate-700 focus:outline-none focus:ring-1 focus:ring-purple-500 shadow-inner"
+          />
+
+          {previewSlotScript && slotScript && (
+            <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-4 space-y-2">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-purple-700">
+                Live Script Render Preview:
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-white p-3 min-h-[160px] flex items-center justify-center shadow-xs">
+                <ScriptAdRenderer code={slotScript} />
+              </div>
+            </div>
+          )}
+
+          {/* Bottom Action Bar for Script Mode */}
+          <div className="flex items-center justify-end border-t border-slate-100 pt-4">
+            <button
+              type="button"
+              onClick={onSave}
+              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-slate-800 transition active:scale-98"
+            >
+              <Save className="h-4 w-4 text-emerald-400" /> Save changes
+            </button>
+          </div>
+        </div>
+        </div>
+      ) : ads.length === 0 ? (
+        /* Empty State */
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-xs">
+          <div className="grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-slate-600 mb-3">
+            <ImageIcon className="h-6 w-6" />
+          </div>
+          <h3 className="text-base font-semibold text-slate-900">No ads added to {activeSlot?.label} yet</h3>
+          <p className="mt-1 max-w-sm text-xs text-slate-500">
+            Add rotating custom banner images or video advertisements for {activeSlot?.shownOn || "this slot"}.
+          </p>
+          <button
+            type="button"
+            onClick={handleAddAd}
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+          >
+            <Plus className="h-4 w-4" /> Add your first ad to {activeSlot?.label}
+          </button>
+        </div>
+      ) : (
+
+        /* Ads Table & List */
+        <div className="space-y-4">
+          {/* Table Action Bar Above Table */}
+          <div className="flex items-center justify-between rounded-xl bg-slate-900 px-4 py-3 text-white shadow-xs">
+            <div className="flex items-center gap-2 text-xs font-medium">
+              <Sparkles className="h-4 w-4 text-amber-400" />
+              <span>
+                <strong>{ads.length}</strong> active ad slide{ads.length === 1 ? "" : "s"} in <strong>{activeSlot?.label}</strong>
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleAddAd}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition hover:bg-emerald-500 active:scale-98"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add ad
+            </button>
+          </div>
+
+          <div ref={tableRef} className="space-y-4">
+            {ads.map((ad, i) => {
+              const isJustAdded = ad.id === newlyAddedId;
+
+              return (
+                <div
+                  key={ad.id}
+                  className={`rounded-xl border border-slate-200 bg-white p-4 shadow-xs transition-colors ${
+                    isJustAdded ? "bg-emerald-50/40 border-emerald-300 ring-1 ring-emerald-300" : "hover:border-slate-300"
+                  }`}
+                >
+                  {/* Top Bar for Ad Row */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 text-xs font-bold text-white shadow-2xs">
+                        #{i + 1}
+                      </span>
+                      <span className="text-xs font-bold text-slate-800">
+                        Banner Ad Slide
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      {/* Expiry Date */}
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs font-semibold text-slate-500 whitespace-nowrap">
+                          Expires:
+                        </label>
+                        <input
+                          type="date"
+                          value={formatExpiresAt(ad.expiresAt)}
+                          onChange={(e) =>
+                            update(ad.id, {
+                              expiresAt: e.target.value ? new Date(e.target.value).toISOString() : null,
+                            })
+                          }
+                          className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-800 focus:border-slate-900 focus:outline-none transition"
+                        />
+                      </div>
+
+                      {/* Delete Button */}
+                      <button
+                        type="button"
+                        onClick={() => remove(ad.id)}
+                        title="Delete ad slide"
+                        aria-label="Delete ad slide"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white shadow-2xs"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="mt-3">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                      {/* Dual Image Cell */}
+                      <div>
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                          Upload Banner Images
+                        </div>
+                        <DualImageCell ad={ad} slot={slot} onUpdate={update} />
+                      </div>
+
+                      {/* Click-through URL */}
+                      <div className="flex-1 max-w-md">
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            Click-Through URL
+                          </label>
+                          {ad.href && ad.href !== "#" && (
+                            <a
+                              href={ad.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-600 hover:underline"
+                            >
+                              Test link <ExternalLink className="h-2.5 w-2.5" />
+                            </a>
+                          )}
+                        </div>
+                        <input
+                          value={ad.href}
+                          onChange={(e) => update(ad.id, { href: e.target.value })}
+                          placeholder="https://advertiser.com"
+                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 transition"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Bottom Action Bar */}
+          <div className="flex items-center justify-end rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <button
+              type="button"
+              onClick={() => onSave()}
+              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-slate-800 transition active:scale-98"
+            >
+              <Save className="h-4 w-4 text-emerald-400" /> Save changes
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
