@@ -114,8 +114,7 @@ export const importCategories = createServerFn({ method: "POST" })
 export const getTags = createServerFn({ method: "GET" })
   .handler(async (): Promise<TagRow[]> => {
     // Return tags list and estimate article counts by parsing comma-separated tag list
-    // (In a full scale relational model we would join an article_tags map table,
-    // but parsing existing tags text column maintains compatibility with the Lovable client data model.)
+    // (In a full scale relational model we would join an article_tags map table)
     const tags = await query("SELECT * FROM tags ORDER BY name ASC");
     const articles = await query("SELECT tags FROM articles WHERE status = 'Published' AND tags IS NOT NULL");
     
