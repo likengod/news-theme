@@ -34,7 +34,7 @@ const HOME_DESC = "Breaking news, market intelligence, and sharp business analys
 export const Route = createFileRoute("/")({
   loader: async () => {
     const [articles, tags] = await Promise.all([
-      getHomepageArticles({ data: 300 }),
+      getHomepageArticles({ data: 50 }),
       getTags()
     ]);
     return { articles, tags };
