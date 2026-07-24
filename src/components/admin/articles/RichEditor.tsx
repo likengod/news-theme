@@ -12,7 +12,7 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
   const imgRef = useRef<HTMLInputElement>(null);
   const lastHtml = useRef<string>(value);
 
-  const [fontOptions, setFontOptions] = React.useState<string[]>(["Default", "Playfair Display", "News Cycle", "Inter", "Georgia", "Arial"]);
+  const [fontOptions, setFontOptions] = React.useState<string[]>(["Default"]);
 
   useEffect(() => {
     if (ref.current && value !== lastHtml.current) {
@@ -28,13 +28,13 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
     const config = loadFontConfig();
     if (config && config.fonts) {
       const families = config.fonts.map(f => f.name || f.family);
-      setFontOptions(["Default", ...new Set([...families, "Arial", "Georgia"])]);
+      setFontOptions(["Default", ...new Set(families)]);
     }
     const handleUpdate = () => {
       const updated = loadFontConfig();
       if (updated && updated.fonts) {
         const families = updated.fonts.map(f => f.name || f.family);
-        setFontOptions(["Default", ...new Set([...families, "Arial", "Georgia"])]);
+        setFontOptions(["Default", ...new Set(families)]);
       }
     };
     window.addEventListener("nt:fonts-updated", handleUpdate);
