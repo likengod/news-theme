@@ -6,11 +6,13 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 
 export default defineConfig({
   server: {
-    port: 8081,
+    port: 3099,
     host: true,
   },
   preview: {
-    port: 8081,
+    port: 3099,
+    host: true,
+    allowedHosts: ["todaytripura.com", "www.todaytripura.com", "localhost"],
   },
   plugins: [
     tailwindcss(),
