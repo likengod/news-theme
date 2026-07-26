@@ -19,7 +19,7 @@ export const tickers = [
   { sym: "BSE SMALLCAP", val: "53,890.90", chg: "+0.28%", up: true },
 ];
 
-export const sections = ["Northeast", "Country", "Global", "Politics", "Business", "Crime", "Tech", "Sports", "Opinion", "Others"];
+export const sections = ["Northeast", "Breaking", "Global", "Politics", "Business", "Crime", "Tech", "Sports", "Opinion", "Others"];
 
 export const lead = {
   kicker: "Breaking · Federal Reserve",
