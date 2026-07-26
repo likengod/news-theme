@@ -29,6 +29,7 @@ import {
   buildProject,
   getDeployHistory,
   getDeployLog,
+  initializeGitRepo,
 } from "@/lib/deploy.functions";
 
 export const Route = createFileRoute("/admin/updates")({
@@ -121,6 +122,23 @@ function UpdatesPage() {
     }
   };
 
+  const handleInitialize = async () => {
+    setPulling(true);
+    try {
+      const res = await initializeGitRepo();
+      if (res.success) {
+        toast.success("CI/CD Pipeline connected successfully!");
+        await refresh();
+      } else {
+        toast.error("Failed to connect: " + res.log);
+      }
+    } catch (err: any) {
+      toast.error("Connection error: " + err.message);
+    } finally {
+      setPulling(false);
+    }
+  };
+
   const handleBuild = async () => {
     setBuilding(true);
     setBuildOutput("");
@@ -186,6 +204,19 @@ function UpdatesPage() {
                   ? "Updating System..." 
                   : `Update to Latest (${updatesCount} new)`}
               </span>
+            </button>
+          ) : !isGitConfigured ? (
+            <button
+              onClick={handleInitialize}
+              disabled={pulling || building}
+              className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60"
+            >
+              {pulling || building ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Hammer className="h-4 w-4 text-white" />
+              )}
+              <span>Connect CI/CD Pipeline</span>
             </button>
           ) : (
             <div className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-500 border border-slate-200">

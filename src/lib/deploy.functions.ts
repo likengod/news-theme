@@ -184,3 +184,41 @@ export const getDeployLog = createServerFn({ method: "GET" })
     if (rows.length === 0) return null;
     return rows[0];
   });
+
+// ─── Initialize Git Repository ───────────────────────────────────────────────
+
+export const initializeGitRepo = createServerFn({ method: "POST" })
+  .handler(async () => {
+    try {
+      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'site_settings_data'");
+      if (rows.length === 0 || !rows[0].value) throw new Error("Settings not found");
+      
+      const settings = JSON.parse(rows[0].value);
+      const remoteUrl = settings.gitRemoteUrl;
+      const pat = settings.gitAccessToken;
+      const branch = settings.gitBranch || "main";
+
+      if (!remoteUrl) throw new Error("Git Remote URL is not configured in Settings.");
+
+      // Format URL to include PAT if it exists
+      let authUrl = remoteUrl;
+      if (pat && remoteUrl.startsWith("https://")) {
+        authUrl = remoteUrl.replace("https://", `https://${pat}@`);
+      } else if (pat && remoteUrl.startsWith("http://")) {
+        authUrl = remoteUrl.replace("http://", `http://${pat}@`);
+      }
+
+      let log = "";
+      log += git("init") + "\n";
+      git("remote remove origin"); // ignore error if it doesn't exist
+      
+      log += git(`remote add origin ${authUrl}`) + "\n";
+      log += git("fetch --all") + "\n";
+      log += git(`branch -M ${branch}`) + "\n";
+      log += git(`reset --hard origin/${branch}`) + "\n";
+      
+      return { success: true, log };
+    } catch (err: any) {
+      return { success: false, log: err.message };
+    }
+  });
