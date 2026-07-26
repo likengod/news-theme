@@ -69,6 +69,7 @@ export function ContentProtectionGuard() {
     const handleVisibilityChange = () => {
       if (document.hidden) {
         setIsBlurred(true);
+        triggerSecurityNotice();
       } else {
         setIsBlurred(false);
       }
