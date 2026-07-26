@@ -67,6 +67,7 @@ export const getGitStatus = createServerFn({ method: "GET" })
     let behind = 0;
 
     if (isConfigured) {
+      git("fetch --all");
       const aheadStr = git("rev-list --count @{u}..HEAD 2>nul || echo 0");
       const behindStr = git("rev-list --count HEAD..@{u} 2>nul || echo 0");
       ahead = parseInt(aheadStr) || 0;
