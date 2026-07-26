@@ -484,6 +484,39 @@ export async function initializeDatabase(customAdmin?: { email: string; password
       }
     }
 
+    // Seed default journalists if empty
+    const journalistCountResult = await query("SELECT id FROM profiles WHERE journalist_id IS NOT NULL LIMIT 1");
+    if (journalistCountResult.length === 0) {
+      console.log("[MySQL] Seeding default journalists...");
+      const demoJournalists = [
+        { name: "John Doe", email: "john@demo.com", jId: "JID-1001" },
+        { name: "Jane Smith", email: "jane@demo.com", jId: "JID-1002" }
+      ];
+      for (const j of demoJournalists) {
+        const uId = crypto.randomUUID();
+        const pubId = String(Math.floor(1000000000 + Math.random() * 9000000000));
+        await query("INSERT INTO users (id, email, password_hash, display_name) VALUES (?, ?, ?, ?)", [uId, j.email, "demo_hash", j.name]);
+        await query("INSERT INTO user_roles (id, user_id, role) VALUES (?, ?, 'journalist')", [crypto.randomUUID(), uId]);
+        await query("INSERT INTO profiles (id, public_user_id, display_name, email, active, journalist_id) VALUES (?, ?, ?, ?, ?, ?)", [uId, pubId, j.name, j.email, true, j.jId]);
+      }
+    }
+
+    // Seed default articles if empty
+    const articleCountResult = await query("SELECT id FROM articles LIMIT 1");
+    if (articleCountResult.length === 0) {
+      console.log("[MySQL] Seeding default articles...");
+      const demoArticles = [
+        { title: "Global Markets Rally As Tech Stocks Surge", cat: "Global", excerpt: "Technology stocks led a global market rally today, lifting major indexes to record highs. Investors cheered stronger-than-expected earnings reports from leading technology companies.", author: "John Doe" },
+        { title: "New Policy Announced for Renewable Energy", cat: "Politics", excerpt: "The government has unveiled a comprehensive new policy aimed at dramatically increasing the country's reliance on renewable energy sources over the next decade.", author: "Jane Smith" },
+        { title: "Local Team Wins Championship In Thrilling Match", cat: "Sports", excerpt: "In a stunning upset, the local underdogs secured the championship title with a last-minute goal, sending thousands of fans into wild celebrations across the city.", author: "John Doe" },
+        { title: "Breakthrough In Artificial Intelligence Research", cat: "Tech", excerpt: "Scientists have announced a major breakthrough in AI research, demonstrating a new model capable of solving complex mathematical problems previously thought unsolvable by machines.", author: "Jane Smith" },
+        { title: "Economy Shows Signs Of Strong Recovery", cat: "Business", excerpt: "Recent economic indicators suggest a robust recovery is underway, with consumer spending hitting an all-time high and unemployment numbers continuing their steady decline.", author: "John Doe" }
+      ];
+      for (const a of demoArticles) {
+        await query("INSERT INTO articles (title, slug, category, author, excerpt, status, date) VALUES (?, ?, ?, ?, ?, 'Published', NOW())", [a.title, slugify(a.title), a.cat, a.author, a.excerpt]);
+      }
+    }
+
     console.log("[MySQL] Database initialization completed successfully!");
   } catch (err: any) {
     console.error("[MySQL] Failed to initialize database:", err.message);
