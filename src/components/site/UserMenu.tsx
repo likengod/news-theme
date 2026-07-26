@@ -102,10 +102,6 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
       return (
         <div className="flex flex-col gap-2">
           <Link to="/auth" className="hover:text-foreground">Sign in</Link>
-          <button type="button" onClick={toggleTheme} className="flex items-center gap-2 hover:text-foreground text-left">
-            {isDark ? <Sun className="h-3.5 w-3.5 text-amber-500" /> : <Moon className="h-3.5 w-3.5" />}
-            {isDark ? "Day Mode" : "Night Mode"}
-          </button>
         </div>
       );
     }
@@ -167,10 +163,6 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
             <Link to="/admin/settings" className="hover:text-foreground">Settings</Link>
           </>
         )}
-        <button type="button" onClick={toggleTheme} className="flex items-center gap-2 text-left hover:text-foreground">
-          {isDark ? <Sun className="h-3.5 w-3.5 text-amber-500" /> : <Moon className="h-3.5 w-3.5" />}
-          {isDark ? "Day Mode" : "Night Mode"}
-        </button>
         <button type="button" onClick={handleSignOut} className="text-left hover:text-foreground">Sign out</button>
       </div>
     );

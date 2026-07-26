@@ -10,7 +10,7 @@ export const ArticleBody = memo(function ArticleBody({ paragraphs, midImage }: P
   if (paragraphs.length === 1 && (paragraphs[0].startsWith("<") || paragraphs[0].includes("<p>"))) {
     return (
       <div 
-        className="prose-article space-y-5 text-lg leading-[1.85] text-foreground/90"
+        className="prose-article space-y-4 md:space-y-5 text-[15px] md:text-lg leading-relaxed md:leading-[1.85] text-foreground/90"
         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(paragraphs[0]) }}
       />
     );
@@ -21,7 +21,7 @@ export const ArticleBody = memo(function ArticleBody({ paragraphs, midImage }: P
   const afterMid = paragraphs.slice(4);
 
   return (
-    <div className="prose-article space-y-5 text-lg leading-[1.85] text-foreground/90">
+    <div className="prose-article space-y-4 md:space-y-5 text-[15px] md:text-lg leading-relaxed md:leading-[1.85] text-foreground/90">
       {first && (
         <p className="first-letter:float-left first-letter:mr-2 first-letter:font-serif first-letter:text-6xl first-letter:font-bold first-letter:leading-none">
           {first}

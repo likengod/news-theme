@@ -88,24 +88,29 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
             {deck}
           </p>
         )}
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs uppercase tracking-widest text-muted-foreground">
-          <div className="flex items-center gap-4 flex-1 w-full">
-            <div className="flex items-center gap-4">
-              <span className="font-semibold text-foreground">By {author}</span>
-              <span aria-hidden>•</span>
-              <time>{date}</time>
-              <span aria-hidden>•</span>
-              <Views count={views} />
-            </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-y-3 gap-x-2 text-[10px] sm:text-xs uppercase tracking-widest text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-4 gap-y-1 flex-1">
+            <span className="font-semibold text-foreground">By {author}</span>
+            <span aria-hidden>•</span>
+            <time>
+              {date.split(/ at /i)[0]}
+              {date.split(/ at /i)[1] && (
+                <span className="hidden sm:inline"> AT {date.split(/ at /i)[1]}</span>
+              )}
+            </time>
+            <span aria-hidden>•</span>
+            <Views count={views} />
+          </div>
 
-            {(settings.googleNews && settings.googleNews !== "#") && (
-              <a
-                href={settings.googleNews || "https://news.google.com/"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ml-auto flex items-center gap-2 transition hover:opacity-80 normal-case tracking-normal"
-              >
-              <img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Google_News_icon.svg" alt="Google News" className="h-7 w-7" />
+          {(settings.googleNews && settings.googleNews !== "#") && (
+            <a
+              href={settings.googleNews || "https://news.google.com/"}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Follow on Google News"
+              className="flex shrink-0 items-center gap-2 transition hover:opacity-80 normal-case tracking-normal rounded hover:bg-muted p-1 sm:p-0"
+            >
+              <img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Google_News_icon.svg" alt="Google News" className="h-6 w-6 sm:h-7 sm:w-7" />
               <div className="flex flex-col items-start justify-center text-left font-sans">
                 <span className="text-[9px] font-medium tracking-wide text-[#3c4043] uppercase leading-none mb-[1px]">Follow on</span>
                 <span className="text-[15px] font-medium leading-none tracking-tight flex items-center">
@@ -119,8 +124,7 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
                 </span>
               </div>
             </a>
-            )}
-          </div>
+          )}
         </div>
       </header>
     </>
