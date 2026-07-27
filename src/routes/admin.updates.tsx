@@ -222,6 +222,14 @@ function UpdatesPage() {
             <div className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-500 border border-slate-200">
               <CheckCircle2 className="h-4 w-4 text-emerald-500" />
               <span>Updated ({currentVersion})</span>
+              <button
+                onClick={handleInitialize}
+                disabled={pulling || building}
+                title="Re-sync Git Credentials"
+                className="ml-2 rounded hover:text-slate-800 transition disabled:opacity-50"
+              >
+                <RefreshCw className={`h-3 w-3 ${pulling ? "animate-spin" : ""}`} />
+              </button>
             </div>
           )}
 

@@ -96,9 +96,14 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
       "journalistId", "journalistName", "access_level"
     ];
 
+    let formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    if (r.date) {
+      formattedDate = String(r.date).replace('T', ' ').replace('Z', '').substring(0, 19);
+    }
+
     const values = [
       r.title, slug, r.category, r.city, r.state, r.country, r.author, r.views || 0,
-      r.status, r.date || new Date().toISOString().slice(0, 19).replace('T', ' '),
+      r.status, formattedDate,
       r.excerpt, r.content, r.featuredImage, r.ogImage || r.featuredImage,
       r.metaTitle, r.metaDescription, r.tags, r.featured ? 1 : 0, r.newsType || "Standard",
       r.journalistId, r.journalistName, r.access_level || "Free"
@@ -168,9 +173,15 @@ export const importAdminArticles = createServerFn({ method: "POST" })
     for (const r of articles) {
       const finalSlug = r.slug || slugify(r.title);
       
+      let formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      if (r.date) {
+        // Handle various date formats (e.g., '2026-07-22T02:33:09.000Z' -> '2026-07-22 02:33:09')
+        formattedDate = String(r.date).replace('T', ' ').replace('Z', '').substring(0, 19);
+      }
+
       const values = [
         r.title || "Untitled", finalSlug, r.category || "General", r.city || "", r.state || "", r.country || "", r.author || "Admin", Number(r.views) || 0,
-        r.status || "Draft", r.date || new Date().toISOString().slice(0, 19).replace('T', ' '),
+        r.status || "Draft", formattedDate,
         r.excerpt || "", r.content || "", r.featuredImage || "", r.ogImage || r.featuredImage || "",
         r.metaTitle || "", r.metaDescription || "", r.tags || "", (r.featured === "true" || r.featured === true || r.featured === 1) ? 1 : 0, r.newsType || "Standard",
         r.journalistId || "", r.journalistName || "", r.access_level || "Free"
