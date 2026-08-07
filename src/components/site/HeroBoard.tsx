@@ -36,26 +36,28 @@ export const HeroBoard = React.memo(function HeroBoard({ articles = [], tags = [
     return selected;
   }
 
-  // 1. Featured Lead
+  // 1. Featured Leads (Slider)
   const featuredCategory = cfg.heroFeatured.category || "Auto (Latest)";
-  const leadArticles = getUnique(articles, 1, (a) => {
+  const leadArticles = getUnique(articles, 3, (a) => {
     if (!featuredCategory || featuredCategory === "Auto (Latest)") return true;
     return a.category?.toLowerCase() === featuredCategory.toLowerCase();
   });
-  const leadDb = leadArticles[0];
-  const activeLead = leadDb ? {
-    kicker: leadDb.category,
-    title: leadDb.title,
-    dek: leadDb.excerpt || leadDb.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...",
-    author: `By ${leadDb.author || "Newsroom"}`,
-    time: formatUtcDate(leadDb.date),
-    img: getArticleImage(leadDb.featuredImage, 0),
-    views: leadDb.views || 0,
-    slug: leadDb.slug
-  } : {
-    ...lead,
-    slug: "sample"
-  };
+  const activeLeads = Array.from({ length: 3 }).map((_, i) => {
+    const a = leadArticles[i];
+    if (a) {
+      return {
+        kicker: a.category,
+        title: a.title,
+        dek: a.excerpt || a.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...",
+        author: `By ${a.author || "Newsroom"}`,
+        time: formatUtcDate(a.date),
+        img: getArticleImage(a.featuredImage, i),
+        views: a.views || 0,
+        slug: a.slug
+      };
+    }
+    return { ...lead, slug: "sample", img: getArticleImage("", i) };
+  });
 
   const leftArticles = getUnique(articles, 5);
   const activeLeftItems = Array.from({ length: 5 }).map((_, i) => {
@@ -158,11 +160,12 @@ export const HeroBoard = React.memo(function HeroBoard({ articles = [], tags = [
       <div className="grid gap-8 lg:grid-cols-12">
         <div className="lg:col-span-9">
           <div className="grid gap-8 lg:grid-cols-12">
-            <HeroSidebarLeft activeLeftItems={activeLeftItems} />
+            <div className="hidden lg:col-span-4 lg:block">
+              <HeroSidebarLeft activeLeftItems={activeLeftItems} />
+            </div>
             <HeroMain 
               hasDbArticles={hasDbArticles} 
-              activeLead={activeLead} 
-              lead={lead} 
+              activeLeads={activeLeads} 
               cfg={cfg} 
               articlesByCategory={articlesByCategory} 
             />

@@ -309,6 +309,16 @@ export async function initializeDatabase(customAdmin?: { email: string; password
       )
     `);
 
+    // 9.6 Create signup_logs table for IP rate limiting
+    await query(`
+      CREATE TABLE IF NOT EXISTS signup_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ip_address VARCHAR(45) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_ip_created (ip_address, created_at DESC)
+      )
+    `);
+
     // 10. Performance Composite Indexes
     await safeCreateIndex("articles", "idx_articles_cat_created", "category_slug, created_at DESC");
     await safeCreateIndex("articles", "idx_articles_status_created", "status, created_at DESC");

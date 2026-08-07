@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth-middleware";
 import crypto from "crypto";
 import { query, hashPassword } from "./db.server";
 import { z } from "zod";
+import disposableDomains from "disposable-email-domains";
 
 // Generator for public_user_id (10 digits)
 async function generatePublicUserId(): Promise<string> {
@@ -21,11 +22,48 @@ export const signUpServer = createServerFn({ method: "POST" })
   .validator((data) => z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters").optional(),
-    displayName: z.string().max(50).optional()
+    displayName: z.string().max(50).optional(),
+    turnstileToken: z.string().min(1, "Captcha verification is required")
   }).parse(data))
   .handler(async ({ data }) => {
-    const { email, password, displayName } = data;
+    const { email, password, displayName, turnstileToken } = data;
     if (!email || !password) throw new Error("Email and password are required");
+
+    // 1. Verify Turnstile Token
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
+    const req = getRequest();
+    const ip = req?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() || 
+               req?.headers?.get("cf-connecting-ip") || 
+               "unknown";
+
+    if (turnstileToken) {
+      const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `secret=${turnstileSecret}&response=${turnstileToken}&remoteip=${ip}`
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        throw new Error("Captcha verification failed. Please try again.");
+      }
+    }
+
+    // 2. Check for Disposable Email
+    const domain = email.split("@")[1]?.toLowerCase();
+    if (domain && disposableDomains.includes(domain)) {
+      throw new Error("Disposable email addresses are not allowed.");
+    }
+
+    // 3. IP Rate Limiting (1 account per 90 days)
+    if (ip !== "unknown") {
+      const logs = await query(
+        "SELECT created_at FROM signup_logs WHERE ip_address = ? AND created_at > DATE_SUB(NOW(), INTERVAL 90 DAY)", 
+        [ip]
+      );
+      if (logs.length > 0) {
+        throw new Error("You can only create 1 account per 90 days from this network.");
+      }
+    }
 
     // Check if user already exists
     const existing = await query("SELECT id FROM users WHERE email = ?", [email]);
@@ -62,6 +100,10 @@ export const signUpServer = createServerFn({ method: "POST" })
       "INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)",
       [token, userId, expiresAt]
     );
+
+    if (ip !== "unknown") {
+      await query("INSERT INTO signup_logs (ip_address) VALUES (?)", [ip]);
+    }
 
     return {
       session: {

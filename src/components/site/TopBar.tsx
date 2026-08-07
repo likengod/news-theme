@@ -28,12 +28,18 @@ const GRADIENT_MAP: Record<string, string> = {
   "forest": "linear-gradient(to right, #11998e, #38ef7d)",
 };
 
+import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
+
+const otherCategories = ["Entertainment", "Health", "Education", "Jobs", "Travel", "Lifestyle"];
+
 export function TopBar() {
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState(defaultSettings);
   const [mounted, setMounted] = useState(false);
   const [showCustom, setShowCustom] = useState(false);
   const navigate = useNavigate();
+  const dbCats = useCategories();
+  const allItems = dbCats.length > 0 ? dbCats.map((c: any) => c.name) : sections.filter(s => s !== "Others").concat(otherCategories);
 
   useEffect(() => {
     setSettings(loadSettings());
@@ -174,7 +180,7 @@ export function TopBar() {
                         Home
                       </Link>
                     </li>
-                    {sections.map((s) => (
+                    {allItems.map((s: string) => (
                       <li key={s}>
                         <Link
                           to="/$slug"

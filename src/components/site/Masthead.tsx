@@ -8,12 +8,28 @@ import { ChevronDown, Home, Search, X } from "lucide-react";
 const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
 
 
-import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
 
 const otherCategories = ["Entertainment", "Health", "Education", "Jobs", "Travel", "Lifestyle"];
 
 export function Masthead() {
   const s = useSiteSettings();
+  const dbCats = useCategories();
+  
+  let navItems = sections;
+  let dropdownItems = otherCategories;
+
+  if (dbCats.length > 0) {
+    const allCatNames = dbCats.map((c: any) => c.name);
+    if (allCatNames.length <= 9) {
+      navItems = allCatNames;
+      dropdownItems = [];
+    } else {
+      navItems = [...allCatNames.slice(0, 8), "Others"];
+      dropdownItems = allCatNames.slice(8);
+    }
+  }
+  
   const hasLogo = !!(s.logoLight || s.logoDark);
   const showLogo = hasLogo;
   const showText = !hasLogo;
@@ -67,7 +83,7 @@ export function Masthead() {
             >
               <Home className="h-4 w-4" />
             </Link>
-            {sections.map((s) =>
+            {navItems.map((s: string) =>
               s === "Others" ? (
                 <div key={s} className="group relative">
                   <button className="flex items-center gap-1 whitespace-nowrap px-3 py-1 uppercase transition-colors hover:underline">
@@ -75,7 +91,7 @@ export function Masthead() {
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
                   <div className="invisible absolute left-1/2 z-50 mt-0 w-48 -translate-x-1/2 border border-border bg-background py-2 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100">
-                    {otherCategories.map((c) => (
+                    {dropdownItems.map((c) => (
                       <Link
                         key={c}
                         to="/$slug"

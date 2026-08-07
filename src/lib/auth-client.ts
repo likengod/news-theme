@@ -41,13 +41,14 @@ export const authClient = {
       }
     },
 
-    async signUp(credentials: { email: string; password?: string; options?: { data?: { display_name?: string } } }) {
+    async signUp(credentials: { email: string; password?: string; turnstileToken?: string; options?: { data?: { display_name?: string } } }) {
       try {
         const res = await signUpServer({
           data: {
             email: credentials.email,
             password: credentials.password,
             displayName: credentials.options?.data?.display_name,
+            turnstileToken: credentials.turnstileToken || "",
           },
         });
         if (typeof window !== "undefined") {

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -74,6 +75,7 @@ function AuthPage() {
   const [tab, setTab] = useState<"signin" | "signup">("signin");
   const [showConfirm, setShowConfirm] = useState(false);
   const [agree, setAgree] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
 
 
   useEffect(() => {
@@ -116,6 +118,7 @@ function AuthPage() {
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!turnstileToken) return toast.error("Please complete the captcha verification.");
     const fd = new FormData(e.currentTarget);
     const parsed = signUpSchema.safeParse({
       firstName: fd.get("firstName"),
@@ -133,6 +136,7 @@ function AuthPage() {
       email: parsed.data.email,
       password: parsed.data.password,
       phone: parsed.data.phone,
+      turnstileToken,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
         data: {
@@ -159,7 +163,7 @@ function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background px-4 py-12">
+    <div className="min-h-screen bg-white px-4 py-12">
       <div className="mx-auto w-full max-w-md">
         <Tabs value={tab} onValueChange={(v) => setTab(v as "signin" | "signup")} className="w-full">
           <TabsList className="grid h-11 w-full grid-cols-2 rounded-md bg-muted p-1">
@@ -173,7 +177,7 @@ function AuthPage() {
 
 
           <TabsContent value="signin">
-            <div className="mt-4 rounded-lg bg-white p-8">
+            <div className="mt-4 pt-4">
               <div className="mb-6 text-center">
                 <h1 className="font-serif text-3xl font-bold tracking-tight">Welcome Back</h1>
                 <p className="mt-1 text-sm text-muted-foreground">Sign in to your account to continue</p>
@@ -232,7 +236,7 @@ function AuthPage() {
           </TabsContent>
 
           <TabsContent value="signup">
-            <div className="mt-4 rounded-lg bg-white p-8">
+            <div className="mt-4 pt-4">
               <div className="mb-6 text-center">
                 <h1 className="font-serif text-3xl font-bold tracking-tight">Create Account</h1>
                 <p className="mt-1 text-sm text-muted-foreground">Join News Theme today</p>
@@ -306,11 +310,15 @@ function AuthPage() {
                   <Checkbox id="agree" checked={agree} onCheckedChange={(v) => setAgree(v === true)} className="mt-0.5" />
                   <span>
                     I agree to the{" "}
-                    <Link to="/terms-and-conditions" className="font-semibold text-foreground underline-offset-2 hover:underline">Terms &amp; Conditions</Link>
+                    <Link to="/terms-and-conditions" className="font-semibold text-indigo-600 dark:text-indigo-400 underline-offset-2 hover:underline hover:text-indigo-700 dark:hover:text-indigo-300">Terms &amp; Conditions</Link>
                     {" "}and{" "}
-                    <Link to="/privacy-policy" className="font-semibold text-foreground underline-offset-2 hover:underline">Privacy Policy</Link>
+                    <Link to="/privacy-policy" className="font-semibold text-indigo-600 dark:text-indigo-400 underline-offset-2 hover:underline hover:text-indigo-700 dark:hover:text-indigo-300">Privacy Policy</Link>
                   </span>
                 </label>
+
+                <div className="flex justify-center my-4 overflow-hidden">
+                  <Turnstile siteKey="1x00000000000000000000AA" onSuccess={setTurnstileToken} />
+                </div>
 
                 <Button type="submit" className="h-11 w-full bg-slate-800 text-white hover:bg-slate-900 disabled:bg-slate-400 disabled:opacity-100" disabled={loading || !agree}>
                   {loading ? "Creating account…" : "Create Account"}

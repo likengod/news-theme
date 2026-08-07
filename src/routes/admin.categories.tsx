@@ -92,7 +92,12 @@ function CategoriesPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">News Categories</h1>
+          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
+            News Categories
+            <span className="rounded-md bg-slate-100 px-2.5 py-0.5 text-sm font-semibold text-slate-600">
+              {allCats.length} Total
+            </span>
+          </h1>
           <p className="text-sm text-slate-500">
             Manage article categories, SEO metadata, and category feeds.
           </p>

@@ -19,6 +19,7 @@ import { getSiteSettingsServer, getAdConfigurationServer, getRedirectRulesServer
 import { getHomepageConfigServer, defaultHomepageConfig } from "@/lib/homepage-config";
 import { getFontConfigServer, defaultFontConfig, buildGoogleFontsUrl, buildFontFaceCss, buildSectionCssVars, FONT_CONFIG_KEY } from "@/lib/font-config";
 import type { FontConfiguration } from "@/lib/font-config";
+import { getCategories } from "@/lib/taxonomy.functions";
 
 import { NotFound } from "@/components/site/NotFound";
 
@@ -108,17 +109,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   },
   loader: async () => {
     try {
-      const [settings, homepageConfig, adsConfig, redirectRules, fontConfig] = await Promise.all([
+      const [settings, homepageConfig, adsConfig, redirectRules, fontConfig, categories] = await Promise.all([
         getSiteSettingsServer(),
         getHomepageConfigServer(),
         getAdConfigurationServer(),
         getRedirectRulesServer(),
         getFontConfigServer(),
+        getCategories(),
       ]);
-      return { settings, homepageConfig, adsConfig, redirectRules, fontConfig };
+      return { settings, homepageConfig, adsConfig, redirectRules, fontConfig, categories };
     } catch (err) {
       console.error("[Root Loader] Failed to prefetch config:", err);
-      return { settings: null, homepageConfig: null, adsConfig: null, redirectRules: [], fontConfig: null };
+      return { settings: null, homepageConfig: null, adsConfig: null, redirectRules: [], fontConfig: null, categories: [] };
     }
   },
   head: ({ loaderData }) => {
@@ -306,6 +308,7 @@ function RootComponent() {
       },
     },
     fontConfig: fontConfig,
+    categories: loaderData?.categories ?? [],
   };
 
   return (

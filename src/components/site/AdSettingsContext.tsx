@@ -8,6 +8,7 @@ type AdSettingsContextType = {
   homepageConfig: HomepageConfig;
   adConfig: AdConfiguration;
   fontConfig?: FontConfiguration;
+  categories?: any[];
 };
 
 const AdSettingsContext = createContext<AdSettingsContextType | null>(null);
@@ -72,4 +73,17 @@ export function useFontConfig(): FontConfiguration {
   }, [ctx]);
 
   return fc;
+}
+
+export function useCategories(): any[] {
+  const ctx = useAdSettings();
+  const [cats, setCats] = useState<any[]>(() => ctx?.categories ?? []);
+
+  useEffect(() => {
+    if (ctx?.categories) {
+      setCats(ctx.categories);
+    }
+  }, [ctx?.categories]);
+
+  return cats;
 }
