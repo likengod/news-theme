@@ -109,7 +109,7 @@ function CategoriesPage() {
             onImport={handleImport}
           />
           <button
-            onClick={() => setEditing({ id: Date.now(), name: "", slug: "", description: "", metaTitle: "", metaDescription: "" })}
+            onClick={() => setEditing({ id: Date.now(), name: "", slug: "", description: "", metaTitle: "", metaDescription: "", showInHeader: false })}
             className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
           >
             <Plus className="h-4 w-4" /> Add Category
@@ -196,6 +196,18 @@ function CategoriesPage() {
                 onChange={(e) => setEditing({ ...editing, slug: e.target.value })}
                 className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
               />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="showInHeader"
+                checked={editing.showInHeader || false}
+                onChange={(e) => setEditing({ ...editing, showInHeader: e.target.checked })}
+                className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+              />
+              <label htmlFor="showInHeader" className="text-sm font-medium text-slate-700">
+                Show in top header navigation
+              </label>
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold text-slate-600">Description</label>

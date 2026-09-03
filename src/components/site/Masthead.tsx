@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { sections } from "@/lib/news-data";
@@ -20,13 +20,26 @@ export function Masthead() {
   let dropdownItems = otherCategories;
 
   if (dbCats.length > 0) {
-    const allCatNames = dbCats.map((c: any) => c.name);
-    if (allCatNames.length <= 9) {
-      navItems = allCatNames;
-      dropdownItems = [];
+    const explicitHeaderCats = dbCats.filter((c: any) => c.showInHeader).map((c: any) => c.name);
+    const dropdownCats = dbCats.filter((c: any) => !c.showInHeader).map((c: any) => c.name);
+
+    if (explicitHeaderCats.length > 0) {
+      navItems = explicitHeaderCats;
+      if (dropdownCats.length > 0) {
+        navItems = [...navItems, "Others"];
+        dropdownItems = dropdownCats;
+      } else {
+        dropdownItems = [];
+      }
     } else {
-      navItems = [...allCatNames.slice(0, 8), "Others"];
-      dropdownItems = allCatNames.slice(8);
+      const allCatNames = dbCats.map((c: any) => c.name);
+      if (allCatNames.length <= 9) {
+        navItems = allCatNames;
+        dropdownItems = [];
+      } else {
+        navItems = [...allCatNames.slice(0, 8), "Others"];
+        dropdownItems = allCatNames.slice(8);
+      }
     }
   }
   
@@ -38,7 +51,7 @@ export function Masthead() {
     <>
       <header className="border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-5 text-center md:py-6">
-          <div className="kicker mb-2 hidden md:block">Est. 2026 · Vol. I · No. 184</div>
+          <div className="kicker mb-2 hidden md:block">Est. 2026 Â· Vol. I Â· No. 184</div>
           <Link to="/" className="block">
             {showLogo && s.logoLight && (
               <img src={s.logoLight} alt={s.logoText || "Logo"} className={`mx-auto h-16 object-contain ${s.logoDark ? "dark:hidden" : ""} ${showText ? "mb-2" : ""}`} />
@@ -61,11 +74,11 @@ export function Masthead() {
             ) : (
               <>
                 <span style={{ color: "#2563eb" }}>Breaking News</span>
-                <span className="mx-2 text-muted-foreground">·</span>
+                <span className="mx-2 text-muted-foreground">Â·</span>
                 <span style={{ color: "#dc2626" }}>Finance</span>
-                <span className="mx-2 text-muted-foreground">·</span>
+                <span className="mx-2 text-muted-foreground">Â·</span>
                 <span style={{ color: "#16a34a" }}>Business</span>
-                <span className="mx-2 text-muted-foreground">·</span>
+                <span className="mx-2 text-muted-foreground">Â·</span>
                 <span style={{ color: "#ea580c" }}>Market</span>
               </>
             )}
@@ -122,5 +135,6 @@ export function Masthead() {
 }
 
 export { SearchBox } from "./SearchModal";
+
 
 

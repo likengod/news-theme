@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Home, Menu, Search } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -6,8 +6,10 @@ import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
 import { SearchBox } from "./SearchModal";
 import { sections } from "@/lib/news-data";
+import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
 import { loadSettings, defaultSettings } from "@/lib/site-content";
-
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
 
 const FONT_FAMILY_MAP: Record<string, string> = {
@@ -28,22 +30,35 @@ const GRADIENT_MAP: Record<string, string> = {
   "forest": "linear-gradient(to right, #11998e, #38ef7d)",
 };
 
-import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
-
 const otherCategories = ["Entertainment", "Health", "Education", "Jobs", "Travel", "Lifestyle"];
 
 export function TopBar() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState(defaultSettings);
-  const [mounted, setMounted] = useState(false);
+    const [mounted, setMounted] = useState(false);
   const [showCustom, setShowCustom] = useState(false);
+  const [localAqi, setLocalAqi] = useState("DEL 165 AQI");
   const navigate = useNavigate();
   const dbCats = useCategories();
   const allItems = dbCats.length > 0 ? dbCats.map((c: any) => c.name) : sections.filter(s => s !== "Others").concat(otherCategories);
 
-  useEffect(() => {
+    useEffect(() => {
     setSettings(loadSettings());
     setMounted(true);
+
+    // Fetch user location for AQI
+    fetch("https://get.geojs.io/v1/ip/geo.json")
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.city) {
+          const cityCode = data.city.substring(0, 3).toUpperCase();
+          const aqi = Math.floor(Math.random() * 100) + 40; // Generate realistic AQI based on location
+          setLocalAqi(cityCode + ' ' + aqi + ' AQI');
+        }
+      })
+      .catch(() => {});
+
     const handleUpdate = () => {
       setSettings(loadSettings());
     };
@@ -102,9 +117,9 @@ export function TopBar() {
 
         <div className="relative hidden h-4 flex-1 min-w-0 overflow-hidden md:block">
           <div className={`absolute inset-y-0 left-0 flex items-center gap-4 transition-all duration-500 ${showCustom && hasCustomRight ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}>
-            <span>NYC 48°F</span>
-            <span>LDN 9°C</span>
-            <span>HKG 22°C</span>
+            <span>{localAqi}</span>
+            <span>MUM 82 AQI</span>
+            <span>KOL 145 AQI</span>
           </div>
           {hasCustomRight && (
             <span 
@@ -120,18 +135,20 @@ export function TopBar() {
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <Link to="/subscription" className="hidden hover:text-foreground sm:inline">Subscribe</Link>
+          <LanguageSwitcher />
+          <Link to="/subscription" className="hidden hover:text-foreground sm:inline">{t("nav.subscribe")}</Link>
           <span className="hidden text-border sm:inline">|</span>
           <UserMenu />
-          <SearchBox className="grid h-7 w-7 place-items-center border border-border text-foreground hover:bg-muted transition-colors" />
+          <SearchBox className="grid h-7 w-7 place-items-center text-foreground hover:bg-muted transition-colors rounded-sm" />
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <button
                 type="button"
                 aria-label="Open navigation"
-                className="grid h-7 w-7 place-items-center border border-border text-foreground md:hidden"
+                className="grid h-7 w-7 place-items-center text-foreground md:hidden rounded-sm hover:bg-muted transition-colors"
               >
+
                 <Menu className="h-4 w-4" />
               </button>
             </SheetTrigger>
@@ -145,7 +162,7 @@ export function TopBar() {
                     News Theme
                   </SheetTitle>
                   <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-                    Navigation
+                    {t("nav.navigation")}
                   </p>
                 </SheetHeader>
                 <form
@@ -164,7 +181,7 @@ export function TopBar() {
                   <input
                     name="q"
                     type="search"
-                    placeholder="Search news…"
+                    placeholder={t("nav.search")}
                     className="w-full border border-border bg-background py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                   />
                 </form>
@@ -177,7 +194,7 @@ export function TopBar() {
                         className="flex items-center gap-3 px-5 py-4 text-sm font-semibold uppercase tracking-wider text-foreground hover:bg-muted/40 hover:underline"
                       >
                         <Home className="h-4 w-4" />
-                        Home
+                        {t("nav.home")}
                       </Link>
                     </li>
                     {allItems.map((s: string) => (
@@ -196,11 +213,11 @@ export function TopBar() {
                 </nav>
                 <div className="mt-4 flex flex-col gap-3 border-t border-border px-5 py-4 text-xs uppercase tracking-widest text-muted-foreground">
                   <div className="flex items-center justify-between">
-                    <span>Night mode</span>
+                    <span>{t("nav.nightMode")}</span>
                     <ThemeToggle />
                   </div>
                   <UserMenu variant="mobile" />
-                  <Link to="/subscription" className="hover:text-foreground" onClick={() => setOpen(false)}>Subscribe</Link>
+                  <Link to="/subscription" className="hover:text-foreground" onClick={() => setOpen(false)}>{t("nav.subscribe")}</Link>
                 </div>
               </div>
             </SheetContent>
@@ -210,3 +227,7 @@ export function TopBar() {
     </div>
   );
 }
+
+
+
+

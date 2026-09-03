@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { top, grid, lead, viewsFor, formatViews, getArticleImage } from "@/lib/news-data";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
 import { articlesByCategory } from "@/lib/homepage-config";
@@ -22,7 +22,7 @@ export const HeroBoard = React.memo(function HeroBoard({ articles = [], tags = [
   const cfg = useHomepageConfig();
 
   const hasDbArticles = articles.length > 0;
-  const localUsed = new Set<number>(usedIds);
+  const localUsed = usedIds || new Set<number>();
 
   function getUnique(pool: any[], count: number, filterFn?: (a: any) => boolean) {
     const selected: any[] = [];
@@ -38,11 +38,12 @@ export const HeroBoard = React.memo(function HeroBoard({ articles = [], tags = [
 
   // 1. Featured Leads (Slider)
   const featuredCategory = cfg.heroFeatured.category || "Auto (Latest)";
-  const leadArticles = getUnique(articles, 3, (a) => {
+  const slideCount = cfg?.heroFeatured?.slideCount ?? 3;
+  const leadArticles = getUnique(articles, slideCount, (a) => {
     if (!featuredCategory || featuredCategory === "Auto (Latest)") return true;
     return a.category?.toLowerCase() === featuredCategory.toLowerCase();
   });
-  const activeLeads = Array.from({ length: 3 }).map((_, i) => {
+  const activeLeads = Array.from({ length: slideCount }).map((_, i) => {
     const a = leadArticles[i];
     if (a) {
       return {
@@ -183,4 +184,5 @@ export const HeroBoard = React.memo(function HeroBoard({ articles = [], tags = [
     </AnimatedContainer>
   );
 });
+
 

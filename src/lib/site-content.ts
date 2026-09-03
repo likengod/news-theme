@@ -1,4 +1,4 @@
-// Lightweight client-side content store for editable site copy.
+﻿// Lightweight client-side content store for editable site copy.
 // Persists to localStorage so admin edits survive reloads without a backend.
 import { z } from "zod";
 
@@ -121,15 +121,20 @@ export type SiteSettings = {
   customAlertAnimationStyle: string;
   customAlertFontFamily: string;
   customAlertFontSize: number;
+  
+  // Software License
+  licenseKey?: string;
+  licenseType?: string;
+  licenseRole?: string;
 };
 
 export const defaultSettings: SiteSettings = {
   siteName: "News Timeline",
-  tagline: "Breaking News · Finance · Business · Markets",
+  tagline: "Breaking News Ã‚Â· Finance Ã‚Â· Business Ã‚Â· Markets",
   logoText: "News Timeline",
   contactEmail: "hello@newstimeline.com",
   contactPhone: "+91 99999 99999",
-  address: "Agartala, Tripura (W) India · Pin: 799006",
+  address: "Agartala, Tripura (W) India Ã‚Â· Pin: 799006",
   facebook: "#",
   instagram: "#",
   twitter: "#",
@@ -142,7 +147,7 @@ export const defaultSettings: SiteSettings = {
   googleNews: "https://news.google.com/",
   footerNote:
     "News Timeline is an independent newsroom covering breaking news, finance, business and markets across Northeast India and beyond.",
-  copyright: `© ${new Date().getFullYear()} News Timeline Media Co. All rights reserved.`,
+  copyright: `Ã‚Â© ${new Date().getFullYear()} News Timeline Media Co. All rights reserved.`,
   builtByText: "Website built and digital partner: Gorilla Tech Solution",
   builtByUrl: "https://gorillatechsolution.com",
   metaDescription:
@@ -250,7 +255,7 @@ export const defaultPages: PageContent[] = [
     intro: "News Theme is an independent newsroom based in Agartala, covering breaking news, finance, business and markets across Northeast India and the wider world.", 
     body: "",
     sections: [
-      { heading: "Our Mission", body: "<p>To deliver verified, contextual and accessible journalism — free from political and commercial interference — to readers across the region and the diaspora.</p>" },
+      { heading: "Our Mission", body: "<p>To deliver verified, contextual and accessible journalism Ã¢â‚¬â€ free from political and commercial interference Ã¢â‚¬â€ to readers across the region and the diaspora.</p>" },
       { heading: "Our Team", body: "<p>Our staff includes reporters, market analysts, video producers and editors, supported by a network of regional correspondents.</p>" },
       { heading: "How We Are Funded", body: "<p>We are funded by reader subscriptions, clearly-labelled sponsorships and a small grant program. We do not accept funding that would compromise editorial independence.</p>" },
       { heading: "Get in Touch", body: '<p>For tips, story pitches or partnerships, visit our <a className="underline" href="/contact">contact page</a> or write to <a className="underline" href="mailto:newsroom@northeasttimeline.com">newsroom@northeasttimeline.com</a>.</p>' }
@@ -291,7 +296,7 @@ export const defaultPages: PageContent[] = [
     body: "",
     sections: [
       { heading: "What Are Cookies", body: "<p>Cookies are small text files placed on your device by websites you visit. They are widely used to make sites work efficiently and to provide information to the site owners.</p>" },
-      { heading: "Types of Cookies We Use", body: "<ul className=\"list-disc space-y-1.5 pl-5\"><li><b>Essential</b> — required to sign in, keep you logged in and remember theme preferences.</li><li><b>Analytics</b> — aggregated usage statistics to improve editorial coverage.</li><li><b>Advertising</b> — limited to measurement of sponsored campaigns; we do not run third-party behavioural ad networks.</li></ul>" },
+      { heading: "Types of Cookies We Use", body: "<ul className=\"list-disc space-y-1.5 pl-5\"><li><b>Essential</b> Ã¢â‚¬â€ required to sign in, keep you logged in and remember theme preferences.</li><li><b>Analytics</b> Ã¢â‚¬â€ aggregated usage statistics to improve editorial coverage.</li><li><b>Advertising</b> Ã¢â‚¬â€ limited to measurement of sponsored campaigns; we do not run third-party behavioural ad networks.</li></ul>" },
       { heading: "Managing Cookies", body: "<p>Most browsers let you refuse or delete cookies via their settings. Disabling essential cookies will break sign-in and personalisation features.</p>" },
       { heading: "Third-Party Cookies", body: "<p>Embedded video players (YouTube, Facebook) may set their own cookies when you play a video. Refer to those providers' privacy policies for details.</p>" }
     ]
@@ -304,7 +309,7 @@ export const defaultPages: PageContent[] = [
     sections: [
       { heading: "Eligibility", body: "<p>You may request a full refund within <b>7 days</b> of your initial subscription payment, provided you have not downloaded more than a token amount of premium content. Renewal payments are non-refundable except where required by law.</p>" },
       { heading: "How to Request a Refund", body: "<p>Email <a className=\"underline\" href=\"mailto:billing@northeasttimeline.com\">billing@northeasttimeline.com</a> from the address linked to your account, including your order ID and the reason for the request.</p>" },
-      { heading: "Processing Time", body: "<p>Approved refunds are processed within 5–10 business days to the original payment method. Bank processing times may add a further 3–5 days.</p>" },
+      { heading: "Processing Time", body: "<p>Approved refunds are processed within 5Ã¢â‚¬â€œ10 business days to the original payment method. Bank processing times may add a further 3Ã¢â‚¬â€œ5 days.</p>" },
       { heading: "Non-Refundable Items", body: "<p>One-off article purchases, gift subscriptions already redeemed and event tickets are non-refundable.</p>" },
       { heading: "Chargebacks", body: "<p>Please contact us before initiating a chargeback; most billing issues can be resolved within one business day.</p>" }
     ]
@@ -323,7 +328,7 @@ export const defaultPages: PageContent[] = [
   { 
     slug: "contact", 
     title: "Contact Us", 
-    intro: "Story tips, corrections, partnership and advertising enquiries — the News Theme desk reads every message. We aim to reply within one business day.", 
+    intro: "Story tips, corrections, partnership and advertising enquiries Ã¢â‚¬â€ the News Theme desk reads every message. We aim to reply within one business day.", 
     body: "",
     sections: []
   },
@@ -348,17 +353,28 @@ export const defaultPages: PageContent[] = [
     sections: [
       { heading: "No Financial Advice", body: "<p>Market data, analysis and opinion published on News Theme do not constitute investment advice, a recommendation, or a solicitation to buy or sell any security. Always consult a qualified financial professional before making investment decisions.</p>" },
       { heading: "Market Data", body: "<p>Quotes, indices and currency rates are delayed at least 15 minutes and provided by third-party vendors. We do not guarantee their accuracy or completeness.</p>" },
-      { heading: "External Links", body: "<p>Our articles may contain links to external sites. We are not responsible for the content, accuracy or practices of those sites.</p>" },
-      { heading: "Errors & Corrections", body: "<p>If you spot an error, email <a className=\"underline\" href=\"mailto:corrections@northeasttimeline.com\">corrections@northeasttimeline.com</a>. Significant corrections are noted at the foot of the affected article.</p>" }
-    ]
-  }
-];
+              { heading: "External Links", body: "<p>Our articles may contain links to external sites. We are not responsible for the content, accuracy or practices of those sites.</p>" },
+        { heading: "Errors & Corrections", body: "<p>If you spot an error, email <a className=\"underline\" href=\"mailto:corrections@northeasttimeline.com\">corrections@northeasttimeline.com</a>. Significant corrections are noted at the foot of the affected article.</p>" }
+      ]
+    },
+    { 
+      slug: "data-deletion-policy", 
+      title: "Data Deletion Policy", 
+      intro: "This policy describes how users can request the deletion of their personal data from News Theme systems.", 
+      body: "",
+      sections: [
+        { heading: "Your Rights", body: "<p>You have the right to request the complete deletion of your personal data stored on our servers.</p>" },
+        { heading: "How to Request Deletion", body: "<p>Please send an email to <a className=\"underline\" href=\"mailto:privacy@northeasttimeline.com\">privacy@northeasttimeline.com</a> with the subject 'Data Deletion Request' from the email address registered with your account.</p>" },
+        { heading: "Processing Time", body: "<p>We will process your data deletion request within 30 days of receipt. We may retain certain data if required by law or for legitimate business purposes.</p>" }
+      ]
+    }
+  ];
 
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "./auth-middleware";
 import { query } from "./db.server";
 
-// ─── Server Functions (MySQL Custom Pages Persistence) ─────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Server Functions (MySQL Custom Pages Persistence) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 export const getCustomPagesServer = createServerFn({ method: "GET" })
   .handler(async (): Promise<PageContent[]> => {
@@ -366,7 +382,16 @@ export const getCustomPagesServer = createServerFn({ method: "GET" })
       const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'custom_pages_data'");
       if (rows.length > 0 && rows[0].value) {
         const parsed = JSON.parse(rows[0].value) as PageContent[];
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Merge with defaultPages to ensure new pages (like data-deletion-policy) appear
+          const merged = [...defaultPages];
+          parsed.forEach((savedPage) => {
+            const idx = merged.findIndex(p => p.slug === savedPage.slug);
+            if (idx !== -1) merged[idx] = savedPage;
+            else merged.push(savedPage);
+          });
+          return merged;
+        }
       }
     } catch {}
     return defaultPages;
@@ -636,7 +661,7 @@ export const scanBrokenLinksServer = createServerFn({ method: "GET" })
 
     const staticRoutes = new Set([
       "", "/", "/about", "/contact", "/submit-news", "/privacy-policy", "/terms-and-conditions", 
-      "/cookie-policy", "/refund-policy", "/disclaimer", "/editorial-policy", "/dmca", 
+      "/cookie-policy", "/refund-policy", "/disclaimer", "/editorial-policy", "/dmca", "/data-deletion-policy", 
       "/verified-journalist", "/subscription", "/work-with-us", "/archive", "/earn-points", 
       "/withdraw-points", "/profile", "/search"
     ]);
@@ -786,7 +811,7 @@ export const defaultAdSlidesHome2: AdSlideItem[] = [
   { id: "ad2-6", image: adHome2_6, href: "#", label: "Sponsored" },
 ];
 
-export type AdSlot = "home1" | "home2" | "ad3" | "popup" | "leaderboard";
+export type AdSlot = "home1" | "home2" | "ad3" | "popup" | "leaderboard" | "featured_slide";
 export type AdSlotMode = "image" | "script";
 
 const SLOT_MODE_KEY = "nt:ad-slot-mode";
@@ -798,6 +823,7 @@ const DEFAULT_SLOT_MODE: Record<AdSlot, AdSlotMode> = {
   ad3: "image",
   popup: "image",
   leaderboard: "image",
+  featured_slide: "image",
 };
 
 export function loadAdSlotMode(slot: AdSlot): AdSlotMode {
@@ -856,6 +882,7 @@ const ADS_KEYS: Record<AdSlot, string> = {
   ad3: "nt:site-ads-ad3",
   popup: "nt:site-ads-popup",
   leaderboard: "nt:site-ads-leaderboard",
+  featured_slide: "nt:site-ads-featured_slide",
 };
 
 
@@ -869,6 +896,7 @@ const DEFAULT_ROTATION: Record<AdSlot, number> = {
   ad3: 5,
   popup: 6,
   leaderboard: 5,
+  featured_slide: 5,
 };
 
 export function loadAdRotation(slot: AdSlot): number {
@@ -926,6 +954,7 @@ const DEFAULTS: Record<AdSlot, AdSlideItem[]> = {
   ad3: defaultAdSlidesAd3,
   popup: defaultAdSlidesPopup,
   leaderboard: defaultAdSlidesLeaderboard,
+  featured_slide: [],
 };
 
 
@@ -1089,6 +1118,7 @@ export function syncAdConfigurationToServer() {
       ad3: loadAds("ad3"),
       popup: loadAds("popup"),
       leaderboard: loadAds("leaderboard"),
+        featured_slide: loadAds("featured_slide"),
     },
     modes: {
       home1: loadAdSlotMode("home1"),
@@ -1096,6 +1126,7 @@ export function syncAdConfigurationToServer() {
       ad3: loadAdSlotMode("ad3"),
       popup: loadAdSlotMode("popup"),
       leaderboard: loadAdSlotMode("leaderboard"),
+        featured_slide: loadAdSlotMode("featured_slide"),
     },
     scripts: {
       home1: loadAdSlotScript("home1"),
@@ -1103,6 +1134,7 @@ export function syncAdConfigurationToServer() {
       ad3: loadAdSlotScript("ad3"),
       popup: loadAdSlotScript("popup"),
       leaderboard: loadAdSlotScript("leaderboard"),
+        featured_slide: loadAdSlotScript("featured_slide"),
     },
     rotations: {
       home1: loadAdRotation("home1"),
@@ -1110,7 +1142,13 @@ export function syncAdConfigurationToServer() {
       ad3: loadAdRotation("ad3"),
       popup: loadAdRotation("popup"),
       leaderboard: loadAdRotation("leaderboard"),
+        featured_slide: loadAdRotation("featured_slide"),
     },
   };
   saveAdConfigurationServer({ data: config }).catch(() => {});
 }
+
+
+
+
+

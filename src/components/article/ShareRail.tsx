@@ -62,18 +62,18 @@ export function ShareRail({ url, title, orientation = "horizontal" }: Props) {
           rel="noopener noreferrer"
           onClick={handleShareClick}
           aria-label={`Share on ${label}`}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-muted/40 transition-all hover:scale-110 hover:bg-muted"
+          className="inline-flex h-7 w-7 items-center justify-center transition-transform hover:scale-110"
           style={{ color }}
         >
-          <Icon className="h-3.5 w-3.5" />
+          <Icon className="h-4 w-4" />
         </a>
       ))}
       <button
         onClick={copy}
         aria-label="Copy link"
-        className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition-all hover:scale-110 hover:bg-muted hover:text-foreground"
+        className="inline-flex h-7 w-7 items-center justify-center text-muted-foreground transition-transform hover:scale-110 hover:text-foreground"
       >
-        <Link2 className="h-3.5 w-3.5" />
+        <Link2 className="h-4 w-4" />
       </button>
     </div>
   );

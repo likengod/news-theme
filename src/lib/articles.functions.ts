@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+﻿import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "@/lib/auth-middleware";
 import { query } from "./db.server";
 import { slugify } from "./news-data";
@@ -35,7 +35,7 @@ export const getAdminArticles = createServerFn({ method: "GET" })
   .validator((data: { q?: string; category?: string; status?: string; page?: number; limit?: number }) => data)
   .handler(async ({ data }): Promise<{ rows: ArticleRow[]; total: number; totalPages: number }> => {
     const { q = "", category = "All", status = "All", page = 1, limit = 20 } = data;
-    // Safety cap — never return more than 200 rows in one admin request
+    // Safety cap â€” never return more than 200 rows in one admin request
     const safeLimit = Math.min(Math.max(1, limit), 200);
     const offset = (Math.max(1, page) - 1) * safeLimit;
 
@@ -112,36 +112,40 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
     if (r.id) {
       // Update
       const setClause = fields.map((f) => `${f} = ?`).join(", ");
-      await query(`UPDATE articles SET ${setClause} WHERE id = ?`, [...values, r.id]);
-      return { ...r, slug, id: r.id };
-    } else {
+          await query(`UPDATE articles SET ${setClause} WHERE id = ?`, [...values, r.id]);
+    Object.keys(HOMEPAGE_CACHE).forEach(k => delete HOMEPAGE_CACHE[k as any]);
+    return { ...r, slug, id: r.id };
+        } else {
       // Insert
       const colNames = fields.join(", ");
       const placeHolders = fields.map(() => "?").join(", ");
       const result = await query(`INSERT INTO articles (${colNames}) VALUES (${placeHolders})`, values);
+      Object.keys(HOMEPAGE_CACHE).forEach(k => delete HOMEPAGE_CACHE[k as any]);
       return { ...r, slug, id: result.insertId };
     }
   });
 
 // Admin only: delete article
-export const deleteAdminArticle = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
-  .validator((id: number) => id)
-  .handler(async ({ data: id }) => {
-    await query("DELETE FROM articles WHERE id = ?", [id]);
-    return { success: true };
-  });
+  export const deleteAdminArticle = createServerFn({ method: "POST" })
+    .middleware([requireAuth])
+    .validator((id: number) => id)
+    .handler(async ({ data: id }) => {
+      await query("DELETE FROM articles WHERE id = ?", [id]);
+      Object.keys(HOMEPAGE_CACHE).forEach(k => delete HOMEPAGE_CACHE[k as any]);
+      return { success: true };
+    });
 
 // Admin only: bulk delete articles
-export const deleteAdminArticlesBulk = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
-  .validator((ids: number[]) => ids)
-  .handler(async ({ data: ids }) => {
-    if (ids.length === 0) return { success: true };
-    const placeholders = ids.map(() => "?").join(",");
-    await query(`DELETE FROM articles WHERE id IN (${placeholders})`, ids);
-    return { success: true };
-  });
+  export const deleteAdminArticlesBulk = createServerFn({ method: "POST" })
+    .middleware([requireAuth])
+    .validator((ids: number[]) => ids)
+    .handler(async ({ data: ids }) => {
+      if (ids.length === 0) return { success: true };
+      const placeholders = ids.map(() => "?").join(",");
+      await query(`DELETE FROM articles WHERE id IN (${placeholders})`, ids);
+      Object.keys(HOMEPAGE_CACHE).forEach(k => delete HOMEPAGE_CACHE[k as any]);
+      return { success: true };
+    });
 
 // Admin only: get ALL articles for export
 export const getAllAdminArticles = createServerFn({ method: "GET" })
@@ -387,3 +391,5 @@ export const getAdminDashboardStats = createServerFn({ method: "GET" })
       categoryStats: categoryStats || []
     };
   });
+
+

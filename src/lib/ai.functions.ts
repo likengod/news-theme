@@ -111,6 +111,7 @@ export const generateArticleContentServer = createServerFn({ method: "POST" })
     const prompt = `You are an expert journalist and web content assistant. Generate a complete news article based on the provided instructions.
 CRITICAL RULE: You must strictly follow the "5 Ws and H" rule. Ensure the lead paragraph clearly answers: Who, What, Where, When, Why, and How.
 Writing Style: ${data.style}
+  ${data.style === `5 ws` ? `CRITICAL INSTRUCTION: You MUST structure the article body explicitly using headings for each of the Five Ws and H. Literally use <h2>Who is the story about?</h2>, <h2>What happened?</h2>, <h2>When did it happen?</h2>, <h2>Where did it take place?</h2>, <h2>Why did the story occur?</h2>, and <h2>How did the events come about?</h2> followed by paragraphs of deep information for each.` : ``}
 
 Instructions/Details:
 ${data.instructions}
@@ -223,3 +224,4 @@ Output exactly and ONLY a JSON object (without markdown \`\`\`json blocks) with 
 
     throw new Error(`AI Generation failed. ${errorContext}`);
   });
+

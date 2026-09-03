@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Save } from "lucide-react";
+﻿import { useState, useEffect, useRef } from "react";
+import { Save, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { loadSettings, saveSettings, type SiteSettings } from "@/lib/site-content";
 import { LogoUploader } from "@/components/admin/settings/SettingsHelpers";
@@ -30,7 +30,7 @@ const GROUPS: { title: string; fields: FieldDef[] }[] = [
           { value: "both", label: "Both (Logo + Text)" },
         ],
       },
-      { key: "tagline", label: "Tagline", placeholder: "Breaking News · Finance · Markets" },
+      { key: "tagline", label: "Tagline", placeholder: "Breaking News Â· Finance Â· Markets" },
       { key: "metaDescription", label: "SEO Meta Description", textarea: true, placeholder: "Independent newsroom..." },
     ],
   },
@@ -55,15 +55,7 @@ const GROUPS: { title: string; fields: FieldDef[] }[] = [
 export function GeneralSettingsForm() {
   const [settings, setSettings] = useState<SiteSettings>(() => loadSettings());
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    setSettings(loadSettings());
-  }, []);
-
-  const update = <K extends keyof SiteSettings>(key: K, val: SiteSettings[K]) => {
-    setSettings((prev) => ({ ...prev, [key]: val }));
-  };
-
+  
   const handleSave = async () => {
     try {
       await saveSettings(settings);
@@ -132,24 +124,23 @@ export function GeneralSettingsForm() {
                 Logo Images & Favicon
               </h3>
               <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-                <LogoUploader compact label="Site logo (Day)" value={settings.logoLight} usage="site-logo" recommendedSize="320×80 px" onChange={(v) => update("logoLight", v)} />
-                <LogoUploader compact label="Site logo (Night)" value={settings.logoDark} usage="site-logo" dark recommendedSize="320×80 px" onChange={(v) => update("logoDark", v)} />
-                <LogoUploader compact label="Footer logo (Day)" value={settings.footerLogoLight} usage="site-logo" recommendedSize="320×80 px" onChange={(v) => update("footerLogoLight", v)} />
-                <LogoUploader compact label="Footer logo (Night)" value={settings.footerLogoDark} usage="site-logo" dark recommendedSize="320×80 px" onChange={(v) => update("footerLogoDark", v)} />
-                <LogoUploader compact label="Favicon" value={settings.favicon} usage="site-favicon" recommendedSize="64×64 px" onChange={(v) => update("favicon", v)} />
+                <LogoUploader compact label="Site logo (Day)" value={settings.logoLight} usage="site-logo" recommendedSize="320Ã—80 px" onChange={(v) => update("logoLight", v)} />
+                <LogoUploader compact label="Site logo (Night)" value={settings.logoDark} usage="site-logo" dark recommendedSize="320Ã—80 px" onChange={(v) => update("logoDark", v)} />
+                <LogoUploader compact label="Footer logo (Day)" value={settings.footerLogoLight} usage="site-logo" recommendedSize="320Ã—80 px" onChange={(v) => update("footerLogoLight", v)} />
+                <LogoUploader compact label="Footer logo (Night)" value={settings.footerLogoDark} usage="site-logo" dark recommendedSize="320Ã—80 px" onChange={(v) => update("footerLogoDark", v)} />
+                <LogoUploader compact label="Favicon" value={settings.favicon} usage="site-favicon" recommendedSize="64Ã—64 px" onChange={(v) => update("favicon", v)} />
               </div>
             </div>
           )}
         </section>
       ))}
 
-      {/* Save Button */}
-      <div className="sticky bottom-4 flex justify-end">
+            
+
+      {/* Save Button */}      <div className="sticky bottom-4 flex justify-end">
         <button
           onClick={handleSave}
-          className={`inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-colors ${
-            saved ? "bg-emerald-600" : "bg-slate-900 hover:bg-slate-800"
-          }`}
+          className={`inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-colors ${saved ? "bg-emerald-600" : "bg-slate-900 hover:bg-slate-800"}`}
         >
           <Save className="h-4 w-4" />
           {saved ? "Saved to MySQL!" : "Save General Settings"}
@@ -158,3 +149,4 @@ export function GeneralSettingsForm() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+﻿import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Pencil, Trash2, Plus, Search, Eye, ChevronLeft, ChevronRight, FileText, CheckCircle2, Clock, Files, Loader2, Image as ImageIcon } from "lucide-react";
@@ -46,7 +46,7 @@ function ArticlesPage() {
   const [status, setStatus] = useState<"All" | Status>("All");
   const [page, setPage] = useState(1);
 
-  // Debounce search input — only fires server request after 300ms of no typing
+  // Debounce search input â€” only fires server request after 300ms of no typing
   const debouncedQ = useDebounce(q, 300);
 
   // Selection state
@@ -57,7 +57,7 @@ function ArticlesPage() {
   const [creating, setCreating] = useState(false);
 
   // CSV state
-  const [csvData, setCsvData] = useState<any[]>([]);
+  
 
   // Confirm modal state (replaces browser confirm())
   const [confirmAction, setConfirmAction] = useState<{
@@ -67,7 +67,7 @@ function ArticlesPage() {
     onConfirm: () => void;
   } | null>(null);
 
-  // ─── Fetch from server (paginated) ─────────────────────────────────────────
+  // â”€â”€â”€ Fetch from server (paginated) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const fetchArticles = useCallback(async () => {
     try {
       setLoading(true);
@@ -84,18 +84,12 @@ function ArticlesPage() {
     }
   }, [debouncedQ, cat, status, page]);
 
-  // Load all for export
-  useEffect(() => {
-    getAllArticlesFn().then(res => setCsvData(res)).catch(console.error);
-  }, [rows]);
-
   const handleImport = async (data: any[]) => {
     try {
       setLoading(true);
       await importArticlesFn({ data });
       await fetchArticles();
-      const all = await getAllArticlesFn();
-      setCsvData(all);
+      
     } catch (err: any) {
       toast.error(err.message || "Import failed");
     } finally {
@@ -113,7 +107,7 @@ function ArticlesPage() {
     setPage(1);
   }, [debouncedQ, cat, status]);
 
-  // ─── Selection helpers ─────────────────────────────────────────────────────
+  // â”€â”€â”€ Selection helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const pageIds = rows.map((r) => r.id);
   const allOnPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
   const someSelected = selected.size > 0;
@@ -134,7 +128,7 @@ function ArticlesPage() {
     });
   };
 
-  // ─── Delete (single) ──────────────────────────────────────────────────────
+  // â”€â”€â”€ Delete (single) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const requestDelete = (id: number, title: string) => {
     setConfirmAction({
       title: "Delete Article?",
@@ -154,7 +148,7 @@ function ArticlesPage() {
     });
   };
 
-  // ─── Delete (bulk) ─────────────────────────────────────────────────────────
+  // â”€â”€â”€ Delete (bulk) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const requestBulkDelete = () => {
     if (selected.size === 0) return;
     setConfirmAction({
@@ -175,7 +169,7 @@ function ArticlesPage() {
     });
   };
 
-  // ─── Save ──────────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Save â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const save = async (r: Row) => {
     try {
       const final = { ...r, slug: r.slug || slugify(r.title), ogImage: r.ogImage || r.featuredImage };
@@ -189,7 +183,7 @@ function ArticlesPage() {
     }
   };
 
-  // ─── Derived ───────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Derived â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const showStart = total > 0 ? (page - 1) * PAGE_SIZE + 1 : 0;
   const showEnd = Math.min(page * PAGE_SIZE, total);
 
@@ -203,7 +197,7 @@ function ArticlesPage() {
         </div>
         <div className="flex items-center gap-2">
           <CsvImportExport
-            data={csvData}
+            getData={getAllArticlesFn}
             filename="articles"
             onImport={handleImport}
           />
@@ -285,7 +279,7 @@ function ArticlesPage() {
                 <td colSpan={6} className="px-5 py-12 text-center text-slate-500">
                   <div className="flex items-center justify-center gap-2">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span>Loading articles…</span>
+                    <span>Loading articlesâ€¦</span>
                   </div>
                 </td>
               </tr>
@@ -297,7 +291,7 @@ function ArticlesPage() {
                 </td>
                 <td className="max-w-[360px] px-5 py-3">
                   <div className="flex items-center gap-3">
-                    {/* Thumbnail — lazy loaded with fixed dimensions to prevent layout shift */}
+                    {/* Thumbnail â€” lazy loaded with fixed dimensions to prevent layout shift */}
                     <div className="h-10 w-16 shrink-0 overflow-hidden rounded bg-slate-100 border border-slate-200">
                       {r.featuredImage ? (
                         <img
@@ -347,7 +341,7 @@ function ArticlesPage() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-5 py-3 text-xs text-slate-600">
-            <span>Showing {showStart}–{showEnd} of {total}</span>
+            <span>Showing {showStart}â€“{showEnd} of {total}</span>
             <div className="flex items-center gap-1">
               <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="grid h-7 w-7 place-items-center rounded border border-slate-200 bg-white disabled:opacity-40"><ChevronLeft className="h-3.5 w-3.5" /></button>
               <span className="px-2">{page} / {totalPages}</span>
@@ -359,7 +353,7 @@ function ArticlesPage() {
 
       {/* ArticleEditor modal (lazy loaded) */}
       {(editing || creating) && (
-        <Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 text-sm text-white">Loading editor…</div>}>
+        <Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 text-sm text-white">Loading editorâ€¦</div>}>
           <ArticleEditor
             initial={editing ?? blankRow()}
             onClose={() => { setEditing(null); setCreating(false); }}
@@ -382,3 +376,5 @@ function ArticlesPage() {
     </div>
   );
 }
+
+

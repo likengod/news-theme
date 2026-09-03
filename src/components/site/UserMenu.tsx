@@ -194,35 +194,27 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
         {/* Earning Users Only: Wallet & Earn Points & Profile */}
         {isEarningUser && (
           <>
-            <DropdownMenuItem asChild>
-              <Link to="/earn-points" className="cursor-pointer">
-                <Wallet className="mr-2 h-4 w-4 text-emerald-600" />
-                <span className="flex-1">Wallet</span>
-                <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">₹{points}</span>
-              </Link>
+            <DropdownMenuItem onSelect={() => navigate({ to: "/earn-points" })} className="cursor-pointer">
+              <Wallet className="mr-2 h-4 w-4 text-emerald-600" />
+              <span className="flex-1">Wallet</span>
+              <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">₹{points}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/earn-points" className="cursor-pointer">
-                <Star className="mr-2 h-4 w-4 text-amber-500" />
-                <span className="flex-1">Earn Points</span>
-              </Link>
+            <DropdownMenuItem onSelect={() => navigate({ to: "/earn-points" })} className="cursor-pointer">
+              <Star className="mr-2 h-4 w-4 text-amber-500" />
+              <span className="flex-1">Earn Points</span>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/profile" className="cursor-pointer">
-                <UserIcon className="mr-2 h-4 w-4" />
-                My profile
-              </Link>
+            <DropdownMenuItem onSelect={() => navigate({ to: "/profile" })} className="cursor-pointer">
+              <UserIcon className="mr-2 h-4 w-4" />
+              My profile
             </DropdownMenuItem>
           </>
         )}
 
         {/* Admins & Staff Only: Admin Panel */}
         {isStaff && (
-          <DropdownMenuItem asChild>
-            <Link to="/admin" className="cursor-pointer font-semibold">
-              <LayoutDashboard className="mr-2 h-4 w-4 text-slate-700" />
-              Admin Panel
-            </Link>
+          <DropdownMenuItem onSelect={() => navigate({ to: "/admin" })} className="cursor-pointer font-semibold">
+            <LayoutDashboard className="mr-2 h-4 w-4 text-slate-700" />
+            Admin Panel
           </DropdownMenuItem>
         )}
 

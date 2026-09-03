@@ -209,6 +209,28 @@ export function DualImageCell({
     );
   }
 
+  if (slot === "featured_slide") {
+    return (
+      <div className="flex items-center gap-3 py-1">
+        <SingleSlotImagePicker
+          label="Featured Slider Ad"
+          badgeColor="bg-emerald-600"
+          value={landscapeVal}
+          aspectClass="w-24 aspect-[16/10]"
+          emptyText="+ Image"
+          recSize="800 × 500 px"
+          onChange={(url) => {
+            onUpdate(ad.id, {
+              imageLandscape: url,
+              image: url,
+              orientation: "landscape",
+            });
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-3 py-1">
       <SingleSlotImagePicker

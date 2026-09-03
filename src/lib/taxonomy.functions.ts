@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+﻿import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "@/lib/auth-middleware";
 import { query } from "./db.server";
 import { slugify } from "./news-data";
@@ -10,6 +10,7 @@ export type CategoryRow = {
   description: string;
   metaTitle: string;
   metaDescription: string;
+  showInHeader: boolean;
   count?: number; // count of articles in category
 };
 
@@ -46,6 +47,7 @@ export const getCategories = createServerFn({ method: "GET" })
       description: r.description || "",
       metaTitle: r.meta_title || "",
       metaDescription: r.meta_description || "",
+      showInHeader: Boolean(r.show_in_header),
       count: Number(r.count || 0),
     }));
   });
@@ -60,16 +62,16 @@ export const saveCategory = createServerFn({ method: "POST" })
     if (c.id && c.id < 1000000) { // check if valid id and not temporary client timestamp
       await query(
         `UPDATE categories 
-         SET name = ?, slug = ?, description = ?, meta_title = ?, meta_description = ? 
+         SET name = ?, slug = ?, description = ?, meta_title = ?, meta_description = ?, show_in_header = ? 
          WHERE id = ?`,
-        [c.name, slug, c.description || "", c.metaTitle || "", c.metaDescription || "", c.id]
+        [c.name, slug, c.description || "", c.metaTitle || "", c.metaDescription || "", c.showInHeader ? 1 : 0, c.id]
       );
       return { ...c, slug };
     } else {
       const res = await query(
         `INSERT INTO categories (name, slug, description, meta_title, meta_description) 
          VALUES (?, ?, ?, ?, ?)`,
-        [c.name, slug, c.description || "", c.metaTitle || "", c.metaDescription || ""]
+        [c.name, slug, c.description || "", c.metaTitle || "", c.metaDescription || "", c.showInHeader ? 1 : 0]
       );
       return { ...c, slug, id: res.insertId };
     }
@@ -96,12 +98,12 @@ export const importCategories = createServerFn({ method: "POST" })
       if (existing.length > 0) {
         const idToUpdate = existing[0].id;
         await query(
-          `UPDATE categories SET name = ?, slug = ?, description = ?, meta_title = ?, meta_description = ? WHERE id = ?`,
+          `UPDATE categories SET name = ?, slug = ?, description = ?, meta_title = ?, meta_description = ?, show_in_header = ? WHERE id = ?`,
           [c.name, finalSlug, c.description || "", c.metaTitle || "", c.metaDescription || "", idToUpdate]
         );
       } else {
         await query(
-          `INSERT INTO categories (name, slug, description, meta_title, meta_description) VALUES (?, ?, ?, ?, ?)`,
+          `INSERT INTO categories (name, slug, description, meta_title, meta_description, show_in_header) VALUES (?, ?, ?, ?, ?, ?)`,
           [c.name, finalSlug, c.description || "", c.metaTitle || "", c.metaDescription || ""]
         );
       }
@@ -298,3 +300,6 @@ export const getTopTags = createServerFn({ method: "GET" })
       return ["Infrastructure", "Trade", "Governance", "Healthcare", "Economy", "Finance", "Space", "Tech", "Sports", "Culture"];
     }
   });
+
+
+

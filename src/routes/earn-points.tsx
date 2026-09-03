@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { UserPlus, MessageCircle, Share2, BookOpen, Wallet, Coins, AlertCircle } from "lucide-react";
+import { UserPlus, MessageCircle, Share2, BookOpen, Wallet, Coins, AlertCircle, Lock } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaYoutube, FaWhatsapp } from "react-icons/fa6";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { authClient as supabase } from "@/lib/auth-client";
 import { getUniqueSharesCount, getUniqueReadsCount, getUniqueCommentsCount } from "@/lib/user-actions-tracker";
 import { loadRewards, type OneTimeReward, type RecurringReward } from "@/lib/rewards";
@@ -79,6 +80,9 @@ function saveState(userId: string, state: State) {
 /* ────────────── Main Component ────────────── */
 
 function EarnPointsPage() {
+  const settings = useSiteSettings();
+  const isPremium = ["Enterprise", "Enterprise+", "Premium"].includes(settings.licenseType || "") || settings.licenseRole === "VIP";
+
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [state, setState] = useState<State>({ completed: {}, balance: 0 });
@@ -94,6 +98,9 @@ function EarnPointsPage() {
   const [dailyTasks, setDailyTasks] = useState<RecurringReward[]>([]);
 
   useEffect(() => {
+    // Only load if premium
+    if (!isPremium) return;
+
     // Read rewards from admin config
     const groups = loadRewards();
     const allGroup = groups.find((g) => g.roleId === "all");
@@ -180,13 +187,39 @@ function EarnPointsPage() {
 
   const totalAvailable = [...socialTasks, ...otherTasks].reduce((s, t) => s + t.points, 0);
 
-  /* ── Progress helpers ── */
+  /* ✨ Progress helpers ✨ */
   const getProgress = (id: string) => {
     if (id === "first_shares") return { text: `${shareCount}/5 articles shared`, ok: shareCount >= 5 };
     if (id === "first_comments") return { text: `${commentCount}/5 articles commented`, ok: commentCount >= 5 };
     if (id === "first_reads") return { text: `${readCount}/5 articles read`, ok: readCount >= 5 };
     return { text: "", ok: true };
   };
+
+  if (!isPremium) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex flex-col">
+        <Header showTicker={false} showBreakingBar={false} />
+        <main className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md w-full rounded-2xl border border-border bg-card p-8 text-center shadow-lg">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <Lock className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h1 className="mt-6 text-xl font-bold text-card-foreground">Feature Locked</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              The Wallet and Rewards system is exclusively available on Premium, Enterprise, and Enterprise+ licenses. Please upgrade your license to unlock this feature.
+            </p>
+            <Link
+              to="/"
+              className="mt-6 inline-flex w-full items-center justify-center rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Return Home
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">

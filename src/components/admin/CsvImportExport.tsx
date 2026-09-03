@@ -1,25 +1,31 @@
-import Papa from "papaparse";
+﻿import Papa from "papaparse";
 import { toast } from "sonner";
 import { Download, Upload } from "lucide-react";
 import { useRef } from "react";
 
 type Props<T> = {
-  data: T[];
+  data?: T[];
+  getData?: () => Promise<T[]>;
   filename: string;
   onImport: (data: T[]) => void;
 };
 
-export function CsvImportExport<T>({ data, filename, onImport }: Props<T>) {
+export function CsvImportExport<T>({ data, getData, filename, onImport }: Props<T>) {
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleExport = () => {
-    if (!data || data.length === 0) {
-      toast.error("No data to export");
-      return;
-    }
-    
+  const handleExport = async () => {
     try {
-      const csv = Papa.unparse(data);
+      let exportData = data;
+      if (getData) {
+        exportData = await getData();
+      }
+
+      if (!exportData || exportData.length === 0) {
+        toast.error("No data to export");
+        return;
+      }
+      
+      const csv = Papa.unparse(exportData);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
@@ -94,3 +100,4 @@ export function CsvImportExport<T>({ data, filename, onImport }: Props<T>) {
     </div>
   );
 }
+

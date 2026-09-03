@@ -8,21 +8,21 @@ import { toast } from 'sonner';
     {
       key: "googleAnalyticsId",
       label: "Google Analytics (GA4) Measurement ID",
-      hint: "Format: G-XXXXXXXXXX â€” from analytics.google.com â€” Admin â€” Data Streams.",
+      hint: "Format: G-XXXXXXXXXX - from analytics.google.com â€” Admin â€” Data Streams.",
       placeholder: "G-XXXXXXXXXX",
       guideUrl: "https://analytics.google.com/"
     },
     {
       key: "googleTagManagerId",
       label: "Google Tag Manager Container ID",
-      hint: "Format: GTM-XXXXXX â€” from tagmanager.google.com.",
+      hint: "Format: GTM-XXXXXX - from tagmanager.google.com.",
       placeholder: "GTM-XXXXXX",
       guideUrl: "https://tagmanager.google.com/"
     },
     {
       key: "googleAdsenseId",
       label: "Google AdSense Publisher ID",
-      hint: "Format: ca-pub-XXXXXXXXXXXXXXXX â€” from your AdSense account.",
+      hint: "Format: ca-pub-XXXXXXXXXXXXXXXX - from your AdSense account.",
       placeholder: "ca-pub-XXXXXXXXXXXXXXXX",
       guideUrl: "https://www.google.com/adsense/"
     },
@@ -36,7 +36,7 @@ import { toast } from 'sonner';
     {
       key: "firebaseConfigJson",
       label: "Firebase config JSON",
-      hint: "Paste the firebaseConfig object from Firebase Console â€” Project settings.",
+      hint: "Paste the firebaseConfig object from Firebase Console - Project settings.",
       textarea: true,
       placeholder: '{"apiKey":"...","projectId":"...","appId":"..."}',
       guideUrl: "https://console.firebase.google.com/"
@@ -98,25 +98,25 @@ import { toast } from 'sonner';
     {
       key: "bingSiteVerification",
       label: "Bing Webmaster (msvalidate.01)",
-      hint: "Content value from Bing Webmaster Tools â€” Add Site â€” Meta tag.",
+      hint: "Content value from Bing Webmaster Tools - Add Site - Meta tag.",
       guideUrl: "https://www.bing.com/webmasters"
     },
     {
       key: "facebookDomainVerification",
       label: "Facebook Domain Verification",
-      hint: "From Meta Business Suite â€” Brand Safety â€” Domains.",
+      hint: "From Meta Business Suite - Brand Safety - Domains.",
       guideUrl: "https://business.facebook.com/settings/owned-domains"
     },
     {
       key: "pinterestSiteVerification",
       label: "Pinterest (p:domain_verify)",
-      hint: "From Pinterest Business â€” Claim website.",
+      hint: "From Pinterest Business - Claim website.",
       guideUrl: "https://www.pinterest.com/settings/claim/"
     },
     {
       key: "yandexVerification",
       label: "Yandex Webmaster",
-      hint: "From Yandex Webmaster â€” Site rights.",
+      hint: "From Yandex Webmaster - Site rights.",
       guideUrl: "https://webmaster.yandex.com/"
     },
   ];
@@ -137,12 +137,13 @@ import { toast } from 'sonner';
 
 
 export function IntegrationsTab({ s, update }: { s: any; update: any }) {
+  const canSeeGitConfig = s.licenseType === "Enterprise+";
   return (
     <div className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
             <Card
               title="Analytics & Marketing"
-              subtitle="Paste IDs only â€” scripts load automatically on every page."
+              subtitle="Paste IDs only - scripts load automatically on every page."
             >
               <div className="space-y-3">
                 {integrationFields.map((f) => (
@@ -175,7 +176,7 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
 
             <Card
               title="Search Engine & Social Verification"
-              subtitle="Paste the meta tag content value â€” we inject the <meta> tag for you."
+              subtitle="Paste the meta tag content value - we inject the <meta> tag for you."
             >
               <div className="mb-4 rounded-md bg-amber-50 p-3 text-xs text-amber-800">
                 Tip: choose the <strong>HTML tag</strong> verification method and paste only the
@@ -213,7 +214,7 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
             {/* Git Connect / CI-CD */}
             <Card
               title="Git Connect / CI-CD"
-              subtitle="Connect your Git repository for continuous deployment. Manage deployments from Admin â†’ Website Update."
+              subtitle="Connect your Git repository for continuous deployment. Manage deployments from Admin &rarr; Website Update."
             >
               <div className="flex items-center gap-3 rounded-lg bg-gradient-to-r from-slate-900 to-slate-800 p-4">
                 <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white/10">
@@ -221,11 +222,13 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white">CI/CD Pipeline</p>
-                  <p className="text-xs text-slate-300">Pull â†’ Build â†’ Deploy from the admin panel</p>
+                  <p className="text-xs text-slate-300">Pull &rarr; Build &rarr; Deploy from the admin panel</p>
                 </div>
               </div>
 
-              <div>
+              {canSeeGitConfig ? (
+                <>
+                  <div>
                 <label className="mb-1 block text-xs font-medium text-slate-700">Git Remote URL</label>
                 <input
                   value={s.gitRemoteUrl || ""}
@@ -258,9 +261,19 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
                   autoComplete="off"
                 />
                 <p className="mt-1 text-[11px] text-slate-500">
-                  Required for private repos. Generate from GitHub â†’ Settings â†’ Developer settings â†’ Personal access tokens.
+                  Required for private repos. Generate from GitHub &rarr; Settings &rarr; Developer settings &rarr; Personal access tokens.
                 </p>
               </div>
+
+                </>
+              ) : (
+                <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-center mb-6">
+                  <p className="text-sm font-medium text-slate-800">Connection Settings Hidden</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Repository configuration is only visible to Enterprise+ users.
+                  </p>
+                </div>
+              )}
 
               <Toggle
                 label="Auto-deploy on pull"
@@ -270,28 +283,28 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
               />
 
               <div className="rounded-md bg-amber-50 p-3 text-xs text-amber-800">
-                <strong>Security note:</strong> Build and deploy commands run on the server. Only admin users can trigger deployments from <strong>Admin â†’ Website Update</strong>.
+                <strong>Security note:</strong> Build and deploy commands run on the server. Only admin users can trigger deployments from <strong>Admin &rarr; Website Update</strong>.
               </div>
             </Card>
 
             <Card title="CI/CD Setup Guide">
               <GuideList
                 items={[
-                  { label: "GitHub â€” Generate Personal Access Token", url: "https://github.com/settings/tokens" },
-                  { label: "GitLab â€” Generate Access Token", url: "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html" },
-                  { label: "Bitbucket â€” App Passwords", url: "https://bitbucket.org/account/settings/app-passwords/" },
-                  { label: "GitHub â€” Creating a Repository", url: "https://docs.github.com/en/get-started/quickstart/create-a-repo" },
-                  { label: "GitHub Actions â€” CI/CD", url: "https://docs.github.com/en/actions" },
-                  { label: "Vercel â€” Git Integration", url: "https://vercel.com/docs/git" },
-                  { label: "Netlify â€” Build & Deploy", url: "https://docs.netlify.com/configure-builds/overview/" },
-                  { label: "Cloudflare Pages â€” Git Integration", url: "https://developers.cloudflare.com/pages/get-started/git-integration/" },
+                  { label: "GitHub - Generate Personal Access Token", url: "https://github.com/settings/tokens" },
+                  { label: "GitLab - Generate Access Token", url: "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html" },
+                  { label: "Bitbucket - App Passwords", url: "https://bitbucket.org/account/settings/app-passwords/" },
+                  { label: "GitHub - Creating a Repository", url: "https://docs.github.com/en/get-started/quickstart/create-a-repo" },
+                  { label: "GitHub Actions - CI/CD", url: "https://docs.github.com/en/actions" },
+                  { label: "Vercel - Git Integration", url: "https://vercel.com/docs/git" },
+                  { label: "Netlify - Build & Deploy", url: "https://docs.netlify.com/configure-builds/overview/" },
+                  { label: "Cloudflare Pages - Git Integration", url: "https://developers.cloudflare.com/pages/get-started/git-integration/" },
                 ]}
               />
               <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">How it works</p>
                 <ol className="list-decimal space-y-1.5 pl-4 text-xs text-slate-700">
                   <li>Paste your Git remote URL and branch above, then <strong>Save changes</strong>.</li>
-                  <li>Go to <strong>Admin â†’ Website Update</strong> to view repo status.</li>
+                  <li>Go to <strong>Admin &rarr; Website Update</strong> to view repo status.</li>
                   <li>Click <strong>Pull Latest</strong> to fetch new commits from your remote.</li>
                   <li>Click <strong>Build & Deploy</strong> to compile and deploy the production build.</li>
                   <li>View deployment history and build logs right from the admin panel.</li>
@@ -303,3 +316,5 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
     </div>
   );
 }
+
+

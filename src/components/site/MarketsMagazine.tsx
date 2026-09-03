@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import artImg from "@/assets/hero-markets.jpg";
 import pensionImg from "@/assets/news-wallstreet.jpg";
 import coverImg from "@/assets/news-oil.jpg";
@@ -82,7 +82,7 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
   }, [slides, slotMode, ctx?.adConfig?.rotations]);
 
   // Filter articles based on selected category (defaulting to "Markets" if not configured)
-  const localUsed = new Set<number>(usedIds);
+  const localUsed = usedIds || new Set<number>();
   const magazineCategory = cfg.marketsMagazine.category || "Markets";
   const dbMagazineArticles = articles.filter((a) => {
     if (localUsed.has(a.id)) return false;
@@ -204,7 +204,7 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
                 {p1 ? p1.title : "A $600 Billion Experiment Kicks Off at the Biggest US Pension Fund"}
               </p>
               <p className="mt-2 max-w-[430px] font-sans text-[16px] leading-[1.12] text-foreground line-clamp-4">
-                {p1 ? (p1.excerpt || p1.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "CalPERS investment chief Stephen Gilmore wants to break down walls between asset classes with a “total portfolio” approach, blending stocks, bonds, private equity and real assets into a single risk budget designed to lift returns for nearly two million members."}
+                {p1 ? (p1.excerpt || p1.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "CalPERS investment chief Stephen Gilmore wants to break down walls between asset classes with a â€œtotal portfolioâ€ approach, blending stocks, bonds, private equity and real assets into a single risk budget designed to lift returns for nearly two million members."}
               </p>
             </div>
           </div>
@@ -222,7 +222,7 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
 
         <Link to="/news/$slug" params={{ slug: p3?.slug || "europe-fights-to-loosen-america-s-iron-grip-on-global-payment-systems" }} className="group block">
           <p className="font-sans text-[17px] font-extrabold leading-[1.18] tracking-normal text-foreground group-hover:underline line-clamp-2">
-            {p3 ? p3.title : "Europe Fights to Loosen America’s Iron Grip on Global Payment Systems"}
+            {p3 ? p3.title : "Europe Fights to Loosen Americaâ€™s Iron Grip on Global Payment Systems"}
           </p>
           <p className="mt-2 font-sans text-[16px] leading-[1.15] text-foreground line-clamp-5">
             {p3 ? (p3.excerpt || p3.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "Concerns over economic sovereignty and the weaponization of cross-border finance are fueling a continent-wide search for homegrown alternatives to Visa and Mastercard, with central banks, fintechs and regulators racing to build a rival network."}
@@ -232,3 +232,4 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
     </section>
   );
 }
+

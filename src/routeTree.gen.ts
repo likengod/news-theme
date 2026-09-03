@@ -26,6 +26,7 @@ import { Route as EditorialPolicyRouteImport } from './routes/editorial-policy'
 import { Route as EarnPointsRouteImport } from './routes/earn-points'
 import { Route as DmcaRouteImport } from './routes/dmca'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
+import { Route as DataDeletionPolicyRouteImport } from './routes/data-deletion-policy'
 import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -139,6 +140,11 @@ const DmcaRoute = DmcaRouteImport.update({
 const DisclaimerRoute = DisclaimerRouteImport.update({
   id: '/disclaimer',
   path: '/disclaimer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataDeletionPolicyRoute = DataDeletionPolicyRouteImport.update({
+  id: '/data-deletion-policy',
+  path: '/data-deletion-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiePolicyRoute = CookiePolicyRouteImport.update({
@@ -297,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/cookie-policy': typeof CookiePolicyRoute
+  '/data-deletion-policy': typeof DataDeletionPolicyRoute
   '/disclaimer': typeof DisclaimerRoute
   '/dmca': typeof DmcaRoute
   '/earn-points': typeof EarnPointsRoute
@@ -344,6 +351,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/cookie-policy': typeof CookiePolicyRoute
+  '/data-deletion-policy': typeof DataDeletionPolicyRoute
   '/disclaimer': typeof DisclaimerRoute
   '/dmca': typeof DmcaRoute
   '/earn-points': typeof EarnPointsRoute
@@ -393,6 +401,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/cookie-policy': typeof CookiePolicyRoute
+  '/data-deletion-policy': typeof DataDeletionPolicyRoute
   '/disclaimer': typeof DisclaimerRoute
   '/dmca': typeof DmcaRoute
   '/earn-points': typeof EarnPointsRoute
@@ -443,6 +452,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/cookie-policy'
+    | '/data-deletion-policy'
     | '/disclaimer'
     | '/dmca'
     | '/earn-points'
@@ -490,6 +500,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/cookie-policy'
+    | '/data-deletion-policy'
     | '/disclaimer'
     | '/dmca'
     | '/earn-points'
@@ -538,6 +549,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/cookie-policy'
+    | '/data-deletion-policy'
     | '/disclaimer'
     | '/dmca'
     | '/earn-points'
@@ -587,6 +599,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
   CookiePolicyRoute: typeof CookiePolicyRoute
+  DataDeletionPolicyRoute: typeof DataDeletionPolicyRoute
   DisclaimerRoute: typeof DisclaimerRoute
   DmcaRoute: typeof DmcaRoute
   EarnPointsRoute: typeof EarnPointsRoute
@@ -728,6 +741,13 @@ declare module '@tanstack/react-router' {
       path: '/disclaimer'
       fullPath: '/disclaimer'
       preLoaderRoute: typeof DisclaimerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data-deletion-policy': {
+      id: '/data-deletion-policy'
+      path: '/data-deletion-policy'
+      fullPath: '/data-deletion-policy'
+      preLoaderRoute: typeof DataDeletionPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookie-policy': {
@@ -988,6 +1008,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
   CookiePolicyRoute: CookiePolicyRoute,
+  DataDeletionPolicyRoute: DataDeletionPolicyRoute,
   DisclaimerRoute: DisclaimerRoute,
   DmcaRoute: DmcaRoute,
   EarnPointsRoute: EarnPointsRoute,

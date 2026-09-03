@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -22,7 +22,9 @@ import {
   Code,
   Layers,
   FileCode,
+  Lock,
 } from "lucide-react";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import {
   loadAds,
   saveAds,
@@ -87,40 +89,48 @@ const SLOTS: SlotMeta[] = [
     label: "Home 1",
     orientation: "Portrait",
     ratio: "3:4",
-    size: "600 × 800 px",
-    shownOn: "Home page — sidebar next to hero board",
+    size: "600 Ã— 800 px",
+    shownOn: "Home page â€” sidebar next to hero board",
   },
   {
     key: "home2",
     label: "Home 2",
     orientation: "Landscape",
     ratio: "~2:1",
-    size: "406 × 196 px",
-    shownOn: "Home page — Markets Magazine sidebar slideshow",
+    size: "406 Ã— 196 px",
+    shownOn: "Home page â€” Markets Magazine sidebar slideshow",
   },
   {
     key: "ad3",
     label: "Ad 3",
     orientation: "Portrait",
     ratio: "3:4",
-    size: "600 × 800 px",
-    shownOn: "Article & Category pages — sidebar ('Your Ad Here')",
+    size: "600 Ã— 800 px",
+    shownOn: "Article & Category pages â€” sidebar ('Your Ad Here')",
   },
   {
     key: "popup",
     label: "Popup",
     orientation: "Portrait + Landscape",
-    ratio: "3:4 (mobile) · 16:9 (desktop)",
-    size: "600 × 800 px (mobile) · 1200 × 675 px (desktop)",
-    shownOn: "Article pages — popup modal 7 seconds after open",
+    ratio: "3:4 (mobile) Â· 16:9 (desktop)",
+    size: "600 Ã— 800 px (mobile) Â· 1200 Ã— 675 px (desktop)",
+    shownOn: "Article pages â€” popup modal 7 seconds after open",
   },
   {
     key: "leaderboard",
     label: "Leaderboard",
     orientation: "Landscape",
     ratio: "~8:1",
-    size: "728 × 90 px, 970 × 250 px, etc.",
+    size: "728 Ã— 90 px, 970 Ã— 250 px, etc.",
     shownOn: "Header or top of pages",
+  },
+  {
+    key: "featured_slide",
+    label: "Featured Ads",
+    orientation: "Landscape",
+    ratio: "16:9",
+    size: "800 Ã— 500 px",
+    shownOn: "Inside the homepage featured stories slider",
   },
 ];
 
@@ -147,6 +157,11 @@ const SAMPLE_GOOGLE_ADSENSE = `<script async src="https://pagead2.googlesyndicat
 </script>`;
 
 function AdvertisementsPage() {
+  const navigate = useNavigate();
+  const s = useSiteSettings();
+  const isPremium = ["Enterprise", "Enterprise+", "Premium"].includes(s.licenseType || "") || s.licenseRole === "VIP";
+  const isEnterprise = ["Enterprise", "Enterprise+"].includes(s.licenseType || "") || s.licenseRole === "VIP";
+
   const [tab, setTab] = useState<Tab>("home1");
   const [ads, setAds] = useState<AdSlideItem[]>([]);
   const [trash, setTrash] = useState<AdSlideItem[]>([]);
@@ -275,6 +290,7 @@ function AdvertisementsPage() {
         <div className="flex flex-wrap items-center gap-1.5">
           {SLOTS.map((s) => {
             const isActive = tab === s.key;
+            const isLocked = ((s.key === "popup" || s.key === "leaderboard") && !isPremium) || (s.key === "featured_slide" && !isEnterprise);
             const count = slotCounts[s.key] || 0;
             return (
               <button
@@ -283,19 +299,26 @@ function AdvertisementsPage() {
                 className={`group flex items-center gap-2 rounded-t-lg border-b-2 px-4 py-2.5 text-sm font-semibold transition-all ${
                   isActive
                     ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                    : isLocked
+                    ? "border-transparent text-slate-400 hover:bg-slate-50"
                     : "border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
-                <span>{s.label}</span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${
-                    isActive
-                      ? "bg-slate-700 text-slate-200"
-                      : "bg-slate-200 text-slate-600 group-hover:bg-slate-300"
-                  }`}
-                >
-                  {count}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span>{s.label}</span>
+                  {isLocked && <Lock className="h-3.5 w-3.5 text-slate-300" />}
+                </div>
+                {!isLocked && (
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${
+                      isActive
+                        ? "bg-slate-700 text-slate-200"
+                        : "bg-slate-200 text-slate-600 group-hover:bg-slate-300"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -332,7 +355,23 @@ function AdvertisementsPage() {
       </div>
 
       {/* Main Tab Content */}
-      {isTrash ? (
+      {(((tab === "popup" || tab === "leaderboard") && !isPremium) || (tab === "featured_slide" && !isEnterprise)) ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+            <Lock className="h-8 w-8 text-slate-400" />
+          </div>
+          <h3 className="mt-4 text-base font-semibold text-slate-800">Premium Feature Locked</h3>
+          <p className="mt-1 max-w-sm text-sm text-slate-500">
+            The {tab === "popup" ? "Popup" : tab === "leaderboard" ? "Leaderboard" : "Featured Ads"} advertisement slot is exclusively available on Enterprise and Enterprise+ licenses. Please upgrade your license to unlock this slot.
+          </p>
+          <button
+            onClick={() => navigate({ to: "/admin/settings", search: { tab: "activate" } })}
+            className="mt-6 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          >
+            Activate Website
+          </button>
+        </div>
+      ) : isTrash ? (
         trash.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
             <Trash className="mb-3 h-8 w-8 text-slate-400" />
@@ -373,7 +412,7 @@ function AdvertisementsPage() {
                         <FolderOpen className="h-3 w-3" />
                         {SLOTS.find(s => s.key === ad.slot)?.label || ad.slot}
                       </span>
-                      <span>�</span>
+                      <span>ï¿½</span>
                       <span className="inline-flex items-center gap-1 text-red-500">
                         <Clock className="h-3 w-3" />
                         Deleted
@@ -583,3 +622,4 @@ function AdvertisementsPage() {
     </div>
   );
 }
+

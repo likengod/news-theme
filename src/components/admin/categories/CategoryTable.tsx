@@ -23,7 +23,16 @@ export function CategoryTable({ categories, onEdit, onDelete }: Props) {
         <tbody className="divide-y divide-slate-100">
           {categories.map((c) => (
             <tr key={c.id} className="hover:bg-slate-50/70 transition-colors">
-              <td className="px-5 py-3 font-semibold text-slate-900">{c.name}</td>
+              <td className="px-5 py-3 font-semibold text-slate-900">
+                <div className="flex items-center gap-2">
+                  {c.name}
+                  {c.showInHeader && (
+                    <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-800">
+                      Header
+                    </span>
+                  )}
+                </div>
+              </td>
               <td className="px-5 py-3 font-mono text-xs text-slate-500">{c.slug}</td>
               <td className="px-5 py-3 text-xs text-slate-600 max-w-xs truncate">{c.description || "—"}</td>
               <td className="px-5 py-3 text-right font-bold text-slate-700">{c.count || 0}</td>

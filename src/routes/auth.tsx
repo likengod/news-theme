@@ -278,9 +278,19 @@ function AuthPage() {
 
                 <div className="space-y-1.5">
                   <Label htmlFor="phone" className="text-sm font-semibold">Phone Number</Label>
-                  <div className="relative">
-                    <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input id="phone" name="phone" type="tel" placeholder="+1 (555) 123-4567" autoComplete="tel" className="pl-10" required />
+                  <div className="flex overflow-hidden rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                    <div className="relative flex items-center border-r border-input bg-muted/50 px-3">
+                      <select className="appearance-none bg-transparent pr-4 text-sm outline-none font-medium text-muted-foreground">
+                        <option>Mobile</option>
+                        <option>Home</option>
+                        <option>Work</option>
+                      </select>
+                      <svg className="absolute right-2 h-3 w-3 text-muted-foreground pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </div>
+                    <div className="flex items-center border-r border-input bg-muted/20 px-3">
+                      <span className="text-sm font-medium text-muted-foreground">+91</span>
+                    </div>
+                    <input id="phone" name="phone" type="tel" placeholder="Phone number" autoComplete="tel" className="flex-1 bg-transparent px-3 py-2 text-sm outline-none" required />
                   </div>
                 </div>
 
@@ -296,7 +306,7 @@ function AuthPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="confirmPassword" className="text-sm font-semibold">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword" className="text-sm font-semibold">Re-enter Password</Label>
                   <div className="relative">
                     <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input id="confirmPassword" name="confirmPassword" type={showConfirm ? "text" : "password"} placeholder="Confirm password" autoComplete="new-password" minLength={6} className="px-10" required />
@@ -306,13 +316,14 @@ function AuthPage() {
                   </div>
                 </div>
 
-                <label className="flex items-start gap-2 text-sm font-medium">
-                  <Checkbox id="agree" checked={agree} onCheckedChange={(v) => setAgree(v === true)} className="mt-0.5" />
-                  <span>
-                    I agree to the{" "}
-                    <Link to="/terms-and-conditions" className="font-semibold text-indigo-600 dark:text-indigo-400 underline-offset-2 hover:underline hover:text-indigo-700 dark:hover:text-indigo-300">Terms &amp; Conditions</Link>
+                <label className="flex items-start gap-3 text-sm">
+                  <Checkbox id="agree" checked={agree} onCheckedChange={(v) => setAgree(v === true)} className="mt-1 h-5 w-5 rounded shadow-sm border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600" />
+                  <span className="leading-snug text-slate-700">
+                    I confirm that I have read, consent and agree to Gorilla Tech's{" "}
+                    <Link to="/terms-and-conditions" className="font-semibold text-blue-600 hover:underline">User Agreement</Link>
                     {" "}and{" "}
-                    <Link to="/privacy-policy" className="font-semibold text-indigo-600 dark:text-indigo-400 underline-offset-2 hover:underline hover:text-indigo-700 dark:hover:text-indigo-300">Privacy Policy</Link>
+                    <Link to="/privacy-policy" className="font-semibold text-blue-600 hover:underline">Privacy Policy</Link>
+                    , and I am of legal age. I understand that I can change my communication preferences any time in my Account.
                   </span>
                 </label>
 
@@ -320,8 +331,8 @@ function AuthPage() {
                   <Turnstile siteKey="1x00000000000000000000AA" onSuccess={setTurnstileToken} />
                 </div>
 
-                <Button type="submit" className="h-11 w-full bg-slate-800 text-white hover:bg-slate-900 disabled:bg-slate-400 disabled:opacity-100" disabled={loading || !agree}>
-                  {loading ? "Creating account…" : "Create Account"}
+                <Button type="submit" className="h-12 w-full rounded-md bg-blue-600 text-base font-medium text-white hover:bg-blue-700 disabled:bg-blue-400 disabled:opacity-100" disabled={loading || !agree}>
+                  {loading ? "Please wait…" : "Continue"}
                 </Button>
               </form>
 

@@ -29,9 +29,11 @@ import {
   Tag,
   Inbox,
   Rocket,
+  Lock,
 } from "lucide-react";
 import { authClient as supabase } from "@/lib/auth-client";
 import { getUserServer, getCurrentUserRole } from "@/lib/auth.functions";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -93,6 +95,9 @@ function AdminLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  
+  const s = useSiteSettings();
+  const isPremium = ["Enterprise", "Enterprise+", "Premium"].includes(s.licenseType || "") || s.licenseRole === "VIP";
 
   // Force light theme inside admin only
   useEffect(() => {
@@ -165,22 +170,33 @@ function AdminLayout() {
           <ul className="space-y-1">
             {nav.map((item) => {
               const Icon = item.icon;
+              const isLocked = item.to === "/admin/rewards" && !isPremium;
+              const toDest = isLocked ? "/admin/settings" : item.to;
+              const searchProps = isLocked ? { tab: "activate" } : undefined;
+              
               const active = item.exact
                 ? pathname === item.to
                 : pathname.startsWith(item.to);
+              
               return (
                 <li key={item.to}>
                   <Link
-                    to={item.to}
+                    to={toDest}
+                    search={searchProps}
                     onClick={() => setOpen(false)}
-                    className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition ${
+                    className={`flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition ${
                       active
                         ? "bg-slate-900 text-white"
+                        : isLocked 
+                        ? "text-slate-400 hover:bg-slate-50"
                         : "text-slate-700 hover:bg-slate-100"
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
+                    <div className="flex items-center gap-3">
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </div>
+                    {isLocked && <Lock className="h-3.5 w-3.5 text-slate-300" />}
                   </Link>
                 </li>
               );

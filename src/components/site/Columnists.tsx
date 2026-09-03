@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Play, ChevronLeft, ChevronRight, X, Share2, Copy, Check, Send, Eye } from "lucide-react";
+import { FaWhatsapp, FaFacebookF, FaTwitter } from "react-icons/fa6";
 import { grid, top, lead, viewsFor, formatViews } from "@/lib/news-data";
 import { Views } from "./Views";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
@@ -294,10 +295,10 @@ function ReelViewerModal({
               href={`https://api.whatsapp.com/send?text=${shareText}`}
               target="_blank"
               rel="noreferrer"
-              className="flex flex-col items-center gap-1 hover:opacity-80 transition"
+              className="flex flex-col items-center gap-2 hover:opacity-80 transition hover:scale-110"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-md">
-                <Send className="h-5 w-5" />
+              <div className="flex items-center justify-center text-[#25D366]">
+                <FaWhatsapp className="h-8 w-8" />
               </div>
               <span className="text-[11px] text-white/80 font-medium">WhatsApp</span>
             </a>
@@ -307,10 +308,10 @@ function ReelViewerModal({
               href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`}
               target="_blank"
               rel="noreferrer"
-              className="flex flex-col items-center gap-1 hover:opacity-80 transition"
+              className="flex flex-col items-center gap-2 hover:opacity-80 transition hover:scale-110"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1877F2] text-white shadow-md">
-                <span className="font-bold text-lg">f</span>
+              <div className="flex items-center justify-center text-[#1877F2]">
+                <FaFacebookF className="h-8 w-8" />
               </div>
               <span className="text-[11px] text-white/80 font-medium">Facebook</span>
             </a>
@@ -320,10 +321,10 @@ function ReelViewerModal({
               href={`https://twitter.com/intent/tweet?text=${shareText}`}
               target="_blank"
               rel="noreferrer"
-              className="flex flex-col items-center gap-1 hover:opacity-80 transition"
+              className="flex flex-col items-center gap-2 hover:opacity-80 transition hover:scale-110"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black border border-white/20 text-white shadow-md">
-                <span className="font-bold text-sm">X</span>
+              <div className="flex items-center justify-center text-white">
+                <FaTwitter className="h-8 w-8" />
               </div>
               <span className="text-[11px] text-white/80 font-medium">Twitter</span>
             </a>
@@ -332,10 +333,10 @@ function ReelViewerModal({
             <button
               type="button"
               onClick={handleCopyLink}
-              className="flex flex-col items-center gap-1 hover:opacity-80 transition"
+              className="flex flex-col items-center gap-2 hover:opacity-80 transition hover:scale-110"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800 border border-white/20 text-white shadow-md">
-                {copied ? <Check className="h-5 w-5 text-green-400" /> : <Copy className="h-5 w-5" />}
+              <div className="flex items-center justify-center text-white/80">
+                {copied ? <Check className="h-8 w-8 text-green-400" /> : <Copy className="h-8 w-8" />}
               </div>
               <span className="text-[11px] text-white/80 font-medium">{copied ? "Copied" : "Copy"}</span>
             </button>

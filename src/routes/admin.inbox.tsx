@@ -77,11 +77,16 @@ function AdminInboxPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
   const [confirmDelete, setConfirmDelete] = useState<{
     id: number;
     userId?: string;
     isDeletion: boolean;
   } | null>(null);
+
+  useEffect(() => {
+    setSelected(new Set());
+  }, [requests]);
 
   const load = async () => {
     setLoading(true);
@@ -94,6 +99,25 @@ function AdminInboxPage() {
       setSummary(sumRes.summary || []);
     } catch (err: any) {
       toast.error("Failed to load inbox: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selected.size} selected request(s)?`)) return;
+
+    setLoading(true);
+    try {
+      await Promise.all(
+        Array.from(selected).map((id) => adminDeleteInboxRequest({ data: { id } }))
+      );
+      toast.success(`${selected.size} request(s) removed from inbox`);
+      setSelected(new Set());
+      await load();
+    } catch (err: any) {
+      toast.error("Bulk delete failed: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -291,26 +315,69 @@ function AdminInboxPage() {
             <p className="text-xs">Try changing the filter or check back later.</p>
           </div>
         ) : (
-          <ul className="divide-y divide-slate-100">
-            {requests.map((req) => {
-              const meta = TYPE_META[req.type] ?? TYPE_META.contact;
-              const Icon = meta.icon;
-              const isExpanded = expandedId === req.id;
-              const isLoading = actionLoading === req.id;
-              let parsedDetails: Record<string, any> | null = null;
-              try {
-                if (req.details && req.details.startsWith("{")) {
-                  parsedDetails = JSON.parse(req.details);
-                }
-              } catch {}
+          <div>
+            {/* Selection Toolbar */}
+            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-5 py-3">
+              <label className="flex items-center gap-3 text-sm font-medium text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer"
+                  checked={requests.length > 0 && selected.size === requests.length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelected(new Set(requests.map(r => r.id)));
+                    } else {
+                      setSelected(new Set());
+                    }
+                  }}
+                />
+                Select All
+              </label>
+              {selected.size > 0 && (
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex items-center gap-1.5 rounded bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete Selected ({selected.size})
+                </button>
+              )}
+            </div>
+            <ul className="divide-y divide-slate-100">
+              {requests.map((req) => {
+                const meta = TYPE_META[req.type] ?? TYPE_META.contact;
+                const Icon = meta.icon;
+                const isExpanded = expandedId === req.id;
+                const isLoading = actionLoading === req.id;
+                let parsedDetails: Record<string, any> | null = null;
+                try {
+                  if (req.details && req.details.startsWith("{")) {
+                    parsedDetails = JSON.parse(req.details);
+                  }
+                } catch {}
 
-              return (
-                <li key={req.id} className="group">
-                  <div
-                    className="flex cursor-pointer items-start gap-4 px-5 py-4 hover:bg-slate-50"
-                    onClick={() => setExpandedId(isExpanded ? null : req.id)}
-                  >
-                    {/* Icon */}
+                return (
+                  <li key={req.id} className="group">
+                    <div
+                      className="flex cursor-pointer items-start gap-4 px-5 py-4 hover:bg-slate-50"
+                      onClick={() => setExpandedId(isExpanded ? null : req.id)}
+                    >
+                      {/* Selection Checkbox */}
+                      <div className="flex h-9 items-center justify-center pt-0.5 shrink-0" onClick={e => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer"
+                          checked={selected.has(req.id)}
+                          onChange={(e) => {
+                            const newSet = new Set(selected);
+                            if (e.target.checked) newSet.add(req.id);
+                            else newSet.delete(req.id);
+                            setSelected(newSet);
+                          }}
+                        />
+                      </div>
+
+                      {/* Icon */}
                     <div
                       className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${meta.bg}`}
                     >
@@ -485,8 +552,9 @@ function AdminInboxPage() {
                   )}
                 </li>
               );
-            })}
-          </ul>
+              })}
+            </ul>
+          </div>
         )}
       </div>
 

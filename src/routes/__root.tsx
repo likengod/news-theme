@@ -20,6 +20,7 @@ import { getHomepageConfigServer, defaultHomepageConfig } from "@/lib/homepage-c
 import { getFontConfigServer, defaultFontConfig, buildGoogleFontsUrl, buildFontFaceCss, buildSectionCssVars, FONT_CONFIG_KEY } from "@/lib/font-config";
 import type { FontConfiguration } from "@/lib/font-config";
 import { getCategories } from "@/lib/taxonomy.functions";
+import "@/lib/i18n";
 
 import { NotFound } from "@/components/site/NotFound";
 

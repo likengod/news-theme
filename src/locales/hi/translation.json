@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "home": "होम",
+    "subscribe": "सब्सक्राइब",
+    "nightMode": "डार्क मोड",
+    "search": "समाचार खोजें…",
+    "navigation": "नेविगेशन"
+  },
+  "footer": {
+    "quickLinks": "त्वरित लिंक",
+    "connectWithUs": "हमसे जुड़ें",
+    "about": "हमारे बारे में",
+    "contact": "संपर्क करें",
+    "submitNews": "समाचार भेजें",
+    "privacyPolicy": "गोपनीयता नीति",
+    "terms": "नियम और शर्तें",
+    "cookiePolicy": "कुकी नीति",
+    "refundPolicy": "रिफंड नीति",
+    "disclaimer": "अस्वीकरण",
+    "editorialPolicy": "संपादकीय नीति",
+    "dmca": "DMCA",
+    "verifiedJournalist": "सत्यापित पत्रकार",
+    "subscription": "सदस्यता",
+    "workWithUs": "हमारे साथ काम करें",
+    "archive": "पुरालेख",
+    "earnPoints": "अंक अर्जित करें",
+    "builtBy": "वेबसाइट निर्माण और डिजिटल पार्टनर"
+  }
+}

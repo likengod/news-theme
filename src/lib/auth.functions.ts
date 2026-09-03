@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+﻿import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import crypto from "crypto";
@@ -320,3 +320,4 @@ export const requestCurrentUserAccountDeletion = createServerFn({ method: "POST"
     await query("UPDATE profiles SET delete_requested = TRUE WHERE id = ?", [context.userId]);
     return { ok: true };
   });
+

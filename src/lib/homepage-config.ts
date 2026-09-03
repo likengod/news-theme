@@ -1,4 +1,4 @@
-// Homepage section configuration — editable via /admin/homepage.
+﻿// Homepage section configuration Ã¢â‚¬â€ editable via /admin/homepage.
 // Each section has a label/title (text rendered as the heading), font size,
 // color, and optionally a category that drives "latest news" content.
 
@@ -10,6 +10,10 @@ export type SectionStyle = {
   color: string; // hex
   /** Category slug (one of ALL_CATEGORIES) for sections that filter by category. */
   category?: string;
+  autoSlide?: boolean;
+  slideInterval?: number;
+  showMultiple?: boolean;
+  slideCount?: number;
 };
 
 export type LiveVideoConfig = {
@@ -38,14 +42,14 @@ export const defaultHomepageConfig: HomepageConfig = {
   heroCultureMusic: { title: "Culture & Music", fontSize: 12, color: "#1A1110" },
   heroOpinion: { title: "Opinion", fontSize: 12, color: "#1A1110" },
   heroPopular: { title: "Popular", fontSize: 12, color: "#1A1110" },
-  heroFeatured: { title: "Featured", fontSize: 12, color: "#1A1110", category: "Auto (Latest)" },
+  heroFeatured: { title: "Featured", fontSize: 12, color: "#1A1110", category: "Auto (Latest)", autoSlide: true, slideInterval: 5, showMultiple: true, slideCount: 3 },
   watch: { title: "Watch", fontSize: 16, color: "#1A1110" },
   marketsMagazine: { title: "Markets Magazine", fontSize: 16, color: "#1A1110" },
   liveVideo: {
     provider: "youtube",
     youtubeChannelId: "UCIALMKvObZNtJ6AmdCLP7Lg",
     facebookPageUrl: "https://www.facebook.com/facebook",
-    title: "LIVE: Markets Now — breaking coverage",
+    title: "LIVE: Markets Now Ã¢â‚¬â€ breaking coverage",
   },
   newsGridColumns: [
     { title: "World", fontSize: 12, color: "#1A1110", category: "Global" },
@@ -64,7 +68,7 @@ import { query } from "./db.server";
 const KEY = "nt:homepage-config:v1";
 const EVENT = "nt:homepage-updated";
 
-// ─── Server Functions (MySQL Database Persistence) ─────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Server Functions (MySQL Database Persistence) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 export const getHomepageConfigServer = createServerFn({ method: "GET" })
   .handler(async (): Promise<HomepageConfig> => {
@@ -153,3 +157,5 @@ export function articlesByCategory(category?: string): Article[] {
   const matched = pool.filter((a) => (a.kicker ?? "").toLowerCase().includes(c));
   return matched.length > 0 ? matched : pool;
 }
+
+

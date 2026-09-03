@@ -1,4 +1,4 @@
-import { useMemo, useState, lazy, Suspense } from "react";
+﻿import { useMemo, useState, lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -32,8 +32,13 @@ import {
 } from "@/lib/journalist.functions";
 import { toggleAdminUserBan } from "@/lib/admin-users.functions";
 import AuthorizedPanel from "@/components/admin/journalists/AuthorizedPanel";
-import { type EditForm, emptyForm } from "@/components/admin/journalists/JournalistFormModal";
+import { type EditForm } from "@/components/admin/journalists/JournalistFormModal";
 
+const emptyForm = (): EditForm => ({
+  email: "", password: "", displayName: "", phone: "", bloodGroup: "",
+  dob: "", validTill: "", address: "", state: "", country: "", pinCode: "", avatarUrl: "",
+  active: true,
+});
 const JournalistFormModal = lazy(() => import("@/components/admin/journalists/JournalistFormModal").then((m) => ({ default: m.JournalistFormModal })));
 const JournalistProfileModal = lazy(() => import("@/components/admin/journalists/JournalistProfileModal").then((m) => ({ default: m.JournalistProfileModal })));
 const RankEditModal = lazy(() => import("@/components/admin/journalists/RankEditModal").then((m) => ({ default: m.RankEditModal })));
@@ -261,7 +266,7 @@ function JournalistsPage() {
               <input
                 value={q}
                 onChange={(e) => { setQ(e.target.value); setPage(1); }}
-                placeholder="Search name, ID, email…"
+                placeholder="Search name, ID, emailâ€¦"
                 className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm focus:border-slate-900 focus:outline-none"
               />
             </div>
@@ -308,7 +313,7 @@ function JournalistsPage() {
 
         {query.isLoading ? (
           <div className="flex items-center justify-center gap-2 px-5 py-16 text-sm text-slate-500">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading journalists…
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading journalistsâ€¦
           </div>
         ) : query.isError ? (
           <div className="px-5 py-16 text-center text-sm text-red-600">
@@ -364,7 +369,7 @@ function JournalistsPage() {
                             </button>
                           </div>
                         ) : (
-                          <span className="text-xs text-slate-400">—</span>
+                          <span className="text-xs text-slate-400">â€”</span>
                         )}
                       </td>
                       <td className="px-5 py-3 text-slate-700">{published.toLocaleString()}</td>
@@ -393,8 +398,8 @@ function JournalistsPage() {
                               : "border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
                           }`}
                         >
-                          <option value="active" className="bg-white text-emerald-700 font-semibold">● Active</option>
-                          <option value="suspended" className="bg-white text-red-700 font-semibold">● Suspended</option>
+                          <option value="active" className="bg-white text-emerald-700 font-semibold">â— Active</option>
+                          <option value="suspended" className="bg-white text-red-700 font-semibold">â— Suspended</option>
                         </select>
                       </td>
                       <td className="px-5 py-3 text-right">
@@ -411,7 +416,7 @@ function JournalistsPage() {
                   <tr>
                     <td colSpan={7} className="px-5 py-8 text-center text-slate-500">
                       {journalists.length === 0
-                        ? "No journalists yet. Assign the Journalist role to a user under Admin → Users."
+                        ? "No journalists yet. Assign the Journalist role to a user under Admin â†’ Users."
                         : "No results match your search."}
                     </td>
                   </tr>
@@ -423,7 +428,7 @@ function JournalistsPage() {
         {filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between border-t border-slate-200 px-5 py-3 text-sm">
             <p className="text-slate-500">
-              Showing <strong>{(currentPage - 1) * PAGE_SIZE + 1}</strong>–<strong>{Math.min(currentPage * PAGE_SIZE, filtered.length)}</strong> of {filtered.length}
+              Showing <strong>{(currentPage - 1) * PAGE_SIZE + 1}</strong>â€“<strong>{Math.min(currentPage * PAGE_SIZE, filtered.length)}</strong> of {filtered.length}
             </p>
             <div className="inline-flex items-center gap-1">
               <button onClick={() => setPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="grid h-8 w-8 place-items-center rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50"><ChevronLeft className="h-4 w-4" /></button>
@@ -545,3 +550,4 @@ function JournalistsPage() {
     </div>
   );
 }
+

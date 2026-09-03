@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Save, Sparkles, Clock, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { loadSettings, saveSettings, type SiteSettings } from "@/lib/site-content";
@@ -13,7 +13,7 @@ const FESTIVE_GRADIENT_MAP: Record<string, string> = {
   "forest": "linear-gradient(to right, #11998e, #38ef7d)",
 };
 
-// Pure CSS keyframe animations — injected via style tag, works without tailwindcss-animate
+// Pure CSS keyframe animations â€” injected via style tag, works without tailwindcss-animate
 const ROTATION_KEYFRAMES = `
 @keyframes rot-slide-up   { from { opacity:0; transform: translateY(60px);  } to { opacity:1; transform: translateY(0); } }
 @keyframes rot-slide-down { from { opacity:0; transform: translateY(-60px); } to { opacity:1; transform: translateY(0); } }
@@ -107,7 +107,7 @@ export function FestiveSettingsForm() {
 
   const [animNonce, setAnimNonce] = useState(0);
 
-  // Re-trigger font/size changes (no swap needed — just re-mount with new style)
+  // Re-trigger font/size changes (no swap needed â€” just re-mount with new style)
   useEffect(() => {
     setAnimNonce((n) => n + 1);
   }, [settings.customAlertFontFamily, settings.customAlertFontSize]);
@@ -264,7 +264,7 @@ export function FestiveSettingsForm() {
                 <option value="">None (Use Standard Solid Black / Color)</option>
                 <option value="indian-flag">🇮🇳 Indian Flag (Saffron, Navy Blue, Green)</option>
                 <option value="diwali">🪔 Diwali Festive (Gold, Orange, Magenta)</option>
-                <option value="sunset">🌅 Sunset (Pink to Purple)</option>
+                <option value="sunset">🌄 Sunset (Pink to Purple)</option>
                 <option value="neon">⚡ Neon Glow (Magenta, Purple, Cyan)</option>
                 <option value="ocean">🌊 Ocean Breeze (Cyan to Blue)</option>
                 <option value="forest">🌲 Forest Canopy (Teal to Emerald)</option>
@@ -281,10 +281,10 @@ export function FestiveSettingsForm() {
                 onChange={(e) => update("customAlertAnimationStyle", e.target.value)}
                 className="h-10 w-full rounded-lg border border-slate-200 px-3 bg-white text-sm focus:border-slate-900 focus:outline-none"
               >
-                <option value="slide-up">⬆ Slide Up (Ticker / News Style)</option>
-                <option value="slide-down">⬇ Slide Down (Reveal from Top)</option>
-                <option value="slide-left">⬅ Slide Left (Push from Right)</option>
-                <option value="slide-right">➡ Slide Right (Push from Left)</option>
+                <option value="slide-up">⬆️ Slide Up (Ticker / News Style)</option>
+                <option value="slide-down">⬇️ Slide Down (Reveal from Top)</option>
+                <option value="slide-left">⬅️ Slide Left (Push from Right)</option>
+                <option value="slide-right">➡️ Slide Right (Push from Left)</option>
                 <option value="fade">✨ Smooth Fade (Cross Fade)</option>
                 <option value="zoom">🔍 Zoom Scale In</option>
                 <option value="flip">🔄 3D Flip Swap</option>
@@ -374,7 +374,7 @@ export function FestiveSettingsForm() {
                         ...rotationAnimStyle,
                       }}
                     >
-                      {showCustomText ? customAlertText : "NYC 48°F • LDN 9°C • HKG 22°C"}
+                      {showCustomText ? customAlertText : "DEL 165 AQI | MUM 82 AQI | KOL 145 AQI"}
                     </span>
                   </div>
                 </div>
@@ -436,7 +436,7 @@ export function FestiveSettingsForm() {
             </div>
 
             <p className="mt-4 text-[11px] text-slate-500 italic">
-              ✨ Every {settings.topBarSwapDelay || 5} seconds, text automatically rotates between default headers and your custom message! Default text color is black (#000000).
+              âœ¨ Every {settings.topBarSwapDelay || 5} seconds, text automatically rotates between default headers and your custom message! Default text color is black (#000000).
             </p>
           </div>
         </div>
@@ -457,3 +457,5 @@ export function FestiveSettingsForm() {
     </div>
   );
 }
+
+

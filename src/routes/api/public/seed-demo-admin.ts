@@ -23,7 +23,7 @@ export const Route = createFileRoute("/api/public/seed-demo-admin")({
             );
           } else {
             userId = users[0].id;
-            await query("UPDATE users SET password_hash = ? WHERE id = ?", [passHash, userId]);
+            await query("UPDATE users SET password_hash = ?, salt = NULL WHERE id = ?", [passHash, userId]);
           }
 
           // Ensure role

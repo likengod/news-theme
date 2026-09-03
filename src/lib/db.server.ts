@@ -1,4 +1,4 @@
-import mysql from "mysql2/promise";
+﻿import mysql from "mysql2/promise";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
@@ -193,9 +193,19 @@ export async function initializeDatabase(customAdmin?: { email: string; password
         description TEXT,
         meta_title VARCHAR(255),
         meta_description TEXT,
+        show_in_header BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Schema upgrade: Add show_in_header if missing
+    try {
+      await query(`ALTER TABLE categories ADD COLUMN show_in_header BOOLEAN DEFAULT FALSE`);
+    } catch (err: any) {
+      if (!err.message.includes("Duplicate column name")) {
+        console.error("Migration error adding show_in_header:", err.message);
+      }
+    }
 
     // 5. Create tags table
     await query(`
@@ -522,9 +532,22 @@ export async function initializeDatabase(customAdmin?: { email: string; password
         { title: "Breakthrough In Artificial Intelligence Research", cat: "Tech", excerpt: "Scientists have announced a major breakthrough in AI research, demonstrating a new model capable of solving complex mathematical problems previously thought unsolvable by machines.", author: "Jane Smith" },
         { title: "Economy Shows Signs Of Strong Recovery", cat: "Business", excerpt: "Recent economic indicators suggest a robust recovery is underway, with consumer spending hitting an all-time high and unemployment numbers continuing their steady decline.", author: "John Doe" }
       ];
-      for (const a of demoArticles) {
+            for (const a of demoArticles) {
         await query("INSERT INTO articles (title, slug, category, author, excerpt, status, date) VALUES (?, ?, ?, ?, ?, 'Published', NOW())", [a.title, slugify(a.title), a.cat, a.author, a.excerpt]);
       }
+    }
+
+    try {
+      await query("CREATE INDEX idx_status_date ON articles (status, date)");
+      console.log("[MySQL] Added index idx_status_date to articles");
+    } catch (e: any) {
+      if (!e.message.includes("Duplicate key name")) console.error(e);
+    }
+    try {
+      await query("CREATE INDEX idx_category_status_date ON articles (category, status, date)");
+      console.log("[MySQL] Added index idx_category_status_date to articles");
+    } catch (e: any) {
+      if (!e.message.includes("Duplicate key name")) console.error(e);
     }
 
     console.log("[MySQL] Database initialization completed successfully!");
@@ -538,3 +561,4 @@ export async function initializeDatabase(customAdmin?: { email: string; password
 initializeDatabase().catch((err) => {
   console.log("[MySQL] Auto-initialization skipped or waiting for setup:", err.message);
 });
+

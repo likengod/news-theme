@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "home": "হোম",
+    "subscribe": "সাবস্ক্রাইব",
+    "nightMode": "নাইট মোড",
+    "search": "খবর খুঁজুন…",
+    "navigation": "নেভিগেশন"
+  },
+  "footer": {
+    "quickLinks": "দ্রুত লিঙ্ক",
+    "connectWithUs": "আমাদের সাথে যুক্ত হন",
+    "about": "আমাদের সম্পর্কে",
+    "contact": "যোগাযোগ করুন",
+    "submitNews": "খবর পাঠান",
+    "privacyPolicy": "গোপনীয়তা নীতি",
+    "terms": "শর্তাবলী",
+    "cookiePolicy": "কুকি নীতি",
+    "refundPolicy": "রিফান্ড নীতি",
+    "disclaimer": "দাবিত্যাগ",
+    "editorialPolicy": "সম্পাদকীয় নীতি",
+    "dmca": "DMCA",
+    "verifiedJournalist": "যাচাইকৃত সাংবাদিক",
+    "subscription": "সাবস্ক্রিপশন",
+    "workWithUs": "আমাদের সাথে কাজ করুন",
+    "archive": "আর্কাইভ",
+    "earnPoints": "পয়েন্ট অর্জন করুন",
+    "builtBy": "ওয়েবসাইট নির্মাণ এবং ডিজিটাল পার্টনার"
+  }
+}

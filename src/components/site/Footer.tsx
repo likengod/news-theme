@@ -1,21 +1,27 @@
-import { MapPin, Phone, Mail } from "lucide-react";
+﻿import { MapPin, Phone, Mail } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { SocialIcons } from "@/components/site/SocialIcons";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { AttributionGuard } from "@/components/site/AttributionGuard";
+import { useTranslation } from "react-i18next";
 
 export function Footer() {
+  const { t } = useTranslation();
   const s = useSiteSettings();
   const year = new Date().getFullYear();
-  const copyright = s.copyright?.replace("{year}", String(year)) || `© ${year} News Theme Media Co. All rights reserved.`;
+  const copyright = s.copyright?.replace("{year}", String(year)) || `Â© ${year} News Theme Media Co. All rights reserved.`;
   const partnerHref = s.builtByUrl?.startsWith("http") ? s.builtByUrl : `https://${s.builtByUrl || "GorillaTechsolution.com"}`;
+  
+  const isPremium = ["Enterprise", "Enterprise+", "Premium"].includes(s.licenseType || "") || s.licenseRole === "VIP";
 
   const quickLinks: { label: string; to?: string }[][] = [
-    [{ label: "About", to: "/about" }, { label: "Contact Us", to: "/contact" }, { label: "Submit News", to: "/submit-news" }],
-    [{ label: "Privacy Policy", to: "/privacy-policy" }, { label: "Terms & Conditions", to: "/terms-and-conditions" }, { label: "Cookie Policy", to: "/cookie-policy" }],
-    [{ label: "Refund Policy", to: "/refund-policy" }, { label: "Disclaimer", to: "/disclaimer" }, { label: "Editorial Policy", to: "/editorial-policy" }],
-    [{ label: "DMCA", to: "/dmca" }, { label: "Verified Journalist", to: "/verified-journalist" }, { label: "Subscription", to: "/subscription" }],
-    [{ label: "Work With Us", to: "/work-with-us" }, { label: "Archive", to: "/archive" }, { label: "Earn Points", to: "/earn-points" }],
+    [{ label: t("footer.about"), to: "/about" }, { label: t("footer.contact"), to: "/contact" }, { label: t("footer.submitNews"), to: "/submit-news" }],
+    [{ label: t("footer.privacyPolicy"), to: "/privacy-policy" }, { label: t("footer.terms"), to: "/terms-and-conditions" }, { label: t("footer.cookiePolicy"), to: "/cookie-policy" }],
+    [{ label: t("footer.refundPolicy"), to: "/refund-policy" }, { label: t("footer.disclaimer"), to: "/disclaimer" }, { label: t("footer.editorialPolicy"), to: "/editorial-policy" }],
+    [{ label: t("footer.dmca"), to: "/dmca" }, { label: "Data Deletion Policy", to: "/data-deletion-policy" }, { label: t("footer.verifiedJournalist"), to: "/verified-journalist" }, { label: t("footer.subscription"), to: "/subscription" }],
+    [{ label: t("footer.workWithUs"), to: "/work-with-us" }, { label: t("footer.archive"), to: "/archive" }].concat(
+      isPremium ? [{ label: t("footer.earnPoints"), to: "/earn-points" }] : []
+    ),
   ];
 
 
@@ -68,7 +74,7 @@ export function Footer() {
 
           {/* Quick Links */}
           <div className="md:text-center">
-            <h5 className="text-sm font-bold uppercase tracking-widest text-foreground">Quick Links</h5>
+            <h5 className="text-sm font-bold uppercase tracking-widest text-foreground">{t("footer.quickLinks")}</h5>
             <div className="mt-3 space-y-2 text-sm text-muted-foreground">
               {quickLinks.map((row, i) => (
                 <div key={i} className="flex flex-wrap gap-x-5 gap-y-2 md:justify-center">
@@ -86,7 +92,7 @@ export function Footer() {
 
           {/* Connect */}
           <div className="md:text-right">
-            <h5 className="text-sm font-bold uppercase tracking-widest text-foreground">Connect With Us</h5>
+            <h5 className="text-sm font-bold uppercase tracking-widest text-foreground">{t("footer.connectWithUs")}</h5>
             <ul className="mt-3 space-y-2.5 text-sm text-muted-foreground">
               <li className="flex items-start gap-2 md:justify-end">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
@@ -109,7 +115,7 @@ export function Footer() {
           <p className="font-medium">{copyright}</p>
 
           <p className="flex flex-wrap items-center gap-1.5">
-            <span>Website built and digital partner:</span>
+            <span>{t("footer.builtBy")}:</span>
             <a
               id="gorilla-tech-partner-tag"
               href="https://gorillatechsolution.com"
@@ -122,7 +128,8 @@ export function Footer() {
           </p>
         </div>
       </div>
-      <AttributionGuard />
+      {/* <AttributionGuard /> */}
     </footer>
   );
 }
+

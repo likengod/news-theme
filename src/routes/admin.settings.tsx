@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   Save,
@@ -8,6 +8,7 @@ import {
   BarChart3,
   KeyRound,
   Image as ImageIcon,
+  DatabaseBackup,
   GitBranch,
   Lock,
   Zap,
@@ -52,9 +53,11 @@ const FestiveSettingsForm = lazy(() => import("@/components/admin/settings/Festi
 const FontSettingsTab = lazy(() => import("@/components/admin/settings/FontSettingsTab").then(m => ({ default: m.FontSettingsTab })));
 const RedirectsAndLinksTab = lazy(() => import("@/components/admin/settings/RedirectsAndLinksTab"));
 const IntegrationsTab = lazy(() => import("@/components/admin/settings/IntegrationsTab").then(m => ({ default: m.IntegrationsTab })));
+const ActivateWebsiteTab = lazy(() => import("@/components/admin/settings/ActivateWebsiteTab").then(m => ({ default: m.ActivateWebsiteTab })));
+const BackupRestoreTab = lazy(() => import("@/components/admin/settings/BackupRestoreTab").then(m => ({ default: m.BackupRestoreTab })));
 
 type SettingsSearch = {
-  tab?: "general" | "festive" | "fonts" | "integrations" | "verification" | "auth" | "protection" | "speed" | "links";
+  tab?: "general" | "festive" | "fonts" | "integrations" | "verification" | "auth" | "protection" | "speed" | "links" | "activate" | "backup";
 };
 
 export const Route = createFileRoute("/admin/settings")({
@@ -75,12 +78,16 @@ type FieldDef = {
 };
 
 function SettingsPage() {
+  const { user } = Route.useRouteContext();
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const router = useRouter();
   const [s, setS] = useState<SiteSettings>(() => loadSettings());
-  const [tab, setTab] = useState<"general" | "festive" | "fonts" | "integrations" | "verification" | "auth" | "protection" | "speed" | "links">(
+  const [tab, setTab] = useState<"general" | "festive" | "fonts" | "integrations" | "verification" | "auth" | "protection" | "speed" | "links" | "activate">(
     search.tab || "general"
   );
+  
+  const isPremium = ["Enterprise", "Enterprise+", "Premium"].includes(s.licenseType || "") || s.licenseRole === "VIP";
 
   useEffect(() => {
     if (search.tab && search.tab !== tab) {
@@ -95,6 +102,7 @@ function SettingsPage() {
     try {
       await saveSettings(s);
       toast.success("Site settings saved");
+      router.invalidate();
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Failed to save settings.");
@@ -153,6 +161,8 @@ function SettingsPage() {
     { id: "protection", label: "Protection & Anti-Theft", icon: Lock },
     { id: "speed", label: "Speed Up", icon: Zap },
     { id: "links", label: "Redirects & Links", icon: Link2 },
+    { id: "backup", label: "System Backup & Restore", icon: DatabaseBackup },
+    { id: "activate", label: "Activate Website", icon: ShieldCheck },
   ] as const;
 
   return (
@@ -179,7 +189,7 @@ function SettingsPage() {
           return (
             <button
               key={t.id}
-              onClick={() => setTab(t.id)}
+              onClick={() => navigate({ to: ".", search: { tab: t.id } })}
               className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${
                 active ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"
               }`}
@@ -197,10 +207,12 @@ function SettingsPage() {
 
         {tab === "fonts" && <FontSettingsTab />}
 
-        {tab === "integrations" && <IntegrationsTab s={s} update={update} />}
+        {tab === "integrations" && <IntegrationsTab s={s} update={update} user={user} />}
 
         {tab === "protection" && <ProtectionSettingsForm s={s} update={update} />}
         {tab === "links" && <RedirectsAndLinksTab />}
+        {tab === "activate" && <ActivateWebsiteTab s={s} update={update} />}
+        {tab === "backup" && <BackupRestoreTab />}
 
       {tab === "speed" && (
         <div className="grid gap-6 lg:grid-cols-2">
@@ -241,36 +253,56 @@ function SettingsPage() {
             title="Daily Optimization Schedule"
             subtitle="Automate background speed optimizations. The website will run compilation, CSS purging, and cache pre-heating daily."
           >
-            <Toggle
-              label="Enable Daily Scheduled Optimization"
-              checked={s.optimizationScheduleEnabled}
-              onChange={(v) => update("optimizationScheduleEnabled", v)}
-              hint="Execute optimization routines automatically at the configured time every day."
-            />
+            {!isPremium ? (
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+                  <Lock className="h-8 w-8 text-slate-400" />
+                </div>
+                <h3 className="mt-4 text-base font-semibold text-slate-800">Premium Feature Locked</h3>
+                <p className="mt-1 max-w-sm text-sm text-slate-500">
+                  Scheduled Background Optimization is exclusively available on Enterprise and Enterprise+ licenses. Please activate your license to automate daily server maintenance.
+                </p>
+                <button
+                  onClick={() => navigate({ to: ".", search: { tab: "activate" } })}
+                  className="mt-6 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+                >
+                  Activate Website
+                </button>
+              </div>
+            ) : (
+              <>
+                <Toggle
+                  label="Enable Daily Scheduled Optimization"
+                  checked={s.optimizationScheduleEnabled}
+                  onChange={(v) => update("optimizationScheduleEnabled", v)}
+                  hint="Execute optimization routines automatically at the configured time every day."
+                />
 
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">Daily Execution Time (24h format)</label>
-              <input
-                type="time"
-                value={s.optimizationScheduleTime || "02:00"}
-                onChange={(e) => update("optimizationScheduleTime", e.target.value)}
-                disabled={!s.optimizationScheduleEnabled}
-                className="w-full max-w-[200px] rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none disabled:bg-slate-50 disabled:text-slate-400"
-              />
-              <p className="mt-1 text-[11px] text-slate-500">
-                Choose a time of low website traffic (e.g., 2:00 AM) to prevent transient performance impacts.
-              </p>
-            </div>
-            
-            <div className="rounded-md border border-slate-100 bg-slate-50/50 p-3">
-              <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Scheduled Operations</h3>
-              <ul className="list-disc pl-4 text-xs text-slate-500 space-y-1">
-                <li>Purge unused CSS templates</li>
-                <li>Clear expired cache entries and index database entries</li>
-                <li>Pre-generate HTML templates for the top 50 articles</li>
-                <li>Verify file system health and clear temporary media chunks</li>
-              </ul>
-            </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-slate-700">Daily Execution Time (24h format)</label>
+                  <input
+                    type="time"
+                    value={s.optimizationScheduleTime || "02:00"}
+                    onChange={(e) => update("optimizationScheduleTime", e.target.value)}
+                    disabled={!s.optimizationScheduleEnabled}
+                    className="w-full max-w-[200px] rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none disabled:bg-slate-50 disabled:text-slate-400"
+                  />
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    Choose a time of low website traffic (e.g., 2:00 AM) to prevent transient performance impacts.
+                  </p>
+                </div>
+                
+                <div className="rounded-md border border-slate-100 bg-slate-50/50 p-3">
+                  <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Scheduled Operations</h3>
+                  <ul className="list-disc pl-4 text-xs text-slate-500 space-y-1">
+                    <li>Purge unused CSS templates</li>
+                    <li>Clear expired cache entries and index database entries</li>
+                    <li>Pre-generate HTML templates for the top 50 articles</li>
+                    <li>Verify file system health and clear temporary media chunks</li>
+                  </ul>
+                </div>
+              </>
+            )}
           </Card>
         </div>
       )}

@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "home": "Home",
+    "subscribe": "Subscribe",
+    "nightMode": "Night mode",
+    "search": "Search news…",
+    "navigation": "Navigation"
+  },
+  "footer": {
+    "quickLinks": "Quick Links",
+    "connectWithUs": "Connect With Us",
+    "about": "About",
+    "contact": "Contact Us",
+    "submitNews": "Submit News",
+    "privacyPolicy": "Privacy Policy",
+    "terms": "Terms & Conditions",
+    "cookiePolicy": "Cookie Policy",
+    "refundPolicy": "Refund Policy",
+    "disclaimer": "Disclaimer",
+    "editorialPolicy": "Editorial Policy",
+    "dmca": "DMCA",
+    "verifiedJournalist": "Verified Journalist",
+    "subscription": "Subscription",
+    "workWithUs": "Work With Us",
+    "archive": "Archive",
+    "earnPoints": "Earn Points",
+    "builtBy": "Website built and digital partner"
+  }
+}

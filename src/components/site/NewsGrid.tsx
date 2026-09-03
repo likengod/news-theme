@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+﻿import React, { useMemo } from "react";
 import techImg from "@/assets/news-tech.jpg";
 import tradeImg from "@/assets/news-trade.jpg";
 import fedImg from "@/assets/news-fed.jpg";
@@ -92,7 +92,7 @@ export const NewsGrid = React.memo(function NewsGrid({ articles = [], usedIds }:
   }, [articles]);
 
   const columns = useMemo(() => {
-    const localUsed = new Set<number>(usedIds);
+    const localUsed = usedIds || new Set<number>();
 
     return baseColumns.map((c, i) => {
       const colCfg = cfg.newsGridColumns[i];
@@ -116,10 +116,22 @@ export const NewsGrid = React.memo(function NewsGrid({ articles = [], usedIds }:
           }
         }
 
-        // 3. If still fewer than 7, fallback to any general homepage articles
+        // 3. If still fewer than 7, fallback to any UNUSED general homepage articles
+        if (matches.length < 7) {
+          const fallbacks = articles.filter(a => !matches.some(m => m.id === a.id) && !localUsed.has(a.id));
+          for (const f of fallbacks) {
+            matches.push(f);
+            if (matches.length >= 7) break;
+          }
+        }
+
+                // 4. If absolutely necessary, fall back to anything, but shuffle/offset it so columns don't look identical
         if (matches.length < 7) {
           const fallbacks = articles.filter(a => !matches.some(m => m.id === a.id));
-          for (const f of fallbacks) {
+          // Use the column index as an offset to stagger the fallback articles
+          const offset = fallbacks.length > 0 ? (i * 3) % fallbacks.length : 0;
+          const staggered = [...fallbacks.slice(offset), ...fallbacks.slice(0, offset)];
+          for (const f of staggered) {
             matches.push(f);
             if (matches.length >= 7) break;
           }
@@ -202,3 +214,6 @@ export const NewsGrid = React.memo(function NewsGrid({ articles = [], usedIds }:
     </section>
   );
 });
+
+
+

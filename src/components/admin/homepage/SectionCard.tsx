@@ -8,9 +8,10 @@ type Props = {
   value: SectionStyle;
   showCategory?: boolean;
   onChange: (v: SectionStyle) => void;
+  children?: React.ReactNode;
 };
 
-export function SectionCard({ label, hint, value, showCategory, onChange }: Props) {
+export function SectionCard({ label, hint, value, showCategory, onChange, children }: Props) {
   const [showStyle, setShowStyle] = useState(false);
   const [localTitle, setLocalTitle] = useState(value.title);
   const [localColor, setLocalColor] = useState(value.color);
@@ -89,6 +90,12 @@ export function SectionCard({ label, hint, value, showCategory, onChange }: Prop
             </label>
           )}
         </div>
+
+        {children && (
+          <div className="pt-2 border-t border-slate-100">
+            {children}
+          </div>
+        )}
 
         {/* Style toggle */}
         <button
