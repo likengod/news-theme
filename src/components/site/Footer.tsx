@@ -1,4 +1,4 @@
-﻿import { MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Mail } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { SocialIcons } from "@/components/site/SocialIcons";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
@@ -18,8 +18,8 @@ export function Footer() {
     [{ label: t("footer.about"), to: "/about" }, { label: t("footer.contact"), to: "/contact" }, { label: t("footer.submitNews"), to: "/submit-news" }],
     [{ label: t("footer.privacyPolicy"), to: "/privacy-policy" }, { label: t("footer.terms"), to: "/terms-and-conditions" }, { label: t("footer.cookiePolicy"), to: "/cookie-policy" }],
     [{ label: t("footer.refundPolicy"), to: "/refund-policy" }, { label: t("footer.disclaimer"), to: "/disclaimer" }, { label: t("footer.editorialPolicy"), to: "/editorial-policy" }],
-    [{ label: t("footer.dmca"), to: "/dmca" }, { label: "Data Deletion Policy", to: "/data-deletion-policy" }, { label: t("footer.verifiedJournalist"), to: "/verified-journalist" }, { label: t("footer.subscription"), to: "/subscription" }],
-    [{ label: t("footer.workWithUs"), to: "/work-with-us" }, { label: t("footer.archive"), to: "/archive" }].concat(
+    [{ label: t("footer.dmca"), to: "/dmca" }, { label: "Data Deletion Policy", to: "/data-deletion-policy" }, { label: t("footer.verifiedJournalist"), to: "/verified-journalist" }],
+    [{ label: t("footer.subscription"), to: "/subscription" }, { label: t("footer.workWithUs"), to: "/work-with-us" }, { label: t("footer.archive"), to: "/archive" }].concat(
       isPremium ? [{ label: t("footer.earnPoints"), to: "/earn-points" }] : []
     ),
   ];
