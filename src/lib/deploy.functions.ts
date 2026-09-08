@@ -43,7 +43,7 @@ async function ensureDeployTable() {
 
 export const getGitStatus = createServerFn({ method: "GET" })
   .handler(async () => {
-    let version = "v1.0.14";
+    let version = "v1.0.15";
     try {
       const pkgPath = path.join(ROOT, "package.json");
       const pkgRaw = fs.readFileSync(pkgPath, "utf-8");
@@ -179,8 +179,17 @@ export const gitPull = createServerFn({ method: "POST" })
       [afterHash, commitMessage, pullResult]
     );
 
-    // Auto-restart server process to pick up new bundles
-    setTimeout(() => {
+    // Auto-restart server process to pick up new bundles (works with nohup, pm2, and systemd)
+    setTimeout(async () => {
+      try {
+        const { spawn } = await import("child_process");
+        const child = spawn(process.argv[0], process.argv.slice(1), {
+          detached: true,
+          stdio: "ignore",
+          cwd: ROOT,
+        });
+        child.unref();
+      } catch {}
       try {
         process.exit(0);
       } catch {}
