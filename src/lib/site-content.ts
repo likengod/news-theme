@@ -1,4 +1,4 @@
-﻿// Lightweight client-side content store for editable site copy.
+// Lightweight client-side content store for editable site copy.
 // Persists to localStorage so admin edits survive reloads without a backend.
 import { z } from "zod";
 
@@ -130,11 +130,11 @@ export type SiteSettings = {
 
 export const defaultSettings: SiteSettings = {
   siteName: "News Timeline",
-  tagline: "Breaking News Ã‚Â· Finance Ã‚Â· Business Ã‚Â· Markets",
+  tagline: "Breaking News • Finance • Business • Markets",
   logoText: "News Timeline",
   contactEmail: "hello@newstimeline.com",
   contactPhone: "+91 99999 99999",
-  address: "Agartala, Tripura (W) India Ã‚Â· Pin: 799006",
+  address: "Agartala, Tripura (W) India • Pin: 799006",
   facebook: "#",
   instagram: "#",
   twitter: "#",

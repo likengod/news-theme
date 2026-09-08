@@ -2,6 +2,7 @@ import { TopBar } from "./TopBar";
 import { Masthead } from "./Masthead";
 import { Ticker } from "./Ticker";
 import { BreakingBar } from "./BreakingBar";
+import { useHomepageConfig } from "@/hooks/use-homepage-config";
 
 interface HeaderProps {
   showTopBar?: boolean;
@@ -11,15 +12,19 @@ interface HeaderProps {
 
 export function Header({
   showTopBar = true,
-  showTicker = true,
-  showBreakingBar = true,
+  showTicker,
+  showBreakingBar,
 }: HeaderProps) {
+  const cfg = useHomepageConfig();
+  const isTickerVisible = showTicker !== undefined ? showTicker : (cfg.showTicker ?? true);
+  const isBreakingVisible = showBreakingBar !== undefined ? showBreakingBar : (cfg.showBreakingBar ?? true);
+
   return (
     <>
       {showTopBar && <TopBar />}
       <Masthead />
-      {showTicker && <Ticker />}
-      {showBreakingBar && <BreakingBar />}
+      {isTickerVisible && <Ticker />}
+      {isBreakingVisible && <BreakingBar />}
     </>
   );
 }

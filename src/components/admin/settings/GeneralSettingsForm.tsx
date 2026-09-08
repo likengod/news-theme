@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Save, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { loadSettings, saveSettings, type SiteSettings } from "@/lib/site-content";
@@ -30,7 +30,7 @@ const GROUPS: { title: string; fields: FieldDef[] }[] = [
           { value: "both", label: "Both (Logo + Text)" },
         ],
       },
-      { key: "tagline", label: "Tagline", placeholder: "Breaking News Â· Finance Â· Markets" },
+      { key: "tagline", label: "Tagline", placeholder: "Breaking News · Finance · Markets" },
       { key: "metaDescription", label: "SEO Meta Description", textarea: true, placeholder: "Independent newsroom..." },
     ],
   },
@@ -56,6 +56,7 @@ export function GeneralSettingsForm() {
   const [settings, setSettings] = useState<SiteSettings>(() => loadSettings());
   const [saved, setSaved] = useState(false);
   
+  const update = (k: keyof SiteSettings, v: any) => setSettings((s) => ({ ...s, [k]: v }));
   const handleSave = async () => {
     try {
       await saveSettings(settings);
@@ -124,11 +125,11 @@ export function GeneralSettingsForm() {
                 Logo Images & Favicon
               </h3>
               <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-                <LogoUploader compact label="Site logo (Day)" value={settings.logoLight} usage="site-logo" recommendedSize="320Ã—80 px" onChange={(v) => update("logoLight", v)} />
-                <LogoUploader compact label="Site logo (Night)" value={settings.logoDark} usage="site-logo" dark recommendedSize="320Ã—80 px" onChange={(v) => update("logoDark", v)} />
-                <LogoUploader compact label="Footer logo (Day)" value={settings.footerLogoLight} usage="site-logo" recommendedSize="320Ã—80 px" onChange={(v) => update("footerLogoLight", v)} />
-                <LogoUploader compact label="Footer logo (Night)" value={settings.footerLogoDark} usage="site-logo" dark recommendedSize="320Ã—80 px" onChange={(v) => update("footerLogoDark", v)} />
-                <LogoUploader compact label="Favicon" value={settings.favicon} usage="site-favicon" recommendedSize="64Ã—64 px" onChange={(v) => update("favicon", v)} />
+                <LogoUploader compact label="Site logo (Day)" value={settings.logoLight} usage="site-logo" recommendedSize="320×80 px" onChange={(v) => update("logoLight", v)} />
+                <LogoUploader compact label="Site logo (Night)" value={settings.logoDark} usage="site-logo" dark recommendedSize="320×80 px" onChange={(v) => update("logoDark", v)} />
+                <LogoUploader compact label="Footer logo (Day)" value={settings.footerLogoLight} usage="site-logo" recommendedSize="320×80 px" onChange={(v) => update("footerLogoLight", v)} />
+                <LogoUploader compact label="Footer logo (Night)" value={settings.footerLogoDark} usage="site-logo" dark recommendedSize="320×80 px" onChange={(v) => update("footerLogoDark", v)} />
+                <LogoUploader compact label="Favicon" value={settings.favicon} usage="site-favicon" recommendedSize="64×64 px" onChange={(v) => update("favicon", v)} />
               </div>
             </div>
           )}

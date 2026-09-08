@@ -4,6 +4,7 @@ import { FaWhatsapp, FaFacebookF, FaTwitter } from "react-icons/fa6";
 import { grid, top, lead, viewsFor, formatViews } from "@/lib/news-data";
 import { Views } from "./Views";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
+import { Link } from "@tanstack/react-router";
 
 type WatchItem = {
   title: string;
@@ -377,20 +378,20 @@ export function Columnists() {
 
   return (
     <section className="border-t border-border pt-3 pb-1 md:py-10">
-      {/* Header bar hidden on mobile (< md), visible on desktop (>= md) */}
-      <div className="hidden md:flex items-center justify-between">
+      {/* Header bar visible on mobile and desktop */}
+      <div className="flex items-center justify-between mb-2 md:mb-0">
         <h3
-          className="font-bold"
+          className="font-bold text-sm md:text-base"
           style={{ color: cfg.watch.color, fontSize: `${cfg.watch.fontSize}px` }}
         >
           {cfg.watch.title}
         </h3>
-        <a
-          href="/news/sample"
-          className="rounded-full border border-border px-4 py-1.5 text-xs font-semibold text-foreground transition hover:bg-foreground hover:text-background"
+        <Link
+          to="/reels"
+          className="rounded-full border border-border px-3 md:px-4 py-1 md:py-1.5 text-[11px] md:text-xs font-semibold text-foreground transition hover:bg-foreground hover:text-background"
         >
           Explore More
-        </a>
+        </Link>
       </div>
 
       <div 

@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { sections } from "@/lib/news-data";
@@ -51,7 +51,6 @@ export function Masthead() {
     <>
       <header className="border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-5 text-center md:py-6">
-          <div className="kicker mb-2 hidden md:block">Est. 2026 Â· Vol. I Â· No. 184</div>
           <Link to="/" className="block">
             {showLogo && s.logoLight && (
               <img src={s.logoLight} alt={s.logoText || "Logo"} className={`mx-auto h-16 object-contain ${s.logoDark ? "dark:hidden" : ""} ${showText ? "mb-2" : ""}`} />
@@ -74,11 +73,11 @@ export function Masthead() {
             ) : (
               <>
                 <span style={{ color: "#2563eb" }}>Breaking News</span>
-                <span className="mx-2 text-muted-foreground">Â·</span>
+                <span className="mx-2 text-muted-foreground">•</span>
                 <span style={{ color: "#dc2626" }}>Finance</span>
-                <span className="mx-2 text-muted-foreground">Â·</span>
+                <span className="mx-2 text-muted-foreground">•</span>
                 <span style={{ color: "#16a34a" }}>Business</span>
-                <span className="mx-2 text-muted-foreground">Â·</span>
+                <span className="mx-2 text-muted-foreground">•</span>
                 <span style={{ color: "#ea580c" }}>Market</span>
               </>
             )}

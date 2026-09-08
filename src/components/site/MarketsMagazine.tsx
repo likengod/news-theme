@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import artImg from "@/assets/hero-markets.jpg";
 import pensionImg from "@/assets/news-wallstreet.jpg";
 import coverImg from "@/assets/news-oil.jpg";
@@ -83,12 +83,24 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
 
   // Filter articles based on selected category (defaulting to "Markets" if not configured)
   const localUsed = usedIds || new Set<number>();
-  const magazineCategory = cfg.marketsMagazine.category || "Markets";
-  const dbMagazineArticles = articles.filter((a) => {
+  const configuredCategory = cfg.marketsMagazine.category;
+  const magazineCategory = (!configuredCategory || configuredCategory === "Markets") ? "Auto (Latest)" : configuredCategory;
+  
+  let dbMagazineArticles = articles.filter((a) => {
     if (localUsed.has(a.id)) return false;
     if (!magazineCategory || magazineCategory === "Auto (Latest)") return true;
     return a.category?.toLowerCase() === magazineCategory.toLowerCase();
   });
+
+  // If not enough articles found for this category, fill with other available articles
+  if (dbMagazineArticles.length < 4) {
+    const filler = articles.filter((a) => !localUsed.has(a.id) && !dbMagazineArticles.some((d) => d.id === a.id));
+    dbMagazineArticles = [...dbMagazineArticles, ...filler];
+  }
+  if (dbMagazineArticles.length < 4) {
+    const remaining = articles.filter((a) => !dbMagazineArticles.some((d) => d.id === a.id));
+    dbMagazineArticles = [...dbMagazineArticles, ...remaining];
+  }
 
   // Record selected articles as used
   dbMagazineArticles.slice(0, 4).forEach((a) => localUsed.add(a.id));
@@ -201,31 +213,31 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
             />
             <div>
               <p className="font-sans text-[28px] font-extrabold leading-[1.16] tracking-normal text-foreground group-hover:underline line-clamp-2">
-                {p1 ? p1.title : "A $600 Billion Experiment Kicks Off at the Biggest US Pension Fund"}
+                {p1 ? p1.title : "Market Insights and Analysis"}
               </p>
               <p className="mt-2 max-w-[430px] font-sans text-[16px] leading-[1.12] text-foreground line-clamp-4">
-                {p1 ? (p1.excerpt || p1.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "CalPERS investment chief Stephen Gilmore wants to break down walls between asset classes with a â€œtotal portfolioâ€ approach, blending stocks, bonds, private equity and real assets into a single risk budget designed to lift returns for nearly two million members."}
+                {p1 ? (p1.excerpt || p1.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "Latest developments and analytical perspectives on regional and global market trends."}
               </p>
             </div>
           </div>
         </Link>
 
-        <Link to="/news/$slug" params={{ slug: p2?.slug || "h-1b-crackdown-on-indian-workers-erodes-a-texas-real-estate-boom" }} className="group block">
-          <p className="font-sans text-[16px] leading-none text-foreground">{p2 ? p2.category : "The Big Take"}</p>
+        <Link to="/news/$slug" params={{ slug: p2?.slug || "market-update-report" }} className="group block">
+          <p className="font-sans text-[16px] leading-none text-foreground">{p2 ? p2.category : "Analysis"}</p>
           <p className="mt-1 font-sans text-[17px] font-medium leading-[1.18] tracking-normal text-foreground group-hover:underline line-clamp-3">
-            {p2 ? p2.title : "H-1B Crackdown on Indian Workers Erodes a Texas Real Estate Boom"}
+            {p2 ? p2.title : "Economic Trends and Growth Outlook"}
           </p>
           <p className="mt-2 font-sans text-[16px] leading-[1.15] text-foreground line-clamp-3">
-            {p2 ? (p2.excerpt || p2.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "Skilled professionals who helped transform a booming Texas region into a tech and housing magnet now face deportation as visa renewals stall, leaving builders, lenders and landlords bracing for a sudden cooldown in some of the state's hottest suburban markets."}
+            {p2 ? (p2.excerpt || p2.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "Key factors driving market momentum and policy adjustments across sectors."}
           </p>
         </Link>
 
-        <Link to="/news/$slug" params={{ slug: p3?.slug || "europe-fights-to-loosen-america-s-iron-grip-on-global-payment-systems" }} className="group block">
+        <Link to="/news/$slug" params={{ slug: p3?.slug || "global-markets-review" }} className="group block">
           <p className="font-sans text-[17px] font-extrabold leading-[1.18] tracking-normal text-foreground group-hover:underline line-clamp-2">
-            {p3 ? p3.title : "Europe Fights to Loosen Americaâ€™s Iron Grip on Global Payment Systems"}
+            {p3 ? p3.title : "Global Financial Markets Review"}
           </p>
           <p className="mt-2 font-sans text-[16px] leading-[1.15] text-foreground line-clamp-5">
-            {p3 ? (p3.excerpt || p3.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "Concerns over economic sovereignty and the weaponization of cross-border finance are fueling a continent-wide search for homegrown alternatives to Visa and Mastercard, with central banks, fintechs and regulators racing to build a rival network."}
+            {p3 ? (p3.excerpt || p3.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "Examining market infrastructure, cross-border flows, and financial technology innovation."}
           </p>
         </Link>
       </div>

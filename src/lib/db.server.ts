@@ -1,4 +1,4 @@
-﻿import mysql from "mysql2/promise";
+import mysql from "mysql2/promise";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
@@ -16,20 +16,20 @@ let configLoaded = false;
 let dbConfig: any = null;
 
 export function loadDbConfig() {
-  if (configLoaded) return dbConfig;
   try {
     const configPath = path.resolve(process.cwd(), "db-config.json");
     if (fs.existsSync(configPath)) {
       const data = fs.readFileSync(configPath, "utf-8");
       dbConfig = JSON.parse(data);
-      configLoaded = true;
       return dbConfig;
     }
+    dbConfig = null;
+    return null;
   } catch (err) {
     console.error("[MySQL] Error reading db-config.json:", err);
+    dbConfig = null;
+    return null;
   }
-  configLoaded = true;
-  return null;
 }
 
 declare global {
@@ -41,7 +41,7 @@ export function getPool() {
   if (pool) return pool;
 
   const config = loadDbConfig();
-  const host = config?.host || process.env.MYSQL_HOST || "localhost";
+  const host = config?.host || process.env.MYSQL_HOST || "127.0.0.1";
   const port = Number(config?.port || process.env.MYSQL_PORT) || 3306;
   const user = config?.user || process.env.MYSQL_USER || "root";
   const password = config?.password !== undefined ? config.password : (process.env.MYSQL_PASSWORD || "");
@@ -57,6 +57,7 @@ export function getPool() {
     connectionLimit: 10,
     maxIdle: 5,
     idleTimeout: 30000,
+    connectTimeout: 4000,
     enableKeepAlive: true,
     queueLimit: 0,
   });
@@ -78,6 +79,10 @@ export async function closePool() {
 }
 
 export async function query(sql: string, params: any[] = []): Promise<any> {
+  const config = loadDbConfig();
+  if (!config) {
+    return [];
+  }
   const p = getPool();
   const [results] = await p.query(sql, params);
   return results;
@@ -98,23 +103,28 @@ export async function safeCreateIndex(tableName: string, indexName: string, colu
 export async function testDbConnection(config: any): Promise<boolean> {
   let tempConn;
   try {
-    // 1. Connect without selecting a database
+    // 1. Connect with connectTimeout
     tempConn = await mysql.createConnection({
-      host: config.host || "localhost",
+      host: config.host || "127.0.0.1",
       port: Number(config.port) || 3306,
       user: config.user || "root",
       password: config.password !== undefined ? config.password : "",
+      connectTimeout: 4000,
     });
     
-    // 2. Create database if it does not exist
+    // 2. Try creating database if allowed, or ignore if already created by hosting panel
     const dbName = config.database || "today_tripura";
-    await tempConn.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
+    try {
+      await tempConn.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
+    } catch (createErr: any) {
+      console.warn("[MySQL] CREATE DATABASE notice:", createErr?.message);
+    }
     
     // 3. Select database to verify access
     await tempConn.query(`USE \`${dbName}\``);
     return true;
   } catch (err: any) {
-    console.error("[MySQL] Test connection / DB creation failed:", err.message);
+    console.error("[MySQL] Test connection / DB verification failed:", err.message);
     throw new Error(err.message || "Failed to connect to MySQL server");
   } finally {
     if (tempConn) {
@@ -557,8 +567,10 @@ export async function initializeDatabase(customAdmin?: { email: string; password
   }
 }
 
-// Call init automatically on startup (catches errors if unconfigured)
-initializeDatabase().catch((err) => {
-  console.log("[MySQL] Auto-initialization skipped or waiting for setup:", err.message);
-});
+// Call init automatically on startup only if db-config exists
+if (loadDbConfig()) {
+  initializeDatabase().catch((err) => {
+    console.log("[MySQL] Auto-initialization skipped or waiting for setup:", err.message);
+  });
+}
 

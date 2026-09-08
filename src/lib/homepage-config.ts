@@ -1,4 +1,4 @@
-﻿// Homepage section configuration Ã¢â‚¬â€ editable via /admin/homepage.
+// Homepage section configuration Ã¢â‚¬â€ editable via /admin/homepage.
 // Each section has a label/title (text rendered as the heading), font size,
 // color, and optionally a category that drives "latest news" content.
 
@@ -33,6 +33,8 @@ export type HomepageConfig = {
   marketsMagazine: SectionStyle;
   liveVideo: LiveVideoConfig;
   newsGridColumns: SectionStyle[]; // 5 columns
+  showTicker?: boolean;
+  showBreakingBar?: boolean;
 };
 
 export const ALL_CATEGORY_OPTIONS = ["Auto (Latest)", ...ALL_CATEGORIES];
@@ -45,11 +47,13 @@ export const defaultHomepageConfig: HomepageConfig = {
   heroFeatured: { title: "Featured", fontSize: 12, color: "#1A1110", category: "Auto (Latest)", autoSlide: true, slideInterval: 5, showMultiple: true, slideCount: 3 },
   watch: { title: "Watch", fontSize: 16, color: "#1A1110" },
   marketsMagazine: { title: "Markets Magazine", fontSize: 16, color: "#1A1110" },
+  showTicker: true,
+  showBreakingBar: true,
   liveVideo: {
     provider: "youtube",
     youtubeChannelId: "UCIALMKvObZNtJ6AmdCLP7Lg",
     facebookPageUrl: "https://www.facebook.com/facebook",
-    title: "LIVE: Markets Now Ã¢â‚¬â€ breaking coverage",
+    title: "LIVE: Markets Now — breaking coverage",
   },
   newsGridColumns: [
     { title: "World", fontSize: 12, color: "#1A1110", category: "Global" },

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkWithUsRouteImport } from './routes/work-with-us'
 import { Route as WithdrawPointsRouteImport } from './routes/withdraw-points'
+import { Route as WatchRouteImport } from './routes/watch'
 import { Route as VerifiedJournalistRouteImport } from './routes/verified-journalist'
 import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
 import { Route as SubscriptionRouteImport } from './routes/subscription'
@@ -19,6 +20,7 @@ import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
+import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
@@ -67,6 +69,11 @@ const WithdrawPointsRoute = WithdrawPointsRouteImport.update({
   path: '/withdraw-points',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WatchRoute = WatchRouteImport.update({
+  id: '/watch',
+  path: '/watch',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerifiedJournalistRoute = VerifiedJournalistRouteImport.update({
   id: '/verified-journalist',
   path: '/verified-journalist',
@@ -105,6 +112,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const RefundPolicyRoute = RefundPolicyRouteImport.update({
   id: '/refund-policy',
   path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReelsRoute = ReelsRouteImport.update({
+  id: '/reels',
+  path: '/reels',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -311,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
+  '/reels': typeof ReelsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
@@ -319,6 +332,7 @@ export interface FileRoutesByFullPath {
   '/subscription': typeof SubscriptionRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/verified-journalist': typeof VerifiedJournalistRoute
+  '/watch': typeof WatchRoute
   '/withdraw-points': typeof WithdrawPointsRoute
   '/work-with-us': typeof WorkWithUsRoute
   '/admin/advertisements': typeof AdminAdvertisementsRoute
@@ -359,6 +373,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
+  '/reels': typeof ReelsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
@@ -367,6 +382,7 @@ export interface FileRoutesByTo {
   '/subscription': typeof SubscriptionRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/verified-journalist': typeof VerifiedJournalistRoute
+  '/watch': typeof WatchRoute
   '/withdraw-points': typeof WithdrawPointsRoute
   '/work-with-us': typeof WorkWithUsRoute
   '/admin/advertisements': typeof AdminAdvertisementsRoute
@@ -409,6 +425,7 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
+  '/reels': typeof ReelsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
@@ -417,6 +434,7 @@ export interface FileRoutesById {
   '/subscription': typeof SubscriptionRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/verified-journalist': typeof VerifiedJournalistRoute
+  '/watch': typeof WatchRoute
   '/withdraw-points': typeof WithdrawPointsRoute
   '/work-with-us': typeof WorkWithUsRoute
   '/admin/advertisements': typeof AdminAdvertisementsRoute
@@ -460,6 +478,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/privacy-policy'
     | '/profile'
+    | '/reels'
     | '/refund-policy'
     | '/reset-password'
     | '/search'
@@ -468,6 +487,7 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/terms-and-conditions'
     | '/verified-journalist'
+    | '/watch'
     | '/withdraw-points'
     | '/work-with-us'
     | '/admin/advertisements'
@@ -508,6 +528,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/privacy-policy'
     | '/profile'
+    | '/reels'
     | '/refund-policy'
     | '/reset-password'
     | '/search'
@@ -516,6 +537,7 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/terms-and-conditions'
     | '/verified-journalist'
+    | '/watch'
     | '/withdraw-points'
     | '/work-with-us'
     | '/admin/advertisements'
@@ -557,6 +579,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/privacy-policy'
     | '/profile'
+    | '/reels'
     | '/refund-policy'
     | '/reset-password'
     | '/search'
@@ -565,6 +588,7 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/terms-and-conditions'
     | '/verified-journalist'
+    | '/watch'
     | '/withdraw-points'
     | '/work-with-us'
     | '/admin/advertisements'
@@ -607,6 +631,7 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ProfileRoute: typeof ProfileRoute
+  ReelsRoute: typeof ReelsRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
@@ -615,6 +640,7 @@ export interface RootRouteChildren {
   SubscriptionRoute: typeof SubscriptionRoute
   TermsAndConditionsRoute: typeof TermsAndConditionsRoute
   VerifiedJournalistRoute: typeof VerifiedJournalistRoute
+  WatchRoute: typeof WatchRoute
   WithdrawPointsRoute: typeof WithdrawPointsRoute
   WorkWithUsRoute: typeof WorkWithUsRoute
   ApiRssRoute: typeof ApiRssRoute
@@ -636,6 +662,13 @@ declare module '@tanstack/react-router' {
       path: '/withdraw-points'
       fullPath: '/withdraw-points'
       preLoaderRoute: typeof WithdrawPointsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/watch': {
+      id: '/watch'
+      path: '/watch'
+      fullPath: '/watch'
+      preLoaderRoute: typeof WatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/verified-journalist': {
@@ -692,6 +725,13 @@ declare module '@tanstack/react-router' {
       path: '/refund-policy'
       fullPath: '/refund-policy'
       preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reels': {
+      id: '/reels'
+      path: '/reels'
+      fullPath: '/reels'
+      preLoaderRoute: typeof ReelsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -1016,6 +1056,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   ProfileRoute: ProfileRoute,
+  ReelsRoute: ReelsRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
@@ -1024,6 +1065,7 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionRoute: SubscriptionRoute,
   TermsAndConditionsRoute: TermsAndConditionsRoute,
   VerifiedJournalistRoute: VerifiedJournalistRoute,
+  WatchRoute: WatchRoute,
   WithdrawPointsRoute: WithdrawPointsRoute,
   WorkWithUsRoute: WorkWithUsRoute,
   ApiRssRoute: ApiRssRoute,

@@ -129,6 +129,55 @@ function HomepageEditorPage() {
         </div>
       </div>
 
+      {/* Top Header Bars & Market Ticker */}
+      <Group
+        title="Top Header Bars & Market Ticker"
+        description="Show or hide the financial market ticker bar and breaking news bar."
+        defaultOpen={true}
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-800">
+                Stock Market Ticker Bar
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Displays live indices (NIFTY 50, SENSEX, GOLD, SILVER, CRUDE OIL) under the header.
+              </p>
+            </div>
+            <label className="relative inline-flex cursor-pointer items-center ml-3 shrink-0">
+              <input
+                type="checkbox"
+                checked={cfg.showTicker ?? true}
+                onChange={(e) => update("showTicker", e.target.checked)}
+                className="peer sr-only"
+              />
+              <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-focus:outline-none" />
+            </label>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-800">
+                Breaking News Bar
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Displays latest breaking headlines scrolling ticker.
+              </p>
+            </div>
+            <label className="relative inline-flex cursor-pointer items-center ml-3 shrink-0">
+              <input
+                type="checkbox"
+                checked={cfg.showBreakingBar ?? true}
+                onChange={(e) => update("showBreakingBar", e.target.checked)}
+                className="peer sr-only"
+              />
+              <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-focus:outline-none" />
+            </label>
+          </div>
+        </div>
+      </Group>
+
       {/* Hero section */}
       <Group
         title="Hero area"

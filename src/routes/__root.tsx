@@ -70,7 +70,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     // Don't intercept server-only API endpoints or RSS feeds
     if (location.pathname.startsWith("/api/") || location.pathname === "/api/rss") return;
     
-    // Check custom redirect rules
+    // 1. Check setup status first before executing any DB queries
+    try {
+      const status = await checkSetupStatus();
+      const isSetupPage = location.pathname === "/setup";
+      
+      if (status.required) {
+        if (!isSetupPage) {
+          throw redirect({ to: "/setup" });
+        }
+        // If setup is required and already on /setup, skip redirects/DB rules
+        return;
+      }
+      if (!status.required && isSetupPage) {
+        throw redirect({ to: "/" });
+      }
+    } catch (err: any) {
+      // Re-throw TanStack Router redirects
+      if (err.isRedirect || err.status === 301 || err.status === 302 || err.status === 307 || err.headers) {
+        throw err;
+      }
+      console.error("[__root beforeLoad] Setup check error:", err);
+    }
+
+    // 2. Check custom redirect rules only if setup is completed
     try {
       const rules = await getRedirectRulesServer();
       const currentPath = location.pathname;
@@ -89,26 +112,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         throw err;
       }
     }
-
-    try {
-      const status = await checkSetupStatus();
-      const isSetupPage = location.pathname === "/setup";
-      
-      if (status.required && !isSetupPage) {
-        throw redirect({ to: "/setup" });
-      }
-      if (!status.required && isSetupPage) {
-        throw redirect({ to: "/" });
-      }
-    } catch (err: any) {
-      // Re-throw TanStack Router redirects
-      if (err.isRedirect || err.status === 302 || err.status === 307 || err.headers) {
-        throw err;
-      }
-      console.error("[__root beforeLoad] Setup check error:", err);
-    }
   },
-  loader: async () => {
+  loader: async ({ location }) => {
+    // If on setup page, return blank defaults without making DB queries
+    if (location.pathname === "/setup") {
+      return { settings: null, homepageConfig: null, adsConfig: null, redirectRules: [], fontConfig: null, categories: [] };
+    }
     try {
       const [settings, homepageConfig, adsConfig, redirectRules, fontConfig, categories] = await Promise.all([
         getSiteSettingsServer(),

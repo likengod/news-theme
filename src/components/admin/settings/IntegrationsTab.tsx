@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Card, IntegrationField, Toggle, type FieldDef, GuideList } from '@/components/admin/settings/SettingsHelpers';
 import { ShieldCheck, Crown, Sparkles, GitBranch } from 'lucide-react';
 import { useServerFn } from '@tanstack/react-start';
@@ -8,7 +8,7 @@ import { toast } from 'sonner';
     {
       key: "googleAnalyticsId",
       label: "Google Analytics (GA4) Measurement ID",
-      hint: "Format: G-XXXXXXXXXX - from analytics.google.com â€” Admin â€” Data Streams.",
+      hint: "Format: G-XXXXXXXXXX - from analytics.google.com — Admin — Data Streams.",
       placeholder: "G-XXXXXXXXXX",
       guideUrl: "https://analytics.google.com/"
     },
@@ -137,7 +137,7 @@ import { toast } from 'sonner';
 
 
 export function IntegrationsTab({ s, update }: { s: any; update: any }) {
-  const canSeeGitConfig = s.licenseType === "Enterprise+";
+  const canSeeGitConfig = true;
   return (
     <div className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">

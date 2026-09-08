@@ -41,11 +41,6 @@ export const checkSetupStatus = createServerFn({ method: "GET" })
       return { required: false };
     } catch (err: any) {
       console.log("[Setup Status] Connection check warning:", err?.message || err);
-      const config = loadDbConfig();
-      if (config) {
-        // DB config already exists; do not send user to setup wizard on transient connection errors
-        return { required: false };
-      }
       return { required: true };
     }
   });
