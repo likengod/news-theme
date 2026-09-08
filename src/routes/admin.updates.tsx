@@ -198,17 +198,17 @@ function UpdatesPage() {
             <button
               onClick={handlePullAndUpdate}
               disabled={pulling || building}
-              className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60 cursor-pointer"
+              className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700 active:bg-red-800 disabled:opacity-60 cursor-pointer"
             >
               {pulling || building ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin text-white" />
               ) : (
-                <Zap className="h-4 w-4 fill-white" />
+                <Zap className="h-4 w-4 fill-white text-white" />
               )}
               <span>
                 {pulling || building 
                   ? "Updating System..." 
-                  : `Update to ${latestVersion}`}
+                  : `Update Now ${latestVersion}`}
               </span>
             </button>
           ) : (
@@ -227,38 +227,6 @@ function UpdatesPage() {
           </button>
         </div>
       </div>
-
-      {/* Update Hero Banner */}
-      {updatesAvailable && (
-        <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent p-6 shadow-sm">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-                <Zap className="h-3.5 w-3.5 fill-emerald-600" />
-                New Update Available
-              </div>
-              <h3 className="text-base font-bold text-slate-900">
-                Version {latestVersion} is ready to install
-              </h3>
-              <p className="text-xs text-slate-600">
-                Your website is currently running <span className="font-semibold text-slate-800">{currentVersion}</span>. Click update to automatically download the latest version from GitHub and re-compile your site.
-              </p>
-            </div>
-            <button
-              onClick={handlePullAndUpdate}
-              disabled={pulling || building}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-emerald-700 hover:shadow-lg disabled:opacity-60 cursor-pointer whitespace-nowrap"
-            >
-              {pulling || building ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Rocket className="h-4 w-4" />
-              )}
-              <span>{pulling || building ? "Updating System..." : `Update Now to ${latestVersion}`}</span>
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Build Terminal Output */}
       {buildOutput && (
