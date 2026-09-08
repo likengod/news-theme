@@ -43,7 +43,7 @@ async function ensureDeployTable() {
 
 export const getGitStatus = createServerFn({ method: "GET" })
   .handler(async () => {
-    let version = "v1.0.18";
+    let version = "v1.0.19";
     try {
       const pkgPath = path.join(ROOT, "package.json");
       const pkgRaw = fs.readFileSync(pkgPath, "utf-8");
@@ -183,17 +183,29 @@ export const gitPull = createServerFn({ method: "POST" })
     setTimeout(async () => {
       try {
         const { spawn } = await import("child_process");
-        const child = spawn(process.argv[0], process.argv.slice(1), {
-          detached: true,
-          stdio: "ignore",
-          cwd: ROOT,
-        });
-        child.unref();
-      } catch {}
+        if (process.platform !== "win32") {
+          const restartCmd = `sleep 2 && if ! fuser 3000/tcp >/dev/null 2>&1; then nohup ${process.argv[0]} server.js > server.log 2>&1 & fi`;
+          const child = spawn("sh", ["-c", restartCmd], {
+            detached: true,
+            stdio: "ignore",
+            cwd: ROOT,
+          });
+          child.unref();
+        } else {
+          const child = spawn(process.argv[0], process.argv.slice(1), {
+            detached: true,
+            stdio: "ignore",
+            cwd: ROOT,
+          });
+          child.unref();
+        }
+      } catch (err) {
+        console.error("[Deploy] Auto-restart spawn error:", err);
+      }
       try {
         process.exit(0);
       } catch {}
-    }, 1500);
+    }, 1200);
 
     return {
       success: true,
