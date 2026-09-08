@@ -179,7 +179,7 @@ function UpdatesPage() {
     }
   };
 
-  const currentVersion = gitStatus?.version || "v1.0.16";
+  const currentVersion = gitStatus?.version || "v1.0.17";
   const latestVersion = gitStatus?.latestVersion || currentVersion;
   const hasNewVersion = Boolean(gitStatus?.hasNewVersion || (latestVersion !== currentVersion));
   const updatesAvailable = (gitStatus?.behind ?? 0) > 0 || hasNewVersion;
@@ -209,7 +209,7 @@ function UpdatesPage() {
               <span>
                 {pulling || building 
                   ? "Updating System..." 
-                  : `Update Now ${latestVersion}`}
+                  : `Update to ${latestVersion}`}
               </span>
             </button>
           ) : (
