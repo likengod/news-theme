@@ -38,6 +38,8 @@ export const Route = createFileRoute("/admin/updates")({
 
 type GitStatus = {
   version?: string;
+  latestVersion?: string;
+  hasNewVersion?: boolean;
   branch: string;
   commitHash: string;
   commitFull: string;
@@ -146,7 +148,10 @@ function UpdatesPage() {
       const res = await buildProject();
       setBuildOutput(res.buildLog || "");
       if (res.success) {
-        toast.success("Build and deployment completed successfully!");
+        toast.success("Build completed successfully! Reloading in 3 seconds...");
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
       } else {
         toast.error("Build failed — check log below");
       }
@@ -173,10 +178,11 @@ function UpdatesPage() {
     }
   };
 
-  const currentVersion = gitStatus?.version || "v1.7.7";
-  const isGitConfigured = Boolean(gitStatus?.isConfigured);
-  const updatesAvailable = (gitStatus?.behind ?? 0) > 0;
-  const updatesCount = gitStatus?.behind ?? 0;
+  const currentVersion = gitStatus?.version || "v1.0.6";
+  const latestVersion = gitStatus?.latestVersion || currentVersion;
+  const hasNewVersion = Boolean(gitStatus?.hasNewVersion || (latestVersion !== currentVersion));
+  const updatesAvailable = (gitStatus?.behind ?? 0) > 0 || hasNewVersion;
+  const updatesCount = gitStatus?.behind && gitStatus.behind > 0 ? gitStatus.behind : (hasNewVersion ? 1 : 0);
 
   return (
     <div className="space-y-8 pb-12">
@@ -192,7 +198,7 @@ function UpdatesPage() {
             <button
               onClick={handlePullAndUpdate}
               disabled={pulling || building}
-              className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60"
+              className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60 cursor-pointer"
             >
               {pulling || building ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -202,21 +208,8 @@ function UpdatesPage() {
               <span>
                 {pulling || building 
                   ? "Updating System..." 
-                  : `Update to Latest (${updatesCount} new)`}
+                  : `Update to ${latestVersion}`}
               </span>
-            </button>
-          ) : !isGitConfigured ? (
-            <button
-              onClick={handleInitialize}
-              disabled={pulling || building}
-              className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60"
-            >
-              {pulling || building ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Hammer className="h-4 w-4 text-white" />
-              )}
-              <span>Check Update</span>
             </button>
           ) : (
             <div className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-500 border border-slate-200">
@@ -228,12 +221,44 @@ function UpdatesPage() {
           <button
             onClick={refresh}
             disabled={loading}
-            className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white p-2 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white p-2 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </button>
         </div>
       </div>
+
+      {/* Update Hero Banner */}
+      {updatesAvailable && (
+        <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent p-6 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                <Zap className="h-3.5 w-3.5 fill-emerald-600" />
+                New Update Available
+              </div>
+              <h3 className="text-base font-bold text-slate-900">
+                Version {latestVersion} is ready to install
+              </h3>
+              <p className="text-xs text-slate-600">
+                Your website is currently running <span className="font-semibold text-slate-800">{currentVersion}</span>. Click update to automatically download the latest version from GitHub and re-compile your site.
+              </p>
+            </div>
+            <button
+              onClick={handlePullAndUpdate}
+              disabled={pulling || building}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-emerald-700 hover:shadow-lg disabled:opacity-60 cursor-pointer whitespace-nowrap"
+            >
+              {pulling || building ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Rocket className="h-4 w-4" />
+              )}
+              <span>{pulling || building ? "Updating System..." : `Update Now to ${latestVersion}`}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Build Terminal Output */}
       {buildOutput && (

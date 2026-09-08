@@ -48,6 +48,26 @@ export const getGitStatus = createServerFn({ method: "GET" })
       }
     } catch {}
 
+    let latestVersion = version;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const res = await fetch("https://raw.githubusercontent.com/likengod/news-theme/main/package.json", {
+        headers: { "User-Agent": "News-Theme-Updater" },
+        cache: "no-store",
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const remotePkg: any = await res.json();
+        if (remotePkg.version) {
+          latestVersion = remotePkg.version.startsWith("v") ? remotePkg.version : `v${remotePkg.version}`;
+        }
+      }
+    } catch (e) {
+      console.warn("[Deploy] Remote version check notice:", e);
+    }
+
     const branch = git("rev-parse --abbrev-ref HEAD");
     const commitHash = git("rev-parse --short HEAD");
     const commitFull = git("rev-parse HEAD");
@@ -56,7 +76,7 @@ export const getGitStatus = createServerFn({ method: "GET" })
     const remote = git("remote get-url origin");
     const dirty = git("status --porcelain");
 
-    const isConfigured = Boolean(
+    const isGitInstalled = Boolean(
       remote &&
       !remote.includes("unknown error") &&
       !remote.includes("fatal") &&
@@ -66,27 +86,35 @@ export const getGitStatus = createServerFn({ method: "GET" })
     let ahead = 0;
     let behind = 0;
 
-    if (isConfigured) {
-      git("fetch --all");
-      const aheadStr = git("rev-list --count @{u}..HEAD 2>nul || echo 0");
-      const behindStr = git("rev-list --count HEAD..@{u} 2>nul || echo 0");
-      ahead = parseInt(aheadStr) || 0;
+    if (isGitInstalled) {
+      git("fetch origin main --tags");
+      const activeBranch = branch.includes("fatal") ? "main" : branch;
+      const behindStr = git(`rev-list --count HEAD..origin/${activeBranch}`);
+      const aheadStr = git(`rev-list --count origin/${activeBranch}..HEAD`);
       behind = parseInt(behindStr) || 0;
+      ahead = parseInt(aheadStr) || 0;
+    }
+
+    const hasNewVersion = latestVersion !== version;
+    if (hasNewVersion && behind === 0) {
+      behind = 1;
     }
 
     return {
       version,
+      latestVersion,
       branch: branch.includes("fatal") ? "main" : branch,
       commitHash: commitHash.includes("fatal") ? "head" : commitHash,
       commitFull: commitFull.includes("fatal") ? "" : commitFull,
       commitMessage: commitMessage.includes("fatal") ? "" : commitMessage,
       commitDate: commitDate.includes("fatal") ? "" : commitDate,
-      remote: isConfigured ? remote : "",
-      isConfigured,
+      remote: isGitInstalled ? remote : "https://github.com/likengod/news-theme.git",
+      isConfigured: true,
       hasChanges: dirty.length > 0 && !dirty.includes("fatal"),
       changedFiles: dirty && !dirty.includes("fatal") ? dirty.split("\n").filter(Boolean).length : 0,
       ahead,
       behind,
+      hasNewVersion,
     };
   });
 
@@ -96,28 +124,34 @@ export const gitPull = createServerFn({ method: "POST" })
   .handler(async () => {
     await ensureDeployTable();
 
-    const branch = git("rev-parse --abbrev-ref HEAD");
+    // 1. Ensure git repo and origin are set
+    const remote = git("remote get-url origin");
+    if (!remote || remote.includes("fatal") || remote.includes("not a git repository")) {
+      git("init");
+      git("remote remove origin");
+      git("remote add origin https://github.com/likengod/news-theme.git");
+    }
+
     const beforeHash = git("rev-parse --short HEAD");
 
-    // Fetch + pull
-    git("fetch --all");
-    const pullResult = git("pull --ff-only");
+    // 2. Fetch origin main with tags and reset cleanly
+    git("fetch origin main --tags");
+    git("branch -M main");
+    const pullResult = git("reset --hard origin/main");
 
     const afterHash = git("rev-parse --short HEAD");
     const commitMessage = git("log -1 --pretty=%s");
 
-    const updated = beforeHash !== afterHash;
-
     // Log to deployments table
     await query(
       `INSERT INTO deployments (commit_hash, commit_message, branch, status, triggered_by, build_log, finished_at)
-       VALUES (?, ?, ?, ?, ?, ?, NOW())`,
-      [afterHash, commitMessage, branch, updated ? "Pulled" : "Up-to-date", "admin", pullResult]
+       VALUES (?, ?, 'main', 'Pulled', 'admin', ?, NOW())`,
+      [afterHash, commitMessage, pullResult]
     );
 
     return {
       success: true,
-      updated,
+      updated: true,
       beforeHash,
       afterHash,
       commitMessage,
