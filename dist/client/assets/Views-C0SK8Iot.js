@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-BBLGJ_Wb.js";import{t}from"./news-data-D07Mj5gy.js";import{t as n}from"./eye-CuRqlAPQ.js";var r=e();function i({count:e,className:i=``}){return(0,r.jsxs)(`span`,{className:`inline-flex items-center gap-1 ${i}`,children:[(0,r.jsx)(n,{className:`h-3 w-3`}),(0,r.jsxs)(`span`,{children:[t(e),` views`]})]})}export{i as t};

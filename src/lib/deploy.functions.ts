@@ -43,7 +43,7 @@ async function ensureDeployTable() {
 
 export const getGitStatus = createServerFn({ method: "GET" })
   .handler(async () => {
-    let version = "v1.0.12";
+    let version = "v1.0.13";
     try {
       const pkgPath = path.join(ROOT, "package.json");
       const pkgRaw = fs.readFileSync(pkgPath, "utf-8");
@@ -178,6 +178,13 @@ export const gitPull = createServerFn({ method: "POST" })
        VALUES (?, ?, 'main', 'Pulled', 'admin', ?, NOW())`,
       [afterHash, commitMessage, pullResult]
     );
+
+    // Auto-restart server process to pick up new bundles
+    setTimeout(() => {
+      try {
+        process.exit(0);
+      } catch {}
+    }, 1500);
 
     return {
       success: true,

@@ -1,0 +1,30 @@
+# Robots.txt for News Timeline / Gorilla Tech Solution
+# Copyright (c) 2026 Gorilla Tech Solution (gorillatechsolution.com). All rights reserved.
+# Unauthorized automated scraping, code reproduction, or training without written consent is strictly prohibited.
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/*
+
+# Block AI Scrapers & Code Theft Bots
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+Sitemap: https://gorillatechsolution.com/sitemap.xml

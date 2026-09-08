@@ -110,9 +110,10 @@ function UpdatesPage() {
     try {
       const res = await gitPull();
       if (res.updated) {
-        toast.success(`Updated! ${res.beforeHash} → ${res.afterHash}`);
-        // Trigger build automatically after successful pull
-        await handleBuild();
+        toast.success(`Updated to latest release! Reloading in 3 seconds...`);
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
       } else {
         toast.info("System core is already up to date");
       }
@@ -178,7 +179,7 @@ function UpdatesPage() {
     }
   };
 
-  const currentVersion = gitStatus?.version || "v1.0.12";
+  const currentVersion = gitStatus?.version || "v1.0.13";
   const latestVersion = gitStatus?.latestVersion || currentVersion;
   const hasNewVersion = Boolean(gitStatus?.hasNewVersion || (latestVersion !== currentVersion));
   const updatesAvailable = (gitStatus?.behind ?? 0) > 0 || hasNewVersion;
