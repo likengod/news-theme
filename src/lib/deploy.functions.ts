@@ -8,9 +8,14 @@ const ROOT = process.cwd();
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+function parseSemver(v: string) {
+  const parts = v.replace(/^v/, "").split(".").map((n) => parseInt(n, 10) || 0);
+  return (parts[0] || 0) * 1000000 + (parts[1] || 0) * 1000 + (parts[2] || 0);
+}
+
 function git(cmd: string): string {
   try {
-    return execSync(`git ${cmd}`, { cwd: ROOT, encoding: "utf-8", timeout: 15000 }).trim();
+    return execSync(`git ${cmd}`, { cwd: ROOT, encoding: "utf-8", timeout: 20000 }).trim();
   } catch (err: any) {
     return err.stderr?.trim() || err.message || "unknown error";
   }
@@ -52,7 +57,7 @@ export const getGitStatus = createServerFn({ method: "GET" })
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3500);
-      const res = await fetch("https://raw.githubusercontent.com/likengod/news-theme/main/package.json", {
+      const res = await fetch(`https://raw.githubusercontent.com/likengod/news-theme/main/package.json?t=${Date.now()}`, {
         headers: { "User-Agent": "News-Theme-Updater" },
         cache: "no-store",
         signal: controller.signal,
@@ -61,12 +66,33 @@ export const getGitStatus = createServerFn({ method: "GET" })
       if (res.ok) {
         const remotePkg: any = await res.json();
         if (remotePkg.version) {
-          latestVersion = remotePkg.version.startsWith("v") ? remotePkg.version : `v${remotePkg.version}`;
+          const remoteV = remotePkg.version.startsWith("v") ? remotePkg.version : `v${remotePkg.version}`;
+          if (parseSemver(remoteV) > parseSemver(latestVersion)) {
+            latestVersion = remoteV;
+          }
         }
       }
     } catch (e) {
       console.warn("[Deploy] Remote version check notice:", e);
     }
+
+    // Also check remote tags directly via git ls-remote
+    try {
+      const tagsOutput = git("ls-remote --tags --sort=v:refname https://github.com/likengod/news-theme.git");
+      if (tagsOutput && !tagsOutput.includes("fatal") && !tagsOutput.includes("unknown error")) {
+        const lines = tagsOutput.trim().split("\n");
+        for (let i = lines.length - 1; i >= 0; i--) {
+          const match = lines[i].match(/refs\/tags\/(v?[0-9]+\.[0-9]+(\.[0-9]+)?)/);
+          if (match && match[1]) {
+            const tag = match[1].startsWith("v") ? match[1] : `v${match[1]}`;
+            if (parseSemver(tag) > parseSemver(latestVersion)) {
+              latestVersion = tag;
+            }
+            break;
+          }
+        }
+      }
+    } catch {}
 
     const branch = git("rev-parse --abbrev-ref HEAD");
     const commitHash = git("rev-parse --short HEAD");
@@ -95,7 +121,7 @@ export const getGitStatus = createServerFn({ method: "GET" })
       ahead = parseInt(aheadStr) || 0;
     }
 
-    const hasNewVersion = latestVersion !== version;
+    const hasNewVersion = parseSemver(latestVersion) > parseSemver(version);
     if (hasNewVersion && behind === 0) {
       behind = 1;
     }
@@ -124,7 +150,8 @@ export const gitPull = createServerFn({ method: "POST" })
   .handler(async () => {
     await ensureDeployTable();
 
-    // 1. Ensure git repo and origin are set
+    // 1. Configure safe directory on Linux & ensure git origin
+    git("config --global --add safe.directory *");
     const remote = git("remote get-url origin");
     if (!remote || remote.includes("fatal") || remote.includes("not a git repository")) {
       git("init");
@@ -137,7 +164,10 @@ export const gitPull = createServerFn({ method: "POST" })
     // 2. Fetch origin main with tags and reset cleanly
     git("fetch origin main --tags");
     git("branch -M main");
-    const pullResult = git("reset --hard origin/main");
+    let pullResult = git("checkout -f -B main origin/main");
+    if (!pullResult || pullResult.includes("fatal")) {
+      pullResult = git("reset --hard origin/main");
+    }
 
     const afterHash = git("rev-parse --short HEAD");
     const commitMessage = git("log -1 --pretty=%s");
@@ -195,6 +225,14 @@ export const buildProject = createServerFn({ method: "POST" })
       "UPDATE deployments SET status = ?, build_log = ?, finished_at = NOW() WHERE id = ?",
       [status, buildLog.slice(-5000), deployId] // keep last 5K chars
     );
+
+    if (status === "Success") {
+      setTimeout(() => {
+        try {
+          process.exit(0);
+        } catch {}
+      }, 1500);
+    }
 
     return { success: status === "Success", status, buildLog: buildLog.slice(-3000), deployId };
   });
