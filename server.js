@@ -93,7 +93,7 @@ const server = createServer(async (req, res) => {
   }
 });
 
-const PORT = process.env.APP_PORT || (process.env.PORT && process.env.PORT !== '3306' ? process.env.PORT : 3099);
+const PORT = process.env.APP_PORT || (process.env.PORT && process.env.PORT !== '3306' ? process.env.PORT : 3000);
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`[Server] Production server listening on http://0.0.0.0:${PORT}`);
 });
