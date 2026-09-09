@@ -213,12 +213,14 @@ export const gitPull = createServerFn({ method: "POST" })
       [afterHash, commitMessage, pullResult]
     );
 
-    // Auto-restart server process to pick up new bundles (works with nohup, pm2, and systemd)
+    // Auto-restart server process to pick up new bundles (works with PM2, systemd, nohup, CloudPanel)
     setTimeout(async () => {
       try {
         const { spawn } = await import("child_process");
         if (process.platform !== "win32") {
-          const restartCmd = `sleep 2 && if ! fuser 3000/tcp >/dev/null 2>&1; then nohup ${process.argv[0]} server.js > server.log 2>&1 & fi`;
+          // If PM2 is managing the process, process.exit(0) will auto-restart it immediately.
+          // In case PM2 is not running, launch nohup node server.js on port 3000 after 2 seconds.
+          const restartCmd = `sleep 2 && if ! fuser 3000/tcp >/dev/null 2>&1; then PORT=3000 APP_PORT=3000 nohup ${process.argv[0]} server.js > server.log 2>&1 & fi`;
           const child = spawn("sh", ["-c", restartCmd], {
             detached: true,
             stdio: "ignore",
@@ -226,7 +228,7 @@ export const gitPull = createServerFn({ method: "POST" })
           });
           child.unref();
         } else {
-          const child = spawn("cmd.exe", ["/c", `timeout /t 2 /nobreak >nul & "${process.argv[0]}" server.js`], {
+          const child = spawn("cmd.exe", ["/c", `timeout /t 2 /nobreak >nul & set PORT=3000 & "${process.argv[0]}" server.js`], {
             detached: true,
             stdio: "ignore",
             cwd: ROOT,
