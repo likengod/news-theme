@@ -46,10 +46,23 @@ export function Footer() {
             )}
             {showText && (
               <h4
-                className="text-2xl uppercase leading-none text-foreground"
+                className="text-2xl uppercase leading-none"
                 style={{ fontFamily: '"Inter", system-ui, sans-serif', fontWeight: 800, letterSpacing: "0.05em" }}
               >
-                {s.logoText || "News Theme"}
+                <span
+                  style={s.logoColorPrimary ? { color: s.logoColorPrimary } : undefined}
+                  className={!s.logoColorPrimary || s.logoColorPrimary === "#000000" ? "text-foreground dark:text-white" : ""}
+                >
+                  {s.logoTextPrimary !== undefined && s.logoTextPrimary !== ""
+                    ? s.logoTextPrimary
+                    : (s.logoText ? s.logoText.split(" ")[0] : "NEWS")}
+                </span>
+                {" "}
+                <span style={{ color: s.logoColorSecondary || "#dc2626" }}>
+                  {s.logoTextSecondary !== undefined && s.logoTextSecondary !== ""
+                    ? s.logoTextSecondary
+                    : (s.logoText && s.logoText.split(" ").length > 1 ? s.logoText.split(" ").slice(1).join(" ") : "THEME")}
+                </span>
               </h4>
             )}
             <p className="mt-3 text-sm text-muted-foreground">

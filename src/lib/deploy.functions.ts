@@ -6,6 +6,28 @@ import fs from "fs";
 
 const ROOT = process.cwd();
 
+// ─── Permanent Git Repository & PAT Defaults ─────────────────────────────────
+export const PERMANENT_GIT_REPO = process.env.GIT_REMOTE_URL || "https://github.com/likengod/news-theme.git";
+export const PERMANENT_GIT_PAT = process.env.GIT_ACCESS_TOKEN || "";
+export const PERMANENT_GIT_BRANCH = process.env.GIT_BRANCH || "main";
+
+export function getAuthenticatedGitUrl(customRepo?: string, customPat?: string): string {
+  const rawRepo = (customRepo && customRepo.trim()) || PERMANENT_GIT_REPO;
+  const token = (customPat && customPat.trim()) || PERMANENT_GIT_PAT;
+
+  if (!token) return rawRepo;
+
+  if (rawRepo.startsWith("https://")) {
+    const clean = rawRepo.replace(/^https:\/\/([^@]+@)?/, "");
+    return `https://${token}@${clean}`;
+  }
+  if (rawRepo.startsWith("http://")) {
+    const clean = rawRepo.replace(/^http:\/\/([^@]+@)?/, "");
+    return `http://${token}@${clean}`;
+  }
+  return rawRepo;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function parseSemver(v: string) {
@@ -43,7 +65,7 @@ async function ensureDeployTable() {
 
 export const getGitStatus = createServerFn({ method: "GET" })
   .handler(async () => {
-    let version = "v1.0.18";
+    let version = "v1.0.20";
     try {
       const pkgPath = path.join(ROOT, "package.json");
       const pkgRaw = fs.readFileSync(pkgPath, "utf-8");
@@ -57,8 +79,12 @@ export const getGitStatus = createServerFn({ method: "GET" })
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const headers: Record<string, string> = { "User-Agent": "News-Theme-Updater" };
+      if (PERMANENT_GIT_PAT) {
+        headers["Authorization"] = `token ${PERMANENT_GIT_PAT}`;
+      }
       const res = await fetch(`https://raw.githubusercontent.com/likengod/news-theme/main/package.json?t=${Date.now()}`, {
-        headers: { "User-Agent": "News-Theme-Updater" },
+        headers,
         cache: "no-store",
         signal: controller.signal,
       });
@@ -76,9 +102,10 @@ export const getGitStatus = createServerFn({ method: "GET" })
       console.warn("[Deploy] Remote version check notice:", e);
     }
 
-    // Also check remote tags directly via git ls-remote
+    // Also check remote tags directly via git ls-remote with authenticated url
     try {
-      const tagsOutput = git("ls-remote --tags --sort=v:refname https://github.com/likengod/news-theme.git");
+      const authUrl = getAuthenticatedGitUrl();
+      const tagsOutput = git(`ls-remote --tags --sort=v:refname ${authUrl}`);
       if (tagsOutput && !tagsOutput.includes("fatal") && !tagsOutput.includes("unknown error")) {
         const lines = tagsOutput.trim().split("\n");
         for (let i = lines.length - 1; i >= 0; i--) {
@@ -112,7 +139,11 @@ export const getGitStatus = createServerFn({ method: "GET" })
     let ahead = 0;
     let behind = 0;
 
+    const authRemote = getAuthenticatedGitUrl();
     if (isGitInstalled) {
+      if (!remote || !remote.includes(PERMANENT_GIT_PAT)) {
+        git(`remote set-url origin ${authRemote}`);
+      }
       git("fetch origin main --tags");
       const activeBranch = branch.includes("fatal") ? "main" : branch;
       const behindStr = git(`rev-list --count HEAD..origin/${activeBranch}`);
@@ -134,7 +165,7 @@ export const getGitStatus = createServerFn({ method: "GET" })
       commitFull: commitFull.includes("fatal") ? "" : commitFull,
       commitMessage: commitMessage.includes("fatal") ? "" : commitMessage,
       commitDate: commitDate.includes("fatal") ? "" : commitDate,
-      remote: isGitInstalled ? remote : "https://github.com/likengod/news-theme.git",
+      remote: PERMANENT_GIT_REPO,
       isConfigured: true,
       hasChanges: dirty.length > 0 && !dirty.includes("fatal"),
       changedFiles: dirty && !dirty.includes("fatal") ? dirty.split("\n").filter(Boolean).length : 0,
@@ -150,13 +181,16 @@ export const gitPull = createServerFn({ method: "POST" })
   .handler(async () => {
     await ensureDeployTable();
 
-    // 1. Configure safe directory on Linux & ensure git origin
+    // 1. Configure safe directory on Linux & ensure git origin with permanent PAT
     git("config --global --add safe.directory *");
+    const authRemote = getAuthenticatedGitUrl();
     const remote = git("remote get-url origin");
     if (!remote || remote.includes("fatal") || remote.includes("not a git repository")) {
       git("init");
       git("remote remove origin");
-      git("remote add origin https://github.com/likengod/news-theme.git");
+      git(`remote add origin ${authRemote}`);
+    } else {
+      git(`remote set-url origin ${authRemote}`);
     }
 
     const beforeHash = git("rev-parse --short HEAD");
@@ -192,7 +226,7 @@ export const gitPull = createServerFn({ method: "POST" })
           });
           child.unref();
         } else {
-          const child = spawn(process.argv[0], process.argv.slice(1), {
+          const child = spawn("cmd.exe", ["/c", `timeout /t 2 /nobreak >nul & "${process.argv[0]}" server.js`], {
             detached: true,
             stdio: "ignore",
             cwd: ROOT,
@@ -291,23 +325,21 @@ export const getDeployLog = createServerFn({ method: "GET" })
 export const initializeGitRepo = createServerFn({ method: "POST" })
   .handler(async () => {
     try {
-      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'site_settings_data'");
-      if (rows.length === 0 || !rows[0].value) throw new Error("Settings not found");
-      
-      const settings = JSON.parse(rows[0].value);
-      const remoteUrl = settings.gitRemoteUrl;
-      const pat = settings.gitAccessToken;
-      const branch = settings.gitBranch || "main";
+      let remoteUrl = PERMANENT_GIT_REPO;
+      let pat = PERMANENT_GIT_PAT;
+      let branch = PERMANENT_GIT_BRANCH;
 
-      if (!remoteUrl) throw new Error("Git Remote URL is not configured in Settings.");
+      try {
+        const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'site_settings_data'");
+        if (rows.length > 0 && rows[0].value) {
+          const settings = JSON.parse(rows[0].value);
+          if (settings.gitRemoteUrl) remoteUrl = settings.gitRemoteUrl;
+          if (settings.gitAccessToken) pat = settings.gitAccessToken;
+          if (settings.gitBranch) branch = settings.gitBranch;
+        }
+      } catch {}
 
-      // Format URL to include PAT if it exists
-      let authUrl = remoteUrl;
-      if (pat && remoteUrl.startsWith("https://")) {
-        authUrl = remoteUrl.replace("https://", `https://${pat}@`);
-      } else if (pat && remoteUrl.startsWith("http://")) {
-        authUrl = remoteUrl.replace("http://", `http://${pat}@`);
-      }
+      const authUrl = getAuthenticatedGitUrl(remoteUrl, pat);
 
       let log = "";
       log += git("init") + "\n";

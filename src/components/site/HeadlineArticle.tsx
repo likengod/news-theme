@@ -23,7 +23,7 @@ export function MinRead({ seed, kicker }: { seed?: string; kicker?: string }) {
 
 export function HeadlineArticle({ item, dense = false }: { item: Item & { slug?: string }; dense?: boolean }) {
   return (
-    <Link to="/news/$slug" params={{ slug: item.slug || "sample" }} className="group block">
+    <Link to="/news/$slug" params={{ slug: item.slug || "sample" }} className="group block" suppressHydrationWarning>
       {item.img && (
         <div className="mb-3 overflow-hidden">
           <img
@@ -34,7 +34,7 @@ export function HeadlineArticle({ item, dense = false }: { item: Item & { slug?:
           />
         </div>
       )}
-      <h3 className={`headline text-foreground group-hover:underline ${dense ? "text-lg" : "text-xl"}`}>
+      <h3 className={`headline text-foreground group-hover:underline ${dense ? "text-lg" : "text-xl"}`} suppressHydrationWarning>
         {item.title}
       </h3>
       {item.excerpt && (

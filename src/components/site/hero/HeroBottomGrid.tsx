@@ -27,7 +27,7 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
           <h3 className="headline mt-4 text-xl text-foreground group-hover:underline [-webkit-line-clamp:3] [max-height:none]">
             {activeBottomItems[0].title}
           </h3>
-          <p className="mt-2 text-sm leading-snug text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden [&::first-letter]:font-serif [&::first-letter]:float-left [&::first-letter]:mr-2 [&::first-letter]:text-5xl [&::first-letter]:font-bold [&::first-letter]:leading-[0.9] [&::first-letter]:text-foreground">
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
             {activeBottomItems[0].excerpt}
           </p>
           <MinRead seed={activeBottomItems[0].title} kicker={activeBottomItems[0].kicker} />
@@ -48,7 +48,7 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
           <h3 className="headline mt-4 text-xl text-foreground group-hover:underline line-clamp-2 [-webkit-line-clamp:2] [max-height:none]">
             {activeBottomItems[1].title}
           </h3>
-          <p className="mt-2 text-sm leading-snug text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden [&::first-letter]:font-serif [&::first-letter]:float-left [&::first-letter]:mr-2 [&::first-letter]:text-5xl [&::first-letter]:font-bold [&::first-letter]:leading-[0.9] [&::first-letter]:text-foreground">
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
             {activeBottomItems[1].excerpt}
           </p>
           <MinRead seed={activeBottomItems[1].title} kicker={activeBottomItems[1].kicker} />

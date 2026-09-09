@@ -353,6 +353,17 @@ function AuthPage() {
         <p className="mt-6 text-center text-xs text-muted-foreground">
           <Link to="/" className="hover:underline">← Back to home</Link>
         </p>
+        <p className="mt-2.5 text-center text-xs text-muted-foreground">
+          Built by{" "}
+          <a
+            href="https://gorillatechsolution.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 hover:underline"
+          >
+            Gorilla Tech Solution
+          </a>
+        </p>
       </div>
     </div>
   );

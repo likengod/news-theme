@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect } from "react";
-import { Save, Sparkles, Clock, RefreshCw } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Save, Sparkles, Clock, RefreshCw, RotateCcw, Check, Power } from "lucide-react";
 import { toast } from "sonner";
 import { loadSettings, saveSettings, type SiteSettings } from "@/lib/site-content";
 import { useFontConfig } from "@/components/site/AdSettingsContext";
@@ -50,18 +50,24 @@ export function FestiveSettingsForm() {
   const [showCustomText, setShowCustomText] = useState(false);
   const fontConfig = useFontConfig();
 
+  const isFestiveEnabled = settings.festiveThemeEnabled !== false;
+
   useEffect(() => {
     setSettings(loadSettings());
   }, []);
 
   // Automatic Text Rotation Animation in Preview
   useEffect(() => {
+    if (!isFestiveEnabled) {
+      setShowCustomText(false);
+      return;
+    }
     const delay = (Number(settings.topBarSwapDelay) || 5) * 1000;
     const interval = setInterval(() => {
       setShowCustomText((prev) => !prev);
     }, delay);
     return () => clearInterval(interval);
-  }, [settings.topBarSwapDelay]);
+  }, [settings.topBarSwapDelay, isFestiveEnabled]);
 
   const update = <K extends keyof SiteSettings>(key: K, val: SiteSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: val }));
@@ -115,8 +121,10 @@ export function FestiveSettingsForm() {
   // When rotation STYLE changes, swap text so the new animation is actually visible
   useEffect(() => {
     setAnimNonce((n) => n + 1);
-    setShowCustomText((prev) => !prev);
-  }, [settings.customAlertAnimationStyle]);
+    if (isFestiveEnabled) {
+      setShowCustomText((prev) => !prev);
+    }
+  }, [settings.customAlertAnimationStyle, isFestiveEnabled]);
 
   const triggerTestSwap = () => {
     setAnimNonce((n) => n + 1);
@@ -128,11 +136,11 @@ export function FestiveSettingsForm() {
       {/* Inject pure CSS keyframe animations for text rotation preview */}
       <style dangerouslySetInnerHTML={{ __html: ROTATION_KEYFRAMES }} />
       {/* Single Unified Form & Live Animation Card */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-200">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
+        {/* Header with Save Button */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4 mb-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-200 shrink-0">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
@@ -143,6 +151,56 @@ export function FestiveSettingsForm() {
                 Set custom alert message, rotation delay, text color, and gradient (Default color: #000000 Black).
               </p>
             </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleSave}
+            className={`inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all active:scale-95 shrink-0 self-start sm:self-auto ${
+              saved ? "bg-emerald-600" : "bg-slate-900 hover:bg-slate-800"
+            }`}
+          >
+            <Save className="h-3.5 w-3.5" />
+            {saved ? "Saved to MySQL!" : "Save Changes"}
+          </button>
+        </div>
+
+        {/* Master ON / OFF Toggle Banner */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/80 mb-6 transition-colors">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <Power className={`h-4 w-4 ${isFestiveEnabled ? "text-emerald-600" : "text-slate-400"}`} />
+              <span className="text-sm font-bold text-slate-800">
+                Festive Theme & Custom Alert Rotation
+              </span>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                isFestiveEnabled ? "bg-emerald-100 text-emerald-800 border border-emerald-200" : "bg-slate-200 text-slate-600 border border-slate-300"
+              }`}>
+                {isFestiveEnabled ? "ON (Active)" : "OFF (Disabled)"}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500">
+              Turn ON to rotate custom alert messages across Top Bar, category headers, section badges, and QR cards. Turn OFF to display standard category titles only.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-xs font-semibold text-slate-600">
+              {isFestiveEnabled ? "Enabled" : "Disabled"}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isFestiveEnabled}
+              onClick={() => update("festiveThemeEnabled", !isFestiveEnabled)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 ${
+                isFestiveEnabled ? "bg-emerald-600" : "bg-slate-300"
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                  isFestiveEnabled ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
           </div>
         </div>
 
@@ -218,33 +276,45 @@ export function FestiveSettingsForm() {
                     onClick={() => {
                       update("festiveCategoryTitleColor", "");
                       update("topBarTextColor", "");
+                      update("festiveCategoryTitleGradient", "");
+                      update("topBarTextGradient", "");
                     }}
-                    className="h-10 rounded-lg border border-slate-200 px-3 text-xs text-slate-600 hover:bg-slate-100"
+                    className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs whitespace-nowrap shrink-0 inline-flex items-center gap-1.5"
                   >
+                    <RotateCcw className="h-3.5 w-3.5 text-slate-400" />
                     Reset (Black)
                   </button>
                 )}
               </div>
 
               {/* Quick Presets */}
-              <div className="flex flex-wrap gap-1.5">
-                {PRESET_COLORS.map((p) => (
-                  <button
-                    key={p.hex}
-                    type="button"
-                    onClick={() => {
-                      update("festiveCategoryTitleColor", p.hex);
-                      update("topBarTextColor", p.hex);
-                    }}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
-                  >
-                    <span
-                      className="h-2.5 w-2.5 rounded-full border border-black/10"
-                      style={{ backgroundColor: p.hex }}
-                    />
-                    {p.name}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2">
+                {PRESET_COLORS.map((p) => {
+                  const isSelected = (settings.festiveCategoryTitleColor === p.hex || settings.topBarTextColor === p.hex) && !activeGradient;
+                  return (
+                    <button
+                      key={p.hex}
+                      type="button"
+                      onClick={() => {
+                        update("festiveCategoryTitleColor", p.hex);
+                        update("topBarTextColor", p.hex);
+                        update("festiveCategoryTitleGradient", "");
+                        update("topBarTextGradient", "");
+                      }}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all shadow-xs whitespace-nowrap ${
+                        isSelected
+                          ? "border-2 border-slate-900 bg-slate-900 text-white shadow-sm ring-2 ring-slate-400/20"
+                          : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+                      }`}
+                    >
+                      <span
+                        className="h-2.5 w-2.5 rounded-full border border-black/10 shrink-0"
+                        style={{ backgroundColor: p.hex }}
+                      />
+                      {p.name}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -341,23 +411,29 @@ export function FestiveSettingsForm() {
           {/* Right Column: Live Rotating Animation Preview (5 cols) */}
           <div className="lg:col-span-5 flex flex-col justify-between rounded-xl border border-slate-200 bg-slate-50/70 p-5">
             <div>
-              <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">
                     Live Animated Preview
                   </span>
                   <button
                     type="button"
                     onClick={triggerTestSwap}
-                    className="px-2 py-0.5 text-[10px] font-bold text-slate-700 bg-slate-200 hover:bg-slate-300 rounded border border-slate-300 transition-colors"
+                    className="whitespace-nowrap inline-flex items-center justify-center px-2.5 py-1 text-[11px] font-bold text-slate-700 bg-white hover:bg-slate-100 rounded-md border border-slate-300 shadow-xs transition-colors shrink-0"
                   >
                     Test Swap
                   </button>
                 </div>
-                <span className="flex items-center gap-1.5 text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  <RefreshCw className="h-3 w-3 animate-spin" />
-                  Swapping every {settings.topBarSwapDelay || 5}s
-                </span>
+                {isFestiveEnabled ? (
+                  <span className="whitespace-nowrap inline-flex items-center gap-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                    Swapping every {settings.topBarSwapDelay || 5}s
+                  </span>
+                ) : (
+                  <span className="whitespace-nowrap inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded-full border border-slate-300 shrink-0">
+                    Rotation OFF
+                  </span>
+                )}
               </div>
 
               <div className="mt-4 space-y-4">
@@ -443,11 +519,11 @@ export function FestiveSettingsForm() {
       </section>
 
       {/* Save Button */}
-      <div className="sticky bottom-4 flex justify-end">
+      <div className="sticky bottom-4 flex justify-end z-30 pointer-events-auto">
         <button
           onClick={handleSave}
-          className={`inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-colors ${
-            saved ? "bg-emerald-600" : "bg-slate-900 hover:bg-slate-800"
+          className={`inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm font-bold text-white shadow-xl transition-all active:scale-95 ${
+            saved ? "bg-emerald-600 ring-4 ring-emerald-200" : "bg-slate-900 hover:bg-slate-800 ring-4 ring-slate-300/40"
           }`}
         >
           <Save className="h-4 w-4" />

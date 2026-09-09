@@ -1,0 +1,106 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Verify Production Bundle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build Application
+        run: npm run build
+
+      - name: Package Production Artifact
+        run: |
+          mkdir -p assets
+          if [ -d "dist/client/assets" ]; then
+            cp -r dist/client/assets/* assets/ 2>/dev/null || true
+          fi
+          zip -r cloudpanel-production.zip dist public assets server.js package.json package-lock.json
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudpanel-production
+          path: cloudpanel-production.zip
+          retention-days: 14
+
+  deploy:
+    name: Deploy to CloudPanel / VPS
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Deployment Configuration
+        id: check_config
+        run: |
+          if [ -n "${{ secrets.SSH_HOST }}" ] && [ -n "${{ secrets.SSH_USER }}" ]; then
+            echo "configured=true" >> $GITHUB_OUTPUT
+            echo "SSH Secrets detected. Proceeding with automated deployment."
+          else
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "Notice: SSH secrets (SSH_HOST, SSH_USER) not yet set in repository secrets."
+            echo "To enable zero-click auto deployment, add SSH_HOST, SSH_USER, SSH_KEY, and DEPLOY_PATH in GitHub Settings -> Secrets -> Actions."
+          fi
+
+      - name: Deploy to Server via SSH
+        if: steps.check_config.outputs.configured == 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            TARGET_DIR="${{ secrets.DEPLOY_PATH || '/home/todaytripura/htdocs/todaytripura.com' }}"
+            echo "Deploying to: $TARGET_DIR"
+            cd "$TARGET_DIR" || exit 1
+            
+            # Fetch latest commits
+            git pull origin main
+            
+            # Install production dependencies
+            npm install --production=false --legacy-peer-deps
+            
+            # Build production assets
+            npm run build
+            
+            # Restart application (supports PM2, systemd, or background node)
+            if command -v pm2 >/dev/null 2>&1; then
+              pm2 reload all || pm2 restart all
+            elif systemctl is-active --quiet news-theme; then
+              systemctl restart news-theme
+            else
+              fuser -k 3000/tcp 2>/dev/null || true
+              fuser -k 3099/tcp 2>/dev/null || true
+              nohup node server.js > server.log 2>&1 &
+            fi
+            
+            echo "Deployment completed successfully!"

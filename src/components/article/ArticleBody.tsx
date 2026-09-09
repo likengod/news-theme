@@ -23,7 +23,7 @@ export const ArticleBody = memo(function ArticleBody({ paragraphs, midImage }: P
   return (
     <div className="prose-article space-y-4 md:space-y-5 text-[15px] md:text-lg leading-relaxed md:leading-[1.85] text-foreground/90">
       {first && (
-        <p className="first-letter:float-left first-letter:mr-2 first-letter:font-serif first-letter:text-6xl first-letter:font-bold first-letter:leading-none">
+        <p>
           {first}
         </p>
       )}

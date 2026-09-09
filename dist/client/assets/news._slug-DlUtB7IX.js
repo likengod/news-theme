@@ -1,1 +1,0 @@
-import{t as e}from"./news._slug-BQzYqY6J.js";export{e as notFoundComponent};

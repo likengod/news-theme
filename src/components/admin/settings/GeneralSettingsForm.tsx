@@ -120,18 +120,140 @@ export function GeneralSettingsForm() {
           </div>
 
           {grp.title === "Brand Information" && (
-            <div className="mt-6 border-t border-slate-100 pt-6">
-              <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500">
-                Logo Images & Favicon
-              </h3>
-              <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-                <LogoUploader compact label="Site logo (Day)" value={settings.logoLight} usage="site-logo" recommendedSize="320×80 px" onChange={(v) => update("logoLight", v)} />
-                <LogoUploader compact label="Site logo (Night)" value={settings.logoDark} usage="site-logo" dark recommendedSize="320×80 px" onChange={(v) => update("logoDark", v)} />
-                <LogoUploader compact label="Footer logo (Day)" value={settings.footerLogoLight} usage="site-logo" recommendedSize="320×80 px" onChange={(v) => update("footerLogoLight", v)} />
-                <LogoUploader compact label="Footer logo (Night)" value={settings.footerLogoDark} usage="site-logo" dark recommendedSize="320×80 px" onChange={(v) => update("footerLogoDark", v)} />
-                <LogoUploader compact label="Favicon" value={settings.favicon} usage="site-favicon" recommendedSize="64×64 px" onChange={(v) => update("favicon", v)} />
+            <>
+              <div className="mt-6 border-t border-slate-100 pt-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Logo Text & Two-Tone Colors
+                  </h3>
+                  <span className="text-[11px] text-slate-400">Customize each word and its color independently</span>
+                </div>
+
+                {/* Live Preview */}
+                <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50/90 p-5 text-center shadow-inner">
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 block mb-2">Live Header Preview</span>
+                  <div
+                    className="text-3xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-wide inline-block"
+                    style={{ fontFamily: '"Inter", system-ui, sans-serif', letterSpacing: "0.05em" }}
+                  >
+                    <span style={{ color: settings.logoColorPrimary || "#000000" }}>
+                      {settings.logoTextPrimary !== undefined && settings.logoTextPrimary !== "" ? settings.logoTextPrimary : "NEWS"}
+                    </span>
+                    {" "}
+                    <span style={{ color: settings.logoColorSecondary || "#dc2626" }}>
+                      {settings.logoTextSecondary !== undefined && settings.logoTextSecondary !== "" ? settings.logoTextSecondary : "THEME"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Part 1 */}
+                  <div className="rounded-lg border border-slate-200 bg-white p-3.5 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-700">Part 1 Text (e.g. News)</label>
+                      <span className="text-[10px] text-slate-400">First Word</span>
+                    </div>
+                    <input
+                      type="text"
+                      value={settings.logoTextPrimary ?? "News"}
+                      onChange={(e) => {
+                        const text = e.target.value;
+                        const nextSec = settings.logoTextSecondary ?? "Theme";
+                        update("logoTextPrimary", text);
+                        update("logoText", `${text} ${nextSec}`.trim());
+                      }}
+                      placeholder="News"
+                      className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
+                    />
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-500 block mb-1">Part 1 Text Color</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.logoColorPrimary && settings.logoColorPrimary.startsWith("#") ? settings.logoColorPrimary : "#000000"}
+                          onChange={(e) => update("logoColorPrimary", e.target.value)}
+                          className="h-8 w-10 cursor-pointer rounded border border-slate-200 p-0.5"
+                        />
+                        <input
+                          type="text"
+                          value={settings.logoColorPrimary || "#000000"}
+                          onChange={(e) => update("logoColorPrimary", e.target.value)}
+                          placeholder="#000000"
+                          className="h-8 flex-1 rounded-md border border-slate-200 px-2.5 text-xs font-mono focus:border-slate-900 focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => update("logoColorPrimary", "#000000")}
+                          className="px-2 py-1 text-[10px] rounded bg-slate-100 hover:bg-slate-200 text-slate-700"
+                          title="Set Black"
+                        >
+                          Black
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Part 2 */}
+                  <div className="rounded-lg border border-slate-200 bg-white p-3.5 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-700">Part 2 Text (e.g. Theme)</label>
+                      <span className="text-[10px] text-slate-400">Second Word</span>
+                    </div>
+                    <input
+                      type="text"
+                      value={settings.logoTextSecondary ?? "Theme"}
+                      onChange={(e) => {
+                        const text = e.target.value;
+                        const nextPri = settings.logoTextPrimary ?? "News";
+                        update("logoTextSecondary", text);
+                        update("logoText", `${nextPri} ${text}`.trim());
+                      }}
+                      placeholder="Theme"
+                      className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
+                    />
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-500 block mb-1">Part 2 Text Color</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.logoColorSecondary && settings.logoColorSecondary.startsWith("#") ? settings.logoColorSecondary : "#dc2626"}
+                          onChange={(e) => update("logoColorSecondary", e.target.value)}
+                          className="h-8 w-10 cursor-pointer rounded border border-slate-200 p-0.5"
+                        />
+                        <input
+                          type="text"
+                          value={settings.logoColorSecondary || "#dc2626"}
+                          onChange={(e) => update("logoColorSecondary", e.target.value)}
+                          placeholder="#dc2626"
+                          className="h-8 flex-1 rounded-md border border-slate-200 px-2.5 text-xs font-mono focus:border-slate-900 focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => update("logoColorSecondary", "#dc2626")}
+                          className="px-2 py-1 text-[10px] rounded bg-red-50 hover:bg-red-100 text-red-600 font-semibold"
+                          title="Set Red"
+                        >
+                          Red
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+
+              <div className="mt-6 border-t border-slate-100 pt-6">
+                <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Logo Images & Favicon
+                </h3>
+                <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+                  <LogoUploader compact label="Site logo (Day)" value={settings.logoLight} usage="site-logo" recommendedSize="320×80 px" onChange={(v) => update("logoLight", v)} />
+                  <LogoUploader compact label="Site logo (Night)" value={settings.logoDark} usage="site-logo" dark recommendedSize="320×80 px" onChange={(v) => update("logoDark", v)} />
+                  <LogoUploader compact label="Footer logo (Day)" value={settings.footerLogoLight} usage="site-logo" recommendedSize="320×80 px" onChange={(v) => update("footerLogoLight", v)} />
+                  <LogoUploader compact label="Footer logo (Night)" value={settings.footerLogoDark} usage="site-logo" dark recommendedSize="320×80 px" onChange={(v) => update("footerLogoDark", v)} />
+                  <LogoUploader compact label="Favicon" value={settings.favicon} usage="site-favicon" recommendedSize="64×64 px" onChange={(v) => update("favicon", v)} />
+                </div>
+              </div>
+            </>
           )}
         </section>
       ))}

@@ -41,13 +41,16 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
   }, []);
 
   useEffect(() => {
-    if (!settings.topBarWeatherCustomText) return;
+    if (settings.festiveThemeEnabled === false || !settings.topBarWeatherCustomText) {
+      setShowCustomText(false);
+      return;
+    }
     const delay = (Number(settings.topBarSwapDelay) || 5) * 1000;
     const interval = setInterval(() => {
       setShowCustomText((prev) => !prev);
     }, delay);
     return () => clearInterval(interval);
-  }, [settings.topBarWeatherCustomText, settings.topBarSwapDelay]);
+  }, [settings.festiveThemeEnabled, settings.topBarWeatherCustomText, settings.topBarSwapDelay]);
 
   useEffect(() => {
     if (ctx?.adConfig) {
@@ -82,7 +85,7 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
   }, [slides, slotMode, ctx?.adConfig?.rotations]);
 
   // Filter articles based on selected category (defaulting to "Markets" if not configured)
-  const localUsed = usedIds || new Set<number>();
+  const localUsed = new Set<number>(usedIds || []);
   const configuredCategory = cfg.marketsMagazine.category;
   const magazineCategory = (!configuredCategory || configuredCategory === "Markets") ? "Auto (Latest)" : configuredCategory;
   
@@ -133,7 +136,7 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
         color: settings.festiveCategoryBadgeTextColor || "#ffffff",
       };
 
-  const badgeTitle = showCustomText && settings.topBarWeatherCustomText
+  const badgeTitle = settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText
     ? settings.topBarWeatherCustomText
     : cfg.marketsMagazine.title;
 
@@ -168,13 +171,13 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
         </Link>
 
         <Link to="/news/$slug" params={{ slug: leadArt?.slug || "gen-z-traders-go-for-broke-in-pursuit-of-a-new-american-dream" }} className="group block pt-0.5">
-          <p className="max-w-[500px] font-sans text-[28px] font-extrabold leading-[1.14] tracking-normal text-foreground group-hover:underline md:text-[29px] line-clamp-2">
+          <p className="headline max-w-[500px] text-[26px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline md:text-[28px] line-clamp-2">
             {leadArt ? leadArt.title : "Gen-Z Traders Go for Broke in Pursuit of a New American Dream"}
           </p>
-          <p className="mt-3 max-w-[440px] font-sans text-[16px] leading-[1.15] text-foreground line-clamp-6 [&::first-letter]:float-left [&::first-letter]:mr-2 [&::first-letter]:font-serif [&::first-letter]:text-[44px] [&::first-letter]:font-bold [&::first-letter]:leading-[0.85] [&::first-letter]:mt-1">
+          <p className="mt-2.5 max-w-[440px] text-[15px] leading-relaxed text-muted-foreground line-clamp-6">
             {leadArt ? (leadArt.excerpt || leadArt.content?.replace(/<[^>]*>/g, '').slice(0, 300) + "...") : "Lottery-like meme stocks and options can seem like a shortcut to beat high home prices, stubborn inflation and the looming threat of AI to entry-level jobs. A new generation of retail traders is piling into zero-day options, leveraged ETFs and viral tickers, betting that a single windfall can leapfrog them past a housing market that feels permanently out of reach and a labor market reshaped overnight."}
           </p>
-          <p className="mt-1 font-sans text-[15px] leading-tight text-foreground">
+          <p className="mt-1.5 font-sans text-[14px] leading-tight text-foreground">
             By {leadArt ? (leadArt.author || "Newsroom Staff") : "Justina Lee and Lu Wang"}
           </p>
         </Link>
@@ -212,10 +215,10 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
               className="h-[130px] w-full object-cover md:w-[194px]"
             />
             <div>
-              <p className="font-sans text-[28px] font-extrabold leading-[1.16] tracking-normal text-foreground group-hover:underline line-clamp-2">
+              <p className="headline text-[22px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline md:text-[24px] line-clamp-2">
                 {p1 ? p1.title : "Market Insights and Analysis"}
               </p>
-              <p className="mt-2 max-w-[430px] font-sans text-[16px] leading-[1.12] text-foreground line-clamp-4">
+              <p className="mt-2 max-w-[430px] text-[14px] leading-relaxed text-muted-foreground line-clamp-4">
                 {p1 ? (p1.excerpt || p1.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "Latest developments and analytical perspectives on regional and global market trends."}
               </p>
             </div>
@@ -223,20 +226,20 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
         </Link>
 
         <Link to="/news/$slug" params={{ slug: p2?.slug || "market-update-report" }} className="group block">
-          <p className="font-sans text-[16px] leading-none text-foreground">{p2 ? p2.category : "Analysis"}</p>
-          <p className="mt-1 font-sans text-[17px] font-medium leading-[1.18] tracking-normal text-foreground group-hover:underline line-clamp-3">
+          <p className="font-sans text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">{p2 ? p2.category : "Analysis"}</p>
+          <p className="headline mt-1 text-[17px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline line-clamp-3">
             {p2 ? p2.title : "Economic Trends and Growth Outlook"}
           </p>
-          <p className="mt-2 font-sans text-[16px] leading-[1.15] text-foreground line-clamp-3">
+          <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground line-clamp-3">
             {p2 ? (p2.excerpt || p2.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "Key factors driving market momentum and policy adjustments across sectors."}
           </p>
         </Link>
 
         <Link to="/news/$slug" params={{ slug: p3?.slug || "global-markets-review" }} className="group block">
-          <p className="font-sans text-[17px] font-extrabold leading-[1.18] tracking-normal text-foreground group-hover:underline line-clamp-2">
+          <p className="headline text-[17px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline line-clamp-2">
             {p3 ? p3.title : "Global Financial Markets Review"}
           </p>
-          <p className="mt-2 font-sans text-[16px] leading-[1.15] text-foreground line-clamp-5">
+          <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground line-clamp-5">
             {p3 ? (p3.excerpt || p3.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "Examining market infrastructure, cross-border flows, and financial technology innovation."}
           </p>
         </Link>

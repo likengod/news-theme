@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from "react";
+import React, { useMemo } from "react";
 import techImg from "@/assets/news-tech.jpg";
 import tradeImg from "@/assets/news-trade.jpg";
 import fedImg from "@/assets/news-fed.jpg";
@@ -92,7 +92,7 @@ export const NewsGrid = React.memo(function NewsGrid({ articles = [], usedIds }:
   }, [articles]);
 
   const columns = useMemo(() => {
-    const localUsed = usedIds || new Set<number>();
+    const localUsed = new Set<number>(usedIds || []);
 
     return baseColumns.map((c, i) => {
       const colCfg = cfg.newsGridColumns[i];

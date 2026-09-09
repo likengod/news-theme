@@ -27,5 +27,5 @@ export function useHomepageConfig(): HomepageConfig {
     }
   }, [ctx]);
 
-  return cfg;
+  return ctx?.homepageConfig ?? cfg;
 }

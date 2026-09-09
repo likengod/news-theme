@@ -1,4 +1,4 @@
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import heroMarkets from "@/assets/hero-markets.jpg";
 import { Header } from "@/components/site/Header";
@@ -73,10 +73,12 @@ function Home() {
       <main className="mx-auto max-w-7xl px-4 py-4 md:py-10">
         {/* On Mobile Devices (< md): Render Watch section directly below Header */}
         <div className="block md:hidden border-b border-border mb-2 pb-2">
-          <Columnists />
+          <Suspense fallback={null}>
+            <Columnists />
+          </Suspense>
         </div>
 
-        <HeroBoard articles={dbArticles} tags={dbTags} usedIds={usedIds} />
+        <HeroBoard articles={dbArticles} tags={dbTags} />
 
         {/* On Desktop Devices (>= md): Render Watch section after HeroBoard */}
         <div className="hidden md:block">

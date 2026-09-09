@@ -167,22 +167,22 @@ function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Site Settings</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Site Settings</h1>
           <p className="text-sm text-slate-500">
             Brand, contact, analytics, verification and login providers.
           </p>
         </div>
         <button
           onClick={onSave}
-          className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 transition active:scale-95 shrink-0 self-start sm:self-auto"
         >
           <Save className="h-4 w-4" /> Save changes
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5">
+      <div className="flex flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xs">
         {tabs.map((t) => {
           const Icon = t.icon;
           const active = tab === t.id;
@@ -190,11 +190,13 @@ function SettingsPage() {
             <button
               key={t.id}
               onClick={() => navigate({ to: ".", search: { tab: t.id } })}
-              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${
-                active ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"
+              className={`whitespace-nowrap inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
+                active
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
-              <Icon className="h-3.5 w-3.5" /> {t.label}
+              <Icon className="h-3.5 w-3.5 shrink-0" /> {t.label}
             </button>
           );
         })}

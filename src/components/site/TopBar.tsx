@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Home, Menu, Search } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -73,11 +73,14 @@ export function TopBar() {
     month: "short", day: "numeric",
   });
 
-  const hasCustomRight = mounted && !!settings.topBarWeatherCustomText;
+  const hasCustomRight = mounted && settings.festiveThemeEnabled !== false && !!settings.topBarWeatherCustomText;
   const delay = Number(settings.topBarSwapDelay) || 5;
 
   useEffect(() => {
-    if (!hasCustomRight) return;
+    if (!hasCustomRight) {
+      setShowCustom(false);
+      return;
+    }
     const interval = setInterval(() => {
       setShowCustom((prev) => !prev);
     }, delay * 1000);
@@ -156,10 +159,23 @@ export function TopBar() {
               <div className="flex flex-col h-full overflow-y-auto pb-8">
                 <SheetHeader className="border-b border-border px-5 py-4 text-left">
                   <SheetTitle
-                    className="text-foreground text-2xl uppercase tracking-wider font-extrabold"
+                    className="text-2xl uppercase tracking-wider font-extrabold"
                     style={{ fontFamily: '"Inter", system-ui, sans-serif', fontWeight: 800, letterSpacing: "0.05em" }}
                   >
-                    News Theme
+                    <span
+                      style={settings.logoColorPrimary ? { color: settings.logoColorPrimary } : undefined}
+                      className={!settings.logoColorPrimary || settings.logoColorPrimary === "#000000" ? "text-foreground dark:text-white" : ""}
+                    >
+                      {settings.logoTextPrimary !== undefined && settings.logoTextPrimary !== ""
+                        ? settings.logoTextPrimary
+                        : (settings.logoText ? settings.logoText.split(" ")[0] : "NEWS")}
+                    </span>
+                    {" "}
+                    <span style={{ color: settings.logoColorSecondary || "#dc2626" }}>
+                      {settings.logoTextSecondary !== undefined && settings.logoTextSecondary !== ""
+                        ? settings.logoTextSecondary
+                        : (settings.logoText && settings.logoText.split(" ").length > 1 ? settings.logoText.split(" ").slice(1).join(" ") : "THEME")}
+                    </span>
                   </SheetTitle>
                   <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
                     {t("nav.navigation")}

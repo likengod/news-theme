@@ -25,13 +25,16 @@ export function ArticleQrCard({ url }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!settings.topBarWeatherCustomText) return;
+    if (settings.festiveThemeEnabled === false || !settings.topBarWeatherCustomText) {
+      setShowCustomText(false);
+      return;
+    }
     const delay = (Number(settings.topBarSwapDelay) || 5) * 1000;
     const interval = setInterval(() => {
       setShowCustomText((prev) => !prev);
     }, delay);
     return () => clearInterval(interval);
-  }, [settings.topBarWeatherCustomText, settings.topBarSwapDelay]);
+  }, [settings.festiveThemeEnabled, settings.topBarWeatherCustomText, settings.topBarSwapDelay]);
 
   const qrCodeUrl = useMemo(() => {
     return `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(url)}`;
@@ -54,7 +57,7 @@ export function ArticleQrCard({ url }: Props) {
     ? { color: settings.festiveScanMeSubtextColor }
     : undefined;
 
-  const textToDisplay = showCustomText && settings.topBarWeatherCustomText
+  const textToDisplay = settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText
     ? settings.topBarWeatherCustomText
     : (settings.festiveScanMeCustomText || "SCAN ME");
 

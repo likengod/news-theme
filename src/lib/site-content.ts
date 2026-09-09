@@ -31,6 +31,10 @@ export type SiteSettings = {
   footerLogoDark: string;
   favicon: string;
   logoDisplayMode: "logo_only" | "text_only" | "both";
+  logoTextPrimary?: string; // e.g. "News"
+  logoColorPrimary?: string; // e.g. "#000000"
+  logoTextSecondary?: string; // e.g. "Theme"
+  logoColorSecondary?: string; // e.g. "#dc2626"
   // Integrations / analytics
   googleAnalyticsId: string; // e.g. G-XXXXXXX
   googleTagManagerId: string; // GTM-XXXXXX
@@ -108,6 +112,7 @@ export type SiteSettings = {
   topBarTextColor: string;
   topBarTextGradient: string;
   // Festive & Category Customizations
+  festiveThemeEnabled: boolean;
   festiveCategoryTitleColor: string;
   festiveCategoryTitleGradient: string;
   festiveCategoryBadgeBgColor: string;
@@ -158,6 +163,10 @@ export const defaultSettings: SiteSettings = {
   footerLogoDark: "",
   favicon: "",
   logoDisplayMode: "logo_only",
+  logoTextPrimary: "News",
+  logoColorPrimary: "#000000",
+  logoTextSecondary: "Theme",
+  logoColorSecondary: "#dc2626",
   googleAnalyticsId: "",
   googleTagManagerId: "",
   googleAdsenseId: "",
@@ -205,7 +214,7 @@ export const defaultSettings: SiteSettings = {
   facebookAppId: "",
   linkedinClientId: "",
   oauthRedirectUrl: "",
-  gitRemoteUrl: "",
+  gitRemoteUrl: "https://github.com/likengod/news-theme.git",
   gitBranch: "main",
   gitAutoDeploy: false,
   gitAccessToken: "",
@@ -226,6 +235,7 @@ export const defaultSettings: SiteSettings = {
   topBarTextColor: "",
   topBarTextGradient: "",
   // Festive & Category Customizations
+  festiveThemeEnabled: true,
   festiveCategoryTitleColor: "",
   festiveCategoryTitleGradient: "",
   festiveCategoryBadgeBgColor: "",
@@ -463,7 +473,13 @@ export const getSiteSettingsServer = createServerFn({ method: "GET" })
       const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'site_settings_data'");
       if (rows.length > 0 && rows[0].value) {
         const parsed = JSON.parse(rows[0].value);
-        const res = { ...defaultSettings, ...parsed };
+        const res = { 
+          ...defaultSettings, 
+          ...parsed,
+          gitRemoteUrl: parsed.gitRemoteUrl || defaultSettings.gitRemoteUrl,
+          gitAccessToken: parsed.gitAccessToken || defaultSettings.gitAccessToken,
+          gitBranch: parsed.gitBranch || defaultSettings.gitBranch,
+        };
         setCached(cacheKey, res);
         return res;
       }

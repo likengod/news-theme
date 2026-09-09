@@ -58,8 +58,10 @@ export const GOOGLE_FONTS_CATALOG: { name: string; family: string; weights: stri
   { name: "News Cycle", family: "News Cycle", weights: ["400","700"], category: "Serif" },
   { name: "Bodoni Moda", family: "Bodoni Moda", weights: ["700","800","900"], category: "Serif" },
   { name: "DM Serif Display", family: "DM Serif Display", weights: ["400"], category: "Serif" },
-  { name: "Hind Siliguri", family: "Hind Siliguri", weights: ["400","500","600","700"], category: "Bengali" },
+  { name: "Hind Siliguri", family: "Hind Siliguri", weights: ["300","400","500","600","700"], category: "Bengali" },
+  { name: "Anek Bangla", family: "Anek Bangla", weights: ["400","500","600","700","800"], category: "Bengali" },
   { name: "Noto Sans Bengali", family: "Noto Sans Bengali", weights: ["400","500","600","700"], category: "Bengali" },
+  { name: "Mina", family: "Mina", weights: ["400","700"], category: "Bengali" },
   { name: "JetBrains Mono", family: "JetBrains Mono", weights: ["400","600"], category: "Monospace" },
   { name: "Fira Code", family: "Fira Code", weights: ["400","500","700"], category: "Monospace" },
   { name: "Dancing Script", family: "Dancing Script", weights: ["400","700"], category: "Display" },
@@ -72,18 +74,28 @@ export const GOOGLE_FONTS_CATALOG: { name: string; family: string; weights: stri
 // Default system fonts — only fonts actively used in section mappings + Bengali support
 const SYSTEM_FONTS: FontEntry[] = [
   {
-    id: "sys-inter", name: "Inter", family: "Inter", source: "google",
-    weights: ["400","500","600","700"], isDefault: true, isSystem: true,
+    id: "sys-noto-serif-bengali", name: "Noto Serif Bengali", family: "Noto Serif Bengali", source: "google",
+    weights: ["400","500","600","700","800","900"], isDefault: true, isSystem: true,
     createdAt: new Date().toISOString(),
   },
   {
-    id: "sys-news-cycle", name: "News Cycle", family: "News Cycle", source: "google",
-    weights: ["400","700"], isDefault: false, isSystem: true,
+    id: "sys-solaiman-lipi", name: "SolaimanLipi", family: "SolaimanLipi", source: "upload",
+    weights: ["400", "700"], isDefault: false, isSystem: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "sys-anek-bangla", name: "Anek Bangla", family: "Anek Bangla", source: "google",
+    weights: ["400","500","600","700","800"], isDefault: false, isSystem: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "sys-kalpurush", name: "Kalpurush", family: "Kalpurush", source: "upload",
+    weights: ["400", "700"], isDefault: false, isSystem: true,
     createdAt: new Date().toISOString(),
   },
   {
     id: "sys-hind-siliguri", name: "Hind Siliguri", family: "Hind Siliguri", source: "google",
-    weights: ["400","500","600","700"], isDefault: false, isSystem: true,
+    weights: ["300","400","500","600","700"], isDefault: false, isSystem: true,
     createdAt: new Date().toISOString(),
   },
   {
@@ -92,18 +104,13 @@ const SYSTEM_FONTS: FontEntry[] = [
     createdAt: new Date().toISOString(),
   },
   {
-    id: "sys-noto-serif-bengali", name: "Noto Serif Bengali", family: "Noto Serif Bengali", source: "google",
+    id: "sys-inter", name: "Inter", family: "Inter", source: "google",
     weights: ["400","500","600","700"], isDefault: false, isSystem: true,
     createdAt: new Date().toISOString(),
   },
   {
-    id: "sys-tiro-bangla", name: "Tiro Bangla", family: "Tiro Bangla", source: "google",
-    weights: ["400"], isDefault: false, isSystem: true,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "sys-galada", name: "Galada", family: "Galada", source: "google",
-    weights: ["400"], isDefault: false, isSystem: true,
+    id: "sys-news-cycle", name: "News Cycle", family: "News Cycle", source: "google",
+    weights: ["400","700"], isDefault: false, isSystem: true,
     createdAt: new Date().toISOString(),
   },
 ];
@@ -111,12 +118,12 @@ const SYSTEM_FONTS: FontEntry[] = [
 export const defaultFontConfig: FontConfiguration = {
   fonts: SYSTEM_FONTS,
   sectionMapping: {
-    headlines: "sys-news-cycle",  // News Cycle for h1-h4
-    body: "sys-inter",           // Inter for body text
-    navigation: "sys-inter",     // Inter for nav menus
-    footer: "sys-inter",         // Inter for footer
-    ticker: "sys-inter",         // Inter for ticker
-    buttons: "sys-inter",        // Inter for buttons
+    headlines: "sys-noto-serif-bengali",  // Noto Serif Bengali for classic editorial headlines
+    body: "sys-noto-serif-bengali",       // Noto Serif Bengali for editorial body
+    navigation: "sys-noto-serif-bengali", // Noto Serif Bengali for nav
+    footer: "sys-noto-serif-bengali",     // Noto Serif Bengali for footer
+    ticker: "sys-noto-serif-bengali",     // Noto Serif Bengali for ticker
+    buttons: "sys-noto-serif-bengali",    // Noto Serif Bengali for buttons
   },
 };
 
@@ -163,14 +170,21 @@ export const getFontConfigServer = createServerFn({ method: "GET" })
 
       if (rows && rows.length > 0 && rows[0].value) {
         const parsed = JSON.parse(rows[0].value) as Partial<FontConfiguration>;
+        const rawMapping = {
+          ...defaultFontConfig.sectionMapping,
+          ...(parsed.sectionMapping || {}),
+        };
+        // Migrate legacy fonts to Noto Serif Bengali
+        for (const k of Object.keys(rawMapping) as FontSectionKey[]) {
+          if (rawMapping[k] === "sys-tiro-bangla" || rawMapping[k] === "sys-galada" || rawMapping[k] === "sys-hind-siliguri" || rawMapping[k] === "sys-solaiman-lipi") {
+            rawMapping[k] = "sys-noto-serif-bengali";
+          }
+        }
         const config: FontConfiguration = {
           ...defaultFontConfig,
           ...parsed,
           fonts: mergeFonts(parsed.fonts),
-          sectionMapping: {
-            ...defaultFontConfig.sectionMapping,
-            ...(parsed.sectionMapping || {}),
-          },
+          sectionMapping: rawMapping,
         };
         setCached(cacheKey, config);
         return config;
@@ -215,14 +229,21 @@ export function loadFontConfig(): FontConfiguration {
     const stored = localStorage.getItem(FONT_CONFIG_KEY);
     if (stored) {
       const parsed = JSON.parse(stored) as Partial<FontConfiguration>;
+      const rawMapping = {
+        ...defaultFontConfig.sectionMapping,
+        ...(parsed.sectionMapping || {}),
+      };
+      // Migrate legacy fonts to Noto Serif Bengali
+      for (const k of Object.keys(rawMapping) as FontSectionKey[]) {
+        if (rawMapping[k] === "sys-tiro-bangla" || rawMapping[k] === "sys-galada" || rawMapping[k] === "sys-hind-siliguri" || rawMapping[k] === "sys-solaiman-lipi") {
+          rawMapping[k] = "sys-noto-serif-bengali";
+        }
+      }
       return {
         ...defaultFontConfig,
         ...parsed,
         fonts: mergeFonts(parsed.fonts),
-        sectionMapping: {
-          ...defaultFontConfig.sectionMapping,
-          ...(parsed.sectionMapping || {}),
-        },
+        sectionMapping: rawMapping,
       };
     }
   } catch (e) {
@@ -293,12 +314,12 @@ export function buildSectionCssVars(config: FontConfiguration): string {
 
   for (const section of FONT_SECTIONS) {
     const fontId = config.sectionMapping[section.key as FontSectionKey];
-    let family = "sans-serif";
+    let family = `"Noto Serif Bengali", "SolaimanLipi", "Kalpurush", Georgia, serif`;
 
     if (fontId) {
       const font = getFontById(fontId, config.fonts);
       if (font) {
-        family = `"${font.family}", sans-serif`;
+        family = `"${font.family}", "Noto Serif Bengali", "SolaimanLipi", "Kalpurush", Georgia, serif`;
       }
     }
 

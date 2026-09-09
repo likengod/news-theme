@@ -88,13 +88,16 @@ function CategoryPage() {
   }, []);
 
   useEffect(() => {
-    if (!settings.topBarWeatherCustomText) return;
+    if (settings.festiveThemeEnabled === false || !settings.topBarWeatherCustomText) {
+      setShowCustomText(false);
+      return;
+    }
     const delay = (Number(settings.topBarSwapDelay) || 5) * 1000;
     const interval = setInterval(() => {
       setShowCustomText((prev) => !prev);
     }, delay);
     return () => clearInterval(interval);
-  }, [settings.topBarWeatherCustomText, settings.topBarSwapDelay]);
+  }, [settings.festiveThemeEnabled, settings.topBarWeatherCustomText, settings.topBarSwapDelay]);
 
   if (!loaderData) {
     return (
@@ -129,7 +132,7 @@ function CategoryPage() {
     ? { color: settings.festiveCategoryTitleColor }
     : undefined;
 
-  const isShowingCustomAlert = Boolean(showCustomText && settings.topBarWeatherCustomText);
+  const isShowingCustomAlert = Boolean(settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText);
   // Text rotation: pure CSS keyframe animation (no tailwindcss-animate needed)
   const rotationAnimStyle = TEXT_ROTATION_CSS[settings.customAlertAnimationStyle || "slide-up"] || TEXT_ROTATION_CSS["slide-up"];
 
@@ -201,12 +204,13 @@ function CategoryPage() {
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-5">{f.excerpt}</p>
                 {/* Author + Views + Share */}
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <User className="h-3 w-3" />
+                <div className="mt-3 flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-2.5">
+                    <span className="inline-flex items-center gap-1">
+                      <User className="h-3 w-3 shrink-0" />
                       <span className="font-medium text-foreground">{f.author}</span>
                     </span>
+                    <span>·</span>
                     <Views count={f.views} />
                   </div>
                   <button
@@ -262,13 +266,14 @@ function CategoryPage() {
                       ))}
                     </div>
                     {/* Author + Views + Share */}
-                    <div className="mt-2 flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-3">
-                        <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                          <User className="h-3 w-3" />
+                    <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                      <div className="flex items-center gap-2.5">
+                        <span className="inline-flex items-center gap-1">
+                          <User className="h-3 w-3 shrink-0" />
                           <span className="font-medium text-foreground">{p.author}</span>
                         </span>
-                        <span className="ml-auto"><Views count={p.views} /></span>
+                        <span>·</span>
+                        <Views count={p.views} />
                       </div>
                       <button
                         type="button"

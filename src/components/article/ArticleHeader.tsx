@@ -32,13 +32,16 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
   }, []);
 
   useEffect(() => {
-    if (!settings.topBarWeatherCustomText) return;
+    if (settings.festiveThemeEnabled === false || !settings.topBarWeatherCustomText) {
+      setShowCustomText(false);
+      return;
+    }
     const delay = (Number(settings.topBarSwapDelay) || 5) * 1000;
     const interval = setInterval(() => {
       setShowCustomText((prev) => !prev);
     }, delay);
     return () => clearInterval(interval);
-  }, [settings.topBarWeatherCustomText, settings.topBarSwapDelay]);
+  }, [settings.festiveThemeEnabled, settings.topBarWeatherCustomText, settings.topBarSwapDelay]);
 
   const activeGradient = settings.festiveCategoryTitleGradient || settings.topBarTextGradient;
 
@@ -54,7 +57,7 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
         color: settings.festiveCategoryTitleColor || settings.topBarTextColor || "#000000",
       };
 
-  const badgeText = showCustomText && settings.topBarWeatherCustomText
+  const badgeText = settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText
     ? settings.topBarWeatherCustomText
     : category;
 

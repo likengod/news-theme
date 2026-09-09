@@ -23,6 +23,9 @@ const MIME_TYPES = {
   '.ttf': 'font/ttf',
   '.otf': 'font/otf',
   '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
+  '.webmanifest': 'application/manifest+json',
+  '.map': 'application/json',
 };
 
 const server = createServer(async (req, res) => {
@@ -30,15 +33,20 @@ const server = createServer(async (req, res) => {
     const rawUrl = req.url || '/';
     const parsedPath = rawUrl.split('?')[0];
 
-    // Static assets handling
-    if (parsedPath.startsWith('/assets/') || parsedPath === '/favicon.ico' || parsedPath.startsWith('/images/')) {
-      const filePath = path.join(__dirname, 'dist/client', parsedPath);
-      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    // Static assets handling from dist/client or public
+    const staticDirs = [path.join(__dirname, 'dist/client'), path.join(__dirname, 'public')];
+    for (const baseDir of staticDirs) {
+      const filePath = path.join(baseDir, parsedPath);
+      if (filePath.startsWith(baseDir) && fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
         const ext = path.extname(filePath).toLowerCase();
         if (MIME_TYPES[ext]) {
           res.setHeader('Content-Type', MIME_TYPES[ext]);
         }
-        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        if (parsedPath.startsWith('/assets/')) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        } else {
+          res.setHeader('Cache-Control', 'public, max-age=86400');
+        }
         fs.createReadStream(filePath).pipe(res);
         return;
       }
@@ -85,7 +93,7 @@ const server = createServer(async (req, res) => {
   }
 });
 
-const PORT = process.env.APP_PORT || (process.env.PORT && process.env.PORT !== '3306' ? process.env.PORT : 3000);
+const PORT = process.env.APP_PORT || (process.env.PORT && process.env.PORT !== '3306' ? process.env.PORT : 3099);
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`[Server] Production server listening on http://0.0.0.0:${PORT}`);
 });
