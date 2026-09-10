@@ -711,8 +711,9 @@ function AdvertisementsPage() {
                 {tab !== "popup" && (
                   <div className="flex items-center gap-2 rounded-lg bg-slate-800 px-3 py-1 text-xs text-slate-200">
                     <Clock className="h-3.5 w-3.5 text-amber-400" />
-                    <span>Rotate every:</span>
+                    <label htmlFor={`rotation-speed-${tab}`}>Rotate every:</label>
                     <input
+                      id={`rotation-speed-${tab}`}
                       type="number"
                       min={1}
                       max={120}
@@ -833,10 +834,11 @@ function AdvertisementsPage() {
 
                         {/* Expiration date */}
                         <div className="flex items-center gap-1.5">
-                          <label className="text-xs font-semibold text-slate-500 whitespace-nowrap">
+                          <label htmlFor={`expires-${ad.id}`} className="text-xs font-semibold text-slate-500 whitespace-nowrap">
                             Expires:
                           </label>
                           <input
+                            id={`expires-${ad.id}`}
                             type="date"
                             value={formatExpiresAt(ad.expiresAt)}
                             onChange={(e) =>
