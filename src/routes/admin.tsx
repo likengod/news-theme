@@ -166,7 +166,7 @@ function AdminLayout() {
     getGitStatus()
       .then((res) => {
         if (!mounted) return;
-        const cur = res?.version || "v1.0.51";
+        const cur = res?.version || "v1.0.52";
         const latest = res?.latestVersion || cur;
         const isSimulated = typeof window !== "undefined" && (
           new URLSearchParams(window.location.search).get("test_update") === "1" ||
@@ -367,7 +367,7 @@ function AdminLayout() {
 
                 <div className="mt-6 flex items-center justify-center gap-3 text-sm font-semibold text-slate-500">
                   <span className="font-mono text-slate-700 bg-slate-200/70 px-3 py-1 rounded-full text-xs">
-                    Current: {updateStatus.currentVersion || "v1.0.51"}
+                    Current: {updateStatus.currentVersion || "v1.0.52"}
                   </span>
                   <span>➔</span>
                   <span className="font-mono text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full text-xs font-bold">
@@ -400,23 +400,6 @@ function AdminLayout() {
             </div>
           ) : (
             <>
-              {updateStatus.hasUpdate && !pathname?.startsWith("/admin/updates") && (
-                <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50/90 px-4 py-3 text-sm text-red-800">
-                  <div className="flex items-center gap-2.5 font-medium">
-                    <AlertTriangle className="h-4 w-4 shrink-0 text-red-600" />
-                    <span>
-                      <strong>Update Available:</strong> Version {updateStatus.latestVersion} is available to install (current: {updateStatus.currentVersion}).
-                    </span>
-                  </div>
-                  <Link
-                    to="/admin/updates"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-700 transition shadow-sm"
-                  >
-                    <Rocket className="h-3.5 w-3.5" />
-                    Update Website Now
-                  </Link>
-                </div>
-              )}
               <Outlet />
             </>
           )}
