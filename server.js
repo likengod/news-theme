@@ -69,10 +69,10 @@ const server = createServer(async (req, res) => {
         if (MIME_TYPES[ext]) {
           res.setHeader('Content-Type', MIME_TYPES[ext]);
         }
-        if (parsedPath.startsWith('/assets/') || parsedPath.startsWith('/uploads/')) {
+        if (parsedPath.startsWith('/assets/') || parsedPath.startsWith('/uploads/') || parsedPath.startsWith('/fonts/') || ['.ico', '.svg', '.woff2', '.woff', '.ttf', '.webp', '.jpg', '.png'].includes(ext)) {
           res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
         } else {
-          res.setHeader('Cache-Control', 'public, max-age=86400');
+          res.setHeader('Cache-Control', 'public, max-age=2592000');
         }
         fs.createReadStream(filePath).pipe(res);
         return;

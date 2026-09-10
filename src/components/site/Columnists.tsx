@@ -435,7 +435,7 @@ export function Columnists() {
                   <img
                     src={adImg}
                     alt={ad.label || "Sponsored Ad"}
-                    loading={index === 0 ? "eager" : "lazy"}
+                    loading="lazy"
                     decoding="async"
                     width={270}
                     height={480}
@@ -478,7 +478,7 @@ export function Columnists() {
                 <img
                   src={v.img}
                   alt={v.title}
-                  loading={index < 2 ? "eager" : "lazy"}
+                  loading="lazy"
                   decoding="async"
                   width={270}
                   height={480}

@@ -188,7 +188,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
         ...(googleFontsUrl ? [
           { rel: "preload", as: "style", href: googleFontsUrl },
-          { rel: "stylesheet", href: googleFontsUrl },
         ] : []),
         { rel: "stylesheet", href: appCss },
       ],
@@ -317,6 +316,22 @@ function RootComponent() {
       document.head.appendChild(varsStyle);
     }
     varsStyle.textContent = varsCss;
+
+    // Google Fonts asynchronous non-blocking stylesheet attachment
+    const activeSectionFontIds = Object.values(fontConfig.sectionMapping || {});
+    const googleFontsUrl = buildGoogleFontsUrl(fontConfig.fonts, activeSectionFontIds);
+    let fontLink = document.getElementById("nt-google-fonts") as HTMLLinkElement | null;
+    if (googleFontsUrl) {
+      if (!fontLink) {
+        fontLink = document.createElement("link");
+        fontLink.id = "nt-google-fonts";
+        fontLink.rel = "stylesheet";
+        fontLink.href = googleFontsUrl;
+        document.head.appendChild(fontLink);
+      } else if (fontLink.href !== googleFontsUrl) {
+        fontLink.href = googleFontsUrl;
+      }
+    }
 
     return () => {
       faceStyle?.remove();

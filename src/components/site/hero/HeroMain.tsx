@@ -127,6 +127,10 @@ export function HeroMain({ activeLeads, cfg }: any) {
                 <img
                   src={adImg}
                   alt={ad.label || "Advertisement"}
+                  loading="lazy"
+                  decoding="async"
+                  width={800}
+                  height={500}
                   className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover/ad:scale-102"
                 />
                 {/* SPONSORED Tag */}
