@@ -80,19 +80,19 @@ export function Masthead() {
               </h1>
             )}
           </Link>
-          <p className="mt-3 hidden text-[11px] font-semibold uppercase tracking-[0.35em] md:block text-muted-foreground">
+          <p className="mt-2.5 sm:mt-3 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.25em] md:tracking-[0.35em] text-muted-foreground">
             {s.tagline ? (
-              <span>{s.tagline}</span>
+              <span className="break-words">{s.tagline}</span>
             ) : (
-              <>
+              <span className="inline-flex flex-wrap items-center justify-center gap-x-1.5 sm:gap-x-2">
                 <span style={{ color: "#2563eb" }}>Breaking News</span>
-                <span className="mx-2 text-muted-foreground">•</span>
+                <span className="text-muted-foreground">•</span>
                 <span style={{ color: "#dc2626" }}>Finance</span>
-                <span className="mx-2 text-muted-foreground">•</span>
+                <span className="text-muted-foreground">•</span>
                 <span style={{ color: "#16a34a" }}>Business</span>
-                <span className="mx-2 text-muted-foreground">•</span>
+                <span className="text-muted-foreground">•</span>
                 <span style={{ color: "#ea580c" }}>Market</span>
-              </>
+              </span>
             )}
           </p>
         </div>

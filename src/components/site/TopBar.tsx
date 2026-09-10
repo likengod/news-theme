@@ -177,8 +177,8 @@ export function TopBar() {
                         : (settings.logoText && settings.logoText.split(" ").length > 1 ? settings.logoText.split(" ").slice(1).join(" ") : "THEME")}
                     </span>
                   </SheetTitle>
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-                    {t("nav.navigation")}
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground truncate">
+                    {settings.tagline || t("nav.navigation")}
                   </p>
                 </SheetHeader>
                 <form
