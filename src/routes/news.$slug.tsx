@@ -73,11 +73,16 @@ function ArticleNotFound() {
 
 export const Route = createFileRoute("/news/$slug")({
   loader: async ({ params, context }) => {
-    const [data, origin] = await Promise.all([
-      context.queryClient.ensureQueryData(articleQueryOptions(params.slug)),
-      getRequestOrigin(),
-    ]);
-    return { data, origin };
+    try {
+      const [data, origin] = await Promise.all([
+        context.queryClient.ensureQueryData(articleQueryOptions(params.slug)).catch(() => null),
+        getRequestOrigin().catch(() => ""),
+      ]);
+      return { data, origin };
+    } catch (err) {
+      console.warn("[Article loader] Error:", err);
+      return { data: null, origin: "" };
+    }
   },
   head: ({ loaderData }) => {
     if (!loaderData || !loaderData.data) {

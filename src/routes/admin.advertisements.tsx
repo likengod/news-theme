@@ -159,8 +159,12 @@ const SAMPLE_GOOGLE_ADSENSE = `<script async src="https://pagead2.googlesyndicat
 function AdvertisementsPage() {
   const navigate = useNavigate();
   const s = useSiteSettings();
-  const isPremium = ["Enterprise", "Enterprise+", "Premium", "Demo"].includes(s.licenseType || "") || s.licenseRole === "VIP";
-  const isEnterprise = ["Enterprise", "Enterprise+", "Demo"].includes(s.licenseType || "") || s.licenseRole === "VIP";
+  const planType = (s.licenseType || "").toLowerCase();
+  const roleType = (s.licenseRole || "").toLowerCase();
+  const keyType = (s.licenseKey || "").toUpperCase();
+  const isVIP = roleType === "vip" || roleType === "admin";
+  const isEnterprise = isVIP || planType.includes("enterprise") || planType.includes("demo") || keyType.includes("ENT") || keyType.includes("DEMO");
+  const isPremium = isEnterprise || planType.includes("premium");
 
   const [tab, setTab] = useState<Tab>("home1");
   const [ads, setAds] = useState<AdSlideItem[]>([]);

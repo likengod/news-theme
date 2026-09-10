@@ -33,11 +33,22 @@ const HOME_DESC = "Breaking news, market intelligence, and sharp business analys
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const [articles, tags] = await Promise.all([
-      getHomepageArticles({ data: 50 }),
-      getTags()
-    ]);
-    return { articles, tags };
+    try {
+      const [articles, tags] = await Promise.all([
+        getHomepageArticles({ data: 50 }).catch((err) => {
+          console.warn("[Homepage Loader] getHomepageArticles fallback to empty:", err?.message || err);
+          return [];
+        }),
+        getTags().catch((err) => {
+          console.warn("[Homepage Loader] getTags fallback to empty:", err?.message || err);
+          return [];
+        }),
+      ]);
+      return { articles: Array.isArray(articles) ? articles : [], tags: Array.isArray(tags) ? tags : [] };
+    } catch (err) {
+      console.error("[Homepage Loader] Top-level error, rendering fallback:", err);
+      return { articles: [], tags: [] };
+    }
   },
   head: () => ({
     meta: [

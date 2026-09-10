@@ -1,4 +1,4 @@
-﻿import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "@/lib/auth-middleware";
 import { query } from "./db.server";
 import { slugify } from "./news-data";
@@ -26,30 +26,36 @@ export type TagRow = {
 export const getCategories = createServerFn({ method: "GET" })
   .validator((data?: { q?: string }) => data ?? {})
   .handler(async ({ data }): Promise<CategoryRow[]> => {
-    const q = data?.q ? `%${data.q}%` : null;
-    let sql = `
-      SELECT c.*, COUNT(a.id) as count 
-      FROM categories c 
-      LEFT JOIN articles a ON c.name = a.category AND a.status = 'Published'
-    `;
-    const params: any[] = [];
-    if (q) {
-      sql += " WHERE c.name LIKE ? OR c.description LIKE ?";
-      params.push(q, q);
-    }
-    sql += " GROUP BY c.id ORDER BY c.name ASC";
+    try {
+      const q = data?.q ? `%${data.q}%` : null;
+      let sql = `
+        SELECT c.*, COUNT(a.id) as count 
+        FROM categories c 
+        LEFT JOIN articles a ON c.name = a.category AND a.status = 'Published'
+      `;
+      const params: any[] = [];
+      if (q) {
+        sql += " WHERE c.name LIKE ? OR c.description LIKE ?";
+        params.push(q, q);
+      }
+      sql += " GROUP BY c.id ORDER BY c.name ASC";
 
-    const rows = await query(sql, params);
-    return rows.map((r: any) => ({
-      id: r.id,
-      name: r.name,
-      slug: r.slug,
-      description: r.description || "",
-      metaTitle: r.meta_title || "",
-      metaDescription: r.meta_description || "",
-      showInHeader: Boolean(r.show_in_header),
-      count: Number(r.count || 0),
-    }));
+      const rows = await query(sql, params);
+      if (!Array.isArray(rows)) return [];
+      return rows.map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        slug: r.slug,
+        description: r.description || "",
+        metaTitle: r.meta_title || "",
+        metaDescription: r.meta_description || "",
+        showInHeader: Boolean(r.show_in_header),
+        count: Number(r.count || 0),
+      }));
+    } catch (err: any) {
+      console.warn("[getCategories] Query warning:", err?.message || err);
+      return [];
+    }
   });
 
 export const saveCategory = createServerFn({ method: "POST" })
@@ -115,26 +121,40 @@ export const importCategories = createServerFn({ method: "POST" })
 
 export const getTags = createServerFn({ method: "GET" })
   .handler(async (): Promise<TagRow[]> => {
-    // Return tags list and estimate article counts by parsing comma-separated tag list
-    // (In a full scale relational model we would join an article_tags map table)
-    const tags = await query("SELECT * FROM tags ORDER BY name ASC");
-    const articles = await query("SELECT tags FROM articles WHERE status = 'Published' AND tags IS NOT NULL");
-    
-    // Count tags
-    const counts = new Map<string, number>();
-    articles.forEach((a: any) => {
-      const list = a.tags.split(",").map((t: string) => t.trim().toLowerCase());
-      list.forEach((t: string) => {
-        counts.set(t, (counts.get(t) || 0) + 1);
-      });
-    });
+    try {
+      const tags = await query("SELECT * FROM tags ORDER BY name ASC");
+      if (!Array.isArray(tags)) return [];
+      
+      let articles: any[] = [];
+      try {
+        articles = await query("SELECT tags FROM articles WHERE status = 'Published' AND tags IS NOT NULL");
+      } catch {
+        articles = [];
+      }
+      
+      // Count tags
+      const counts = new Map<string, number>();
+      if (Array.isArray(articles)) {
+        articles.forEach((a: any) => {
+          if (typeof a?.tags === "string") {
+            const list = a.tags.split(",").map((t: string) => t.trim().toLowerCase());
+            list.forEach((t: string) => {
+              counts.set(t, (counts.get(t) || 0) + 1);
+            });
+          }
+        });
+      }
 
-    return tags.map((r: any) => ({
-      id: r.id,
-      name: r.name,
-      slug: r.slug,
-      count: counts.get(r.name.toLowerCase()) || 0,
-    }));
+      return tags.map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        slug: r.slug,
+        count: counts.get(r.name?.toLowerCase?.() || "") || 0,
+      }));
+    } catch (err: any) {
+      console.warn("[getTags] Query warning:", err?.message || err);
+      return [];
+    }
   });
 
 export const saveTag = createServerFn({ method: "POST" })
@@ -190,85 +210,90 @@ export const importTags = createServerFn({ method: "POST" })
 export const getCategoryData = createServerFn({ method: "GET" })
   .validator((data: any) => data)
   .handler(async ({ data }) => {
-    const slug = typeof data === "string" ? data : (data?.slug || "");
-    const page = typeof data === "object" && Number(data?.page) > 0 ? Number(data.page) : 1;
-    const limit = typeof data === "object" && Number(data?.limit) > 0 ? Number(data.limit) : 10;
-    const offset = (page - 1) * limit;
+    try {
+      const slug = typeof data === "string" ? data : (data?.slug || "");
+      const page = typeof data === "object" && Number(data?.page) > 0 ? Number(data.page) : 1;
+      const limit = typeof data === "object" && Number(data?.limit) > 0 ? Number(data.limit) : 10;
+      const offset = (page - 1) * limit;
 
-    const catRows = await query("SELECT * FROM categories WHERE slug = ?", [slug]);
-    if (catRows.length === 0) return null;
-    const cat = catRows[0];
+      const catRows = await query("SELECT * FROM categories WHERE slug = ?", [slug]);
+      if (!Array.isArray(catRows) || catRows.length === 0) return null;
+      const cat = catRows[0];
 
-    const [countRes, articles, latestRows] = await Promise.all([
-      query(
-        "SELECT COUNT(*) as total FROM articles WHERE category = ? AND status = 'Published' AND date <= NOW()",
-        [cat.name]
-      ),
-      query(
-        "SELECT * FROM articles WHERE category = ? AND status = 'Published' AND date <= NOW() ORDER BY date DESC, id DESC LIMIT ? OFFSET ?",
-        [cat.name, limit, offset]
-      ),
-      query(
-        "SELECT * FROM articles WHERE category = ? AND status = 'Published' AND date <= NOW() ORDER BY date DESC, id DESC LIMIT 5",
-        [cat.name]
-      )
-    ]);
+      const [countRes, articles, latestRows] = await Promise.all([
+        query(
+          "SELECT COUNT(*) as total FROM articles WHERE category = ? AND status = 'Published' AND date <= NOW()",
+          [cat.name]
+        ),
+        query(
+          "SELECT * FROM articles WHERE category = ? AND status = 'Published' AND date <= NOW() ORDER BY date DESC, id DESC LIMIT ? OFFSET ?",
+          [cat.name, limit, offset]
+        ),
+        query(
+          "SELECT * FROM articles WHERE category = ? AND status = 'Published' AND date <= NOW() ORDER BY date DESC, id DESC LIMIT 5",
+          [cat.name]
+        )
+      ]);
 
-    const total = Number(countRes[0]?.total || 0);
-    const totalPages = Math.max(1, Math.ceil(total / limit));
+      const total = Number(countRes?.[0]?.total || 0);
+      const totalPages = Math.max(1, Math.ceil(total / limit));
 
-    const mapped = articles.map((r: any) => ({
-      ...r,
-      featured: Boolean(r.featured),
-    }));
+      const mapped = (Array.isArray(articles) ? articles : []).map((r: any) => ({
+        ...r,
+        featured: Boolean(r.featured),
+      }));
 
-    const featured = (page === 1 ? mapped.slice(0, 3) : []).map((a: any) => ({
-      title: a.title,
-      excerpt: a.excerpt,
-      date: new Date(a.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
-      img: a.featuredImage,
-      tags: a.tags ? a.tags.split(",").map((t: string) => t.trim()) : [cat.name],
-      slug: a.slug,
-      views: a.views,
-      author: a.author || "Newsroom",
-      kickers: a.tags ? a.tags.split(",").map((t: string) => t.trim()).slice(0, 2) : [cat.name],
-    }));
+      const featured = (page === 1 ? mapped.slice(0, 3) : []).map((a: any) => ({
+        title: a.title,
+        excerpt: a.excerpt,
+        date: new Date(a.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+        img: a.featuredImage,
+        tags: a.tags ? a.tags.split(",").map((t: string) => t.trim()) : [cat.name],
+        slug: a.slug,
+        views: a.views,
+        author: a.author || "Newsroom",
+        kickers: a.tags ? a.tags.split(",").map((t: string) => t.trim()).slice(0, 2) : [cat.name],
+      }));
 
-    const listSource = page === 1 ? mapped.slice(3) : mapped;
+      const listSource = page === 1 ? mapped.slice(3) : mapped;
 
-    const list = listSource.map((a: any) => ({
-      title: a.title,
-      excerpt: a.excerpt,
-      date: new Date(a.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
-      img: a.featuredImage,
-      tags: a.tags ? a.tags.split(",").map((t: string) => t.trim()) : [cat.name],
-      slug: a.slug,
-      views: a.views,
-      author: a.author || "Newsroom",
-    }));
+      const list = listSource.map((a: any) => ({
+        title: a.title,
+        excerpt: a.excerpt,
+        date: new Date(a.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+        img: a.featuredImage,
+        tags: a.tags ? a.tags.split(",").map((t: string) => t.trim()) : [cat.name],
+        slug: a.slug,
+        views: a.views,
+        author: a.author || "Newsroom",
+      }));
 
-    const latest = latestRows.map((a: any) => ({
-      title: a.title,
-      date: new Date(a.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
-      img: a.featuredImage,
-      slug: a.slug,
-    }));
+      const latest = (Array.isArray(latestRows) ? latestRows : []).map((a: any) => ({
+        title: a.title,
+        date: new Date(a.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+        img: a.featuredImage,
+        slug: a.slug,
+      }));
 
-    return {
-      category: {
-        name: cat.name,
-        slug: cat.slug,
-        description: cat.description || `Latest ${cat.name} news, analysis and updates.`,
-        metaTitle: cat.meta_title || `${cat.name} News - News Theme`,
-        metaDescription: cat.meta_description || `Read latest ${cat.name} articles and coverage.`,
-      },
-      featured,
-      list,
-      latest,
-      total,
-      totalPages,
-      page
-    };
+      return {
+        category: {
+          name: cat.name,
+          slug: cat.slug,
+          description: cat.description || `Latest ${cat.name} news, analysis and updates.`,
+          metaTitle: cat.meta_title || `${cat.name} News - News Theme`,
+          metaDescription: cat.meta_description || `Read latest ${cat.name} articles and coverage.`,
+        },
+        featured,
+        list,
+        latest,
+        total,
+        totalPages,
+        page
+      };
+    } catch (err: any) {
+      console.warn("[getCategoryData] Query warning:", err?.message || err);
+      return null;
+    }
   });
 
 export const getTopTags = createServerFn({ method: "GET" })

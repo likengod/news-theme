@@ -1,4 +1,4 @@
-﻿import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "@/lib/auth-middleware";
 import { query } from "./db.server";
 import { slugify } from "./news-data";
@@ -318,38 +318,59 @@ const HOMEPAGE_CACHE: Record<number, { data: any; lastFetched: number; TTL: numb
 export const getHomepageArticles = createServerFn({ method: "GET" })
   .validator((limit: any) => limit)
   .handler(async ({ data }) => {
-    const limitNum = Math.min(Math.max(1, parseInt(data, 10) || 30), 100);
-    
-    const now = Date.now();
-    const cache = HOMEPAGE_CACHE[limitNum];
-    
-    if (cache && (now - cache.lastFetched < cache.TTL)) {
-      console.log(`[Cache Hit] Serving homepage articles (limit: ${limitNum})`);
-      return cache.data;
+    try {
+      let rawLimit = 30;
+      if (typeof data === "number") {
+        rawLimit = data;
+      } else if (typeof data === "string") {
+        rawLimit = parseInt(data, 10) || 30;
+      } else if (typeof data === "object" && data !== null) {
+        rawLimit = parseInt(data.data || data.limit, 10) || 30;
+      }
+      const limitNum = Math.min(Math.max(1, rawLimit), 100);
+      
+      const now = Date.now();
+      const cache = HOMEPAGE_CACHE[limitNum];
+      
+      if (cache && (now - cache.lastFetched < cache.TTL)) {
+        console.log(`[Cache Hit] Serving homepage articles (limit: ${limitNum})`);
+        return cache.data;
+      }
+      
+      console.log(`[Cache Miss] Fetching homepage articles from MySQL (limit: ${limitNum})`);
+      const items = await query(
+        `SELECT id, title, slug, category, city, state, country, author, views, status, date,
+                excerpt, featuredImage, ogImage, tags, featured, newsType, journalistId, journalistName, access_level
+         FROM articles 
+         WHERE status = 'Published' AND date <= NOW() 
+         ORDER BY date DESC, id DESC 
+         LIMIT ?`,
+        [limitNum]
+      );
+      if (!Array.isArray(items)) {
+        return [];
+      }
+      const mapped = items.map((r: any) => ({
+        ...r,
+        featured: Boolean(r.featured),
+      }));
+      
+      HOMEPAGE_CACHE[limitNum] = {
+        data: mapped,
+        lastFetched: now,
+        TTL: 60 * 1000 // 60 seconds
+      };
+      
+      return mapped;
+    } catch (err: any) {
+      console.error("[getHomepageArticles] Error fetching articles:", err?.message || err);
+      // Return cached data if available even if stale
+      const fallbackLimit = 30;
+      if (HOMEPAGE_CACHE[fallbackLimit]?.data) {
+        return HOMEPAGE_CACHE[fallbackLimit].data;
+      }
+      return [];
     }
-    
-    console.log(`[Cache Miss] Fetching homepage articles from MySQL (limit: ${limitNum})`);
-    const items = await query(
-      `SELECT id, title, slug, category, city, state, country, author, views, status, date,
-              excerpt, featuredImage, ogImage, tags, featured, newsType, journalistId, journalistName, access_level
-       FROM articles 
-       WHERE status = 'Published' AND date <= NOW() 
-       ORDER BY date DESC, id DESC 
-       LIMIT ?`,
-      [limitNum]
-    );
-    const mapped = items.map((r: any) => ({
-      ...r,
-      featured: Boolean(r.featured),
-    }));
-    
-    HOMEPAGE_CACHE[limitNum] = {
-      data: mapped,
-      lastFetched: now,
-      TTL: 60 * 1000 // 60 seconds
-    };
-    
-    return mapped;
   });
 
 // Admin: get dashboard statistics

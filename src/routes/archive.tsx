@@ -20,15 +20,20 @@ export const Route = createFileRoute("/archive")({
   }),
   loaderDeps: ({ search: { day, month, year, page } }) => ({ day, month, year, page }),
   loader: async ({ deps }) => {
-    return await getPublicArchiveArticles({
-      data: {
-        year: deps.year,
-        month: deps.month,
-        day: deps.day,
-        page: deps.page || 1,
-        limit: 15,
-      },
-    });
+    try {
+      return await getPublicArchiveArticles({
+        data: {
+          year: deps.year,
+          month: deps.month,
+          day: deps.day,
+          page: deps.page || 1,
+          limit: 15,
+        },
+      });
+    } catch (err) {
+      console.warn("[Archive loader] Error:", err);
+      return { rows: [], total: 0, totalPages: 1 };
+    }
   },
   head: () => ({
     meta: [

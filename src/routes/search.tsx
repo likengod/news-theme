@@ -19,14 +19,19 @@ export const Route = createFileRoute("/search")({
   }),
   loaderDeps: ({ search: { q, category, page } }) => ({ q, category, page }),
   loader: async ({ deps }) => {
-    return await searchPublicArticles({
-      data: {
-        q: deps.q || "",
-        category: deps.category || "All",
-        page: deps.page || 1,
-        limit: 15,
-      },
-    });
+    try {
+      return await searchPublicArticles({
+        data: {
+          q: deps.q || "",
+          category: deps.category || "All",
+          page: deps.page || 1,
+          limit: 15,
+        },
+      });
+    } catch (err) {
+      console.warn("[Search loader] Error:", err);
+      return { rows: [], total: 0, totalPages: 1 };
+    }
   },
   head: () => ({
     meta: [

@@ -33,6 +33,22 @@ const server = createServer(async (req, res) => {
     const rawUrl = req.url || '/';
     const parsedPath = rawUrl.split('?')[0];
 
+    // Special handling for favicon.ico so it never falls into SSR route matching
+    if (parsedPath === '/favicon.ico') {
+      const icoDirs = [path.join(__dirname, 'public/favicon.ico'), path.join(__dirname, 'dist/client/favicon.ico')];
+      for (const icoPath of icoDirs) {
+        if (fs.existsSync(icoPath)) {
+          res.setHeader('Content-Type', 'image/x-icon');
+          res.setHeader('Cache-Control', 'public, max-age=86400');
+          fs.createReadStream(icoPath).pipe(res);
+          return;
+        }
+      }
+      res.statusCode = 204;
+      res.end();
+      return;
+    }
+
     // Static assets handling from dist/client or public
     const staticDirs = [path.join(__dirname, 'dist/client'), path.join(__dirname, 'public')];
     for (const baseDir of staticDirs) {

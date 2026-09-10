@@ -53,10 +53,15 @@ export const Route = createFileRoute("/$slug")({
   }),
   loaderDeps: ({ search: { page } }) => ({ page }),
   loader: async ({ params, deps }) => {
-    const data = await getCategoryData({
-      data: { slug: params.slug, page: deps.page || 1, limit: 10 }
-    });
-    return data;
+    try {
+      const data = await getCategoryData({
+        data: { slug: params.slug, page: deps.page || 1, limit: 10 }
+      });
+      return data;
+    } catch (err) {
+      console.warn("[Category loader] Error:", err);
+      return null;
+    }
   },
   head: ({ params }) => {
     const title = decodeURIComponent(params.slug).replace(/-/g, " ");
