@@ -182,6 +182,7 @@ function AdvertisementsPage() {
   const isVIP = roleType === "vip" || roleType === "admin";
   const isEnterprise = isVIP || planType.includes("enterprise") || planType.includes("demo") || keyType.includes("ENT") || keyType.includes("DEMO");
   const isPremium = isEnterprise || planType.includes("premium");
+  const isEnterprisePlus = isVIP || planType.includes("enterprise+") || planType.includes("enterprise plus") || keyType.includes("ENT_PLUS") || keyType.includes("DEMO");
 
   const [tab, setTab] = useState<Tab>("home1");
   const [ads, setAds] = useState<AdSlideItem[]>([]);
@@ -352,7 +353,7 @@ function AdvertisementsPage() {
         <div className="flex flex-wrap items-center gap-1.5">
           {SLOTS.map((s) => {
             const isActive = tab === s.key;
-            const isLocked = ((s.key === "popup" || s.key === "leaderboard") && !isPremium) || (s.key === "featured_slide" && !isEnterprise);
+            const isLocked = ((s.key === "popup" || s.key === "leaderboard") && !isPremium) || ((s.key === "featured_slide" || s.key === "reel_ads") && !isEnterprisePlus);
             const count = slotCounts[s.key] || 0;
             return (
               <button
@@ -417,14 +418,14 @@ function AdvertisementsPage() {
       </div>
 
       {/* Main Tab Content */}
-      {(((tab === "popup" || tab === "leaderboard") && !isPremium) || (tab === "featured_slide" && !isEnterprise)) ? (
+      {(((tab === "popup" || tab === "leaderboard") && !isPremium) || ((tab === "featured_slide" || tab === "reel_ads") && !isEnterprisePlus)) ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
             <Lock className="h-8 w-8 text-slate-400" />
           </div>
           <h3 className="mt-4 text-base font-semibold text-slate-800">Premium Feature Locked</h3>
           <p className="mt-1 max-w-sm text-sm text-slate-500">
-            The {tab === "popup" ? "Popup" : tab === "leaderboard" ? "Leaderboard" : "Featured Ads"} advertisement slot is exclusively available on Enterprise and Enterprise+ licenses. Please upgrade your license to unlock this slot.
+            The {(tab === "featured_slide" || tab === "reel_ads") ? SLOTS.find(s=>s.key===tab)?.label : tab === "popup" ? "Popup" : "Leaderboard"} advertisement slot is exclusively available on { (tab === "featured_slide" || tab === "reel_ads") ? "Enterprise+" : "Premium" } licenses. Please upgrade your license to unlock this slot.
           </p>
           <button
             onClick={() => navigate({ to: "/admin/settings", search: { tab: "activate" } })}
