@@ -710,7 +710,7 @@ function AdvertisementsPage() {
 
               <div className="flex items-center gap-3">
                 {tab !== "popup" && (
-                  <div className="flex items-center gap-2 rounded-lg bg-slate-800 px-3 py-1 text-xs text-slate-200">
+                  <div className="flex items-center gap-2 rounded-lg bg-slate-800 px-3 py-1 text-xs text-slate-200" title={!isEnterprise ? "Requires Enterprise license" : ""}>
                     <Clock className="h-3.5 w-3.5 text-amber-400" />
                     <label htmlFor={`rotation-speed-${tab}`}>Rotate every:</label>
                     <input
@@ -718,11 +718,13 @@ function AdvertisementsPage() {
                       type="number"
                       min={1}
                       max={120}
+                      disabled={!isEnterprise}
                       value={rotation}
                       onChange={(e) => setRotation(Math.max(1, parseInt(e.target.value) || 5))}
-                      className="w-12 rounded bg-slate-900 border border-slate-700 px-1.5 py-0.5 text-center text-xs font-bold text-white focus:outline-none focus:border-amber-400"
+                      className="w-12 rounded bg-slate-900 border border-slate-700 px-1.5 py-0.5 text-center text-xs font-bold text-white focus:outline-none focus:border-amber-400 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     <span>sec</span>
+                    {!isEnterprise && <Lock className="h-3.5 w-3.5 ml-1 text-slate-400" />}
                   </div>
                 )}
                 <button
@@ -794,9 +796,12 @@ function AdvertisementsPage() {
                         {/* Featured / Priority toggle */}
                         <button
                           type="button"
+                          disabled={!isEnterprise}
                           onClick={() => toggleFeatured(ad.id)}
                           title={
-                            isFeatured
+                            !isEnterprise 
+                              ? "Requires Enterprise license" 
+                              : isFeatured
                               ? "Currently Featured: shows first before other ads. Click to unfeature."
                               : "Click to feature this ad: featured ads always show first before regular ads."
                           }
@@ -804,10 +809,11 @@ function AdvertisementsPage() {
                             isFeatured
                               ? "bg-amber-500 text-white hover:bg-amber-600"
                               : "border border-slate-200 bg-white text-slate-600 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50"
-                          }`}
+                          } ${!isEnterprise && "opacity-50 cursor-not-allowed"}`}
                         >
                           <Star className={`h-3.5 w-3.5 ${isFeatured ? "fill-white" : "text-amber-500"}`} />
                           {isFeatured ? "Featured (First)" : "Mark Featured"}
+                          {!isEnterprise && <Lock className="h-3 w-3 ml-0.5 text-slate-400" />}
                         </button>
 
                         {/* Reorder Up / Down */}
@@ -834,21 +840,23 @@ function AdvertisementsPage() {
                         </div>
 
                         {/* Expiration date */}
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5" title={!isEnterprise ? "Requires Enterprise license" : ""}>
                           <label htmlFor={`expires-${ad.id}`} className="text-xs font-semibold text-slate-500 whitespace-nowrap">
                             Expires:
                           </label>
                           <input
                             id={`expires-${ad.id}`}
                             type="date"
+                            disabled={!isEnterprise}
                             value={formatExpiresAt(ad.expiresAt)}
                             onChange={(e) =>
                               update(ad.id, {
                                 expiresAt: e.target.value ? new Date(e.target.value).toISOString() : null,
                               })
                             }
-                            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-800 focus:border-slate-900 focus:outline-none transition"
+                            className={`rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-800 focus:border-slate-900 focus:outline-none transition ${!isEnterprise ? "opacity-50 cursor-not-allowed bg-slate-50" : ""}`}
                           />
+                          {!isEnterprise && <Lock className="h-3 w-3 text-slate-300" />}
                         </div>
 
                         {/* Delete button */}

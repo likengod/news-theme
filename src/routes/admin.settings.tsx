@@ -87,7 +87,13 @@ function SettingsPage() {
     search.tab || "general"
   );
   
-  const isPremium = ["Enterprise", "Enterprise+", "Premium"].includes(s.licenseType || "") || s.licenseRole === "VIP";
+  const planType = (s.licenseType || "").toLowerCase();
+  const roleType = (s.licenseRole || "").toLowerCase();
+  const keyType = (s.licenseKey || "").toUpperCase();
+  const isVIP = roleType === "vip" || roleType === "admin";
+  const isEnterprise = isVIP || planType.includes("enterprise") || planType.includes("demo") || keyType.includes("ENT") || keyType.includes("DEMO");
+  const isEnterprisePlus = isVIP || planType.includes("enterprise+") || planType.includes("enterprise plus") || keyType.includes("ENT_PLUS") || keyType.includes("DEMO");
+  const isPremium = isEnterprise || planType.includes("premium");
 
   useEffect(() => {
     if (search.tab && search.tab !== tab) {
@@ -186,17 +192,27 @@ function SettingsPage() {
         {tabs.map((t) => {
           const Icon = t.icon;
           const active = tab === t.id;
+          const isLocked = t.id === "festive" && !isEnterprise;
           return (
             <button
               key={t.id}
-              onClick={() => navigate({ to: ".", search: { tab: t.id } })}
+              onClick={() => {
+                if (isLocked) {
+                  toast.error("Festive settings require an Enterprise license");
+                  return;
+                }
+                navigate({ to: ".", search: { tab: t.id } });
+              }}
               className={`whitespace-nowrap inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
                 active
                   ? "bg-slate-900 text-white shadow-sm"
+                  : isLocked
+                  ? "text-slate-400 hover:bg-slate-50"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               <Icon className="h-3.5 w-3.5 shrink-0" /> {t.label}
+              {isLocked && <Lock className="h-3 w-3 ml-0.5 text-slate-300" />}
             </button>
           );
         })}
@@ -204,7 +220,23 @@ function SettingsPage() {
 
       <Suspense fallback={<div className="p-8 text-center text-slate-500 animate-pulse">Loading settings...</div>}>
         {tab === "general" && <GeneralSettingsForm />}
-        {tab === "festive" && <FestiveSettingsForm />}
+        {tab === "festive" && (isEnterprise ? <FestiveSettingsForm /> : (
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center mt-6">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+              <Lock className="h-8 w-8 text-slate-400" />
+            </div>
+            <h3 className="mt-4 text-base font-semibold text-slate-800">Enterprise Feature Locked</h3>
+            <p className="mt-1 max-w-sm text-sm text-slate-500">
+              The Festive features and seasonal decorations are exclusively available on Enterprise licenses. Please upgrade your license to unlock this.
+            </p>
+            <button
+              onClick={() => navigate({ to: ".", search: { tab: "activate" } })}
+              className="mt-6 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            >
+              Activate Website
+            </button>
+          </div>
+        ))}
 
 
         {tab === "fonts" && <FontSettingsTab />}
