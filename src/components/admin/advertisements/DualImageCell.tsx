@@ -175,12 +175,13 @@ export function DualImageCell({
   const landscapeSize = slot === "home2" ? "406 × 196 px" : slot === "leaderboard" ? "728 × 90 px, etc." : "1200 × 675 px";
   
   if (slot === "home1" || slot === "ad3") {
+    const portraitValOnly = ad.imagePortrait || (ad.orientation === "portrait" ? ad.image : (!ad.imageLandscape ? ad.image : ""));
     return (
       <div className="flex items-center gap-3 py-1">
         <SingleSlotImagePicker
           label="Portrait"
           badgeColor="bg-indigo-600"
-          value={portraitVal || ad.image || ""}
+          value={portraitValOnly || ""}
           aspectClass="w-16 h-20"
           emptyText="+ Portrait"
           recSize="600 × 800 px"
@@ -188,6 +189,7 @@ export function DualImageCell({
             onUpdate(ad.id, {
               imagePortrait: url,
               image: url,
+              imageLandscape: undefined,
               orientation: "portrait",
             });
           }}
@@ -197,12 +199,13 @@ export function DualImageCell({
   }
 
   if (slot === "home2") {
+    const landscapeValOnly = ad.imageLandscape || (ad.orientation === "landscape" ? ad.image : (!ad.imagePortrait ? ad.image : ""));
     return (
       <div className="flex items-center gap-3 py-1">
         <SingleSlotImagePicker
           label="Landscape"
           badgeColor="bg-emerald-600"
-          value={landscapeVal || ad.image || ""}
+          value={landscapeValOnly || ""}
           aspectClass="w-28 h-14"
           emptyText="+ Landscape"
           recSize="406 × 196 px"
@@ -210,6 +213,7 @@ export function DualImageCell({
             onUpdate(ad.id, {
               imageLandscape: url,
               image: url,
+              imagePortrait: undefined,
               orientation: "landscape",
             });
           }}

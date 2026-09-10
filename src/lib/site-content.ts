@@ -1170,22 +1170,44 @@ export function safeSetItem(key: string, value: string): boolean {
   }
 }
 
+function sanitizeSlotAds(slot: AdSlot, list: AdSlideItem[]): AdSlideItem[] {
+  if (!Array.isArray(list)) return list;
+  if (slot === "home1" || slot === "ad3" || slot === "reel_ads") {
+    return list.map((ad) => {
+      if (ad.imagePortrait) {
+        return { ...ad, image: ad.imagePortrait, orientation: "portrait" as const, imageLandscape: undefined };
+      }
+      return ad;
+    });
+  }
+  if (slot === "home2") {
+    return list.map((ad) => {
+      if (ad.imageLandscape) {
+        return { ...ad, image: ad.imageLandscape, orientation: "landscape" as const, imagePortrait: undefined };
+      }
+      return ad;
+    });
+  }
+  return list;
+}
+
 function readRaw(slot: AdSlot): AdSlideItem[] {
   if (inMemoryAdsCache[slot]) return inMemoryAdsCache[slot]!;
-  if (typeof window === "undefined") return DEFAULTS[slot];
+  if (typeof window === "undefined") return sanitizeSlotAds(slot, DEFAULTS[slot]);
   try {
     const raw = localStorage.getItem(ADS_KEYS[slot]);
-    const parsed = raw ? (JSON.parse(raw) as AdSlideItem[]) : DEFAULTS[slot];
+    const parsed = sanitizeSlotAds(slot, raw ? (JSON.parse(raw) as AdSlideItem[]) : DEFAULTS[slot]);
     inMemoryAdsCache[slot] = parsed;
     return parsed;
   } catch {
-    return DEFAULTS[slot];
+    return sanitizeSlotAds(slot, DEFAULTS[slot]);
   }
 }
 
 function writeRaw(slot: AdSlot, ads: AdSlideItem[]) {
-  inMemoryAdsCache[slot] = ads;
-  safeSetItem(ADS_KEYS[slot], JSON.stringify(ads));
+  const sanitized = sanitizeSlotAds(slot, ads);
+  inMemoryAdsCache[slot] = sanitized;
+  safeSetItem(ADS_KEYS[slot], JSON.stringify(sanitized));
 }
 
 export function loadTrash(): AdSlideItem[] {

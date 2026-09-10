@@ -86,7 +86,19 @@ export default function Advertisement({
   const items: AdSlide[] = slot
     ? slotMode === "script"
       ? [{ type: "script", scriptCode: slotScript }]
-      : dbSlides.map((s) => ({ image: s.image, href: s.href }))
+      : dbSlides
+          .map((s) => {
+            let img = s.image;
+            if (slot === "home1" || slot === "ad3" || slot === "popup" || slot === "reel_ads") {
+              // Strictly portrait slots: prioritize portrait image, filter out legacy landscape
+              img = s.imagePortrait || (s.orientation === "portrait" ? s.image : "") || (s.imageLandscape && s.image === s.imageLandscape ? "" : s.image);
+            } else if (slot === "home2" || slot === "leaderboard") {
+              // Strictly landscape slots: prioritize landscape image, filter out legacy portrait
+              img = s.imageLandscape || (s.orientation === "landscape" ? s.image : "") || (s.imagePortrait && s.image === s.imagePortrait ? "" : s.image);
+            }
+            return { image: img, href: s.href };
+          })
+          .filter((s) => !!s.image)
     : slides && slides.length > 0
       ? slides
       : image || video
@@ -188,7 +200,7 @@ export default function Advertisement({
                       src={s.image}
                       alt="Advertisement"
                       loading="lazy"
-                      className="h-full w-full object-contain"
+                      className={`h-full w-full ${slot === "home1" || slot === "ad3" ? "object-cover" : "object-contain"}`}
                     />
                   ) : null}
                 </div>
