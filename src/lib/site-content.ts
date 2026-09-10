@@ -894,18 +894,18 @@ import adHome2_5 from "@/assets/news-wallstreet.webp";
 import adHome2_6 from "@/assets/hero-markets.webp";
 
 export const defaultAdSlides: AdSlideItem[] = [
-  { id: "ad-1", image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80", href: "#", label: "Sponsored" },
-  { id: "ad-2", image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80", href: "#", label: "Sponsored" },
-  { id: "ad-3", image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80", href: "#", label: "Sponsored" },
+  { id: "ad-1", image: "https://placehold.co/600x800/e2e8f0/475569?text=Portrait+Ad\\n600x800", href: "#", label: "Sponsored" },
+  { id: "ad-2", image: "https://placehold.co/600x800/f8fafc/94a3b8?text=Portrait+Ad\\n600x800", href: "#", label: "Sponsored" },
+  { id: "ad-3", image: "https://placehold.co/600x800/f1f5f9/64748b?text=Portrait+Ad\\n600x800", href: "#", label: "Sponsored" },
 ];
 
 export const defaultAdSlidesHome2: AdSlideItem[] = [
-  { id: "ad2-1", image: adHome2_1, href: "#", label: "Sponsored" },
-  { id: "ad2-2", image: adHome2_2, href: "#", label: "Sponsored" },
-  { id: "ad2-3", image: adHome2_3, href: "#", label: "Sponsored" },
-  { id: "ad2-4", image: adHome2_4, href: "#", label: "Sponsored" },
-  { id: "ad2-5", image: adHome2_5, href: "#", label: "Sponsored" },
-  { id: "ad2-6", image: adHome2_6, href: "#", label: "Sponsored" },
+  { id: "ad2-1", image: "https://placehold.co/406x196/e2e8f0/475569?text=Landscape+Ad\\n406x196", href: "#", label: "Sponsored" },
+  { id: "ad2-2", image: "https://placehold.co/406x196/f8fafc/94a3b8?text=Landscape+Ad\\n406x196", href: "#", label: "Sponsored" },
+  { id: "ad2-3", image: "https://placehold.co/406x196/f1f5f9/64748b?text=Landscape+Ad\\n406x196", href: "#", label: "Sponsored" },
+  { id: "ad2-4", image: "https://placehold.co/406x196/e2e8f0/475569?text=Landscape+Ad\\n406x196", href: "#", label: "Sponsored" },
+  { id: "ad2-5", image: "https://placehold.co/406x196/f8fafc/94a3b8?text=Landscape+Ad\\n406x196", href: "#", label: "Sponsored" },
+  { id: "ad2-6", image: "https://placehold.co/406x196/f1f5f9/64748b?text=Landscape+Ad\\n406x196", href: "#", label: "Sponsored" },
 ];
 
 export type AdSlot = "home1" | "home2" | "ad3" | "popup" | "leaderboard" | "featured_slide" | "reel_ads";
@@ -975,13 +975,13 @@ export function saveAdSlotScript(slot: AdSlot, script: string) {
 }
 
 const ADS_KEYS: Record<AdSlot, string> = {
-  home1: "nt:site-ads",
-  home2: "nt:site-ads-home2",
-  ad3: "nt:site-ads-ad3",
-  popup: "nt:site-ads-popup",
-  leaderboard: "nt:site-ads-leaderboard",
-  featured_slide: "nt:site-ads-featured_slide",
-  reel_ads: "nt:site-ads-reel_ads",
+  home1: "nt:ads:v2:home1",
+  home2: "nt:ads:v2:home2",
+  ad3: "nt:ads:v2:ad3",
+  popup: "nt:ads:v2:popup",
+  leaderboard: "nt:ads:v2:leaderboard",
+  featured_slide: "nt:ads:v2:featured_slide",
+  reel_ads: "nt:ads:v2:reel_ads",
 };
 
 
@@ -1100,22 +1100,22 @@ export function savePopupConfig(cfg: Partial<PopupConfig>) {
 }
 
 export const defaultAdSlidesAd3: AdSlideItem[] = [
-  { id: "ad3-1", image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80", href: "#", label: "Sponsored" },
-  { id: "ad3-2", image: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80", href: "#", label: "Sponsored" },
-  { id: "ad3-3", image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80", href: "#", label: "Sponsored" },
+  { id: "ad3-1", image: "https://placehold.co/600x800/e2e8f0/475569?text=Portrait+Ad\\n600x800", href: "#", label: "Sponsored" },
+  { id: "ad3-2", image: "https://placehold.co/600x800/f8fafc/94a3b8?text=Portrait+Ad\\n600x800", href: "#", label: "Sponsored" },
+  { id: "ad3-3", image: "https://placehold.co/600x800/f1f5f9/64748b?text=Portrait+Ad\\n600x800", href: "#", label: "Sponsored" },
 ];
 
 export const defaultAdSlidesPopup: AdSlideItem[] = [
-  { id: "pop-1", image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=900&q=80", href: "#", label: "Sponsored", orientation: "portrait" },
-  { id: "pop-2", image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=80", href: "#", label: "Sponsored", orientation: "landscape" },
+  { id: "pop-1", image: "https://placehold.co/600x800/e2e8f0/475569?text=Popup+Ad\\n600x800", href: "#", label: "Sponsored", orientation: "portrait" },
+  { id: "pop-2", image: "https://placehold.co/1200x675/f8fafc/94a3b8?text=Popup+Ad\\n1200x675", href: "#", label: "Sponsored", orientation: "landscape" },
 ];
 
 export const defaultAdSlidesLeaderboard: AdSlideItem[] = [
   { 
     id: "lead-1", 
-    imageLandscape: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&h=150&q=80",
-    imagePortrait: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=600&h=100&q=80",
-    image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&h=150&q=80",
+    imageLandscape: "https://placehold.co/1200x150/e2e8f0/475569?text=Leaderboard\\n1200x150",
+    imagePortrait: "https://placehold.co/600x100/e2e8f0/475569?text=Leaderboard\\n600x100",
+    image: "https://placehold.co/1200x150/e2e8f0/475569?text=Leaderboard\\n1200x150",
     href: "#", 
     label: "Sponsored", 
     orientation: "landscape" 
