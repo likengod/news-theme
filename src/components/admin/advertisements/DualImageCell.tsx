@@ -5,6 +5,69 @@ import { type AdSlideItem, type AdSlot } from "@/lib/site-content";
 import { LibraryPicker } from "@/components/admin/MediaField";
 import { trackUpload } from "@/lib/media-library";
 
+async function convertFileToWebp(file: File): Promise<File> {
+  if (file.type === "image/webp" || file.name.toLowerCase().endsWith(".webp")) {
+    return file;
+  }
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              resolve(file);
+              return;
+            }
+            const webpName = file.name.replace(/\.[^.]+$/, "") + ".webp";
+            resolve(new File([blob], webpName, { type: "image/webp" }));
+          },
+          "image/webp",
+          0.82
+        );
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function convertDataUrlToWebp(dataUrl: string): Promise<string> {
+  if (!dataUrl || dataUrl.startsWith("data:image/webp") || dataUrl.toLowerCase().endsWith(".webp")) {
+    return dataUrl;
+  }
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(dataUrl);
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/webp", 0.82));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
 export function SingleSlotImagePicker({
   label,
   badgeColor,
@@ -39,9 +102,15 @@ export function SingleSlotImagePicker({
   const handleDeviceUpload = async (f?: File | null) => {
     if (!f) return;
     try {
-      const item = await trackUpload(f, "advertisement");
+      const webpFile = await convertFileToWebp(f);
+      const isConverted = webpFile !== f;
+      const item = await trackUpload(webpFile, "advertisement");
       onChange(item.dataUrl);
-      toast.success(`${label} image uploaded`);
+      if (isConverted) {
+        toast.success(`${label} image converted to WebP and uploaded`);
+      } else {
+        toast.success(`${label} WebP image uploaded`);
+      }
     } catch {
       toast.error("Upload failed");
     }
@@ -53,7 +122,7 @@ export function SingleSlotImagePicker({
       <input
         ref={fileRef}
         type="file"
-        accept="image/*"
+        accept=".webp,image/webp"
         hidden
         onChange={(e) => handleDeviceUpload(e.target.files?.[0])}
       />
@@ -98,13 +167,17 @@ export function SingleSlotImagePicker({
         <span className={`rounded px-1.5 py-0.2 text-[8px] font-bold uppercase tracking-wider text-white ${badgeColor}`}>
           {label}
         </span>
+        <span className="rounded bg-emerald-50 border border-emerald-200 px-1 py-0.2 text-[7.5px] font-extrabold uppercase tracking-wider text-emerald-700">
+          WebP
+        </span>
         <span className="text-[9px] text-slate-400 whitespace-nowrap">{recSize}</span>
       </div>
 
       {menuOpen && (
-        <div className="absolute left-1/2 top-full z-50 mt-1.5 w-52 -translate-x-1/2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl animate-in fade-in-50 zoom-in-95">
-          <div className="border-b border-slate-100 bg-slate-50/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
-            {label} ({recSize})
+        <div className="absolute left-1/2 top-full z-50 mt-1.5 w-56 -translate-x-1/2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl animate-in fade-in-50 zoom-in-95">
+          <div className="border-b border-slate-100 bg-slate-50/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 flex items-center justify-between">
+            <span>{label} ({recSize})</span>
+            <span className="text-[8px] font-extrabold text-emerald-600 bg-emerald-100/70 px-1 rounded">WEBP ONLY</span>
           </div>
           <button
             type="button"
@@ -116,8 +189,8 @@ export function SingleSlotImagePicker({
           >
             <Upload className="h-4 w-4 shrink-0 text-slate-500" />
             <div>
-              <div className="font-medium text-slate-900">Upload image</div>
-              <div className="text-[10px] text-slate-400">From your device</div>
+              <div className="font-medium text-slate-900">Upload WebP image</div>
+              <div className="text-[10px] text-slate-400">Select .webp from device (auto-converts)</div>
             </div>
           </button>
           <button
@@ -131,7 +204,7 @@ export function SingleSlotImagePicker({
             <FolderOpen className="h-4 w-4 shrink-0 text-slate-500" />
             <div>
               <div className="font-medium text-slate-900">Media Library</div>
-              <div className="text-[10px] text-slate-400">Select existing image</div>
+              <div className="text-[10px] text-slate-400">Select image (auto-converts to .webp)</div>
             </div>
           </button>
         </div>
@@ -139,12 +212,24 @@ export function SingleSlotImagePicker({
 
       {pickerOpen && (
         <LibraryPicker
-          accept="image/*"
+          accept="image/webp,.webp"
           onClose={() => setPickerOpen(false)}
-          onPick={(item) => {
-            onChange(item.dataUrl);
-            setPickerOpen(false);
-            toast.success(`${label} image selected`);
+          onPick={async (item) => {
+            try {
+              const webpData = await convertDataUrlToWebp(item.dataUrl);
+              const isConverted = webpData !== item.dataUrl;
+              onChange(webpData);
+              setPickerOpen(false);
+              if (isConverted) {
+                toast.success(`${label} image converted to WebP and selected`);
+              } else {
+                toast.success(`${label} WebP image selected`);
+              }
+            } catch {
+              onChange(item.dataUrl);
+              setPickerOpen(false);
+              toast.success(`${label} image selected`);
+            }
           }}
         />
       )}

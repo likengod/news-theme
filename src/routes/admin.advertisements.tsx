@@ -98,7 +98,7 @@ const SLOTS: SlotMeta[] = [
     label: "Home 1",
     orientation: "Portrait",
     ratio: "3:4",
-    size: "600 × 800 px",
+    size: "600 × 800 px (WebP)",
     shownOn: "Home page — sidebar next to hero board",
   },
   {
@@ -106,7 +106,7 @@ const SLOTS: SlotMeta[] = [
     label: "Home 2",
     orientation: "Landscape",
     ratio: "~2:1",
-    size: "406 × 196 px",
+    size: "406 × 196 px (WebP)",
     shownOn: "Home page — Markets Magazine sidebar slideshow",
   },
   {
@@ -114,7 +114,7 @@ const SLOTS: SlotMeta[] = [
     label: "Ad 3",
     orientation: "Portrait",
     ratio: "3:4",
-    size: "600 × 800 px",
+    size: "600 × 800 px (WebP)",
     shownOn: "Article & Category pages — sidebar ('Your Ad Here')",
   },
   {
@@ -122,7 +122,7 @@ const SLOTS: SlotMeta[] = [
     label: "Popup",
     orientation: "Portrait + Landscape",
     ratio: "3:4 (mobile) · 16:9 (desktop)",
-    size: "600 × 800 px (mobile) · 1200 × 675 px (desktop)",
+    size: "600 × 800 px (mobile) · 1200 × 675 px (desktop) (WebP)",
     shownOn: "Article pages — popup modal 7 seconds after open",
   },
   {
@@ -130,7 +130,7 @@ const SLOTS: SlotMeta[] = [
     label: "Leaderboard",
     orientation: "Landscape",
     ratio: "~8:1",
-    size: "728 × 90 px, 970 × 250 px, etc.",
+    size: "728 × 90 px, 970 × 250 px (WebP)",
     shownOn: "Header or top of pages",
   },
   {
@@ -138,7 +138,7 @@ const SLOTS: SlotMeta[] = [
     label: "Featured Ads",
     orientation: "Landscape",
     ratio: "16:9",
-    size: "800 × 500 px",
+    size: "800 × 500 px (WebP)",
     shownOn: "Inside the homepage featured stories slider",
   },
   {
@@ -146,7 +146,7 @@ const SLOTS: SlotMeta[] = [
     label: "Reel Ads",
     orientation: "Portrait",
     ratio: "9:16",
-    size: "1080 × 1920 px",
+    size: "1080 × 1920 px (WebP)",
     shownOn: "Watch carousel & Reels grid — auto-inserted every 3 reels",
   },
 ];
@@ -332,6 +332,18 @@ function AdvertisementsPage() {
           <p className="mt-1 text-sm text-slate-500">
             Manage rotating ad slides for your site. Support custom images, videos, and 3rd party script ads (Google AdSense, Bing Ads).
           </p>
+        </div>
+      </div>
+
+      {/* WebP Format Notice Banner */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-2.5 text-xs text-emerald-950 shadow-2xs">
+        <div className="flex items-center gap-2.5">
+          <span className="rounded-md bg-emerald-600 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-xs">
+            WebP Format Only
+          </span>
+          <span className="font-medium text-emerald-900">
+            All banner and reel advertisements support <strong>WebP (.webp)</strong> images for maximum Google PageSpeed performance. When you select or upload any image, it is automatically verified and converted to WebP.
+          </span>
         </div>
       </div>
 
