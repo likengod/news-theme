@@ -33,9 +33,9 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
           <MinRead seed={activeBottomItems[0].title} kicker={activeBottomItems[0].kicker} />
         </Link>
 
-        <Link to="/news/$slug" params={{ slug: activeBottomItems[1].slug || "sample" }} className="group block">
+        <Link to="/news/$slug" params={{ slug: activeBottomItems[1].slug || "sample" }} className="group block border-t border-border pt-6 md:border-t-0 md:pt-0">
           {activeBottomItems[1].img && (
-            <div className="overflow-hidden">
+            <div className="hidden md:block overflow-hidden">
               <img
                 src={activeBottomItems[1].img}
                 alt={activeBottomItems[1].title}
@@ -45,7 +45,7 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
               />
             </div>
           )}
-          <h3 className="headline mt-4 text-xl text-foreground group-hover:underline line-clamp-2 [-webkit-line-clamp:2] [max-height:none]">
+          <h3 className="headline mt-0 md:mt-4 text-xl text-foreground group-hover:underline line-clamp-2 [-webkit-line-clamp:2] [max-height:none]">
             {activeBottomItems[1].title}
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
@@ -54,7 +54,7 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
           <MinRead seed={activeBottomItems[1].title} kicker={activeBottomItems[1].kicker} />
         </Link>
 
-        <div className="divide-y divide-border">
+        <div className="divide-y divide-border border-t border-border pt-6 md:border-t-0 md:pt-0">
           {activeBottomItems.slice(2, 5).map((item: any, idx: number) => (
             <div key={`${item.title}-${idx}`} className={idx === 0 ? "pb-5" : idx === 1 ? "py-5" : "pt-5"}>
               <HeadlineArticle item={item} dense />
