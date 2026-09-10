@@ -131,6 +131,7 @@ export type SiteSettings = {
   licenseKey?: string;
   licenseType?: string;
   licenseRole?: string;
+  licenseExpiresAt?: string;
 };
 
 export const defaultSettings: SiteSettings = {
