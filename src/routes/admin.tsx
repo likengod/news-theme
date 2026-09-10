@@ -320,7 +320,7 @@ function AdminLayout() {
           </div>
 
           <div className="flex items-center gap-3">
-            {updateStatus.hasUpdate && (
+            {updateStatus.hasUpdate && pathname !== "/admin/updates" && (
               <Link
                 to="/admin/updates"
                 className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-700 transition"
@@ -398,7 +398,7 @@ function AdminLayout() {
             </div>
           ) : (
             <>
-              {updateStatus.hasUpdate && (
+              {updateStatus.hasUpdate && pathname !== "/admin/updates" && (
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50/90 px-4 py-3 text-sm text-red-800">
                   <div className="flex items-center gap-2.5 font-medium">
                     <AlertTriangle className="h-4 w-4 shrink-0 text-red-600" />
