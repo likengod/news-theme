@@ -179,7 +179,7 @@ function UpdatesPage() {
     }
   };
 
-  const currentVersion = gitStatus?.version || "v1.0.20";
+  const currentVersion = gitStatus?.version || "v1.0.21";
   const latestVersion = gitStatus?.latestVersion || currentVersion;
   const hasNewVersion = Boolean(gitStatus?.hasNewVersion || (latestVersion !== currentVersion));
   const updatesAvailable = (gitStatus?.behind ?? 0) > 0 || hasNewVersion;
