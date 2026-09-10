@@ -17,10 +17,12 @@ export type SectionStyle = {
 };
 
 export type LiveVideoConfig = {
+  enabled?: boolean;
   provider: "youtube" | "facebook";
   youtubeChannelId: string;
   facebookPageUrl: string;
   title: string;
+  thumbnailUrl?: string;
 };
 
 export type HomepageConfig = {
@@ -50,6 +52,7 @@ export const defaultHomepageConfig: HomepageConfig = {
   showTicker: true,
   showBreakingBar: true,
   liveVideo: {
+    enabled: true,
     provider: "youtube",
     youtubeChannelId: "UCIALMKvObZNtJ6AmdCLP7Lg",
     facebookPageUrl: "https://www.facebook.com/facebook",
