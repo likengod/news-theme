@@ -151,6 +151,7 @@ function HomepageEditorPage() {
                 checked={cfg.showTicker ?? true}
                 onChange={(e) => update("showTicker", e.target.checked)}
                 className="peer sr-only"
+                aria-label="Toggle Stock Market Ticker Bar"
               />
               <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-focus:outline-none" />
             </label>
@@ -171,6 +172,7 @@ function HomepageEditorPage() {
                 checked={cfg.showBreakingBar ?? true}
                 onChange={(e) => update("showBreakingBar", e.target.checked)}
                 className="peer sr-only"
+                aria-label="Toggle Breaking News Bar"
               />
               <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-focus:outline-none" />
             </label>
