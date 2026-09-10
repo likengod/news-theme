@@ -997,7 +997,11 @@ export function saveAdRotation(slot: AdSlot, seconds: number) {
   }
 }
 
-export function injectReelAds<T>(items: T[], ads: AdSlideItem[], interval = 3): (
+export function injectReelAds<T>(
+  items: T[],
+  ads: AdSlideItem[],
+  intervalOrOptions: number | { interval?: number; firstAfter?: number } = 3
+): (
   | { isAd: false; item: T; originalIndex: number }
   | { isAd: true; ad: AdSlideItem }
 )[] {
@@ -1012,13 +1016,23 @@ export function injectReelAds<T>(items: T[], ads: AdSlideItem[], interval = 3): 
     | { isAd: true; ad: AdSlideItem }
   )[] = [];
 
+  const opts = typeof intervalOrOptions === "number"
+    ? { interval: intervalOrOptions, firstAfter: intervalOrOptions }
+    : {
+        interval: intervalOrOptions?.interval ?? 3,
+        firstAfter: intervalOrOptions?.firstAfter ?? (intervalOrOptions?.interval ?? 3),
+      };
+
   let adIdx = 0;
+  let itemsSinceLastAd = 0;
   for (let i = 0; i < items.length; i++) {
     result.push({ isAd: false, item: items[i], originalIndex: i });
-    // After every `interval` reels (e.g., 3rd, 6th, 9th)
-    if ((i + 1) % interval === 0) {
+    itemsSinceLastAd++;
+    const threshold = adIdx === 0 ? opts.firstAfter : opts.interval;
+    if (itemsSinceLastAd >= threshold) {
       result.push({ isAd: true, ad: sortedAds[adIdx % sortedAds.length] });
       adIdx++;
+      itemsSinceLastAd = 0;
     }
   }
 

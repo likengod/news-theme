@@ -4,6 +4,7 @@ import { FaWhatsapp, FaFacebookF, FaTwitter } from "react-icons/fa6";
 import { grid, top, lead, viewsFor, formatViews } from "@/lib/news-data";
 import { Views } from "./Views";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useAdSettings } from "./AdSettingsContext";
 import { loadAds, injectReelAds, type AdSlideItem } from "@/lib/site-content";
 import { Link } from "@tanstack/react-router";
@@ -369,13 +370,18 @@ export function Columnists() {
   const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const isMobile = useIsMobile();
   const reelAds = useMemo(() => {
     return adCtx?.adConfig?.slots?.["reel_ads"] || loadAds("reel_ads");
   }, [adCtx?.adConfig?.slots]);
 
   const displayItems = useMemo(() => {
-    return injectReelAds(watchItems, reelAds, 3);
-  }, [reelAds]);
+    return injectReelAds(
+      watchItems,
+      reelAds,
+      isMobile ? { firstAfter: 1, interval: 2 } : 3
+    );
+  }, [reelAds, isMobile]);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -414,6 +420,7 @@ export function Columnists() {
             const ad = item.ad;
             const adImg = ad.imagePortrait || ad.imageLandscape || ad.image;
             const adHref = ad.href || "#";
+            const isGenericLabel = !ad.label || /^(sponsored|sponsor|ad|ads|advertisement|sponsored ad)$/i.test(ad.label.trim());
             return (
               <div
                 key={`reel-ad-${index}`}
@@ -432,27 +439,31 @@ export function Columnists() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-                  {/* Sponsored badge */}
-                  <span className="absolute left-2.5 top-2.5 bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-black rounded flex items-center gap-1 shadow-sm">
-                    <Sparkles className="h-2.5 w-2.5" />
-                    Sponsored
+                  {/* Sponsored badge: reduced size on small mobile devices so it never wraps or overflows */}
+                  <span className="absolute left-1.5 top-1.5 md:left-2.5 md:top-2.5 bg-amber-500 px-1 py-0.5 md:px-2 md:py-0.5 text-[7.5px] sm:text-[9px] md:text-[10px] font-extrabold text-black rounded flex items-center gap-0.5 md:gap-1 shadow-sm whitespace-nowrap leading-none tracking-tight">
+                    <Sparkles className="h-2 w-2 md:h-2.5 md:w-2.5 shrink-0" />
+                    <span>Sponsored</span>
                   </span>
 
-                  {ad.label && (
-                    <h4 className="absolute bottom-11 left-2.5 right-2.5 text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
+                  {/* Title: ONLY show if it's an actual custom headline/brand, never repeat generic "Sponsored" / "Advertisement" */}
+                  {!isGenericLabel && (
+                    <h4 className="hidden md:block absolute bottom-11 left-2.5 right-2.5 text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
                       {ad.label}
                     </h4>
                   )}
 
-                  <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white/90 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full border border-white/20 group-hover/ad:bg-amber-500 group-hover/ad:text-black group-hover/ad:border-amber-400 transition-colors">
+                  {/* Visit button */}
+                  <div className="absolute bottom-1.5 left-1.5 right-1.5 md:bottom-2.5 md:left-2.5 md:right-2.5 flex items-center justify-between">
+                    <span className="inline-flex items-center gap-0.5 md:gap-1 text-[8px] sm:text-[9px] md:text-[11px] font-semibold text-white/90 bg-white/20 backdrop-blur-md px-1.5 py-0.5 md:px-2 md:py-1 rounded-full border border-white/20 group-hover/ad:bg-amber-500 group-hover/ad:text-black group-hover/ad:border-amber-400 transition-colors leading-none">
                       <span>Visit</span>
-                      <ExternalLink className="h-2.5 w-2.5" />
+                      <ExternalLink className="h-2 w-2 md:h-2.5 md:w-2.5 shrink-0" />
                     </span>
                   </div>
                 </a>
-                <div className="mt-1.5 text-[11px] text-muted-foreground truncate">
-                  {ad.label || "Advertisement"}
+
+                {/* Subtitle below card: on desktop show label or "Sponsored"; on mobile hide if generic to avoid multiple sponsor texts */}
+                <div className={`mt-1.5 text-[9px] md:text-[11px] text-muted-foreground truncate ${isGenericLabel ? "hidden md:block" : ""}`}>
+                  {ad.label || "Sponsored"}
                 </div>
               </div>
             );

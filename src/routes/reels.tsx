@@ -7,6 +7,7 @@ import { viewsFor, formatViews } from "@/lib/news-data";
 import { getAllReels } from "@/lib/reels-data";
 import { ReelViewerModal } from "@/components/site/ReelViewerModal";
 import { useAdSettings } from "@/components/site/AdSettingsContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { loadAds, injectReelAds } from "@/lib/site-content";
 
 type ReelsSearchParams = {
@@ -44,9 +45,14 @@ function ReelsPage() {
     return adCtx?.adConfig?.slots?.["reel_ads"] || loadAds("reel_ads");
   }, [adCtx?.adConfig?.slots]);
 
+  const isMobile = useIsMobile();
   const displayReels = useMemo(() => {
-    return injectReelAds(currentReels, reelAds, 3);
-  }, [currentReels, reelAds]);
+    return injectReelAds(
+      currentReels,
+      reelAds,
+      isMobile ? { firstAfter: 1, interval: 2 } : 3
+    );
+  }, [currentReels, reelAds, isMobile]);
 
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
 
@@ -85,6 +91,7 @@ function ReelsPage() {
               const ad = entry.ad;
               const adImg = ad.imagePortrait || ad.imageLandscape || ad.image;
               const adHref = ad.href || "#";
+              const isGenericLabel = !ad.label || /^(sponsored|sponsor|ad|ads|advertisement|sponsored ad)$/i.test(ad.label.trim());
               return (
                 <div
                   key={`reel-ad-${index}`}
@@ -105,30 +112,30 @@ function ReelsPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
                     {/* Sponsored badge */}
-                    <span className="absolute left-1.5 top-1.5 sm:left-2 sm:top-2 bg-amber-500 px-1.5 py-0.5 text-[8px] sm:text-[10px] font-bold text-black rounded shadow-sm flex items-center gap-1">
-                      <Sparkles className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+                    <span className="absolute left-1 top-1 sm:left-2 sm:top-2 bg-amber-500 px-1 py-0.5 sm:px-2 sm:py-0.5 text-[7.5px] sm:text-[10px] font-extrabold text-black rounded shadow-sm flex items-center gap-0.5 sm:gap-1 whitespace-nowrap leading-none tracking-tight">
+                      <Sparkles className="h-2 w-2 sm:h-2.5 sm:w-2.5 shrink-0" />
                       <span>Sponsored</span>
                     </span>
 
-                    {/* Ad label */}
-                    {ad.label && (
-                      <h3 className="absolute bottom-8 sm:bottom-9 left-1.5 right-1.5 sm:left-2 sm:right-2 text-[9px] sm:text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
+                    {/* Ad custom label: only show if not generic */}
+                    {!isGenericLabel && (
+                      <h3 className="hidden sm:block absolute bottom-8 sm:bottom-9 left-1.5 right-1.5 sm:left-2 sm:right-2 text-[9px] sm:text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
                         {ad.label}
                       </h3>
                     )}
 
                     {/* Visit link button */}
                     <div className="absolute bottom-1.5 left-1.5 sm:bottom-2 sm:left-2 flex items-center gap-1 sm:gap-1.5">
-                      <span className="inline-flex items-center gap-1 text-[8px] sm:text-[10px] font-semibold text-white/90 bg-white/20 backdrop-blur-md px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full border border-white/20 group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-400 transition-colors">
+                      <span className="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[10px] font-semibold text-white/90 bg-white/20 backdrop-blur-md px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full border border-white/20 group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-400 transition-colors leading-none">
                         <span>Visit</span>
-                        <ExternalLink className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+                        <ExternalLink className="h-2 w-2 sm:h-2.5 sm:w-2.5 shrink-0" />
                       </span>
                     </div>
                   </a>
 
                   {/* Ad label under card */}
-                  <div className="mt-1 flex items-center gap-1 text-[9px] sm:text-[11px] text-muted-foreground truncate">
-                    <span>{ad.label || "Advertisement"}</span>
+                  <div className={`mt-1 flex items-center gap-1 text-[9px] sm:text-[11px] text-muted-foreground truncate ${isGenericLabel ? "hidden sm:flex" : ""}`}>
+                    <span>{ad.label || "Sponsored"}</span>
                   </div>
                 </div>
               );
