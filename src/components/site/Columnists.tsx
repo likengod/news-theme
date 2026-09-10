@@ -397,12 +397,12 @@ export function Columnists() {
     <section className="border-t border-border pt-3 pb-1 md:py-10">
       {/* Header bar visible on mobile and desktop */}
       <div className="flex items-center justify-between mb-2 md:mb-0">
-        <h3
+        <h2
           className="font-bold text-sm md:text-base"
           style={{ color: cfg.watch.color, fontSize: `${cfg.watch.fontSize}px` }}
         >
           {cfg.watch.title}
-        </h3>
+        </h2>
         <Link
           to="/reels"
           className="rounded-full border border-border px-3 md:px-4 py-1 md:py-1.5 text-[11px] md:text-xs font-semibold text-foreground transition hover:bg-foreground hover:text-background"
