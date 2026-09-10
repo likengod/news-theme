@@ -164,7 +164,7 @@ function AdminLayout() {
     getGitStatus()
       .then((res) => {
         if (!mounted) return;
-        const cur = res?.version || "v1.0.44";
+        const cur = res?.version || "v1.0.45";
         const latest = res?.latestVersion || cur;
         const isSimulated = typeof window !== "undefined" && (
           new URLSearchParams(window.location.search).get("test_update") === "1" ||
@@ -365,7 +365,7 @@ function AdminLayout() {
 
                 <div className="mt-6 flex items-center justify-center gap-3 text-sm font-semibold text-slate-500">
                   <span className="font-mono text-slate-700 bg-slate-200/70 px-3 py-1 rounded-full text-xs">
-                    Current: {updateStatus.currentVersion || "v1.0.44"}
+                    Current: {updateStatus.currentVersion || "v1.0.45"}
                   </span>
                   <span>➔</span>
                   <span className="font-mono text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full text-xs font-bold">
