@@ -164,7 +164,7 @@ function AdminLayout() {
     getGitStatus()
       .then((res) => {
         if (!mounted) return;
-        const cur = res?.version || "v1.0.40";
+        const cur = res?.version || "v1.0.41";
         const latest = res?.latestVersion || cur;
         const isSimulated = typeof window !== "undefined" && (
           new URLSearchParams(window.location.search).get("test_update") === "1" ||
@@ -205,7 +205,7 @@ function AdminLayout() {
                   <span style={{ color: s.logoColorPrimary || "#000000" }}>{s.logoTextPrimary || "News"}</span>{" "}
                   <span style={{ color: s.logoColorSecondary || "#dc2626" }}>{s.logoTextSecondary || "Theme"}</span>
                 </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500">
+                <div className="text-[10px] uppercase tracking-widest text-slate-600">
                   Admin Panel
                 </div>
               </div>
@@ -228,7 +228,7 @@ function AdminLayout() {
         </div>
 
         <nav className="p-3">
-          <p className="px-3 pb-2 pt-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="px-3 pb-2 pt-3 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
             Main
           </p>
           <ul className="space-y-1">
@@ -274,7 +274,7 @@ function AdminLayout() {
             })}
           </ul>
 
-          <p className="px-3 pb-2 pt-6 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="px-3 pb-2 pt-6 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
             Shortcuts
           </p>
           <ul className="space-y-1">
@@ -323,9 +323,9 @@ function AdminLayout() {
             {updateStatus.hasUpdate && (
               <Link
                 to="/admin/updates"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-red-50 border border-red-200 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-700 transition"
               >
-                <Rocket className="h-3.5 w-3.5 text-red-600 animate-pulse" />
+                <Rocket className="h-3.5 w-3.5 animate-pulse" />
                 <span>Update Available ({updateStatus.latestVersion || "New"})</span>
               </Link>
             )}
@@ -365,7 +365,7 @@ function AdminLayout() {
 
                 <div className="mt-6 flex items-center justify-center gap-3 text-sm font-semibold text-slate-500">
                   <span className="font-mono text-slate-700 bg-slate-200/70 px-3 py-1 rounded-full text-xs">
-                    Current: {updateStatus.currentVersion || "v1.0.40"}
+                    Current: {updateStatus.currentVersion || "v1.0.41"}
                   </span>
                   <span>➔</span>
                   <span className="font-mono text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full text-xs font-bold">
