@@ -85,13 +85,13 @@ export function Masthead() {
               <span className="break-words">{s.tagline}</span>
             ) : (
               <span className="inline-flex flex-wrap items-center justify-center gap-x-1.5 sm:gap-x-2">
-                <span style={{ color: "#2563eb" }}>Breaking News</span>
+                <span className="text-[#1d4ed8] dark:text-blue-400">Breaking News</span>
                 <span className="text-muted-foreground">•</span>
-                <span style={{ color: "#dc2626" }}>Finance</span>
+                <span className="text-[#b91c1c] dark:text-red-400">Finance</span>
                 <span className="text-muted-foreground">•</span>
-                <span style={{ color: "#16a34a" }}>Business</span>
+                <span className="text-[#15803d] dark:text-emerald-400">Business</span>
                 <span className="text-muted-foreground">•</span>
-                <span style={{ color: "#ea580c" }}>Market</span>
+                <span className="text-[#c2410c] dark:text-orange-400">Market</span>
               </span>
             )}
           </p>

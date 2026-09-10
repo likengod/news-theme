@@ -7,7 +7,7 @@ export function Ticker() {
         <div key={t.sym} className="flex items-center gap-2 font-mono text-xs">
           <span className="font-semibold tracking-wide text-foreground">{t.sym}</span>
           <span className="text-muted-foreground">{t.val}</span>
-          <span className={t.up ? "text-[#16a34a]" : "text-[#dc2626]"}>
+          <span className={t.up ? "text-[#15803d] dark:text-emerald-400" : "text-[#b91c1c] dark:text-red-400"}>
             {t.up ? "▲" : "▼"} {t.chg}
           </span>
         </div>
