@@ -65,7 +65,7 @@ async function ensureDeployTable() {
 
 export const getGitStatus = createServerFn({ method: "GET" })
   .handler(async () => {
-    let version = "v1.0.53";
+    let version = "v1.0.54";
     try {
       const pkgPath = path.join(ROOT, "package.json");
       const pkgRaw = fs.readFileSync(pkgPath, "utf-8");
