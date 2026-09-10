@@ -262,13 +262,13 @@ export function DualImageCell({
   if (slot === "home1" || slot === "ad3") {
     const portraitValOnly = ad.imagePortrait || (ad.orientation === "portrait" ? ad.image : (!ad.imageLandscape ? ad.image : ""));
     return (
-      <div className="flex items-center gap-3 py-1">
+      <div className="flex justify-center py-4 w-full bg-slate-50/50 rounded-xl border border-slate-100">
         <SingleSlotImagePicker
           label="Portrait"
           badgeColor="bg-indigo-600"
           value={portraitValOnly || ""}
-          aspectClass="w-16 h-20"
-          emptyText="+ Portrait"
+          aspectClass="w-40 sm:w-48 aspect-[3/4]"
+          emptyText="Click to upload"
           recSize="600 × 800 px"
           onChange={(url) => {
             onUpdate(ad.id, {
@@ -286,13 +286,13 @@ export function DualImageCell({
   if (slot === "home2") {
     const landscapeValOnly = ad.imageLandscape || (ad.orientation === "landscape" ? ad.image : (!ad.imagePortrait ? ad.image : ""));
     return (
-      <div className="flex items-center gap-3 py-1">
+      <div className="flex justify-center py-4 w-full bg-slate-50/50 rounded-xl border border-slate-100">
         <SingleSlotImagePicker
           label="Landscape"
           badgeColor="bg-emerald-600"
           value={landscapeValOnly || ""}
-          aspectClass="w-28 h-14"
-          emptyText="+ Landscape"
+          aspectClass="w-56 sm:w-72 aspect-[2/1]"
+          emptyText="Click to upload"
           recSize="406 × 196 px"
           onChange={(url) => {
             onUpdate(ad.id, {
@@ -309,13 +309,13 @@ export function DualImageCell({
 
   if (slot === "reel_ads") {
     return (
-      <div className="flex items-center gap-3 py-1">
+      <div className="flex justify-center py-4 w-full bg-slate-50/50 rounded-xl border border-slate-100">
         <SingleSlotImagePicker
           label="Vertical Reel Ad"
           badgeColor="bg-purple-600"
           value={portraitVal || ad.image || ""}
-          aspectClass="w-16 aspect-[9/16]"
-          emptyText="+ Reel Ad"
+          aspectClass="w-32 sm:w-40 aspect-[9/16]"
+          emptyText="Click to upload"
           recSize="1080 × 1920 px"
           onChange={(url) => {
             onUpdate(ad.id, {
@@ -331,13 +331,13 @@ export function DualImageCell({
 
   if (slot === "leaderboard") {
     return (
-      <div className="flex items-center gap-3 py-1">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-4 w-full bg-slate-50/50 rounded-xl border border-slate-100">
         <SingleSlotImagePicker
           label="Mobile View"
           badgeColor="bg-blue-600"
           value={portraitVal}
-          aspectClass="w-20 h-10"
-          emptyText="+ Mobile"
+          aspectClass="w-40 aspect-[6/1]"
+          emptyText="Click to upload"
           recSize="320 × 50 px, etc."
           onChange={(url) => {
             onUpdate(ad.id, {
