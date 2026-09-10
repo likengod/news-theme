@@ -2,10 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { Play, Eye, Film, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, Eye, Film, ChevronLeft, ChevronRight, Sparkles, ExternalLink } from "lucide-react";
 import { viewsFor, formatViews } from "@/lib/news-data";
 import { getAllReels } from "@/lib/reels-data";
 import { ReelViewerModal } from "@/components/site/ReelViewerModal";
+import { useAdSettings } from "@/components/site/AdSettingsContext";
+import { loadAds, injectReelAds } from "@/lib/site-content";
 
 type ReelsSearchParams = {
   page?: number;
@@ -36,6 +38,15 @@ function ReelsPage() {
 
   const startIndex = (validPage - 1) * ITEMS_PER_PAGE;
   const currentReels = allReels.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const adCtx = useAdSettings();
+  const reelAds = useMemo(() => {
+    return adCtx?.adConfig?.slots?.["reel_ads"] || loadAds("reel_ads");
+  }, [adCtx?.adConfig?.slots]);
+
+  const displayReels = useMemo(() => {
+    return injectReelAds(currentReels, reelAds, 3);
+  }, [currentReels, reelAds]);
 
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
 
@@ -69,8 +80,62 @@ function ReelsPage() {
 
         {/* Reels Grid: exactly 4 columns on mobile, 5 columns on desktop */}
         <div className="grid grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
-          {currentReels.map((reel, index) => {
-            const globalIndex = startIndex + index;
+          {displayReels.map((entry, index) => {
+            if (entry.isAd && entry.ad) {
+              const ad = entry.ad;
+              const adImg = ad.imagePortrait || ad.imageLandscape || ad.image;
+              const adHref = ad.href || "#";
+              return (
+                <div
+                  key={`reel-ad-${index}`}
+                  className="group flex flex-col"
+                >
+                  <a
+                    href={adHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block relative aspect-[9/16] w-full overflow-hidden rounded-lg sm:rounded-xl bg-black border border-amber-500/40 shadow-sm transition duration-300 group-hover:scale-[1.02] group-hover:border-amber-400 group-hover:shadow-md"
+                  >
+                    <img
+                      src={adImg}
+                      alt={ad.label || "Sponsored Ad"}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+
+                    {/* Sponsored badge */}
+                    <span className="absolute left-1.5 top-1.5 sm:left-2 sm:top-2 bg-amber-500 px-1.5 py-0.5 text-[8px] sm:text-[10px] font-bold text-black rounded shadow-sm flex items-center gap-1">
+                      <Sparkles className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+                      <span>Sponsored</span>
+                    </span>
+
+                    {/* Ad label */}
+                    {ad.label && (
+                      <h3 className="absolute bottom-8 sm:bottom-9 left-1.5 right-1.5 sm:left-2 sm:right-2 text-[9px] sm:text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
+                        {ad.label}
+                      </h3>
+                    )}
+
+                    {/* Visit link button */}
+                    <div className="absolute bottom-1.5 left-1.5 sm:bottom-2 sm:left-2 flex items-center gap-1 sm:gap-1.5">
+                      <span className="inline-flex items-center gap-1 text-[8px] sm:text-[10px] font-semibold text-white/90 bg-white/20 backdrop-blur-md px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full border border-white/20 group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-400 transition-colors">
+                        <span>Visit</span>
+                        <ExternalLink className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+                      </span>
+                    </div>
+                  </a>
+
+                  {/* Ad label under card */}
+                  <div className="mt-1 flex items-center gap-1 text-[9px] sm:text-[11px] text-muted-foreground truncate">
+                    <span>{ad.label || "Advertisement"}</span>
+                  </div>
+                </div>
+              );
+            }
+
+            const reel = entry.item;
+            const globalIndex = startIndex + entry.originalIndex;
             const count = reel.views || viewsFor(reel.title);
 
             return (

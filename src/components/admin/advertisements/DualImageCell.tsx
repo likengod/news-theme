@@ -218,6 +218,28 @@ export function DualImageCell({
     );
   }
 
+  if (slot === "reel_ads") {
+    return (
+      <div className="flex items-center gap-3 py-1">
+        <SingleSlotImagePicker
+          label="Vertical Reel Ad"
+          badgeColor="bg-purple-600"
+          value={portraitVal || ad.image || ""}
+          aspectClass="w-16 aspect-[9/16]"
+          emptyText="+ Reel Ad"
+          recSize="1080 × 1920 px"
+          onChange={(url) => {
+            onUpdate(ad.id, {
+              imagePortrait: url,
+              image: url,
+              orientation: "portrait",
+            });
+          }}
+        />
+      </div>
+    );
+  }
+
   if (slot === "leaderboard") {
     return (
       <div className="flex items-center gap-3 py-1">

@@ -551,6 +551,19 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" })
       const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'ad_configuration_data'");
       if (rows.length > 0 && rows[0].value) {
         const parsed = JSON.parse(rows[0].value) as AdConfiguration;
+        if (parsed?.slots) {
+          parsed.slots.reel_ads = parsed.slots.reel_ads || [];
+          parsed.slots.featured_slide = parsed.slots.featured_slide || [];
+        }
+        if (parsed?.modes) {
+          parsed.modes.reel_ads = parsed.modes.reel_ads || "image";
+        }
+        if (parsed?.rotations) {
+          parsed.rotations.reel_ads = parsed.rotations.reel_ads || 5;
+        }
+        if (parsed?.scripts) {
+          parsed.scripts.reel_ads = parsed.scripts.reel_ads || "";
+        }
         setCached(cacheKey, parsed);
         return parsed;
       }
@@ -563,6 +576,8 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" })
         ad3: defaultAdSlidesAd3,
         popup: defaultAdSlidesPopup,
         leaderboard: defaultAdSlidesLeaderboard,
+        featured_slide: defaultAdSlidesHome2,
+        reel_ads: [],
       },
       modes: {
         home1: "image",
@@ -570,14 +585,18 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" })
         ad3: "image",
         popup: "image",
         leaderboard: "image",
+        featured_slide: "image",
+        reel_ads: "image",
       },
-      scripts: { home1: "", home2: "", ad3: "", popup: "", leaderboard: "" },
+      scripts: { home1: "", home2: "", ad3: "", popup: "", leaderboard: "", featured_slide: "", reel_ads: "" },
       rotations: {
         home1: 5,
         home2: 5,
         ad3: 5,
         popup: 6,
         leaderboard: 5,
+        featured_slide: 5,
+        reel_ads: 5,
       },
       popupConfig: defaultPopupConfig,
     };
@@ -861,7 +880,7 @@ export const defaultAdSlidesHome2: AdSlideItem[] = [
   { id: "ad2-6", image: adHome2_6, href: "#", label: "Sponsored" },
 ];
 
-export type AdSlot = "home1" | "home2" | "ad3" | "popup" | "leaderboard" | "featured_slide";
+export type AdSlot = "home1" | "home2" | "ad3" | "popup" | "leaderboard" | "featured_slide" | "reel_ads";
 export type AdSlotMode = "image" | "script";
 
 const SLOT_MODE_KEY = "nt:ad-slot-mode";
@@ -874,6 +893,7 @@ const DEFAULT_SLOT_MODE: Record<AdSlot, AdSlotMode> = {
   popup: "image",
   leaderboard: "image",
   featured_slide: "image",
+  reel_ads: "image",
 };
 
 export function loadAdSlotMode(slot: AdSlot): AdSlotMode {
@@ -933,6 +953,7 @@ const ADS_KEYS: Record<AdSlot, string> = {
   popup: "nt:site-ads-popup",
   leaderboard: "nt:site-ads-leaderboard",
   featured_slide: "nt:site-ads-featured_slide",
+  reel_ads: "nt:site-ads-reel_ads",
 };
 
 
@@ -947,6 +968,7 @@ const DEFAULT_ROTATION: Record<AdSlot, number> = {
   popup: 6,
   leaderboard: 5,
   featured_slide: 5,
+  reel_ads: 5,
 };
 
 export function loadAdRotation(slot: AdSlot): number {
@@ -973,6 +995,34 @@ export function saveAdRotation(slot: AdSlot, seconds: number) {
   } catch {
     /* noop */
   }
+}
+
+export function injectReelAds<T>(items: T[], ads: AdSlideItem[], interval = 3): (
+  | { isAd: false; item: T; originalIndex: number }
+  | { isAd: true; ad: AdSlideItem }
+)[] {
+  const validAds = ads.filter((a) => !!(a.image || a.imagePortrait || a.imageLandscape));
+  if (validAds.length === 0) {
+    return items.map((item, originalIndex) => ({ isAd: false, item, originalIndex }));
+  }
+
+  const sortedAds = [...validAds].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+  const result: (
+    | { isAd: false; item: T; originalIndex: number }
+    | { isAd: true; ad: AdSlideItem }
+  )[] = [];
+
+  let adIdx = 0;
+  for (let i = 0; i < items.length; i++) {
+    result.push({ isAd: false, item: items[i], originalIndex: i });
+    // After every `interval` reels (e.g., 3rd, 6th, 9th)
+    if ((i + 1) % interval === 0) {
+      result.push({ isAd: true, ad: sortedAds[adIdx % sortedAds.length] });
+      adIdx++;
+    }
+  }
+
+  return result;
 }
 
 const POPUP_CONFIG_KEY = "nt:popup-ad-config";
@@ -1037,6 +1087,7 @@ const DEFAULTS: Record<AdSlot, AdSlideItem[]> = {
   popup: defaultAdSlidesPopup,
   leaderboard: defaultAdSlidesLeaderboard,
   featured_slide: [],
+  reel_ads: [],
 };
 
 
@@ -1215,7 +1266,8 @@ export function syncAdConfigurationToServer() {
       ad3: loadAds("ad3"),
       popup: loadAds("popup"),
       leaderboard: loadAds("leaderboard"),
-        featured_slide: loadAds("featured_slide"),
+      featured_slide: loadAds("featured_slide"),
+      reel_ads: loadAds("reel_ads"),
     },
     modes: {
       home1: loadAdSlotMode("home1"),
@@ -1223,7 +1275,8 @@ export function syncAdConfigurationToServer() {
       ad3: loadAdSlotMode("ad3"),
       popup: loadAdSlotMode("popup"),
       leaderboard: loadAdSlotMode("leaderboard"),
-        featured_slide: loadAdSlotMode("featured_slide"),
+      featured_slide: loadAdSlotMode("featured_slide"),
+      reel_ads: loadAdSlotMode("reel_ads"),
     },
     scripts: {
       home1: loadAdSlotScript("home1"),
@@ -1231,7 +1284,8 @@ export function syncAdConfigurationToServer() {
       ad3: loadAdSlotScript("ad3"),
       popup: loadAdSlotScript("popup"),
       leaderboard: loadAdSlotScript("leaderboard"),
-        featured_slide: loadAdSlotScript("featured_slide"),
+      featured_slide: loadAdSlotScript("featured_slide"),
+      reel_ads: loadAdSlotScript("reel_ads"),
     },
     rotations: {
       home1: loadAdRotation("home1"),
@@ -1239,7 +1293,8 @@ export function syncAdConfigurationToServer() {
       ad3: loadAdRotation("ad3"),
       popup: loadAdRotation("popup"),
       leaderboard: loadAdRotation("leaderboard"),
-        featured_slide: loadAdRotation("featured_slide"),
+      featured_slide: loadAdRotation("featured_slide"),
+      reel_ads: loadAdRotation("reel_ads"),
     },
     popupConfig: loadPopupConfig(),
   };

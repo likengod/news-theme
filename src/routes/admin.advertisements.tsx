@@ -27,6 +27,7 @@ import {
   ArrowUp,
   ArrowDown,
   Timer,
+  Film,
 } from "lucide-react";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import {
@@ -139,6 +140,14 @@ const SLOTS: SlotMeta[] = [
     ratio: "16:9",
     size: "800 × 500 px",
     shownOn: "Inside the homepage featured stories slider",
+  },
+  {
+    key: "reel_ads",
+    label: "Reel Ads",
+    orientation: "Portrait",
+    ratio: "9:16",
+    size: "1080 × 1920 px",
+    shownOn: "Watch carousel & Reels grid — auto-inserted every 3 reels",
   },
 ];
 
@@ -646,6 +655,31 @@ function AdvertisementsPage() {
             </div>
           )}
 
+          {/* Reel Ads guidance banner */}
+          {tab === "reel_ads" && (
+            <div className="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50/90 via-slate-50 to-indigo-50/70 p-5 shadow-xs space-y-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-purple-600 text-white shadow-xs">
+                    <Film className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Reel Ads — Auto-Injected Every 3 Reels</h3>
+                    <p className="text-xs text-slate-500">
+                      Recommended Size: <strong className="font-bold text-purple-700">1080 × 1920 px (9:16 Vertical Ratio)</strong>
+                    </p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-800 border border-purple-200">
+                  Every 3rd Reel Injected
+                </span>
+              </div>
+              <p className="text-[11.5px] text-slate-600 leading-relaxed border-t border-purple-100/80 pt-2.5">
+                Ads uploaded in this slot are automatically inserted after every 3 reels in both the <strong>Homepage Watch Carousel</strong> and the <strong>/reels Grid</strong> across all devices (mobile, tablet, and desktop). When users click on the ad card, they are directed to the Click-Through URL.
+              </p>
+            </div>
+          )}
+
           {/* Ad Count Bar & Controls */}
           {ads.length > 0 && (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-900 px-4 py-3 text-white shadow-xs">
@@ -818,6 +852,8 @@ function AdvertisementsPage() {
                               ? "Upload Banner Image (Portrait 3:4)"
                               : slot === "home2"
                               ? "Upload Banner Image (Landscape ~2:1)"
+                              : slot === "reel_ads"
+                              ? "Upload Reel Ad (Vertical 9:16 — 1080 × 1920 px)"
                               : "Upload Banner Images"}
                           </div>
                           <DualImageCell ad={ad} slot={slot} onUpdate={update} />

@@ -1,9 +1,11 @@
-import { useState, useRef, useEffect } from "react";
-import { Play, ChevronLeft, ChevronRight, X, Share2, Copy, Check, Send, Eye } from "lucide-react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Play, ChevronLeft, ChevronRight, X, Share2, Copy, Check, Send, Eye, ExternalLink, Sparkles } from "lucide-react";
 import { FaWhatsapp, FaFacebookF, FaTwitter } from "react-icons/fa6";
 import { grid, top, lead, viewsFor, formatViews } from "@/lib/news-data";
 import { Views } from "./Views";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
+import { useAdSettings } from "./AdSettingsContext";
+import { loadAds, injectReelAds, type AdSlideItem } from "@/lib/site-content";
 import { Link } from "@tanstack/react-router";
 
 type WatchItem = {
@@ -363,8 +365,17 @@ function ReelViewerModal({
 
 export function Columnists() {
   const cfg = useHomepageConfig();
+  const adCtx = useAdSettings();
   const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const reelAds = useMemo(() => {
+    return adCtx?.adConfig?.slots?.["reel_ads"] || loadAds("reel_ads");
+  }, [adCtx?.adConfig?.slots]);
+
+  const displayItems = useMemo(() => {
+    return injectReelAds(watchItems, reelAds, 3);
+  }, [reelAds]);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -398,40 +409,92 @@ export function Columnists() {
         ref={scrollRef}
         className="mt-0 md:mt-6 flex overflow-x-auto gap-2 pb-3 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:gap-4 md:pb-3"
       >
-        {watchItems.map((v, index) => (
-          <div
-            key={v.title}
-            onClick={() => setActiveReelIndex(index)}
-            className="group block shrink-0 snap-start cursor-pointer w-[23%] sm:w-[45%] md:w-[31%] lg:w-[calc(20%-0.8rem)]"
-          >
-            <div className="relative aspect-[9/16] overflow-hidden rounded-xl bg-black border border-border/40 shadow-sm transition duration-500 hover:scale-[1.02]">
-              <img
-                src={v.img}
-                alt={v.title}
-                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        {displayItems.map((item, index) => {
+          if (item.isAd && item.ad) {
+            const ad = item.ad;
+            const adImg = ad.imagePortrait || ad.imageLandscape || ad.image;
+            const adHref = ad.href || "#";
+            return (
+              <div
+                key={`reel-ad-${index}`}
+                className="group block shrink-0 snap-start w-[23%] sm:w-[45%] md:w-[31%] lg:w-[calc(20%-0.8rem)]"
+              >
+                <a
+                  href={adHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block relative aspect-[9/16] overflow-hidden rounded-xl bg-black border border-amber-500/40 shadow-sm transition duration-500 hover:scale-[1.02] hover:border-amber-400 group/ad"
+                >
+                  <img
+                    src={adImg}
+                    alt={ad.label || "Sponsored Ad"}
+                    className="h-full w-full object-cover transition duration-500 group-hover/ad:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-              {v.kicker && (
-                <span className="absolute left-2.5 top-2.5 bg-[#1d4ed8] px-2 py-0.5 text-[10px] font-bold text-white rounded">
-                  {v.kicker}
-                </span>
-              )}
+                  {/* Sponsored badge */}
+                  <span className="absolute left-2.5 top-2.5 bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-black rounded flex items-center gap-1 shadow-sm">
+                    <Sparkles className="h-2.5 w-2.5" />
+                    Sponsored
+                  </span>
 
-              <h4 className="absolute bottom-11 left-2.5 right-2.5 text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
-                {v.title}
-              </h4>
+                  {ad.label && (
+                    <h4 className="absolute bottom-11 left-2.5 right-2.5 text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
+                      {ad.label}
+                    </h4>
+                  )}
 
-              <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-black shadow transition-transform group-hover:scale-110">
-                  <Play className="h-3 w-3 fill-current ml-0.5" />
-                </span>
-                <span className="text-xs font-semibold text-white drop-shadow">{v.duration}</span>
+                  <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white/90 bg-white/20 backdrop-blur-md px-2 py-1 rounded-full border border-white/20 group-hover/ad:bg-amber-500 group-hover/ad:text-black group-hover/ad:border-amber-400 transition-colors">
+                      <span>Visit</span>
+                      <ExternalLink className="h-2.5 w-2.5" />
+                    </span>
+                  </div>
+                </a>
+                <div className="mt-1.5 text-[11px] text-muted-foreground truncate">
+                  {ad.label || "Advertisement"}
+                </div>
               </div>
+            );
+          }
+
+          const v = item.item;
+          const reelIdx = item.originalIndex;
+          return (
+            <div
+              key={v.title + index}
+              onClick={() => setActiveReelIndex(reelIdx)}
+              className="group block shrink-0 snap-start cursor-pointer w-[23%] sm:w-[45%] md:w-[31%] lg:w-[calc(20%-0.8rem)]"
+            >
+              <div className="relative aspect-[9/16] overflow-hidden rounded-xl bg-black border border-border/40 shadow-sm transition duration-500 hover:scale-[1.02]">
+                <img
+                  src={v.img}
+                  alt={v.title}
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                {v.kicker && (
+                  <span className="absolute left-2.5 top-2.5 bg-[#1d4ed8] px-2 py-0.5 text-[10px] font-bold text-white rounded">
+                    {v.kicker}
+                  </span>
+                )}
+
+                <h4 className="absolute bottom-11 left-2.5 right-2.5 text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
+                  {v.title}
+                </h4>
+
+                <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-black shadow transition-transform group-hover:scale-110">
+                    <Play className="h-3 w-3 fill-current ml-0.5" />
+                  </span>
+                  <span className="text-xs font-semibold text-white drop-shadow">{v.duration}</span>
+                </div>
+              </div>
+              <Views count={viewsFor(v.title)} className="mt-1.5 text-[11px] text-muted-foreground" />
             </div>
-            <Views count={viewsFor(v.title)} className="mt-1.5 text-[11px] text-muted-foreground" />
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Render Fullscreen Reel Viewer Modal */}
