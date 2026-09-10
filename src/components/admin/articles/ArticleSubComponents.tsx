@@ -12,7 +12,7 @@ function ImageInput({ value, onChange, hint }: { value: string; onChange: (v: st
       </div>
       <div className="flex-1 space-y-2">
         <input value={value} onChange={(e) => onChange(e.target.value)} placeholder="Paste image URL..." className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none" />
-        <MediaField value={value} onChange={onChange} usage="article" hint={hint} previewClassName="hidden" recommendedSize="1600Ã—900 px (16:9)" />
+        <MediaField value={value} onChange={onChange} usage="article" hint={hint} previewClassName="hidden" recommendedSize="1600×900 px (16:9)" />
       </div>
     </div>
   );
@@ -60,7 +60,7 @@ function JournalistPicker({
     <div>
       <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-600">
         <UserCheck className="h-3.5 w-3.5" /> Journalist
-        <span className="font-normal normal-case text-slate-400">â€” assign a journalist from your users by name or User ID</span>
+        <span className="font-normal normal-case text-slate-400">— assign a journalist from your users by name or User ID</span>
       </div>
 
       {journalistId ? (
@@ -152,7 +152,7 @@ function AwardPointsBox({ publicUserId, displayName }: { publicUserId: string; d
       setBalance(res.newBalance);
       setAmount("");
       setReason("");
-      toast.success(`${points > 0 ? "Added" : "Deducted"} ${Math.abs(points)} pts Â· new balance ${res.newBalance}`);
+      toast.success(`${points > 0 ? "Added" : "Deducted"} ${Math.abs(points)} pts · new balance ${res.newBalance}`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to award points");
     } finally {

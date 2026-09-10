@@ -4,12 +4,14 @@ import { SocialIcons } from "@/components/site/SocialIcons";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { AttributionGuard } from "@/components/site/AttributionGuard";
 import { useTranslation } from "react-i18next";
+import { cleanCopyright } from "@/lib/site-content";
 
 export function Footer() {
   const { t } = useTranslation();
   const s = useSiteSettings();
   const year = new Date().getFullYear();
-  const copyright = s.copyright?.replace("{year}", String(year)) || `Â© ${year} News Theme Media Co. All rights reserved.`;
+  const rawCopyright = s.copyright || `© ${year} News Theme Media Co. All rights reserved.`;
+  const copyright = cleanCopyright(rawCopyright).replace("{year}", String(year));
   const partnerHref = s.builtByUrl?.startsWith("http") ? s.builtByUrl : `https://${s.builtByUrl || "GorillaTechsolution.com"}`;
   
   const isPremium = ["Enterprise", "Enterprise+", "Premium"].includes(s.licenseType || "") || s.licenseRole === "VIP";

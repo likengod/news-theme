@@ -352,7 +352,7 @@ export default function ArticleEditor({
                   <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-600">
                     <MapPin className="h-3.5 w-3.5" /> Location
                     <span className="font-normal normal-case text-slate-400">
-                      â€” builds the URL's location segment
+                      — builds the URL's location segment
                     </span>
                   </div>
                   <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
@@ -424,7 +424,7 @@ export default function ArticleEditor({
                   <ImageInput
                     value={r.ogImage}
                     onChange={(v) => set("ogImage", v)}
-                    hint="Override only if you want a different image when shared on social media. Recommended 1200Ã—630."
+                    hint="Override only if you want a different image when shared on social media. Recommended 1200×630."
                   />
                 </Field>
               </div>
@@ -582,7 +582,7 @@ export default function ArticleEditor({
             return (
               <>
                 <p className="text-xs text-slate-500">
-                  Step {idx + 1} of {order.length} Â·
+                  Step {idx + 1} of {order.length} ·
                   {isLast ? "Review & publish" : "Complete this step, then continue"}
                 </p>
                 <div className="flex gap-2">

@@ -134,6 +134,16 @@ export type SiteSettings = {
   licenseExpiresAt?: string;
 };
 
+export function cleanCopyright(text?: string): string {
+  if (!text) return "";
+  return text
+    .replace(/[\u00C3][,\s]*[\u00C2]*[\u00A9]/g, "©")
+    .replace(/[\u00C2][\u00A9]/g, "©")
+    .replace(/&copy;/gi, "©")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export const defaultSettings: SiteSettings = {
   siteName: "News Timeline",
   tagline: "Breaking News • Finance • Business • Markets",
@@ -153,7 +163,7 @@ export const defaultSettings: SiteSettings = {
   googleNews: "https://news.google.com/",
   footerNote:
     "News Timeline is an independent newsroom covering breaking news, finance, business and markets across Northeast India and beyond.",
-  copyright: `Ã‚Â© ${new Date().getFullYear()} News Timeline Media Co. All rights reserved.`,
+  copyright: `© ${new Date().getFullYear()} News Timeline Media Co. All rights reserved.`,
   builtByText: "Website built and digital partner: Gorilla Tech Solution",
   builtByUrl: "https://gorillatechsolution.com",
   metaDescription:
@@ -266,7 +276,7 @@ export const defaultPages: PageContent[] = [
     intro: "News Theme is an independent newsroom based in Agartala, covering breaking news, finance, business and markets across Northeast India and the wider world.", 
     body: "",
     sections: [
-      { heading: "Our Mission", body: "<p>To deliver verified, contextual and accessible journalism Ã¢â‚¬â€ free from political and commercial interference Ã¢â‚¬â€ to readers across the region and the diaspora.</p>" },
+      { heading: "Our Mission", body: "<p>To deliver verified, contextual and accessible journalism — free from political and commercial interference — to readers across the region and the diaspora.</p>" },
       { heading: "Our Team", body: "<p>Our staff includes reporters, market analysts, video producers and editors, supported by a network of regional correspondents.</p>" },
       { heading: "How We Are Funded", body: "<p>We are funded by reader subscriptions, clearly-labelled sponsorships and a small grant program. We do not accept funding that would compromise editorial independence.</p>" },
       { heading: "Get in Touch", body: '<p>For tips, story pitches or partnerships, visit our <a className="underline" href="/contact">contact page</a> or write to <a className="underline" href="mailto:newsroom@northeasttimeline.com">newsroom@northeasttimeline.com</a>.</p>' }
@@ -307,7 +317,7 @@ export const defaultPages: PageContent[] = [
     body: "",
     sections: [
       { heading: "What Are Cookies", body: "<p>Cookies are small text files placed on your device by websites you visit. They are widely used to make sites work efficiently and to provide information to the site owners.</p>" },
-      { heading: "Types of Cookies We Use", body: "<ul className=\"list-disc space-y-1.5 pl-5\"><li><b>Essential</b> Ã¢â‚¬â€ required to sign in, keep you logged in and remember theme preferences.</li><li><b>Analytics</b> Ã¢â‚¬â€ aggregated usage statistics to improve editorial coverage.</li><li><b>Advertising</b> Ã¢â‚¬â€ limited to measurement of sponsored campaigns; we do not run third-party behavioural ad networks.</li></ul>" },
+      { heading: "Types of Cookies We Use", body: "<ul className=\"list-disc space-y-1.5 pl-5\"><li><b>Essential</b> — required to sign in, keep you logged in and remember theme preferences.</li><li><b>Analytics</b> — aggregated usage statistics to improve editorial coverage.</li><li><b>Advertising</b> — limited to measurement of sponsored campaigns; we do not run third-party behavioural ad networks.</li></ul>" },
       { heading: "Managing Cookies", body: "<p>Most browsers let you refuse or delete cookies via their settings. Disabling essential cookies will break sign-in and personalisation features.</p>" },
       { heading: "Third-Party Cookies", body: "<p>Embedded video players (YouTube, Facebook) may set their own cookies when you play a video. Refer to those providers' privacy policies for details.</p>" }
     ]
@@ -320,7 +330,7 @@ export const defaultPages: PageContent[] = [
     sections: [
       { heading: "Eligibility", body: "<p>You may request a full refund within <b>7 days</b> of your initial subscription payment, provided you have not downloaded more than a token amount of premium content. Renewal payments are non-refundable except where required by law.</p>" },
       { heading: "How to Request a Refund", body: "<p>Email <a className=\"underline\" href=\"mailto:billing@northeasttimeline.com\">billing@northeasttimeline.com</a> from the address linked to your account, including your order ID and the reason for the request.</p>" },
-      { heading: "Processing Time", body: "<p>Approved refunds are processed within 5Ã¢â‚¬â€œ10 business days to the original payment method. Bank processing times may add a further 3Ã¢â‚¬â€œ5 days.</p>" },
+      { heading: "Processing Time", body: "<p>Approved refunds are processed within 5–10 business days to the original payment method. Bank processing times may add a further 3–5 days.</p>" },
       { heading: "Non-Refundable Items", body: "<p>One-off article purchases, gift subscriptions already redeemed and event tickets are non-refundable.</p>" },
       { heading: "Chargebacks", body: "<p>Please contact us before initiating a chargeback; most billing issues can be resolved within one business day.</p>" }
     ]
@@ -339,7 +349,7 @@ export const defaultPages: PageContent[] = [
   { 
     slug: "contact", 
     title: "Contact Us", 
-    intro: "Story tips, corrections, partnership and advertising enquiries Ã¢â‚¬â€ the News Theme desk reads every message. We aim to reply within one business day.", 
+    intro: "Story tips, corrections, partnership and advertising enquiries — the News Theme desk reads every message. We aim to reply within one business day.", 
     body: "",
     sections: []
   },
@@ -385,7 +395,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "./auth-middleware";
 import { query } from "./db.server";
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Server Functions (MySQL Custom Pages Persistence) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Server Functions (MySQL Custom Pages Persistence) ─────────────────────
 
 export const getCustomPagesServer = createServerFn({ method: "GET" })
   .handler(async (): Promise<PageContent[]> => {
@@ -477,6 +487,7 @@ export const getSiteSettingsServer = createServerFn({ method: "GET" })
         const res = { 
           ...defaultSettings, 
           ...parsed,
+          copyright: cleanCopyright(parsed.copyright || defaultSettings.copyright),
           gitRemoteUrl: parsed.gitRemoteUrl || defaultSettings.gitRemoteUrl,
           gitAccessToken: parsed.gitAccessToken || defaultSettings.gitAccessToken,
           gitBranch: parsed.gitBranch || defaultSettings.gitBranch,
@@ -495,7 +506,11 @@ export const saveSiteSettingsServer = createServerFn({ method: "POST" })
     contactEmail: z.string().email("Invalid email").optional().or(z.literal("")),
   }).passthrough().parse(settings) as SiteSettings)
   .handler(async ({ data }) => {
-    const json = JSON.stringify(data);
+    const cleanedData = {
+      ...data,
+      copyright: cleanCopyright(data.copyright || defaultSettings.copyright),
+    };
+    const json = JSON.stringify(cleanedData);
     await query(
       `INSERT INTO site_settings (setting_key, value) VALUES ('site_settings_data', ?)
        ON DUPLICATE KEY UPDATE value = ?`,
@@ -1085,28 +1100,43 @@ const PAGES_KEY = "nt:site-pages";
 let memorySettings: SiteSettings | null = null;
 
 export function loadSettings(): SiteSettings {
-  if (memorySettings) return memorySettings;
+  if (memorySettings) {
+    if (memorySettings.copyright) {
+      memorySettings.copyright = cleanCopyright(memorySettings.copyright);
+    }
+    return memorySettings;
+  }
   if (typeof window === "undefined") return defaultSettings;
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
-    return raw ? { ...defaultSettings, ...JSON.parse(raw) } : defaultSettings;
+    if (!raw) return defaultSettings;
+    const parsed = JSON.parse(raw);
+    const res = { ...defaultSettings, ...parsed };
+    if (res.copyright) {
+      res.copyright = cleanCopyright(res.copyright);
+    }
+    return res;
   } catch {
     return defaultSettings;
   }
 }
 
 export async function saveSettings(s: SiteSettings) {
-  memorySettings = s;
+  const cleaned = {
+    ...s,
+    copyright: cleanCopyright(s.copyright || defaultSettings.copyright),
+  };
+  memorySettings = cleaned;
   if (typeof window !== "undefined") {
     try {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(cleaned));
     } catch (e) {
       console.warn("Failed to save settings to localStorage, continuing to server save", e);
     }
     window.dispatchEvent(new Event("nt:settings-updated"));
     window.dispatchEvent(new Event("nt:ads-updated"));
   }
-  return await saveSiteSettingsServer({ data: s });
+  return await saveSiteSettingsServer({ data: cleaned });
 }
 
 export function loadPages(): PageContent[] {

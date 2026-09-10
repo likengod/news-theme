@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Save, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { loadSettings, saveSettings, type SiteSettings } from "@/lib/site-content";
+import { loadSettings, saveSettings, cleanCopyright, type SiteSettings } from "@/lib/site-content";
 import { LogoUploader } from "@/components/admin/settings/SettingsHelpers";
 
 type FieldDef = {
@@ -53,13 +53,28 @@ const GROUPS: { title: string; fields: FieldDef[] }[] = [
 ];
 
 export function GeneralSettingsForm() {
-  const [settings, setSettings] = useState<SiteSettings>(() => loadSettings());
+  const [settings, setSettings] = useState<SiteSettings>(() => {
+    const s = loadSettings();
+    if (s.copyright) {
+      s.copyright = cleanCopyright(s.copyright);
+    }
+    return s;
+  });
   const [saved, setSaved] = useState(false);
   
-  const update = (k: keyof SiteSettings, v: any) => setSettings((s) => ({ ...s, [k]: v }));
+  const update = (k: keyof SiteSettings, v: any) => setSettings((s) => ({
+    ...s,
+    [k]: k === "copyright" && typeof v === "string" ? cleanCopyright(v) : v,
+  }));
+
   const handleSave = async () => {
     try {
-      await saveSettings(settings);
+      const cleaned = {
+        ...settings,
+        copyright: cleanCopyright(settings.copyright),
+      };
+      await saveSettings(cleaned);
+      setSettings(cleaned);
       setSaved(true);
       toast.success("General site settings saved to MySQL!");
       setTimeout(() => setSaved(false), 2000);

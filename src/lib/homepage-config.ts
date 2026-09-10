@@ -1,4 +1,4 @@
-// Homepage section configuration Ã¢â‚¬â€ editable via /admin/homepage.
+// Homepage section configuration — editable via /admin/homepage.
 // Each section has a label/title (text rendered as the heading), font size,
 // color, and optionally a category that drives "latest news" content.
 
@@ -72,7 +72,7 @@ import { query } from "./db.server";
 const KEY = "nt:homepage-config:v1";
 const EVENT = "nt:homepage-updated";
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Server Functions (MySQL Database Persistence) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Server Functions (MySQL Database Persistence) ─────────────────────────
 
 export const getHomepageConfigServer = createServerFn({ method: "GET" })
   .handler(async (): Promise<HomepageConfig> => {
