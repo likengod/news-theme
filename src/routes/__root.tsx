@@ -196,11 +196,50 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const chunkRecoveryScript = `
+(function() {
+  function handleChunkError(err) {
+    try {
+      var msg = (err && (err.message || (err.reason && err.reason.message) || String(err.reason || err))) || '';
+      if (/failed to fetch dynamically imported module/i.test(msg) || 
+          /importing a module script failed/i.test(msg) || 
+          /loading chunk/i.test(msg) || 
+          /error #418/i.test(msg) ||
+          /error #423/i.test(msg) ||
+          /error #425/i.test(msg)) {
+        var key = 'chunk_reload_ts';
+        var last = Number(sessionStorage.getItem(key) || 0);
+        var now = Date.now();
+        if (now - last > 10000) {
+          sessionStorage.setItem(key, String(now));
+          window.location.reload();
+        }
+      }
+    } catch(e) {}
+  }
+  window.addEventListener('vite:preloadError', function(event) {
+    try {
+      if (event && event.preventDefault) event.preventDefault();
+      var key = 'chunk_reload_ts';
+      var last = Number(sessionStorage.getItem(key) || 0);
+      var now = Date.now();
+      if (now - last > 10000) {
+        sessionStorage.setItem(key, String(now));
+        window.location.reload();
+      }
+    } catch(e) {}
+  });
+  window.addEventListener('error', handleChunkError);
+  window.addEventListener('unhandledrejection', handleChunkError);
+})();
+`;
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script dangerouslySetInnerHTML={{ __html: chunkRecoveryScript }} />
         <HeadContent />
       </head>
       <body>

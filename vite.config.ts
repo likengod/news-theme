@@ -14,6 +14,9 @@ export default defineConfig({
     host: true,
     allowedHosts: ["todaytripura.com", "www.todaytripura.com", "localhost"],
   },
+  build: {
+    emptyOutDir: false,
+  },
   plugins: [
     tailwindcss(),
     tsconfigPaths({ projects: ["./tsconfig.json"] }),

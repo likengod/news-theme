@@ -49,11 +49,20 @@ const server = createServer(async (req, res) => {
       return;
     }
 
-    // Static assets handling from dist/client or public
-    const staticDirs = [path.join(__dirname, 'dist/client'), path.join(__dirname, 'public')];
+    // Static assets handling from dist/client, public, or historical assets
+    const staticDirs = [
+      path.join(__dirname, 'dist/client'),
+      path.join(__dirname, 'public'),
+      path.join(__dirname, 'assets'),
+    ];
     for (const baseDir of staticDirs) {
-      const filePath = path.join(baseDir, parsedPath);
-      if (filePath.startsWith(baseDir) && fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+      let filePath = path.join(baseDir, parsedPath);
+      // If looking for /assets/<filename>, also check baseDir directly if baseDir is assets
+      if (!fs.existsSync(filePath) && parsedPath.startsWith('/assets/') && path.basename(baseDir) === 'assets') {
+        filePath = path.join(baseDir, path.basename(parsedPath));
+      }
+
+      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
         const ext = path.extname(filePath).toLowerCase();
         if (MIME_TYPES[ext]) {
           res.setHeader('Content-Type', MIME_TYPES[ext]);
@@ -66,6 +75,15 @@ const server = createServer(async (req, res) => {
         fs.createReadStream(filePath).pipe(res);
         return;
       }
+    }
+
+    // If an asset in /assets/ is still not found, return 404 immediately without running SSR
+    if (parsedPath.startsWith('/assets/')) {
+      res.statusCode = 404;
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.end('Asset Not Found');
+      return;
     }
 
     const host = req.headers.host || '127.0.0.1:3000';
@@ -90,6 +108,14 @@ const server = createServer(async (req, res) => {
     response.headers.forEach((value, key) => {
       res.setHeader(key, value);
     });
+
+    // Ensure HTML documents are never cached so visitors always receive fresh chunk manifests
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('text/html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
 
     if (response.body) {
       const reader = response.body.getReader();
