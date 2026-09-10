@@ -17,6 +17,7 @@ export default defineConfig({
   build: {
     emptyOutDir: false,
     sourcemap: true,
+    modulePreload: false,
   },
   plugins: [
     tailwindcss(),
