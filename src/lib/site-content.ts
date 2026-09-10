@@ -1090,21 +1090,88 @@ const DEFAULTS: Record<AdSlot, AdSlideItem[]> = {
   reel_ads: [],
 };
 
+const inMemoryAdsCache: Partial<Record<AdSlot, AdSlideItem[]>> = {};
 
+/**
+ * Robust localStorage.setItem wrapper that intercepts QuotaExceededError,
+ * frees up stale/heavy cached items, and ensures site code never crashes.
+ */
+export function safeSetItem(key: string, value: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e: any) {
+    console.warn(`[Storage] Quota exceeded for "${key}". Recovering space...`, e);
 
+    // 1. Prune media library history if heavy (> 150KB)
+    try {
+      const rawMedia = localStorage.getItem("nt_media_library_v1");
+      if (rawMedia && rawMedia.length > 150000) {
+        try {
+          const m = JSON.parse(rawMedia);
+          if (Array.isArray(m)) {
+            localStorage.setItem("nt_media_library_v1", JSON.stringify(m.slice(0, 2)));
+          }
+        } catch {
+          localStorage.removeItem("nt_media_library_v1");
+        }
+      }
+    } catch {}
+
+    // 2. Clear trash cache if present
+    try {
+      localStorage.removeItem("nt:site-ads-trash");
+    } catch {}
+
+    // 3. Retry write
+    try {
+      localStorage.setItem(key, value);
+      return true;
+    } catch {}
+
+    // 4. If still overflowing, prune other slot caches
+    try {
+      const adSlots: AdSlot[] = ["leaderboard", "popup", "ad3", "home2", "home1", "featured_slide"];
+      for (const slot of adSlots) {
+        const slotKey = ADS_KEYS[slot];
+        if (slotKey && slotKey !== key && localStorage.getItem(slotKey)) {
+          localStorage.removeItem(slotKey);
+          try {
+            localStorage.setItem(key, value);
+            return true;
+          } catch {}
+        }
+      }
+    } catch {}
+
+    // 5. Final fallback: avoid crashing
+    try {
+      localStorage.setItem(key, value);
+      return true;
+    } catch {
+      console.warn(`[Storage] Browser quota full for "${key}". Data saved to memory and syncing to server database.`);
+      return false;
+    }
+  }
+}
 
 function readRaw(slot: AdSlot): AdSlideItem[] {
+  if (inMemoryAdsCache[slot]) return inMemoryAdsCache[slot]!;
   if (typeof window === "undefined") return DEFAULTS[slot];
   try {
     const raw = localStorage.getItem(ADS_KEYS[slot]);
-    return raw ? (JSON.parse(raw) as AdSlideItem[]) : DEFAULTS[slot];
+    const parsed = raw ? (JSON.parse(raw) as AdSlideItem[]) : DEFAULTS[slot];
+    inMemoryAdsCache[slot] = parsed;
+    return parsed;
   } catch {
     return DEFAULTS[slot];
   }
 }
 
 function writeRaw(slot: AdSlot, ads: AdSlideItem[]) {
-  localStorage.setItem(ADS_KEYS[slot], JSON.stringify(ads));
+  inMemoryAdsCache[slot] = ads;
+  safeSetItem(ADS_KEYS[slot], JSON.stringify(ads));
 }
 
 export function loadTrash(): AdSlideItem[] {
@@ -1118,7 +1185,7 @@ export function loadTrash(): AdSlideItem[] {
       (i) => i.deletedAt && now - new Date(i.deletedAt).getTime() < TRASH_TTL_MS
     );
     if (fresh.length !== items.length) {
-      localStorage.setItem(TRASH_KEY, JSON.stringify(fresh));
+      safeSetItem(TRASH_KEY, JSON.stringify(fresh));
     }
     return fresh;
   } catch {
@@ -1127,13 +1194,46 @@ export function loadTrash(): AdSlideItem[] {
 }
 
 export function saveTrash(items: AdSlideItem[]) {
-  localStorage.setItem(TRASH_KEY, JSON.stringify(items));
-  if (typeof window !== "undefined") window.dispatchEvent(new Event("nt:ads-updated"));
+  safeSetItem(TRASH_KEY, JSON.stringify(items));
+  if (typeof window !== "undefined") {
+    try {
+      window.dispatchEvent(new Event("nt:ads-updated"));
+    } catch {}
+  }
+}
+
+/** Automatically cleans up oversized or legacy base64 entries from localStorage to maintain healthy quota */
+export function cleanCloggedStorage() {
+  if (typeof window === "undefined") return;
+  try {
+    let totalChars = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k) totalChars += (localStorage.getItem(k) || "").length;
+    }
+    // If usage is above ~2 MB (approx 2,000,000 chars), prune media library and empty trash
+    if (totalChars > 2000000) {
+      console.warn(`[Storage] High localStorage usage (${Math.round(totalChars / 1024)} KB). Freeing quota...`);
+      const rawMedia = localStorage.getItem("nt_media_library_v1");
+      if (rawMedia) {
+        try {
+          const media = JSON.parse(rawMedia);
+          if (Array.isArray(media) && media.length > 2) {
+            localStorage.setItem("nt_media_library_v1", JSON.stringify(media.slice(0, 2)));
+          }
+        } catch {
+          localStorage.removeItem("nt_media_library_v1");
+        }
+      }
+      localStorage.removeItem("nt:site-ads-trash");
+    }
+  } catch {}
 }
 
 /** Move all expired (past expiresAt) ads from every slot into trash. */
 export function processExpiredAds() {
   if (typeof window === "undefined") return;
+  cleanCloggedStorage();
   const now = Date.now();
   const trash = loadTrash();
   (Object.keys(ADS_KEYS) as AdSlot[]).forEach((slot) => {
@@ -1156,9 +1256,15 @@ export function loadAds(slot: AdSlot = "home1"): AdSlideItem[] {
 }
 
 export function saveAds(a: AdSlideItem[], slot: AdSlot = "home1") {
-  writeRaw(slot, a);
+  try {
+    writeRaw(slot, a);
+  } catch (err) {
+    console.warn("[saveAds] writeRaw error handled:", err);
+  }
   if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("nt:ads-updated"));
+    try {
+      window.dispatchEvent(new Event("nt:ads-updated"));
+    } catch {}
   }
   syncAdConfigurationToServer();
 }

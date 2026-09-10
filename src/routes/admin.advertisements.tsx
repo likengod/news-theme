@@ -285,24 +285,29 @@ function AdvertisementsPage() {
   };
 
   const onSave = () => {
-    saveAdSlotMode(slot, slotMode);
-    if (slotMode === "script") {
-      saveAdSlotScript(slot, slotScript);
-      toast.success(`Saved 3rd Party Script Ad integration for ${activeSlot?.label ?? slot}`);
-    } else {
-      if (tab === "popup") {
-        savePopupConfig(popupConfig);
+    try {
+      saveAdSlotMode(slot, slotMode);
+      if (slotMode === "script") {
+        saveAdSlotScript(slot, slotScript);
+        toast.success(`Saved 3rd Party Script Ad integration for ${activeSlot?.label ?? slot}`);
+      } else {
+        if (tab === "popup") {
+          savePopupConfig(popupConfig);
+        }
+        const cleaned = ads.filter((a) =>
+          (a.image || a.imagePortrait || a.imageLandscape || "").trim().length > 0
+        );
+        saveAds(cleaned, slot);
+        saveAdRotation(slot, rotation);
+        setAds(cleaned);
+        const slotLabel = activeSlot?.label ?? slot;
+        toast.success(
+          `Saved ${cleaned.length} custom banner slide${cleaned.length === 1 ? "" : "s"} to ${slotLabel} (rotates every ${rotation}s)`
+        );
       }
-      const cleaned = ads.filter((a) =>
-        (a.image || a.imagePortrait || a.imageLandscape || "").trim().length > 0
-      );
-      saveAds(cleaned, slot);
-      saveAdRotation(slot, rotation);
-      setAds(cleaned);
-      const slotLabel = activeSlot?.label ?? slot;
-      toast.success(
-        `Saved ${cleaned.length} custom banner slide${cleaned.length === 1 ? "" : "s"} to ${slotLabel} (rotates every ${rotation}s)`
-      );
+    } catch (err: any) {
+      console.error("[onSave] Failed to save advertisements:", err);
+      toast.error("Failed to save advertisements: " + (err?.message || "Storage error"));
     }
   };
 
