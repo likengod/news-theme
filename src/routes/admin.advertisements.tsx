@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -159,8 +159,8 @@ const SAMPLE_GOOGLE_ADSENSE = `<script async src="https://pagead2.googlesyndicat
 function AdvertisementsPage() {
   const navigate = useNavigate();
   const s = useSiteSettings();
-  const isPremium = ["Enterprise", "Enterprise+", "Premium"].includes(s.licenseType || "") || s.licenseRole === "VIP";
-  const isEnterprise = ["Enterprise", "Enterprise+"].includes(s.licenseType || "") || s.licenseRole === "VIP";
+  const isPremium = ["Enterprise", "Enterprise+", "Premium", "Demo"].includes(s.licenseType || "") || s.licenseRole === "VIP";
+  const isEnterprise = ["Enterprise", "Enterprise+", "Demo"].includes(s.licenseType || "") || s.licenseRole === "VIP";
 
   const [tab, setTab] = useState<Tab>("home1");
   const [ads, setAds] = useState<AdSlideItem[]>([]);

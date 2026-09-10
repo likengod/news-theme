@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { CheckCircle2, Key, ShieldAlert, ShoppingCart, Loader2, Calendar, ShieldCheck } from "lucide-react";
-import { type SiteSettings } from "@/lib/site-content";
+import { CheckCircle2, Key, ShieldAlert, ShoppingCart, Loader2, Calendar, ShieldCheck, Sparkles } from "lucide-react";
+import { type SiteSettings, saveSettings } from "@/lib/site-content";
 import { Card } from "@/components/admin/settings/SettingsHelpers";
 import { LicensePricingModal } from "@/components/admin/settings/LicensePricingModal";
 import { toast } from "sonner";
@@ -64,10 +64,24 @@ export function ActivateWebsiteTab({
       expiryDate.setMonth(expiryDate.getMonth() + months);
       const expiryIso = expiryDate.toISOString();
 
+      const newSettings = {
+        ...s,
+        licenseKey: rawKey,
+        licenseType: plan,
+        licenseRole: role,
+        licenseExpiresAt: expiryIso,
+      };
+
       update("licenseKey", rawKey);
       update("licenseType", plan);
       update("licenseRole", role);
       update("licenseExpiresAt", expiryIso);
+
+      try {
+        await saveSettings(newSettings);
+      } catch (e) {
+        console.warn("[Activation] Could not auto-save:", e);
+      }
 
       toast.success(`${plan} License activated successfully! (Valid for ${months} months)`);
       setIsActivating(false);
@@ -115,12 +129,24 @@ export function ActivateWebsiteTab({
     }
   };
 
-  const handleDeactivate = () => {
+  const handleDeactivate = async () => {
     setInputValue("");
+    const updatedSettings = {
+      ...s,
+      licenseKey: "",
+      licenseType: "",
+      licenseRole: "",
+      licenseExpiresAt: "",
+    };
     update("licenseKey", "");
     update("licenseType", "");
     update("licenseRole", "");
     update("licenseExpiresAt", "");
+    try {
+      await saveSettings(updatedSettings);
+    } catch (e) {
+      console.warn("[Deactivate] Could not auto-save:", e);
+    }
     toast.info("Website license deactivated.");
   };
 
