@@ -520,11 +520,26 @@ export const saveSiteSettingsServer = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+export type PopupConfig = {
+  frequencyMinutes: number; // Interval between popup appearances: 0 (every page view), 5, 10, 15, 30, 60, -1 (once per session)
+  initialDelaySeconds: number; // Delay in seconds after page load before showing popup (e.g. 7)
+  closeDelaySeconds: number; // Countdown seconds before close button (X) unlocks (e.g. 6)
+  rotateOnInterval?: boolean; // Whether the popup advances to the next ad on each interval appearance (default: true)
+};
+
+export const defaultPopupConfig: PopupConfig = {
+  frequencyMinutes: 10,
+  initialDelaySeconds: 7,
+  closeDelaySeconds: 6,
+  rotateOnInterval: true,
+};
+
 export type AdConfiguration = {
   slots: Record<AdSlot, AdSlideItem[]>;
   modes: Record<AdSlot, AdSlotMode>;
   scripts: Record<AdSlot, string>;
   rotations: Record<AdSlot, number>;
+  popupConfig?: PopupConfig;
 };
 
 export const getAdConfigurationServer = createServerFn({ method: "GET" })
@@ -564,6 +579,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" })
         popup: 6,
         leaderboard: 5,
       },
+      popupConfig: defaultPopupConfig,
     };
     return config;
   });
@@ -575,6 +591,7 @@ export const saveAdConfigurationServer = createServerFn({ method: "POST" })
     modes: z.record(z.any()),
     scripts: z.record(z.any()),
     rotations: z.record(z.any()),
+    popupConfig: z.record(z.any()).optional(),
   }).parse(config) as AdConfiguration)
   .handler(async ({ data }) => {
     const json = JSON.stringify(data);
@@ -819,6 +836,7 @@ export type AdSlideItem = {
   deletedAt?: string | null; // ISO timestamp; purge after 30 days
   slot?: AdSlot; // used in trash to know where to restore
   orientation?: AdOrientation; // preferred display orientation
+  isFeatured?: boolean; // Featured/Priority: shows first before other ads
 };
 
 import adHome2_1 from "@/assets/news-oil.jpg";
@@ -950,6 +968,38 @@ export function saveAdRotation(slot: AdSlot, seconds: number) {
     const map = raw ? (JSON.parse(raw) as Record<string, number>) : {};
     map[slot] = Math.max(1, Math.round(seconds));
     localStorage.setItem(ROTATION_KEY, JSON.stringify(map));
+    window.dispatchEvent(new Event("nt:ads-updated"));
+    syncAdConfigurationToServer();
+  } catch {
+    /* noop */
+  }
+}
+
+const POPUP_CONFIG_KEY = "nt:popup-ad-config";
+
+export function loadPopupConfig(): PopupConfig {
+  if (typeof window === "undefined") return defaultPopupConfig;
+  try {
+    const raw = localStorage.getItem(POPUP_CONFIG_KEY);
+    if (!raw) return defaultPopupConfig;
+    const p = JSON.parse(raw);
+    return {
+      frequencyMinutes: typeof p.frequencyMinutes === "number" ? p.frequencyMinutes : defaultPopupConfig.frequencyMinutes,
+      initialDelaySeconds: typeof p.initialDelaySeconds === "number" ? p.initialDelaySeconds : defaultPopupConfig.initialDelaySeconds,
+      closeDelaySeconds: typeof p.closeDelaySeconds === "number" ? p.closeDelaySeconds : defaultPopupConfig.closeDelaySeconds,
+      rotateOnInterval: p.rotateOnInterval !== false,
+    };
+  } catch {
+    return defaultPopupConfig;
+  }
+}
+
+export function savePopupConfig(cfg: Partial<PopupConfig>) {
+  if (typeof window === "undefined") return;
+  try {
+    const cur = loadPopupConfig();
+    const updated = { ...cur, ...cfg };
+    localStorage.setItem(POPUP_CONFIG_KEY, JSON.stringify(updated));
     window.dispatchEvent(new Event("nt:ads-updated"));
     syncAdConfigurationToServer();
   } catch {
@@ -1191,11 +1241,9 @@ export function syncAdConfigurationToServer() {
       leaderboard: loadAdRotation("leaderboard"),
         featured_slide: loadAdRotation("featured_slide"),
     },
+    popupConfig: loadPopupConfig(),
   };
   saveAdConfigurationServer({ data: config }).catch(() => {});
 }
-
-
-
 
 

@@ -282,6 +282,9 @@ function RootComponent() {
       if (adsConfig.rotations) {
         localStorage.setItem("nt:site-ads-rotation", JSON.stringify(adsConfig.rotations));
       }
+      if (adsConfig.popupConfig) {
+        localStorage.setItem("nt:popup-ad-config", JSON.stringify(adsConfig.popupConfig));
+      }
 
       window.dispatchEvent(new Event("nt:ads-updated"));
       window.dispatchEvent(new Event("nt:homepage-updated"));

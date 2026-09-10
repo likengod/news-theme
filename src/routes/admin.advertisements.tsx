@@ -23,6 +23,10 @@ import {
   Layers,
   FileCode,
   Lock,
+  Star,
+  ArrowUp,
+  ArrowDown,
+  Timer,
 } from "lucide-react";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import {
@@ -39,6 +43,10 @@ import {
   saveAdSlotMode,
   loadAdSlotScript,
   saveAdSlotScript,
+  loadPopupConfig,
+  savePopupConfig,
+  type PopupConfig,
+  defaultPopupConfig,
   type AdSlideItem,
   type AdSlot,
   type AdType,
@@ -170,6 +178,7 @@ function AdvertisementsPage() {
   const [ads, setAds] = useState<AdSlideItem[]>([]);
   const [trash, setTrash] = useState<AdSlideItem[]>([]);
   const [rotation, setRotation] = useState<number>(5);
+  const [popupConfig, setPopupConfig] = useState<PopupConfig>(defaultPopupConfig);
   const [slotMode, setSlotMode] = useState<AdSlotMode>("image");
   const [slotScript, setSlotScript] = useState<string>("");
   const [previewSlotScript, setPreviewSlotScript] = useState<boolean>(false);
@@ -184,6 +193,7 @@ function AdvertisementsPage() {
     setTrash(loadTrash());
     setSlotMode(loadAdSlotMode("home1"));
     setSlotScript(loadAdSlotScript("home1"));
+    setPopupConfig(loadPopupConfig());
   }, []);
 
   useEffect(() => {
@@ -194,6 +204,9 @@ function AdvertisementsPage() {
       setRotation(loadAdRotation(tab));
       setSlotMode(loadAdSlotMode(tab));
       setSlotScript(loadAdSlotScript(tab));
+      if (tab === "popup") {
+        setPopupConfig(loadPopupConfig());
+      }
       setPreviewSlotScript(false);
     }
   }, [tab]);
@@ -215,6 +228,22 @@ function AdvertisementsPage() {
 
   const update = (id: string, patch: Partial<AdSlideItem>) =>
     setAds((prev) => prev.map((a) => (a.id === id ? { ...a, ...patch } : a)));
+
+  const moveAd = (index: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= ads.length) return;
+    const next = [...ads];
+    const temp = next[index];
+    next[index] = next[targetIndex];
+    next[targetIndex] = temp;
+    setAds(next);
+  };
+
+  const toggleFeatured = (id: string) => {
+    setAds((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, isFeatured: !a.isFeatured } : a))
+    );
+  };
 
   const remove = (id: string) => {
     trashAds([id], slot);
@@ -252,6 +281,9 @@ function AdvertisementsPage() {
       saveAdSlotScript(slot, slotScript);
       toast.success(`Saved 3rd Party Script Ad integration for ${activeSlot?.label ?? slot}`);
     } else {
+      if (tab === "popup") {
+        savePopupConfig(popupConfig);
+      }
       const cleaned = ads.filter((a) =>
         (a.image || a.imagePortrait || a.imageLandscape || "").trim().length > 0
       );
@@ -488,129 +520,335 @@ function AdvertisementsPage() {
             </button>
           </div>
         </div>
-      ) : ads.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-xs">
-          <div className="grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-slate-600 mb-3">
-            <ImageIcon className="h-6 w-6" />
-          </div>
-          <h3 className="text-base font-semibold text-slate-900">No ads added to {activeSlot?.label} yet</h3>
-          <p className="mt-1 max-w-sm text-xs text-slate-500">
-            Add rotating custom banner images or video advertisements for {activeSlot?.shownOn || "this slot"}.
-          </p>
-          <button
-            type="button"
-            onClick={handleAddAd}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
-          >
-            <Plus className="h-4 w-4" /> Add your first ad to {activeSlot?.label}
-          </button>
-        </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-xl bg-slate-900 px-4 py-3 text-white shadow-xs">
-            <div className="flex items-center gap-2 text-xs font-medium">
-              <Sparkles className="h-4 w-4 text-amber-400" />
-              <span>
-                <strong>{ads.length}</strong> active ad slide{ads.length === 1 ? "" : "s"} in <strong>{activeSlot?.label}</strong>
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={handleAddAd}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition hover:bg-emerald-500 active:scale-98"
-            >
-              <Plus className="h-3.5 w-3.5" /> Add ad
-            </button>
-          </div>
-
-          <div ref={tableRef} className="space-y-4">
-            {ads.map((ad, i) => {
-              const isJustAdded = ad.id === newlyAddedId;
-
-              return (
-                <div
-                  key={ad.id}
-                  className={`rounded-xl border border-slate-200 bg-white p-4 shadow-xs transition-colors ${
-                    isJustAdded ? "bg-emerald-50/40 border-emerald-300 ring-1 ring-emerald-300" : "hover:border-slate-300"
-                  }`}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-3">
-                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 text-xs font-bold text-white shadow-2xs">
-                        #{i + 1}
-                      </span>
-                      <span className="text-xs font-bold text-slate-800">
-                        Banner Ad Slide
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <label className="text-xs font-semibold text-slate-500 whitespace-nowrap">
-                          Expires:
-                        </label>
-                        <input
-                          type="date"
-                          value={formatExpiresAt(ad.expiresAt)}
-                          onChange={(e) =>
-                            update(ad.id, {
-                              expiresAt: e.target.value ? new Date(e.target.value).toISOString() : null,
-                            })
-                          }
-                          className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-800 focus:border-slate-900 focus:outline-none transition"
-                        />
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => remove(ad.id)}
-                        title="Delete ad slide"
-                        aria-label="Delete ad slide"
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white shadow-2xs"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+          {/* Popup Timing & Frequency Settings (Exclusive to Popup tab) */}
+          {tab === "popup" && (
+            <div className="rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50/80 via-slate-50 to-purple-50/60 p-5 shadow-xs space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-100/80 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="grid h-9 w-9 place-items-center rounded-lg bg-indigo-600 text-white shadow-xs">
+                    <Timer className="h-5 w-5" />
                   </div>
-
-                  <div className="mt-3">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                      <div>
-                        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                          Upload Banner Images
-                        </div>
-                        <DualImageCell ad={ad} slot={slot} onUpdate={update} />
-                      </div>
-
-                      <div className="flex-1 max-w-md">
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                            Click-Through URL
-                          </label>
-                          {ad.href && ad.href !== "#" && (
-                            <a
-                              href={ad.href}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-600 hover:underline"
-                            >
-                              Test link <ExternalLink className="h-2.5 w-2.5" />
-                            </a>
-                          )}
-                        </div>
-                        <input
-                          value={ad.href}
-                          onChange={(e) => update(ad.id, { href: e.target.value })}
-                          placeholder="https://advertiser.com"
-                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 transition"
-                        />
-                      </div>
-                    </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Popup Display Timing & Frequency</h3>
+                    <p className="text-xs text-slate-500">Configure how often the popup appears, appearance delays, and slide rotation.</p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
+                {/* Frequency Interval */}
+                <div className="space-y-1.5 bg-white p-3 rounded-lg border border-slate-200 shadow-2xs">
+                  <label className="block text-xs font-bold text-slate-700">
+                    Appearance Frequency
+                  </label>
+                  <select
+                    value={popupConfig.frequencyMinutes}
+                    onChange={(e) =>
+                      setPopupConfig((prev) => ({
+                        ...prev,
+                        frequencyMinutes: parseInt(e.target.value, 10),
+                      }))
+                    }
+                    className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                  >
+                    <option value={0}>Every Page Load (0 min)</option>
+                    <option value={5}>Every 5 Minutes</option>
+                    <option value={10}>Every 10 Minutes (Default)</option>
+                    <option value={15}>Every 15 Minutes</option>
+                    <option value={30}>Every 30 Minutes</option>
+                    <option value={60}>Every 1 Hour (60 min)</option>
+                    <option value={-1}>Once Per Session Only</option>
+                  </select>
+                  <p className="text-[10.5px] text-slate-500">How often visitors see the popup ad</p>
+                </div>
+
+                {/* Initial Delay */}
+                <div className="space-y-1.5 bg-white p-3 rounded-lg border border-slate-200 shadow-2xs">
+                  <label className="block text-xs font-bold text-slate-700">
+                    Initial Display Delay
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      max={120}
+                      value={popupConfig.initialDelaySeconds}
+                      onChange={(e) =>
+                        setPopupConfig((prev) => ({
+                          ...prev,
+                          initialDelaySeconds: Math.max(0, parseInt(e.target.value) || 0),
+                        }))
+                      }
+                      className="w-20 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                    />
+                    <span className="text-xs text-slate-500 font-medium">seconds</span>
+                  </div>
+                  <p className="text-[10.5px] text-slate-500">Wait after page open before popup appears</p>
+                </div>
+
+                {/* Close Button Unlock Delay */}
+                <div className="space-y-1.5 bg-white p-3 rounded-lg border border-slate-200 shadow-2xs">
+                  <label className="block text-xs font-bold text-slate-700">
+                    Close Button Countdown
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={1}
+                      max={60}
+                      value={popupConfig.closeDelaySeconds}
+                      onChange={(e) =>
+                        setPopupConfig((prev) => ({
+                          ...prev,
+                          closeDelaySeconds: Math.max(1, parseInt(e.target.value) || 1),
+                        }))
+                      }
+                      className="w-20 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                    />
+                    <span className="text-xs text-slate-500 font-medium">seconds</span>
+                  </div>
+                  <p className="text-[10.5px] text-slate-500">Wait before (X) close button unlocks</p>
+                </div>
+
+                {/* In-Popup Slide Rotation */}
+                <div className="space-y-1.5 bg-white p-3 rounded-lg border border-slate-200 shadow-2xs">
+                  <label className="block text-xs font-bold text-slate-700">
+                    Slide Rotation Speed
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={1}
+                      max={60}
+                      value={rotation}
+                      onChange={(e) => setRotation(Math.max(1, parseInt(e.target.value) || 6))}
+                      className="w-20 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                    />
+                    <span className="text-xs text-slate-500 font-medium">seconds</span>
+                  </div>
+                  <p className="text-[10.5px] text-slate-500">Seconds per slide while popup is open</p>
+                </div>
+              </div>
+
+              {/* Advance ad on each appearance toggle */}
+              <div className="flex items-center justify-between bg-white px-4 py-2.5 rounded-lg border border-slate-200 shadow-2xs">
+                <div>
+                  <div className="text-xs font-bold text-slate-800">Change popup image on each interval appearance</div>
+                  <div className="text-[11px] text-slate-500">When popup reappears after the interval, it automatically switches to the next ad in rotation.</div>
+                </div>
+                <Switch
+                  checked={popupConfig.rotateOnInterval !== false}
+                  onCheckedChange={(c) => setPopupConfig((prev) => ({ ...prev, rotateOnInterval: c }))}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Ad Count Bar & Controls */}
+          {ads.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-900 px-4 py-3 text-white shadow-xs">
+              <div className="flex items-center gap-2 text-xs font-medium">
+                <Sparkles className="h-4 w-4 text-amber-400" />
+                <span>
+                  <strong>{ads.length}</strong> active ad slide{ads.length === 1 ? "" : "s"} in <strong>{activeSlot?.label}</strong>
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {tab !== "popup" && (
+                  <div className="flex items-center gap-2 rounded-lg bg-slate-800 px-3 py-1 text-xs text-slate-200">
+                    <Clock className="h-3.5 w-3.5 text-amber-400" />
+                    <span>Rotate every:</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={120}
+                      value={rotation}
+                      onChange={(e) => setRotation(Math.max(1, parseInt(e.target.value) || 5))}
+                      className="w-12 rounded bg-slate-900 border border-slate-700 px-1.5 py-0.5 text-center text-xs font-bold text-white focus:outline-none focus:border-amber-400"
+                    />
+                    <span>sec</span>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={handleAddAd}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition hover:bg-emerald-500 active:scale-98"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add ad
+                </button>
+              </div>
+            </div>
+          )}
+
+          {ads.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-xs">
+              <div className="grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-slate-600 mb-3">
+                <ImageIcon className="h-6 w-6" />
+              </div>
+              <h3 className="text-base font-semibold text-slate-900">No ads added to {activeSlot?.label} yet</h3>
+              <p className="mt-1 max-w-sm text-xs text-slate-500">
+                Add rotating custom banner images or video advertisements for {activeSlot?.shownOn || "this slot"}.
+              </p>
+              <button
+                type="button"
+                onClick={handleAddAd}
+                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+              >
+                <Plus className="h-4 w-4" /> Add your first ad to {activeSlot?.label}
+              </button>
+            </div>
+          ) : (
+            <div ref={tableRef} className="space-y-4">
+              {ads.map((ad, i) => {
+                const isJustAdded = ad.id === newlyAddedId;
+                const isFeatured = !!ad.isFeatured;
+
+                return (
+                  <div
+                    key={ad.id}
+                    className={`rounded-xl border bg-white p-4 shadow-xs transition-colors ${
+                      isFeatured
+                        ? "border-amber-300 ring-1 ring-amber-300 bg-amber-50/15"
+                        : isJustAdded
+                        ? "bg-emerald-50/40 border-emerald-300 ring-1 ring-emerald-300"
+                        : "border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <span
+                          className={`inline-flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold text-white shadow-2xs ${
+                            isFeatured ? "bg-amber-500" : "bg-slate-900"
+                          }`}
+                        >
+                          #{i + 1}
+                        </span>
+                        {isFeatured ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 border border-amber-300 px-2.5 py-0.5 text-[11px] font-bold text-amber-900">
+                            <Star className="h-3 w-3 fill-amber-500 text-amber-600" /> FEATURED (SHOWS FIRST)
+                          </span>
+                        ) : (
+                          <span className="text-xs font-bold text-slate-800">
+                            Banner Ad Slide
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        {/* Featured / Priority toggle */}
+                        <button
+                          type="button"
+                          onClick={() => toggleFeatured(ad.id)}
+                          title={
+                            isFeatured
+                              ? "Currently Featured: shows first before other ads. Click to unfeature."
+                              : "Click to feature this ad: featured ads always show first before regular ads."
+                          }
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition shadow-2xs ${
+                            isFeatured
+                              ? "bg-amber-500 text-white hover:bg-amber-600"
+                              : "border border-slate-200 bg-white text-slate-600 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50"
+                          }`}
+                        >
+                          <Star className={`h-3.5 w-3.5 ${isFeatured ? "fill-white" : "text-amber-500"}`} />
+                          {isFeatured ? "Featured (First)" : "Mark Featured"}
+                        </button>
+
+                        {/* Reorder Up / Down */}
+                        <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-2xs">
+                          <button
+                            type="button"
+                            disabled={i === 0}
+                            onClick={() => moveAd(i, "up")}
+                            title="Move Up (Show earlier in slideshow)"
+                            className="p-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30 disabled:hover:bg-transparent transition"
+                          >
+                            <ArrowUp className="h-3.5 w-3.5" />
+                          </button>
+                          <div className="w-[1px] h-4 bg-slate-200" />
+                          <button
+                            type="button"
+                            disabled={i === ads.length - 1}
+                            onClick={() => moveAd(i, "down")}
+                            title="Move Down (Show later in slideshow)"
+                            className="p-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30 disabled:hover:bg-transparent transition"
+                          >
+                            <ArrowDown className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+
+                        {/* Expiration date */}
+                        <div className="flex items-center gap-1.5">
+                          <label className="text-xs font-semibold text-slate-500 whitespace-nowrap">
+                            Expires:
+                          </label>
+                          <input
+                            type="date"
+                            value={formatExpiresAt(ad.expiresAt)}
+                            onChange={(e) =>
+                              update(ad.id, {
+                                expiresAt: e.target.value ? new Date(e.target.value).toISOString() : null,
+                              })
+                            }
+                            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-800 focus:border-slate-900 focus:outline-none transition"
+                          />
+                        </div>
+
+                        {/* Delete button */}
+                        <button
+                          type="button"
+                          onClick={() => remove(ad.id)}
+                          title="Delete ad slide"
+                          aria-label="Delete ad slide"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white shadow-2xs"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="mt-3">
+                      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                            Upload Banner Images
+                          </div>
+                          <DualImageCell ad={ad} slot={slot} onUpdate={update} />
+                        </div>
+
+                        <div className="flex-1 max-w-md">
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                              Click-Through URL
+                            </label>
+                            {ad.href && ad.href !== "#" && (
+                              <a
+                                href={ad.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-600 hover:underline"
+                              >
+                                Test link <ExternalLink className="h-2.5 w-2.5" />
+                              </a>
+                            )}
+                          </div>
+                          <input
+                            value={ad.href}
+                            onChange={(e) => update(ad.id, { href: e.target.value })}
+                            placeholder="https://advertiser.com"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 transition"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="flex items-center justify-end rounded-xl border border-slate-200 bg-slate-50 p-4">
             <button
