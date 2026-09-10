@@ -884,12 +884,12 @@ export type AdSlideItem = {
   isFeatured?: boolean; // Featured/Priority: shows first before other ads
 };
 
-import adHome2_1 from "@/assets/news-oil.jpg";
-import adHome2_2 from "@/assets/news-fed.jpg";
-import adHome2_3 from "@/assets/news-tech.jpg";
-import adHome2_4 from "@/assets/news-crypto.jpg";
-import adHome2_5 from "@/assets/news-wallstreet.jpg";
-import adHome2_6 from "@/assets/hero-markets.jpg";
+import adHome2_1 from "@/assets/news-oil.webp";
+import adHome2_2 from "@/assets/news-fed.webp";
+import adHome2_3 from "@/assets/news-tech.webp";
+import adHome2_4 from "@/assets/news-crypto.webp";
+import adHome2_5 from "@/assets/news-wallstreet.webp";
+import adHome2_6 from "@/assets/hero-markets.webp";
 
 export const defaultAdSlides: AdSlideItem[] = [
   { id: "ad-1", image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80", href: "#", label: "Sponsored" },

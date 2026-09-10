@@ -7,7 +7,7 @@ import { sections } from "@/lib/news-data";
 import { Search as SearchIcon } from "lucide-react";
 import { searchPublicArticles } from "@/lib/articles.functions";
 
-import heroImg from "@/assets/hero-markets.jpg";
+import heroImg from "@/assets/hero-markets.webp";
 
 type SearchParams = { q?: string; category?: string; page?: number };
 

@@ -74,6 +74,17 @@ const server = createServer(async (req, res) => {
         } else {
           res.setHeader('Cache-Control', 'public, max-age=2592000');
         }
+
+        const compressibleExts = ['.css', '.js', '.json', '.svg', '.txt', '.xml', '.html'];
+        const acceptEncoding = (req.headers['accept-encoding'] || '').toLowerCase();
+        if (compressibleExts.includes(ext) && acceptEncoding.includes('gzip')) {
+          res.setHeader('Content-Encoding', 'gzip');
+          res.setHeader('Vary', 'Accept-Encoding');
+          const gzip = zlib.createGzip({ level: 6 });
+          fs.createReadStream(filePath).pipe(gzip).pipe(res);
+          return;
+        }
+
         fs.createReadStream(filePath).pipe(res);
         return;
       }

@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
-import techImg from "@/assets/news-tech.jpg";
-import tradeImg from "@/assets/news-trade.jpg";
-import fedImg from "@/assets/news-fed.jpg";
-import wsImg from "@/assets/news-wallstreet.jpg";
-import cryptoImg from "@/assets/news-crypto.jpg";
+import techImg from "@/assets/news-tech.webp";
+import tradeImg from "@/assets/news-trade.webp";
+import fedImg from "@/assets/news-fed.webp";
+import wsImg from "@/assets/news-wallstreet.webp";
+import cryptoImg from "@/assets/news-crypto.webp";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
 import { articlesByCategory } from "@/lib/homepage-config";
 import { getArticleImage } from "@/lib/news-data";

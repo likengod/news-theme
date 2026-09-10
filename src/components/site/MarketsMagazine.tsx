@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import artImg from "@/assets/hero-markets.jpg";
-import pensionImg from "@/assets/news-wallstreet.jpg";
-import coverImg from "@/assets/news-oil.jpg";
-import slide1 from "@/assets/news-fed.jpg";
-import slide2 from "@/assets/news-tech.jpg";
-import slide3 from "@/assets/news-crypto.jpg";
+import artImg from "@/assets/hero-markets.webp";
+import pensionImg from "@/assets/news-wallstreet.webp";
+import coverImg from "@/assets/news-oil.webp";
+import slide1 from "@/assets/news-fed.webp";
+import slide2 from "@/assets/news-tech.webp";
+import slide3 from "@/assets/news-crypto.webp";
 import { loadAds, loadAdRotation, loadAdSlotMode, loadAdSlotScript, loadSettings, type AdSlideItem, type AdSlotMode } from "@/lib/site-content";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
 import { ScriptAdRenderer } from "./ScriptAdRenderer";

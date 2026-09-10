@@ -1,10 +1,10 @@
-﻿import fedImg from '@/assets/news-fed.jpg';
-import techImg from '@/assets/news-tech.jpg';
-import oilImg from '@/assets/news-oil.jpg';
-import cryptoImg from '@/assets/news-crypto.jpg';
-import wsImg from '@/assets/news-wallstreet.jpg';
-import tradeImg from '@/assets/news-trade.jpg';
-import heroImg from '@/assets/hero-markets.jpg';
+import fedImg from '@/assets/news-fed.webp';
+import techImg from '@/assets/news-tech.webp';
+import oilImg from '@/assets/news-oil.webp';
+import cryptoImg from '@/assets/news-crypto.webp';
+import wsImg from '@/assets/news-wallstreet.webp';
+import tradeImg from '@/assets/news-trade.webp';
+import heroImg from '@/assets/hero-markets.webp';
 import { loadReelsConfig, toEmbedSrc } from '@/lib/reels-config';
 
 export type WatchItem = {

@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import heroMarkets from "@/assets/hero-markets.jpg";
+import heroMarkets from "@/assets/hero-markets.webp";
 import { Header } from "@/components/site/Header";
 import { HeroBoard } from "@/components/site/HeroBoard";
 import { LazySection } from "@/components/site/LazySection";

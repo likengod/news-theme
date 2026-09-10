@@ -7,7 +7,7 @@ import { getPublicArchiveArticles } from "@/lib/articles.functions";
 import Advertisement from "@/components/site/Advertisement";
 import React from "react";
 
-import heroImg from "@/assets/hero-markets.jpg";
+import heroImg from "@/assets/hero-markets.webp";
 
 type SearchParams = { day?: string; month?: string; year?: string; page?: number };
 

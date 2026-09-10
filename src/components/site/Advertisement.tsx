@@ -196,12 +196,15 @@ export default function Advertisement({
                       className="h-full w-full object-contain"
                     />
                   ) : s.image ? (
-                    <img
-                      src={s.image}
-                      alt="Advertisement"
-                      loading="lazy"
-                      className={`h-full w-full ${slot === "home1" || slot === "ad3" ? "object-cover" : "object-contain"}`}
-                    />
+                    i === index ? (
+                      <img
+                        src={s.image}
+                        alt="Advertisement"
+                        loading="lazy"
+                        decoding="async"
+                        className={`h-full w-full ${slot === "home1" || slot === "ad3" ? "object-cover" : "object-contain"}`}
+                      />
+                    ) : null
                   ) : null}
                 </div>
               ))
