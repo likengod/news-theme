@@ -1211,21 +1211,56 @@ export function cleanCloggedStorage() {
       const k = localStorage.key(i);
       if (k) totalChars += (localStorage.getItem(k) || "").length;
     }
-    // If usage is above ~2 MB (approx 2,000,000 chars), prune media library and empty trash
-    if (totalChars > 2000000) {
-      console.warn(`[Storage] High localStorage usage (${Math.round(totalChars / 1024)} KB). Freeing quota...`);
+
+    // If usage is above ~1 MB (approx 1,000,000 chars), perform deep cleaning
+    if (totalChars > 1000000) {
+      console.warn(`[Storage] High localStorage usage (${Math.round(totalChars / 1024)} KB). Deep cleaning bulky storage...`);
+
+      // 1. Purge trash cache
+      localStorage.removeItem(TRASH_KEY);
+
+      // 2. Clear or aggressively filter media library
       const rawMedia = localStorage.getItem("nt_media_library_v1");
       if (rawMedia) {
         try {
           const media = JSON.parse(rawMedia);
-          if (Array.isArray(media) && media.length > 2) {
-            localStorage.setItem("nt_media_library_v1", JSON.stringify(media.slice(0, 2)));
+          if (Array.isArray(media)) {
+            // Drop any item over 60 KB to prevent quota exhaustion
+            const light = media.filter((m: any) => !m?.dataUrl || m.dataUrl.length < 60000).slice(0, 3);
+            if (light.length > 0) {
+              localStorage.setItem("nt_media_library_v1", JSON.stringify(light));
+            } else {
+              localStorage.removeItem("nt_media_library_v1");
+            }
           }
         } catch {
           localStorage.removeItem("nt_media_library_v1");
         }
       }
-      localStorage.removeItem("nt:site-ads-trash");
+
+      // 3. Inspect ad slot keys for oversized (> 200 KB) raw base64 data
+      const adSlots: AdSlot[] = ["reel_ads", "home1", "home2", "ad3", "popup", "leaderboard", "featured_slide"];
+      for (const slot of adSlots) {
+        const slotKey = ADS_KEYS[slot];
+        const raw = localStorage.getItem(slotKey);
+        if (raw && raw.length > 200000) {
+          // Cache in memory first so active session never loses it
+          try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) inMemoryAdsCache[slot] = parsed;
+          } catch {}
+          console.warn(`[Storage] Evicting oversized local cache for slot "${slot}" (${Math.round(raw.length / 1024)} KB). (Data remains safe in server database).`);
+          localStorage.removeItem(slotKey);
+        }
+      }
+
+      // Check remaining
+      let finalChars = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k) finalChars += (localStorage.getItem(k) || "").length;
+      }
+      console.info(`[Storage] Deep clean finished. Storage freed to: ${Math.round(finalChars / 1024)} KB.`);
     }
   } catch {}
 }
