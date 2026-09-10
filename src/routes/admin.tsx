@@ -43,17 +43,20 @@ export const Route = createFileRoute("/admin")({
     const { data } = await supabase.auth.getSession();
     if (!data.session?.user) throw redirect({ to: "/auth" });
     
-    // Validate session token in MySQL database and check role permissions
+    // Validate session token and check role permissions — run both DB queries in parallel
     try {
-      const res = await getUserServer({ data: data.session.access_token });
+      const [res, roleRes] = await Promise.all([
+        getUserServer({ data: data.session.access_token }),
+        getCurrentUserRole({ data: data.session.access_token }),
+      ]);
+
       if (!res.user) {
         // Token is invalid/expired in MySQL database; sign out and redirect to login
         await supabase.auth.signOut();
         throw redirect({ to: "/auth" });
       }
 
-      // Query database to ensure user has a role authorized to access the admin panel
-      const roleRes = await getCurrentUserRole({ data: data.session.access_token });
+      // Ensure user has a role authorized to access the admin panel
       const allowedRoles = ["admin", "editor"];
       if (!roleRes.role || !allowedRoles.includes(roleRes.role)) {
         // Logged-in user is not authorized; redirect to home page
@@ -161,7 +164,7 @@ function AdminLayout() {
     getGitStatus()
       .then((res) => {
         if (!mounted) return;
-        const cur = res?.version || "v1.0.38";
+        const cur = res?.version || "v1.0.39";
         const latest = res?.latestVersion || cur;
         const isSimulated = typeof window !== "undefined" && (
           new URLSearchParams(window.location.search).get("test_update") === "1" ||
@@ -362,7 +365,7 @@ function AdminLayout() {
 
                 <div className="mt-6 flex items-center justify-center gap-3 text-sm font-semibold text-slate-500">
                   <span className="font-mono text-slate-700 bg-slate-200/70 px-3 py-1 rounded-full text-xs">
-                    Current: {updateStatus.currentVersion || "v1.0.38"}
+                    Current: {updateStatus.currentVersion || "v1.0.39"}
                   </span>
                   <span>➔</span>
                   <span className="font-mono text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full text-xs font-bold">
