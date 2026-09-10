@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import serverModule from './dist/server/server.js';
 import fs from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -49,10 +50,11 @@ const server = createServer(async (req, res) => {
       return;
     }
 
-    // Static assets handling from dist/client, public, or historical assets
+    // Static assets handling from dist/client, public, uploads, or historical assets
     const staticDirs = [
       path.join(__dirname, 'dist/client'),
       path.join(__dirname, 'public'),
+      path.join(__dirname, 'uploads'),
       path.join(__dirname, 'assets'),
     ];
     for (const baseDir of staticDirs) {
@@ -67,7 +69,7 @@ const server = createServer(async (req, res) => {
         if (MIME_TYPES[ext]) {
           res.setHeader('Content-Type', MIME_TYPES[ext]);
         }
-        if (parsedPath.startsWith('/assets/')) {
+        if (parsedPath.startsWith('/assets/') || parsedPath.startsWith('/uploads/')) {
           res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
         } else {
           res.setHeader('Cache-Control', 'public, max-age=86400');
@@ -77,8 +79,8 @@ const server = createServer(async (req, res) => {
       }
     }
 
-    // If an asset in /assets/ is still not found, return 404 immediately without running SSR
-    if (parsedPath.startsWith('/assets/')) {
+    // If an asset in /assets/ or /uploads/ is still not found, return 404 immediately without running SSR
+    if (parsedPath.startsWith('/assets/') || parsedPath.startsWith('/uploads/')) {
       res.statusCode = 404;
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -117,15 +119,38 @@ const server = createServer(async (req, res) => {
       res.setHeader('Expires', '0');
     }
 
-    if (response.body) {
-      const reader = response.body.getReader();
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        res.write(value);
+    const acceptEncoding = (req.headers['accept-encoding'] || '').toLowerCase();
+    const isCompressible = contentType.includes('text/') || 
+                           contentType.includes('application/javascript') || 
+                           contentType.includes('application/json');
+
+    if (isCompressible && acceptEncoding.includes('gzip')) {
+      res.setHeader('Content-Encoding', 'gzip');
+      res.removeHeader('Content-Length');
+      const gzip = zlib.createGzip({ level: 6 });
+      gzip.pipe(res);
+      if (response.body) {
+        const reader = response.body.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          gzip.write(value);
+        }
+        gzip.end();
+      } else {
+        gzip.end();
       }
+    } else {
+      if (response.body) {
+        const reader = response.body.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          res.write(value);
+        }
+      }
+      res.end();
     }
-    res.end();
   } catch (err) {
     console.error('[Server Error]', err);
     if (!res.headersSent) {

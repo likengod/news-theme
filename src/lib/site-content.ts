@@ -550,7 +550,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" })
     try {
       const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'ad_configuration_data'");
       if (rows.length > 0 && rows[0].value) {
-        const parsed = JSON.parse(rows[0].value) as AdConfiguration;
+        let parsed = JSON.parse(rows[0].value) as AdConfiguration;
         if (parsed?.slots) {
           parsed.slots.reel_ads = parsed.slots.reel_ads || [];
           parsed.slots.featured_slide = parsed.slots.featured_slide || [];
@@ -564,6 +564,23 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" })
         if (parsed?.scripts) {
           parsed.scripts.reel_ads = parsed.scripts.reel_ads || "";
         }
+
+        // Auto-migrate any base64 images to static files on disk
+        try {
+          const { persistAllAdConfiguration } = await import("./ad-storage.server");
+          const { config: cleanConfig, changed } = persistAllAdConfiguration(parsed);
+          if (changed) {
+            parsed = cleanConfig;
+            const updatedJson = JSON.stringify(cleanConfig);
+            query(
+              `UPDATE site_settings SET value = ? WHERE setting_key = 'ad_configuration_data'`,
+              [updatedJson]
+            ).catch((err) => console.error("[AdStorage] Background MySQL update error:", err));
+          }
+        } catch (storageErr) {
+          console.error("[AdStorage] Auto-migration error:", storageErr);
+        }
+
         setCached(cacheKey, parsed);
         return parsed;
       }
@@ -613,7 +630,16 @@ export const saveAdConfigurationServer = createServerFn({ method: "POST" })
     popupConfig: z.record(z.any()).optional(),
   }).parse(config) as AdConfiguration)
   .handler(async ({ data }) => {
-    const json = JSON.stringify(data);
+    let cleanData = data;
+    try {
+      const { persistAllAdConfiguration } = await import("./ad-storage.server");
+      const { config: cleanConfig } = persistAllAdConfiguration(data);
+      cleanData = cleanConfig;
+    } catch (storageErr) {
+      console.error("[AdStorage] Save persistence error:", storageErr);
+    }
+
+    const json = JSON.stringify(cleanData);
     await query(
       `INSERT INTO site_settings (setting_key, value) VALUES ('ad_configuration_data', ?)
        ON DUPLICATE KEY UPDATE value = ?`,

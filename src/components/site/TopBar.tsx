@@ -47,23 +47,41 @@ export function TopBar() {
     setSettings(loadSettings());
     setMounted(true);
 
-    // Fetch user location for AQI
-    fetch("https://get.geojs.io/v1/ip/geo.json")
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.city) {
-          const cityCode = data.city.substring(0, 3).toUpperCase();
-          const aqi = Math.floor(Math.random() * 100) + 40; // Generate realistic AQI based on location
-          setLocalAqi(cityCode + ' ' + aqi + ' AQI');
-        }
-      })
-      .catch(() => {});
+    // Check cached AQI first to avoid unnecessary network roundtrips
+    try {
+      const cached = sessionStorage.getItem("nt:cached-aqi");
+      if (cached) setLocalAqi(cached);
+    } catch {}
+
+    // Fetch user location for AQI in the background after page has settled
+    const timer = setTimeout(() => {
+      if (typeof window === "undefined") return;
+      try {
+        if (sessionStorage.getItem("nt:cached-aqi")) return;
+      } catch {}
+
+      fetch("https://get.geojs.io/v1/ip/geo.json")
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.city) {
+            const cityCode = data.city.substring(0, 3).toUpperCase();
+            const aqi = Math.floor(Math.random() * 100) + 40;
+            const aqiStr = `${cityCode} ${aqi} AQI`;
+            setLocalAqi(aqiStr);
+            try { sessionStorage.setItem("nt:cached-aqi", aqiStr); } catch {}
+          }
+        })
+        .catch(() => {});
+    }, 3500);
 
     const handleUpdate = () => {
       setSettings(loadSettings());
     };
     window.addEventListener("nt:settings-updated", handleUpdate);
-    return () => window.removeEventListener("nt:settings-updated", handleUpdate);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("nt:settings-updated", handleUpdate);
+    };
   }, []);
 
   const today = new Date().toLocaleDateString("en-US", {

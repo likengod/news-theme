@@ -40,3 +40,8 @@ db-config.json.bak
 *.zip
 .gemini
 
+# Uploads
+uploads/
+public/uploads/
+
+

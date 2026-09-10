@@ -178,14 +178,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
     // Build Google Fonts URL dynamically from font config
     const fontConfig = loaderData?.fontConfig ?? defaultFontConfig;
-    const googleFontsUrl = buildGoogleFontsUrl(fontConfig.fonts);
+    const activeSectionFontIds = Object.values(fontConfig.sectionMapping || {});
+    const googleFontsUrl = buildGoogleFontsUrl(fontConfig.fonts, activeSectionFontIds);
 
     return {
       meta: metaTags,
       links: [
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-        ...(googleFontsUrl ? [{ rel: "stylesheet", href: googleFontsUrl }] : []),
+        ...(googleFontsUrl ? [
+          { rel: "preload", as: "style", href: googleFontsUrl },
+          { rel: "stylesheet", href: googleFontsUrl },
+        ] : []),
         { rel: "stylesheet", href: appCss },
       ],
     };

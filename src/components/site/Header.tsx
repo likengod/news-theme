@@ -8,12 +8,14 @@ interface HeaderProps {
   showTopBar?: boolean;
   showTicker?: boolean;
   showBreakingBar?: boolean;
+  breakingArticles?: any[];
 }
 
 export function Header({
   showTopBar = true,
   showTicker,
   showBreakingBar,
+  breakingArticles,
 }: HeaderProps) {
   const cfg = useHomepageConfig();
   const isTickerVisible = showTicker !== undefined ? showTicker : (cfg.showTicker ?? true);
@@ -24,7 +26,7 @@ export function Header({
       {showTopBar && <TopBar />}
       <Masthead />
       {isTickerVisible && <Ticker />}
-      {isBreakingVisible && <BreakingBar />}
+      {isBreakingVisible && <BreakingBar articles={breakingArticles} />}
     </>
   );
 }

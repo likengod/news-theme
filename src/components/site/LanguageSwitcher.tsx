@@ -13,19 +13,21 @@ declare global {
 export function LanguageSwitcher() {
   const { i18n } = useTranslation();
 
-  useEffect(() => {
-    if (document.getElementById('google-translate-script')) return;
+  const loadGoogleTranslate = () => {
+    if (typeof window === "undefined" || document.getElementById('google-translate-script')) return;
     window.googleTranslateElementInit = () => {
       if (window.google && window.google.translate) {
-        new window.google.translate.TranslateElement(
-          {
-            pageLanguage: 'en',
-            includedLanguages: 'hi,bn,en',
-            layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-            autoDisplay: false,
-          },
-          'google_translate_element'
-        );
+        try {
+          new window.google.translate.TranslateElement(
+            {
+              pageLanguage: 'en',
+              includedLanguages: 'hi,bn,en',
+              layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+              autoDisplay: false,
+            },
+            'google_translate_element'
+          );
+        } catch {}
       }
     };
     const script = document.createElement('script');
@@ -33,6 +35,13 @@ export function LanguageSwitcher() {
     script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
     script.async = true;
     document.body.appendChild(script);
+  };
+
+  useEffect(() => {
+    // Only load during initial mount if the visitor has a pre-existing translation cookie
+    if (typeof document !== "undefined" && document.cookie.includes('googtrans=')) {
+      loadGoogleTranslate();
+    }
   }, []);
 
   const changeLanguage = (lng: string) => {
@@ -45,11 +54,18 @@ export function LanguageSwitcher() {
       return;
     }
 
-    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-    if (select) {
-      select.value = lng;
-      select.dispatchEvent(new Event('change'));
-    }
+    loadGoogleTranslate();
+
+    const applyLng = () => {
+      const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+      if (select) {
+        select.value = lng;
+        select.dispatchEvent(new Event('change'));
+      } else {
+        setTimeout(applyLng, 300);
+      }
+    };
+    applyLng();
   };
 
   const languages = [
@@ -67,7 +83,7 @@ export function LanguageSwitcher() {
         `}
       </style>
       <div id="google_translate_element" style={{ display: 'none' }}></div>
-      <DropdownMenu>
+      <DropdownMenu onOpenChange={(open) => { if (open) loadGoogleTranslate(); }}>
         <DropdownMenuTrigger asChild>
           <button
             className="grid h-7 w-7 place-items-center border border-border text-foreground hover:bg-muted transition-colors focus:outline-none"

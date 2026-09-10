@@ -270,18 +270,26 @@ export function saveFontConfig(config: FontConfiguration): void {
   }
 }
 
-// CSS Builder Helpers
-export function buildGoogleFontsUrl(fonts: FontEntry[]): string {
-  const googleFonts = fonts.filter((f) => f.source === "google");
+export function buildGoogleFontsUrl(fonts: FontEntry[], activeFontIds?: (string | undefined)[]): string {
+  let googleFonts = fonts.filter((f) => f.source === "google");
+  if (activeFontIds && activeFontIds.length > 0) {
+    const idSet = new Set(activeFontIds.filter(Boolean));
+    if (idSet.size > 0) {
+      googleFonts = googleFonts.filter((f) => idSet.has(f.id) || f.isDefault);
+    }
+  }
   if (googleFonts.length === 0) return "";
 
   const families = googleFonts.map((font) => {
     const name = font.family.replace(/ /g, "+");
-    if (!font.weights || font.weights.length === 0) {
-      return `family=${name}`;
-    }
-    const weights = [...font.weights].sort().join(";");
-    return `family=${name}:wght@${weights}`;
+    // Limit to standard core weights (400, 600, 700) to keep font bundle lightweight and fast
+    const coreWeights = ["400", "500", "600", "700"];
+    const weights = (font.weights && font.weights.length > 0
+      ? font.weights.filter((w) => coreWeights.includes(w))
+      : ["400", "600", "700"]
+    ).sort().join(";");
+
+    return weights ? `family=${name}:wght@${weights}` : `family=${name}`;
   });
 
   return `https://fonts.googleapis.com/css2?${families.join("&")}&display=swap`;

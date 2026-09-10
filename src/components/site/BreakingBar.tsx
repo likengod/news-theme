@@ -2,14 +2,19 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getHomepageArticles } from "@/lib/articles.functions";
 
-export function BreakingBar() {
-  const { data: articles = [] } = useQuery({
-    queryKey: ["homepageArticles"],
+export function BreakingBar({ articles: propArticles }: { articles?: any[] }) {
+  const hasPropArticles = Array.isArray(propArticles) && propArticles.length > 0;
+  const { data: fetchedArticles = [] } = useQuery({
+    queryKey: ["homepageArticlesBreaking"],
     queryFn: () => getHomepageArticles({ data: 10 }),
+    enabled: !hasPropArticles,
+    staleTime: 60000,
   });
 
+  const articles = hasPropArticles ? propArticles : fetchedArticles;
+
   const headlines = articles.length > 0
-    ? articles.map((a) => `${a.category ? `${a.category}: ` : ""}${a.title}`)
+    ? articles.slice(0, 10).map((a: any) => `${a.category ? `${a.category}: ` : ""}${a.title}`)
     : ["Welcome to News Theme — Stay tuned for breaking news updates."];
 
   const [i, setI] = useState(0);

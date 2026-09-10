@@ -79,7 +79,7 @@ function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Above-the-fold: render immediately for fastest first paint */}
-      <Header />
+      <Header breakingArticles={dbArticles} />
 
       <main className="mx-auto max-w-7xl px-4 py-4 md:py-10">
         {/* On Mobile Devices (< md): Render Watch section directly below Header */}

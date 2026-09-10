@@ -435,6 +435,10 @@ export function Columnists() {
                   <img
                     src={adImg}
                     alt={ad.label || "Sponsored Ad"}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    width={270}
+                    height={480}
                     className="h-full w-full object-cover transition duration-500 group-hover/ad:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -474,6 +478,10 @@ export function Columnists() {
                 <img
                   src={v.img}
                   alt={v.title}
+                  loading={index < 2 ? "eager" : "lazy"}
+                  decoding="async"
+                  width={270}
+                  height={480}
                   className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
