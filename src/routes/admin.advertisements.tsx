@@ -814,7 +814,11 @@ function AdvertisementsPage() {
                       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
                           <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                            Upload Banner Images
+                            {slot === "home1" || slot === "ad3"
+                              ? "Upload Banner Image (Portrait 3:4)"
+                              : slot === "home2"
+                              ? "Upload Banner Image (Landscape ~2:1)"
+                              : "Upload Banner Images"}
                           </div>
                           <DualImageCell ad={ad} slot={slot} onUpdate={update} />
                         </div>

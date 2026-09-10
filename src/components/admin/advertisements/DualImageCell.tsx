@@ -174,6 +174,50 @@ export function DualImageCell({
 
   const landscapeSize = slot === "home2" ? "406 × 196 px" : slot === "leaderboard" ? "728 × 90 px, etc." : "1200 × 675 px";
   
+  if (slot === "home1" || slot === "ad3") {
+    return (
+      <div className="flex items-center gap-3 py-1">
+        <SingleSlotImagePicker
+          label="Portrait"
+          badgeColor="bg-indigo-600"
+          value={portraitVal || ad.image || ""}
+          aspectClass="w-16 h-20"
+          emptyText="+ Portrait"
+          recSize="600 × 800 px"
+          onChange={(url) => {
+            onUpdate(ad.id, {
+              imagePortrait: url,
+              image: url,
+              orientation: "portrait",
+            });
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (slot === "home2") {
+    return (
+      <div className="flex items-center gap-3 py-1">
+        <SingleSlotImagePicker
+          label="Landscape"
+          badgeColor="bg-emerald-600"
+          value={landscapeVal || ad.image || ""}
+          aspectClass="w-28 h-14"
+          emptyText="+ Landscape"
+          recSize="406 × 196 px"
+          onChange={(url) => {
+            onUpdate(ad.id, {
+              imageLandscape: url,
+              image: url,
+              orientation: "landscape",
+            });
+          }}
+        />
+      </div>
+    );
+  }
+
   if (slot === "leaderboard") {
     return (
       <div className="flex items-center gap-3 py-1">
@@ -231,6 +275,7 @@ export function DualImageCell({
     );
   }
 
+  // Popup & other slots: Portrait + Landscape
   return (
     <div className="flex items-center gap-3 py-1">
       <SingleSlotImagePicker
@@ -239,7 +284,7 @@ export function DualImageCell({
         value={portraitVal}
         aspectClass="w-14 h-18"
         emptyText="+ Portrait"
-        recSize="600 × 800 px"
+        recSize="600 × 800 px (Mobile)"
         onChange={(url) => {
           onUpdate(ad.id, {
             imagePortrait: url,
@@ -254,7 +299,7 @@ export function DualImageCell({
         value={landscapeVal}
         aspectClass="w-22 h-14"
         emptyText="+ Landscape"
-        recSize={landscapeSize}
+        recSize="1200 × 675 px (Desktop)"
         onChange={(url) => {
           onUpdate(ad.id, {
             imageLandscape: url,
