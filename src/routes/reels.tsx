@@ -111,31 +111,24 @@ function ReelsPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
-                    {/* Sponsored badge */}
-                    <span className="absolute left-1 top-1 sm:left-2 sm:top-2 bg-amber-500 px-1 py-0.5 sm:px-2 sm:py-0.5 text-[7.5px] sm:text-[10px] font-extrabold text-black rounded shadow-sm flex items-center gap-0.5 sm:gap-1 whitespace-nowrap leading-none tracking-tight">
-                      <Sparkles className="h-2 w-2 sm:h-2.5 sm:w-2.5 shrink-0" />
-                      <span>Sponsored</span>
-                    </span>
-
-                    {/* Ad custom label: only show if not generic */}
-                    {!isGenericLabel && (
-                      <h3 className="hidden sm:block absolute bottom-8 sm:bottom-9 left-1.5 right-1.5 sm:left-2 sm:right-2 text-[9px] sm:text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
-                        {ad.label}
-                      </h3>
-                    )}
-
-                    {/* Visit link button */}
-                    <div className="absolute bottom-1.5 left-1.5 sm:bottom-2 sm:left-2 flex items-center gap-1 sm:gap-1.5">
-                      <span className="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[10px] font-semibold text-white/90 bg-white/20 backdrop-blur-md px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full border border-white/20 group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-400 transition-colors leading-none">
+                    {/* Visit link button: reduced size */}
+                    <div className="absolute bottom-1.5 left-1.5 sm:bottom-2 sm:left-2 flex items-center gap-1">
+                      <span className="inline-flex items-center gap-0.5 text-[7px] sm:text-[8px] md:text-[9.5px] font-semibold text-white/90 bg-black/50 backdrop-blur-md px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded-full border border-white/20 group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-400 transition-colors leading-none">
                         <span>Visit</span>
-                        <ExternalLink className="h-2 w-2 sm:h-2.5 sm:w-2.5 shrink-0" />
+                        <ExternalLink className="h-1.5 w-1.5 sm:h-2 sm:w-2 shrink-0" />
                       </span>
                     </div>
                   </a>
 
-                  {/* Ad label under card */}
-                  <div className={`mt-1 flex items-center gap-1 text-[9px] sm:text-[11px] text-muted-foreground truncate ${isGenericLabel ? "hidden sm:flex" : ""}`}>
-                    <span>{ad.label || "Sponsored"}</span>
+                  {/* Sponsored text BELOW the ad */}
+                  <div className="mt-1 flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-amber-600 dark:text-amber-500 truncate">
+                    <Sparkles className="h-2.5 w-2.5 shrink-0" />
+                    <span>Sponsored</span>
+                    {!isGenericLabel && (
+                      <span className="text-muted-foreground font-normal ml-0.5 truncate">
+                        · {ad.label}
+                      </span>
+                    )}
                   </div>
                 </div>
               );

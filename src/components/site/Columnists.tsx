@@ -439,31 +439,24 @@ export function Columnists() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-                  {/* Sponsored badge: reduced size on small mobile devices so it never wraps or overflows */}
-                  <span className="absolute left-1.5 top-1.5 md:left-2.5 md:top-2.5 bg-amber-500 px-1 py-0.5 md:px-2 md:py-0.5 text-[7.5px] sm:text-[9px] md:text-[10px] font-extrabold text-black rounded flex items-center gap-0.5 md:gap-1 shadow-sm whitespace-nowrap leading-none tracking-tight">
-                    <Sparkles className="h-2 w-2 md:h-2.5 md:w-2.5 shrink-0" />
-                    <span>Sponsored</span>
-                  </span>
-
-                  {/* Title: ONLY show if it's an actual custom headline/brand, never repeat generic "Sponsored" / "Advertisement" */}
-                  {!isGenericLabel && (
-                    <h4 className="hidden md:block absolute bottom-11 left-2.5 right-2.5 text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
-                      {ad.label}
-                    </h4>
-                  )}
-
-                  {/* Visit button */}
+                  {/* Visit button: reduced size */}
                   <div className="absolute bottom-1.5 left-1.5 right-1.5 md:bottom-2.5 md:left-2.5 md:right-2.5 flex items-center justify-between">
-                    <span className="inline-flex items-center gap-0.5 md:gap-1 text-[8px] sm:text-[9px] md:text-[11px] font-semibold text-white/90 bg-white/20 backdrop-blur-md px-1.5 py-0.5 md:px-2 md:py-1 rounded-full border border-white/20 group-hover/ad:bg-amber-500 group-hover/ad:text-black group-hover/ad:border-amber-400 transition-colors leading-none">
+                    <span className="inline-flex items-center gap-0.5 text-[7px] sm:text-[8px] md:text-[9.5px] font-semibold text-white/90 bg-black/50 backdrop-blur-md px-1.5 py-0.5 md:px-2 md:py-0.5 rounded-full border border-white/20 group-hover/ad:bg-amber-500 group-hover/ad:text-black group-hover/ad:border-amber-400 transition-colors leading-none">
                       <span>Visit</span>
-                      <ExternalLink className="h-2 w-2 md:h-2.5 md:w-2.5 shrink-0" />
+                      <ExternalLink className="h-1.5 w-1.5 md:h-2 md:w-2 shrink-0" />
                     </span>
                   </div>
                 </a>
 
-                {/* Subtitle below card: on desktop show label or "Sponsored"; on mobile hide if generic to avoid multiple sponsor texts */}
-                <div className={`mt-1.5 text-[9px] md:text-[11px] text-muted-foreground truncate ${isGenericLabel ? "hidden md:block" : ""}`}>
-                  {ad.label || "Sponsored"}
+                {/* Sponsored text BELOW the ad */}
+                <div className="mt-1.5 flex items-center gap-1 text-[10px] md:text-[11px] font-semibold text-amber-600 dark:text-amber-500 truncate">
+                  <Sparkles className="h-2.5 w-2.5 shrink-0" />
+                  <span>Sponsored</span>
+                  {!isGenericLabel && (
+                    <span className="text-muted-foreground font-normal ml-0.5 truncate">
+                      · {ad.label}
+                    </span>
+                  )}
                 </div>
               </div>
             );
