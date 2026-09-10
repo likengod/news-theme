@@ -159,6 +159,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: desc },
     ];
+    
+    if (s?.forceHttps) {
+      metaTags.push({ httpEquiv: "Content-Security-Policy", content: "upgrade-insecure-requests" });
+    }
 
     if (s?.googleSiteVerification) {
       metaTags.push({ name: "google-site-verification", content: s.googleSiteVerification });
@@ -254,6 +258,9 @@ function RootComponent() {
   const loaderData = Route.useLoaderData();
 
   useEffect(() => {
+    if (loaderData?.settings?.forceHttps && window.location.protocol === "http:" && window.location.hostname !== "localhost") {
+      window.location.protocol = "https:";
+    }
     if (typeof window === "undefined" || !loaderData) return;
     const { settings, homepageConfig, adsConfig, fontConfig } = loaderData;
     if (settings) {

@@ -21,6 +21,32 @@ export function ProtectionSettingsForm({ s, update }: Props) {
         </div>
 
         <div className="space-y-5 p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200/90 bg-slate-50/50 p-4">
+            <div className="space-y-1">
+              <label className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                Force HTTPS / SSL Strict Mode
+                <ShieldAlert className="h-4 w-4 text-emerald-600" />
+              </label>
+              <p className="text-xs text-slate-500">
+                When enabled, the server will automatically redirect all standard HTTP traffic to secure HTTPS. (Requires a valid SSL certificate like Let's Encrypt on your server).
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => update("forceHttps", !s.forceHttps)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${
+                s.forceHttps ? "bg-emerald-600" : "bg-slate-300"
+              }`}
+              aria-pressed={s.forceHttps}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs transition duration-200 ${
+                  s.forceHttps ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
           {/* Main Toggle */}
           <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200/90 bg-slate-50/50 p-4">
             <div className="space-y-1">

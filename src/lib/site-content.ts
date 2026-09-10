@@ -97,6 +97,7 @@ export type SiteSettings = {
   protectionEnabled: boolean;
   protectionModalTitle: string;
   protectionModalMessage: string;
+  forceHttps?: boolean; // Added force HTTPS setting
   // Speed Up Optimizations
   cleanUnusedCss: boolean;
   minifyJs: boolean;
@@ -232,6 +233,7 @@ export const defaultSettings: SiteSettings = {
   protectionEnabled: true,
   protectionModalTitle: "Content Protection - News Theme",
   protectionModalMessage: "Our journalists work hard to bring you authentic news. When you share our website links directly, the ad revenue helps us pay our team and keep our servers online.\n\nWe humbly request you not to copy paste or take screenshots of our content. Your small effort to share the original link makes a big difference to our survival. Thank you for standing with us!",
+  forceHttps: false,
   cleanUnusedCss: false,
   minifyJs: true,
   serverCacheEnabled: true,
