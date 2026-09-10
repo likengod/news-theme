@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link } from "@tanstack/react-router";
 import { LiveVideo } from "../LiveVideo";
 import { MinRead } from "../HeadlineArticle";
@@ -106,21 +106,36 @@ export function HeroMain({ activeLeads, cfg }: any) {
       if (featuredAdMode === "script" && featuredAdScript) {
         carouselItems.push(
           <CarouselItem key={`ad-${index}`}>
-            <div className="flex aspect-[16/10] w-full items-center justify-center bg-slate-50 overflow-hidden">
+            <div className="relative flex aspect-[16/10] w-full items-center justify-center bg-slate-50 overflow-hidden">
+              {/* SPONSORED Tag */}
+              <div className="absolute top-3 left-3 z-20 pointer-events-none">
+                <span className="inline-flex items-center rounded-md bg-black/80 px-2.5 py-1 text-[10px] md:text-xs font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-xs border border-white/20">
+                  SPONSORED
+                </span>
+              </div>
               <ScriptAdRenderer script={featuredAdScript} />
             </div>
           </CarouselItem>
         );
       } else if (featuredAdMode === "image" && featuredAds.length > 0) {
         const ad = featuredAds[index % featuredAds.length];
+        const adImg = ad.imageLandscape || ad.image;
         carouselItems.push(
           <CarouselItem key={`ad-${index}`}>
-            <a href={ad.href} target="_blank" rel="noopener noreferrer" className="block w-full">
-              <img
-                src={ad.image}
-                alt={ad.label || "Advertisement"}
-                className="aspect-[16/10] w-full object-cover"
-              />
+            <a href={ad.href} target="_blank" rel="noopener noreferrer" className="group/ad block w-full">
+              <div className="relative overflow-hidden">
+                <img
+                  src={adImg}
+                  alt={ad.label || "Advertisement"}
+                  className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover/ad:scale-102"
+                />
+                {/* SPONSORED Tag */}
+                <div className="absolute top-3 left-3 z-20 pointer-events-none">
+                  <span className="inline-flex items-center rounded-md bg-black/80 px-2.5 py-1 text-[10px] md:text-xs font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-xs border border-white/20">
+                    {ad.label ? ad.label.toUpperCase() : "SPONSORED"}
+                  </span>
+                </div>
+              </div>
             </a>
           </CarouselItem>
         );
@@ -143,7 +158,7 @@ export function HeroMain({ activeLeads, cfg }: any) {
             </CarouselContent>
             
             {/* Arrows Overlaid on Image */}
-            {leads.length > 1 && (
+            {count > 1 && (
               <div className="pointer-events-none absolute inset-x-0 top-0 flex aspect-[16/10] items-center justify-between opacity-0 transition-opacity duration-300 group-hover/carousel:opacity-100">
                 <CarouselPrevious className="pointer-events-auto static h-8 w-6 translate-x-0 translate-y-0 rounded-r-md rounded-l-none border-none bg-black/50 text-white hover:bg-black/70" />
                 <CarouselNext className="pointer-events-auto static h-8 w-6 translate-x-0 translate-y-0 rounded-l-md rounded-r-none border-none bg-black/50 text-white hover:bg-black/70" />
