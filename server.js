@@ -66,6 +66,49 @@ const server = createServer(async (req, res) => {
 
       if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
         const ext = path.extname(filePath).toLowerCase();
+        
+        // HOTLINK PROTECTION START
+        const imageExts = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'];
+        if (imageExts.includes(ext)) {
+          const referer = req.headers.referer || '';
+          const host = req.headers.host || '';
+          
+          if (referer) {
+            try {
+              const refUrl = new URL(referer);
+              const refHost = refUrl.hostname.toLowerCase();
+              const myHost = host.split(':')[0].toLowerCase(); // remove port
+              
+              // Allowlist of allowed referers (social media & search engines)
+              const allowedDomains = [
+                myHost,
+                'localhost',
+                'facebook.com',
+                'twitter.com',
+                't.co',
+                'linkedin.com',
+                'pinterest.com',
+                'google.', // google.com, google.co.in, etc.
+                'bing.com',
+                'yahoo.com'
+              ];
+              
+              const isAllowed = allowedDomains.some(domain => refHost.includes(domain));
+              
+              if (!isAllowed) {
+                // Block the hotlink request
+                res.statusCode = 403;
+                res.setHeader('Content-Type', 'text/plain');
+                res.end('403 Forbidden: Hotlinking is disabled on this server.');
+                return;
+              }
+            } catch (e) {
+              // Invalid referer URL, let it pass or block it (passing is safer)
+            }
+          }
+        }
+        // HOTLINK PROTECTION END
+
         if (MIME_TYPES[ext]) {
           res.setHeader('Content-Type', MIME_TYPES[ext]);
         }

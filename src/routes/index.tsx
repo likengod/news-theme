@@ -69,10 +69,6 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: SITE_URL },
-      // Preload Bangla fonts in parallel with CSS — eliminates ~8s critical path latency
-      { rel: "preload", href: "/fonts/solaimanlipi-bold.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
-      { rel: "preload", href: "/fonts/solaimanlipi-normal.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
-      { rel: "preload", href: "/fonts/kalpurush.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
     ],
   }),
   component: Home,

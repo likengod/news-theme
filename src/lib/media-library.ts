@@ -1,6 +1,4 @@
-// Lightweight media library backed by localStorage.
-// Tracks every image/video the admin uploads across Articles, Pages,
-// Site Settings (logo / OG / favicon) and Advertisements.
+// Lightweight media library backed by IndexedDB and Memory Cache.
 
 export type MediaUsage =
   | "article"
@@ -16,46 +14,61 @@ export interface MediaItem {
   name: string;
   type: string; // mime
   size: number; // bytes
-  dataUrl: string; // base64 data URL (works offline, no storage backend needed)
+  dataUrl: string; // base64 data URL
   usage: MediaUsage;
   altText?: string;
   description?: string;
   createdAt: number;
 }
 
-const KEY = "nt_media_library_v1";
+let memoryCache: MediaItem[] = [];
+let dbPromise: Promise<IDBDatabase> | null = null;
 
-function read(): MediaItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
-  } catch {
-    return [];
-  }
+function getDB(): Promise<IDBDatabase | null> {
+  if (typeof window === "undefined") return Promise.resolve(null);
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
+    const request = indexedDB.open("NT_MediaDB", 1);
+    request.onupgradeneeded = (e) => {
+      const db = (e.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains("store")) {
+        db.createObjectStore("store", { keyPath: "id" });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+  return dbPromise;
+}
+
+// Load from DB on init
+if (typeof window !== "undefined") {
+  getDB().then((db) => {
+    if (!db) return;
+    const tx = db.transaction("store", "readonly");
+    const req = tx.objectStore("store").get("media-list");
+    req.onsuccess = () => {
+      if (req.result?.data) {
+        memoryCache = req.result.data;
+        window.dispatchEvent(new Event("media-library-change"));
+      }
+    };
+  });
 }
 
 function write(items: MediaItem[]) {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(items));
-    window.dispatchEvent(new Event("media-library-change"));
-  } catch (e) {
-    console.warn("Media library quota exceeded, pruning older items...", e);
-    try {
-      // Keep only 4 newest items to free up space
-      const pruned = items.slice(0, 4);
-      localStorage.setItem(KEY, JSON.stringify(pruned));
-      window.dispatchEvent(new Event("media-library-change"));
-    } catch {
-      try {
-        localStorage.removeItem(KEY);
-      } catch {}
-    }
-  }
+  memoryCache = items;
+  window.dispatchEvent(new Event("media-library-change"));
+  getDB().then((db) => {
+    if (!db) return;
+    const tx = db.transaction("store", "readwrite");
+    tx.objectStore("store").put({ id: "media-list", data: items });
+  });
 }
 
 export const mediaLibrary = {
   list(): MediaItem[] {
-    return read().sort((a, b) => b.createdAt - a.createdAt);
+    return memoryCache.sort((a, b) => b.createdAt - a.createdAt);
   },
   add(item: Omit<MediaItem, "id" | "createdAt">): MediaItem {
     const full: MediaItem = {
@@ -63,14 +76,17 @@ export const mediaLibrary = {
       id: `m_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       createdAt: Date.now(),
     };
-    write([full, ...read()]);
+    write([full, ...memoryCache]);
     return full;
   },
+  get(id: string): MediaItem | undefined {
+    return memoryCache.find(m => m.id === id);
+  },
   update(id: string, patch: Partial<Pick<MediaItem, "name" | "usage" | "altText" | "description">>) {
-    write(read().map((m) => (m.id === id ? { ...m, ...patch } : m)));
+    write(memoryCache.map((m) => (m.id === id ? { ...m, ...patch } : m)));
   },
   remove(id: string) {
-    write(read().filter((m) => m.id !== id));
+    write(memoryCache.filter((m) => m.id !== id));
   },
   clear() {
     write([]);
@@ -78,32 +94,42 @@ export const mediaLibrary = {
 };
 
 /**
- * Reads a File and produces an optimized data URL.
- * Automatically compresses large raster images using HTML5 canvas to keep
- * file sizes under ~200 KB and prevent browser QuotaExceededError.
+ * Injects a hidden watermark directly into the binary file data (Metadata Injection).
+ * This works with WebP and keeps file sizes tiny.
  */
+function injectMetadata(dataUrl: string, text: string): string {
+  // Extract base64 part
+  const base64 = dataUrl.split(",")[1];
+  const mime = dataUrl.split(",")[0];
+  
+  // Convert base64 to binary string
+  const binaryString = atob(base64);
+  
+  // Create a payload that we will append to the end of the file.
+  const payload = "\n---WATERMARK_START---\n" + text + "\n---WATERMARK_END---\n";
+  
+  // Safely encode UTF-8 characters (like Bengali) so btoa doesn't crash
+  const utf8Payload = unescape(encodeURIComponent(payload));
+  
+  // Append our invisible metadata payload to the end of the image binary
+  const newBinaryString = binaryString + utf8Payload;
+  
+  // Convert back to base64
+  return mime + "," + btoa(newBinaryString);
+}
+
 export function fileToDataUrl(
   file: File,
+  watermarkData?: string,
   maxDimension = 1920,
   quality = 0.82
 ): Promise<string> {
-  // If not in browser or not a raster image (e.g. SVG, PDF, video), read as-is
   if (
     typeof window === "undefined" ||
     typeof document === "undefined" ||
     !file.type.startsWith("image/") ||
     file.type === "image/svg+xml"
   ) {
-    return new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(String(r.result));
-      r.onerror = () => reject(r.error);
-      r.readAsDataURL(file);
-    });
-  }
-
-  // If already small (< 75 KB), return directly without re-compression
-  if (file.size < 75 * 1024) {
     return new Promise((resolve, reject) => {
       const r = new FileReader();
       r.onload = () => resolve(String(r.result));
@@ -142,24 +168,36 @@ export function fileToDataUrl(
         ctx.imageSmoothingQuality = "high";
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Try WebP first, fallback to JPEG
+        let finalDataUrl = rawDataUrl;
+
+        // Compress as WebP to save space
         try {
           const webp = canvas.toDataURL("image/webp", quality);
           if (webp.startsWith("data:image/webp") && webp.length < rawDataUrl.length) {
-            resolve(webp);
-            return;
+            finalDataUrl = webp;
           }
         } catch {}
 
-        try {
-          const jpeg = canvas.toDataURL("image/jpeg", quality);
-          if (jpeg.length < rawDataUrl.length) {
-            resolve(jpeg);
-            return;
+        // Fallback to JPEG if WebP fails or is larger
+        if (finalDataUrl === rawDataUrl) {
+          try {
+            const jpeg = canvas.toDataURL("image/jpeg", quality);
+            if (jpeg.length < rawDataUrl.length) {
+              finalDataUrl = jpeg;
+            }
+          } catch {}
+        }
+        
+        // Inject the invisible metadata watermark at the end of the binary file
+        if (watermarkData) {
+          try {
+            finalDataUrl = injectMetadata(finalDataUrl, watermarkData);
+          } catch (err) {
+            console.error("Watermark injection failed", err);
           }
-        } catch {}
+        }
 
-        resolve(rawDataUrl);
+        resolve(finalDataUrl);
       };
       img.onerror = () => resolve(rawDataUrl);
       img.src = rawDataUrl;
@@ -172,14 +210,18 @@ export function fileToDataUrl(
 export async function trackUpload(
   file: File,
   usage: MediaUsage = "other",
+  customName?: string,
+  customDescription?: string,
+  watermarkData?: string
 ): Promise<MediaItem> {
-  const dataUrl = await fileToDataUrl(file);
+  const dataUrl = await fileToDataUrl(file, watermarkData);
   return mediaLibrary.add({
-    name: file.name,
-    type: file.type || "application/octet-stream",
-    size: Math.round(dataUrl.length * 0.75), // approximate decoded size
+    name: customName || file.name,
+    type: watermarkData ? "image/png" : (file.type || "application/octet-stream"),
+    size: Math.round(dataUrl.length * 0.75), 
     dataUrl,
     usage,
+    description: customDescription,
   });
 }
 
