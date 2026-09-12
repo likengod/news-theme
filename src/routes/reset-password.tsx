@@ -81,11 +81,25 @@ function ResetPasswordPage() {
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="password">New password</Label>
-              <Input id="password" name="password" type="password" autoComplete="new-password" minLength={6} required />
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                minLength={6}
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm">Confirm password</Label>
-              <Input id="confirm" name="confirm" type="password" autoComplete="new-password" minLength={6} required />
+              <Input
+                id="confirm"
+                name="confirm"
+                type="password"
+                autoComplete="new-password"
+                minLength={6}
+                required
+              />
             </div>
             <Button type="submit" className="w-full" disabled={loading || !ready}>
               {loading ? "Updating…" : "Update password"}
@@ -93,7 +107,9 @@ function ResetPasswordPage() {
           </form>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            <Link to="/auth" className="hover:underline">← Back to sign in</Link>
+            <Link to="/auth" className="hover:underline">
+              ← Back to sign in
+            </Link>
           </p>
         </div>
       </div>

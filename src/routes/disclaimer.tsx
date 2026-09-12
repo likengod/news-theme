@@ -6,7 +6,11 @@ export const Route = createFileRoute("/disclaimer")({
   head: () => ({
     meta: [
       { title: "Disclaimer — News Theme" },
-      { name: "description", content: "Editorial, financial and general disclaimers for content published by News Theme." },
+      {
+        name: "description",
+        content:
+          "Editorial, financial and general disclaimers for content published by News Theme.",
+      },
       { property: "og:url", content: "https://gorillatechsolution.com/disclaimer" },
     ],
     links: [{ rel: "canonical", href: "https://gorillatechsolution.com/disclaimer" }],
@@ -20,7 +24,7 @@ export const Route = createFileRoute("/disclaimer")({
 
 function DisclaimerPage() {
   const page = Route.useLoaderData();
-  
+
   return (
     <PolicyLayout
       title={page?.title || ""}
@@ -31,7 +35,12 @@ function DisclaimerPage() {
               heading: s.heading,
               body: <div dangerouslySetInnerHTML={{ __html: s.body }} />,
             }))
-          : [{ heading: page?.title || "", body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} /> }]
+          : [
+              {
+                heading: page?.title || "",
+                body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} />,
+              },
+            ]
       }
     />
   );

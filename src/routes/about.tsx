@@ -6,7 +6,11 @@ export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
       { title: "About — News Theme" },
-      { name: "description", content: "Independent newsroom covering breaking news, finance, business and markets across Northeast India and beyond." },
+      {
+        name: "description",
+        content:
+          "Independent newsroom covering breaking news, finance, business and markets across Northeast India and beyond.",
+      },
       { property: "og:url", content: "https://gorillatechsolution.com/about" },
     ],
     links: [{ rel: "canonical", href: "https://gorillatechsolution.com/about" }],
@@ -20,7 +24,7 @@ export const Route = createFileRoute("/about")({
 
 function AboutPage() {
   const page = Route.useLoaderData();
-  
+
   return (
     <PolicyLayout
       title={page?.title || ""}
@@ -31,7 +35,12 @@ function AboutPage() {
               heading: s.heading,
               body: <div dangerouslySetInnerHTML={{ __html: s.body }} />,
             }))
-          : [{ heading: page?.title || "", body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} /> }]
+          : [
+              {
+                heading: page?.title || "",
+                body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} />,
+              },
+            ]
       }
     />
   );

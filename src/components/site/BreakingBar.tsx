@@ -13,9 +13,10 @@ export function BreakingBar({ articles: propArticles }: { articles?: any[] }) {
 
   const articles = hasPropArticles ? propArticles : fetchedArticles;
 
-  const headlines = articles.length > 0
-    ? articles.slice(0, 10).map((a: any) => `${a.category ? `${a.category}: ` : ""}${a.title}`)
-    : ["Welcome to News Theme — Stay tuned for breaking news updates."];
+  const headlines =
+    articles.length > 0
+      ? articles.slice(0, 10).map((a: any) => `${a.category ? `${a.category}: ` : ""}${a.title}`)
+      : ["Welcome to News Theme — Stay tuned for breaking news updates."];
 
   const [i, setI] = useState(0);
 
@@ -35,10 +36,7 @@ export function BreakingBar({ articles: propArticles }: { articles?: any[] }) {
           Live
         </span>
         <div className="relative flex-1 overflow-hidden h-5">
-          <span
-            key={i}
-            className="absolute inset-0 truncate headline-slide"
-          >
+          <span key={i} className="absolute inset-0 truncate headline-slide">
             {headlines[i]}
           </span>
         </div>

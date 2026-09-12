@@ -3,11 +3,11 @@ import { loadSettings } from "@/lib/site-content";
 
 const FESTIVE_GRADIENT_MAP: Record<string, string> = {
   "indian-flag": "linear-gradient(to right, #FF9933, #000080, #138808)",
-  "diwali": "linear-gradient(to right, #FF8008, #FFC837, #FF007F, #7F00FF)",
-  "sunset": "linear-gradient(to right, #F5576C, #F093FB)",
-  "neon": "linear-gradient(to right, #FF007F, #7F00FF, #00F0FF)",
-  "ocean": "linear-gradient(to right, #00c6ff, #0072ff)",
-  "forest": "linear-gradient(to right, #11998e, #38ef7d)",
+  diwali: "linear-gradient(to right, #FF8008, #FFC837, #FF007F, #7F00FF)",
+  sunset: "linear-gradient(to right, #F5576C, #F093FB)",
+  neon: "linear-gradient(to right, #FF007F, #7F00FF, #00F0FF)",
+  ocean: "linear-gradient(to right, #00c6ff, #0072ff)",
+  forest: "linear-gradient(to right, #11998e, #38ef7d)",
 };
 
 type Props = {
@@ -40,26 +40,35 @@ export function ArticleQrCard({ url }: Props) {
     return `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(url)}`;
   }, [url]);
 
-  const activeGradient = settings.festiveScanMeTextGradient || settings.topBarTextGradient || settings.festiveCategoryTitleGradient;
-  const activeColor = settings.festiveScanMeTextColor || settings.festiveCategoryTitleColor || settings.topBarTextColor || "#000000";
+  const activeGradient =
+    settings.festiveScanMeTextGradient ||
+    settings.topBarTextGradient ||
+    settings.festiveCategoryTitleGradient;
+  const activeColor =
+    settings.festiveScanMeTextColor ||
+    settings.festiveCategoryTitleColor ||
+    settings.topBarTextColor ||
+    "#000000";
 
-  const scanMeStyle = activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
-    ? {
-        backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-        display: "inline-block",
-      }
-    : { color: activeColor };
+  const scanMeStyle =
+    activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
+      ? {
+          backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+          display: "inline-block",
+        }
+      : { color: activeColor };
 
   const subtextStyle = settings.festiveScanMeSubtextColor
     ? { color: settings.festiveScanMeSubtextColor }
     : undefined;
 
-  const textToDisplay = settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText
-    ? settings.topBarWeatherCustomText
-    : (settings.festiveScanMeCustomText || "SCAN ME");
+  const textToDisplay =
+    settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText
+      ? settings.topBarWeatherCustomText
+      : settings.festiveScanMeCustomText || "SCAN ME";
 
   return (
     <div className="inline-flex items-center gap-2.5">

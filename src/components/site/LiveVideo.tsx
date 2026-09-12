@@ -27,7 +27,7 @@ export function LiveVideo() {
       const cmd = muted ? "unMute" : "mute";
       iframeRef.current.contentWindow.postMessage(
         JSON.stringify({ event: "command", func: cmd, args: [] }),
-        "*"
+        "*",
       );
     }
     setMuted((m) => !m);

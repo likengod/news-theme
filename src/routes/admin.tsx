@@ -43,7 +43,7 @@ export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getSession();
     if (!data.session?.user) throw redirect({ to: "/auth" });
-    
+
     let isCached = false;
     if (typeof window !== "undefined") {
       const cachedTime = sessionStorage.getItem("admin_auth_check_time");
@@ -54,7 +54,7 @@ export const Route = createFileRoute("/admin")({
         }
       }
     }
-    
+
     if (isCached) {
       return { user: data.session.user };
     }
@@ -80,7 +80,7 @@ export const Route = createFileRoute("/admin")({
         }
         throw redirect({ to: "/" });
       }
-      
+
       if (typeof window !== "undefined") {
         sessionStorage.setItem("admin_auth_result", "allowed");
         sessionStorage.setItem("admin_auth_check_time", Date.now().toString());
@@ -90,7 +90,7 @@ export const Route = createFileRoute("/admin")({
       await supabase.auth.signOut();
       throw redirect({ to: "/auth" });
     }
-    
+
     return { user: data.session.user };
   },
   component: AdminLayout,
@@ -116,16 +116,17 @@ const nav = [
   { to: "/admin/updates", label: "Website Update", icon: Rocket },
 ];
 
-
 function AdminLayout() {
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
   const [open, setOpen] = useState(false);
-  
+
   const s = useSiteSettings();
-  const isPremium = ["Enterprise", "Enterprise+", "Premium"].includes(s.licenseType || "") || s.licenseRole === "VIP";
+  const isPremium =
+    ["Enterprise", "Enterprise+", "Premium"].includes(s.licenseType || "") ||
+    s.licenseRole === "VIP";
 
   // Force light theme inside admin only
   useEffect(() => {
@@ -154,12 +155,19 @@ function AdminLayout() {
   const initials = email.slice(0, 2).toUpperCase();
 
   const firstName = (() => {
-    const rawName = (user as any)?.user_metadata?.full_name || (user as any)?.user_metadata?.name || (user as any)?.name || (user as any)?.display_name;
+    const rawName =
+      (user as any)?.user_metadata?.full_name ||
+      (user as any)?.user_metadata?.name ||
+      (user as any)?.name ||
+      (user as any)?.display_name;
     if (rawName && typeof rawName === "string" && rawName.trim()) {
       return rawName.trim().split(" ")[0];
     }
     if (email && email.includes("@")) {
-      const local = email.split("@")[0].replace(/[._0-9-]/g, " ").trim();
+      const local = email
+        .split("@")[0]
+        .replace(/[._0-9-]/g, " ")
+        .trim();
       const first = local.split(" ")[0];
       if (first) {
         return first.charAt(0).toUpperCase() + first.slice(1);
@@ -189,15 +197,20 @@ function AdminLayout() {
         if (!mounted) return;
         const cur = res?.version || "v1.0.55";
         const latest = res?.latestVersion || cur;
-        const isSimulated = typeof window !== "undefined" && (
-          new URLSearchParams(window.location.search).get("test_update") === "1" ||
-          localStorage.getItem("force_update_lock") === "1"
-        );
-        const hasUpdate = isSimulated || Boolean(res?.hasNewVersion || (res?.behind && res.behind > 0));
+        const isSimulated =
+          typeof window !== "undefined" &&
+          (new URLSearchParams(window.location.search).get("test_update") === "1" ||
+            localStorage.getItem("force_update_lock") === "1");
+        const hasUpdate =
+          isSimulated || Boolean(res?.hasNewVersion || (res?.behind && res.behind > 0));
         setUpdateStatus({
           hasUpdate,
           currentVersion: cur,
-          latestVersion: isSimulated ? (res?.latestVersion && res.latestVersion !== cur ? res.latestVersion : "v2.0.0") : latest,
+          latestVersion: isSimulated
+            ? res?.latestVersion && res.latestVersion !== cur
+              ? res.latestVersion
+              : "v2.0.0"
+            : latest,
           checked: true,
         });
       })
@@ -225,19 +238,19 @@ function AdminLayout() {
               </div>
               <div className="leading-tight">
                 <div className="text-sm font-bold">
-                  <span style={{ color: s.logoColorPrimary || "#000000" }}>{s.logoTextPrimary || "News"}</span>{" "}
-                  <span style={{ color: s.logoColorSecondary || "#dc2626" }}>{s.logoTextSecondary || "Theme"}</span>
+                  <span style={{ color: s.logoColorPrimary || "#000000" }}>
+                    {s.logoTextPrimary || "News"}
+                  </span>{" "}
+                  <span style={{ color: s.logoColorSecondary || "#dc2626" }}>
+                    {s.logoTextSecondary || "Theme"}
+                  </span>
                 </div>
                 <div className="text-[10px] uppercase tracking-widest text-slate-600">
                   Admin Panel
                 </div>
               </div>
             </Link>
-            <button
-              className="lg:hidden"
-              onClick={() => setOpen(false)}
-              aria-label="Close menu"
-            >
+            <button className="lg:hidden" onClick={() => setOpen(false)} aria-label="Close menu">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -260,11 +273,9 @@ function AdminLayout() {
               const isLocked = item.to === "/admin/rewards" && !isPremium;
               const toDest = isLocked ? "/admin/settings" : item.to;
               const searchProps = isLocked ? { tab: "activate" } : undefined;
-              
-              const active = item.exact
-                ? pathname === item.to
-                : pathname.startsWith(item.to);
-              
+
+              const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
+
               return (
                 <li key={item.to}>
                   <Link
@@ -275,14 +286,16 @@ function AdminLayout() {
                       active
                         ? "bg-slate-900 text-white"
                         : item.to === "/admin/updates" && updateStatus.hasUpdate
-                        ? "bg-red-50 text-red-700 hover:bg-red-100 font-semibold border border-red-200"
-                        : isLocked 
-                        ? "text-slate-400 hover:bg-slate-50"
-                        : "text-slate-700 hover:bg-slate-100"
+                          ? "bg-red-50 text-red-700 hover:bg-red-100 font-semibold border border-red-200"
+                          : isLocked
+                            ? "text-slate-400 hover:bg-slate-50"
+                            : "text-slate-700 hover:bg-slate-100"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className={`h-4 w-4 ${item.to === "/admin/updates" && updateStatus.hasUpdate ? "text-red-600 animate-pulse" : ""}`} />
+                      <Icon
+                        className={`h-4 w-4 ${item.to === "/admin/updates" && updateStatus.hasUpdate ? "text-red-600 animate-pulse" : ""}`}
+                      />
                       {item.label}
                     </div>
                     {item.to === "/admin/updates" && updateStatus.hasUpdate && (
@@ -315,10 +328,7 @@ function AdminLayout() {
       </aside>
 
       {open && (
-        <div
-          className="fixed inset-0 z-30 bg-black/30 lg:hidden"
-          onClick={() => setOpen(false)}
-        />
+        <div className="fixed inset-0 z-30 bg-black/30 lg:hidden" onClick={() => setOpen(false)} />
       )}
 
       {/* Main */}
@@ -326,11 +336,7 @@ function AdminLayout() {
         {/* Top bar */}
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <button
-              className="lg:hidden"
-              onClick={() => setOpen(true)}
-              aria-label="Open menu"
-            >
+            <button className="lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
               <Menu className="h-5 w-5" />
             </button>
             <div className="relative hidden sm:block">
@@ -383,7 +389,8 @@ function AdminLayout() {
                 </h1>
 
                 <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed">
-                  Without update you can't use the website. A new version is available, please update website.
+                  Without update you can't use the website. A new version is available, please
+                  update website.
                 </p>
 
                 <div className="mt-6 flex items-center justify-center gap-3 text-sm font-semibold text-slate-500">

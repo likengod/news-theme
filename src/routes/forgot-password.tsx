@@ -74,7 +74,9 @@ function ForgotPasswordPage() {
           )}
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            <Link to="/auth" className="hover:underline">← Back to sign in</Link>
+            <Link to="/auth" className="hover:underline">
+              ← Back to sign in
+            </Link>
           </p>
         </div>
       </div>

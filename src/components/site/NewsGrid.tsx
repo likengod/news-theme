@@ -76,7 +76,13 @@ const baseColumns: Column[] = [
   },
 ];
 
-export const NewsGrid = React.memo(function NewsGrid({ articles = [], usedIds }: { articles?: any[]; usedIds?: Set<number> }) {
+export const NewsGrid = React.memo(function NewsGrid({
+  articles = [],
+  usedIds,
+}: {
+  articles?: any[];
+  usedIds?: Set<number>;
+}) {
   const cfg = useHomepageConfig();
   const hasDbArticles = articles.length > 0;
 
@@ -97,19 +103,19 @@ export const NewsGrid = React.memo(function NewsGrid({ articles = [], usedIds }:
     return baseColumns.map((c, i) => {
       const colCfg = cfg.newsGridColumns[i];
       const cat = colCfg?.category;
-      
+
       if (hasDbArticles && cat) {
         const normalizedCat = (cat === "Auto (Latest)" ? "northeast" : cat).toLowerCase().trim();
         const allCatArticles = articlesByCategoryName.get(normalizedCat) || [];
 
         // 1. Unused category articles
-        let matches = allCatArticles.filter(a => !localUsed.has(a.id));
+        let matches = allCatArticles.filter((a) => !localUsed.has(a.id));
 
         // 2. If fewer than 7, include previously used category articles
         if (matches.length < 7) {
-          const usedCatArticles = allCatArticles.filter(a => localUsed.has(a.id));
+          const usedCatArticles = allCatArticles.filter((a) => localUsed.has(a.id));
           for (const u of usedCatArticles) {
-            if (!matches.some(m => m.id === u.id)) {
+            if (!matches.some((m) => m.id === u.id)) {
               matches.push(u);
             }
             if (matches.length >= 7) break;
@@ -118,16 +124,18 @@ export const NewsGrid = React.memo(function NewsGrid({ articles = [], usedIds }:
 
         // 3. If still fewer than 7, fallback to any UNUSED general homepage articles
         if (matches.length < 7) {
-          const fallbacks = articles.filter(a => !matches.some(m => m.id === a.id) && !localUsed.has(a.id));
+          const fallbacks = articles.filter(
+            (a) => !matches.some((m) => m.id === a.id) && !localUsed.has(a.id),
+          );
           for (const f of fallbacks) {
             matches.push(f);
             if (matches.length >= 7) break;
           }
         }
 
-                // 4. If absolutely necessary, fall back to anything, but shuffle/offset it so columns don't look identical
+        // 4. If absolutely necessary, fall back to anything, but shuffle/offset it so columns don't look identical
         if (matches.length < 7) {
-          const fallbacks = articles.filter(a => !matches.some(m => m.id === a.id));
+          const fallbacks = articles.filter((a) => !matches.some((m) => m.id === a.id));
           // Use the column index as an offset to stagger the fallback articles
           const offset = fallbacks.length > 0 ? (i * 3) % fallbacks.length : 0;
           const staggered = [...fallbacks.slice(offset), ...fallbacks.slice(0, offset)];
@@ -172,7 +180,11 @@ export const NewsGrid = React.memo(function NewsGrid({ articles = [], usedIds }:
               >
                 {colCfg.title}
               </h3>
-              <Link to="/news/$slug" params={{ slug: col.slug || "sample" }} className="group block">
+              <Link
+                to="/news/$slug"
+                params={{ slug: col.slug || "sample" }}
+                className="group block"
+              >
                 <div className="relative overflow-hidden">
                   <img
                     src={col.img}
@@ -197,9 +209,10 @@ export const NewsGrid = React.memo(function NewsGrid({ articles = [], usedIds }:
               </Link>
               <ul className="mt-3 space-y-3 border-t border-border pt-3">
                 {col.items.map((item, idx) => (
-                  <li key={`${item.slug || 'item'}-${idx}`}>
+                  <li key={`${item.slug || "item"}-${idx}`}>
                     <Link
-                      to="/news/$slug" params={{ slug: item.slug || "sample" }}
+                      to="/news/$slug"
+                      params={{ slug: item.slug || "sample" }}
                       className="block line-clamp-2 overflow-hidden font-serif text-[15px] font-semibold leading-snug text-primary hover:underline"
                     >
                       {item.title}
@@ -214,6 +227,3 @@ export const NewsGrid = React.memo(function NewsGrid({ articles = [], usedIds }:
     </section>
   );
 });
-
-
-

@@ -1,1 +1,116 @@
-import{n as e,t}from"./createServerFn-Ciss0-sp.js";import{t as n}from"./auth-middleware-JDjVgB0Q.js";var r=`nt:viewer-role`,i=`ne_roles_v1`,a=[`violet`,`blue`,`emerald`,`amber`,`slate`,`rose`,`sky`],o=e=>{let t={violet:`bg-violet-50 text-violet-700 border-violet-200`,blue:`bg-blue-50 text-blue-700 border-blue-200`,emerald:`bg-emerald-50 text-emerald-700 border-emerald-200`,amber:`bg-amber-50 text-amber-800 border-amber-200`,slate:`bg-slate-100 text-slate-700 border-slate-200`,rose:`bg-rose-50 text-rose-700 border-rose-200`,sky:`bg-sky-50 text-sky-700 border-sky-200`};return t[e]??t.slate},s=[{id:`admin`,name:`Admin`,description:`Full access to every admin tool and setting.`,color:`violet`,builtin:!0,seesPopupAds:!1},{id:`editor`,name:`Editor`,description:`Can publish and edit any article.`,color:`blue`,builtin:!0,seesPopupAds:!1},{id:`author`,name:`Author`,description:`Can write and submit own articles.`,color:`emerald`,builtin:!0,seesPopupAds:!1},{id:`journalist`,name:`Journalist`,description:`Verified journalist who reports and submits news.`,color:`sky`,builtin:!0,seesPopupAds:!1},{id:`premium`,name:`Premium user`,description:`Paid reader with access to premium articles and ad-free reading.`,color:`amber`,builtin:!0,seesPopupAds:!1},{id:`reader`,name:`Reader`,description:`Default signed-in visitor.`,color:`slate`,builtin:!0,seesPopupAds:!0}];function c(e){let t=new Map(e.map(e=>[e.id,e]));for(let e of s){let n=t.get(e.id);n?t.set(e.id,{...n,builtin:!0}):t.set(e.id,e)}return Array.from(t.values())}var l=t({method:`GET`}).handler(e(`44c2b244a154cd9bc6306696fd578a3756f03ae68ae423ffb59681668e80655c`)),u=t({method:`POST`}).middleware([n]).handler(e(`5c8cf393ab6d7dc22b596958c14fc70206128b2d1b8f92272c11ce262e738bcb`)),d=t({method:`POST`}).middleware([n]).handler(e(`afb7555d6a34adc5b0e662eb11f4a7f6971738589c83e37b63b29ef9bf924cb1`));function f(){if(typeof window>`u`)return s;try{let e=localStorage.getItem(i);if(!e)return s;let t=JSON.parse(e);return Array.isArray(t)&&t.length?c(t):s}catch{return s}}function p(e){typeof window<`u`&&localStorage.setItem(i,JSON.stringify(e)),u({data:e}).catch(()=>{})}var m=e=>e.toLowerCase().trim().replace(/[^a-z0-9]+/g,`-`).replace(/^-+|-+$/g,``);function h(){return typeof window>`u`?`reader`:localStorage.getItem(r)||`reader`}function g(e){typeof window>`u`||localStorage.setItem(r,e)}function _(){let e=h();return f().find(t=>t.id===e)?.seesPopupAds??!0}export{f as a,u as c,d,l as i,g as l,_ as n,o,h as r,p as s,a as t,m as u};
+import { n as e, t } from "./createServerFn-Ciss0-sp.js";
+import { t as n } from "./auth-middleware-JDjVgB0Q.js";
+var r = `nt:viewer-role`,
+  i = `ne_roles_v1`,
+  a = [`violet`, `blue`, `emerald`, `amber`, `slate`, `rose`, `sky`],
+  o = (e) => {
+    let t = {
+      violet: `bg-violet-50 text-violet-700 border-violet-200`,
+      blue: `bg-blue-50 text-blue-700 border-blue-200`,
+      emerald: `bg-emerald-50 text-emerald-700 border-emerald-200`,
+      amber: `bg-amber-50 text-amber-800 border-amber-200`,
+      slate: `bg-slate-100 text-slate-700 border-slate-200`,
+      rose: `bg-rose-50 text-rose-700 border-rose-200`,
+      sky: `bg-sky-50 text-sky-700 border-sky-200`,
+    };
+    return t[e] ?? t.slate;
+  },
+  s = [
+    {
+      id: `admin`,
+      name: `Admin`,
+      description: `Full access to every admin tool and setting.`,
+      color: `violet`,
+      builtin: !0,
+      seesPopupAds: !1,
+    },
+    {
+      id: `editor`,
+      name: `Editor`,
+      description: `Can publish and edit any article.`,
+      color: `blue`,
+      builtin: !0,
+      seesPopupAds: !1,
+    },
+    {
+      id: `author`,
+      name: `Author`,
+      description: `Can write and submit own articles.`,
+      color: `emerald`,
+      builtin: !0,
+      seesPopupAds: !1,
+    },
+    {
+      id: `journalist`,
+      name: `Journalist`,
+      description: `Verified journalist who reports and submits news.`,
+      color: `sky`,
+      builtin: !0,
+      seesPopupAds: !1,
+    },
+    {
+      id: `premium`,
+      name: `Premium user`,
+      description: `Paid reader with access to premium articles and ad-free reading.`,
+      color: `amber`,
+      builtin: !0,
+      seesPopupAds: !1,
+    },
+    {
+      id: `reader`,
+      name: `Reader`,
+      description: `Default signed-in visitor.`,
+      color: `slate`,
+      builtin: !0,
+      seesPopupAds: !0,
+    },
+  ];
+function c(e) {
+  let t = new Map(e.map((e) => [e.id, e]));
+  for (let e of s) {
+    let n = t.get(e.id);
+    n ? t.set(e.id, { ...n, builtin: !0 }) : t.set(e.id, e);
+  }
+  return Array.from(t.values());
+}
+var l = t({ method: `GET` }).handler(
+    e(`44c2b244a154cd9bc6306696fd578a3756f03ae68ae423ffb59681668e80655c`),
+  ),
+  u = t({ method: `POST` })
+    .middleware([n])
+    .handler(e(`5c8cf393ab6d7dc22b596958c14fc70206128b2d1b8f92272c11ce262e738bcb`)),
+  d = t({ method: `POST` })
+    .middleware([n])
+    .handler(e(`afb7555d6a34adc5b0e662eb11f4a7f6971738589c83e37b63b29ef9bf924cb1`));
+function f() {
+  if (typeof window > `u`) return s;
+  try {
+    let e = localStorage.getItem(i);
+    if (!e) return s;
+    let t = JSON.parse(e);
+    return Array.isArray(t) && t.length ? c(t) : s;
+  } catch {
+    return s;
+  }
+}
+function p(e) {
+  (typeof window < `u` && localStorage.setItem(i, JSON.stringify(e)),
+    u({ data: e }).catch(() => {}));
+}
+var m = (e) =>
+  e
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, `-`)
+    .replace(/^-+|-+$/g, ``);
+function h() {
+  return typeof window > `u` ? `reader` : localStorage.getItem(r) || `reader`;
+}
+function g(e) {
+  typeof window > `u` || localStorage.setItem(r, e);
+}
+function _() {
+  let e = h();
+  return f().find((t) => t.id === e)?.seesPopupAds ?? !0;
+}
+export { f as a, u as c, d, l as i, g as l, _ as n, o, h as r, p as s, a as t, m as u };

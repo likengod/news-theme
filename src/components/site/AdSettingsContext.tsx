@@ -1,6 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { type SiteSettings, type AdConfiguration, loadSettings, defaultSettings } from "@/lib/site-content";
-import { type HomepageConfig, defaultHomepageConfig, loadHomepageConfig } from "@/lib/homepage-config";
+import {
+  type SiteSettings,
+  type AdConfiguration,
+  loadSettings,
+  defaultSettings,
+} from "@/lib/site-content";
+import {
+  type HomepageConfig,
+  defaultHomepageConfig,
+  loadHomepageConfig,
+} from "@/lib/homepage-config";
 import { type FontConfiguration, defaultFontConfig, loadFontConfig } from "@/lib/font-config";
 
 type AdSettingsContextType = {
@@ -20,11 +29,7 @@ export function AdSettingsProvider({
   children: React.ReactNode;
   value: AdSettingsContextType;
 }) {
-  return (
-    <AdSettingsContext.Provider value={value}>
-      {children}
-    </AdSettingsContext.Provider>
-  );
+  return <AdSettingsContext.Provider value={value}>{children}</AdSettingsContext.Provider>;
 }
 
 export function useAdSettings() {

@@ -113,7 +113,9 @@ function SubmitPage() {
       return;
     }
     if (words < MIN_WORDS) {
-      toast.error(`Your news is too short. Add at least ${MIN_WORDS - words} more word${MIN_WORDS - words === 1 ? "" : "s"}.`);
+      toast.error(
+        `Your news is too short. Add at least ${MIN_WORDS - words} more word${MIN_WORDS - words === 1 ? "" : "s"}.`,
+      );
       return;
     }
     if (!image) {
@@ -155,12 +157,16 @@ function SubmitPage() {
           <CheckCircle2 className="mx-auto h-14 w-14" strokeWidth={1.5} />
           <h1 className="mt-6 text-3xl font-black tracking-tight">Submission received</h1>
           <p className="mt-3 text-muted-foreground">
-            Thanks {hideIdentity ? "anonymous contributor" : fullName.split(" ")[0]} — our editors will
-            cross-verify your report and get back on <span className="font-semibold">{phone}</span> within 48
-            hours. Your identity will {hideIdentity ? "not" : ""} be shown on the published story.
+            Thanks {hideIdentity ? "anonymous contributor" : fullName.split(" ")[0]} — our editors
+            will cross-verify your report and get back on{" "}
+            <span className="font-semibold">{phone}</span> within 48 hours. Your identity will{" "}
+            {hideIdentity ? "not" : ""} be shown on the published story.
           </p>
           <div className="mt-8 flex justify-center gap-3">
-            <Link to="/" className="border border-foreground bg-foreground px-5 py-2.5 text-sm font-semibold text-background">
+            <Link
+              to="/"
+              className="border border-foreground bg-foreground px-5 py-2.5 text-sm font-semibold text-background"
+            >
               Back to home
             </Link>
             <button
@@ -195,8 +201,8 @@ function SubmitPage() {
             Submit your news
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Share verified reports, ground photos and press releases with our editorial team. Every submission
-            is cross-verified before publication.
+            Share verified reports, ground photos and press releases with our editorial team. Every
+            submission is cross-verified before publication.
           </p>
         </header>
 
@@ -329,7 +335,9 @@ function SubmitPage() {
                   type="button"
                   onClick={() => setHideIdentity((v) => !v)}
                   className={`mt-0.5 grid h-9 w-9 shrink-0 place-items-center border ${
-                    hideIdentity ? "border-foreground bg-foreground text-background" : "border-border"
+                    hideIdentity
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border"
                   }`}
                   aria-pressed={hideIdentity}
                   aria-label="Toggle hide identity"
@@ -338,11 +346,13 @@ function SubmitPage() {
                 </button>
                 <div className="text-sm">
                   <p className="font-semibold">
-                    {hideIdentity ? "Hide my name on the published story" : "Show my name as the source"}
+                    {hideIdentity
+                      ? "Hide my name on the published story"
+                      : "Show my name as the source"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Either way, your contact details below stay confidential and are only used by our editors
-                    for cross-verification.
+                    Either way, your contact details below stay confidential and are only used by
+                    our editors for cross-verification.
                   </p>
                 </div>
               </div>
@@ -387,8 +397,8 @@ function SubmitPage() {
                   className="mt-1 h-4 w-4 accent-black"
                 />
                 <span className="text-muted-foreground">
-                  I confirm the information above is accurate to my knowledge and I own or have permission to
-                  share every image and document attached. I have read the{" "}
+                  I confirm the information above is accurate to my knowledge and I own or have
+                  permission to share every image and document attached. I have read the{" "}
                   <Link to="/editorial-policy" className="underline">
                     Editorial Policy
                   </Link>

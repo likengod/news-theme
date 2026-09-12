@@ -9,7 +9,9 @@ import { useAdSettings } from "@/components/site/AdSettingsContext";
 
 export function useHomepageConfig(): HomepageConfig {
   const ctx = useAdSettings();
-  const [cfg, setCfg] = useState<HomepageConfig>(() => ctx?.homepageConfig ?? defaultHomepageConfig);
+  const [cfg, setCfg] = useState<HomepageConfig>(
+    () => ctx?.homepageConfig ?? defaultHomepageConfig,
+  );
 
   useEffect(() => {
     if (ctx?.homepageConfig) {

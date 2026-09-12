@@ -32,7 +32,7 @@ import {
   clearAllCachesServer,
   type SiteSettings,
   type RedirectRule,
-  type BrokenLinkItem
+  type BrokenLinkItem,
 } from "@/lib/site-content";
 import { type MediaUsage } from "@/lib/media-library";
 import { MediaField } from "@/components/admin/MediaField";
@@ -48,17 +48,56 @@ import {
   LogoUploader,
 } from "@/components/admin/settings/SettingsHelpers";
 
-const GeneralSettingsForm = lazy(() => import("@/components/admin/settings/GeneralSettingsForm").then(m => ({ default: m.GeneralSettingsForm })));
-const ProtectionSettingsForm = lazy(() => import("@/components/admin/settings/ProtectionSettingsForm").then(m => ({ default: m.ProtectionSettingsForm })));
-const FestiveSettingsForm = lazy(() => import("@/components/admin/settings/FestiveSettingsForm").then(m => ({ default: m.FestiveSettingsForm })));
-const FontSettingsTab = lazy(() => import("@/components/admin/settings/FontSettingsTab").then(m => ({ default: m.FontSettingsTab })));
+const GeneralSettingsForm = lazy(() =>
+  import("@/components/admin/settings/GeneralSettingsForm").then((m) => ({
+    default: m.GeneralSettingsForm,
+  })),
+);
+const ProtectionSettingsForm = lazy(() =>
+  import("@/components/admin/settings/ProtectionSettingsForm").then((m) => ({
+    default: m.ProtectionSettingsForm,
+  })),
+);
+const FestiveSettingsForm = lazy(() =>
+  import("@/components/admin/settings/FestiveSettingsForm").then((m) => ({
+    default: m.FestiveSettingsForm,
+  })),
+);
+const FontSettingsTab = lazy(() =>
+  import("@/components/admin/settings/FontSettingsTab").then((m) => ({
+    default: m.FontSettingsTab,
+  })),
+);
 const RedirectsAndLinksTab = lazy(() => import("@/components/admin/settings/RedirectsAndLinksTab"));
-const IntegrationsTab = lazy(() => import("@/components/admin/settings/IntegrationsTab").then(m => ({ default: m.IntegrationsTab })));
-const ActivateWebsiteTab = lazy(() => import("@/components/admin/settings/ActivateWebsiteTab").then(m => ({ default: m.ActivateWebsiteTab })));
-const BackupRestoreTab = lazy(() => import("@/components/admin/settings/BackupRestoreTab").then(m => ({ default: m.BackupRestoreTab })));
+const IntegrationsTab = lazy(() =>
+  import("@/components/admin/settings/IntegrationsTab").then((m) => ({
+    default: m.IntegrationsTab,
+  })),
+);
+const ActivateWebsiteTab = lazy(() =>
+  import("@/components/admin/settings/ActivateWebsiteTab").then((m) => ({
+    default: m.ActivateWebsiteTab,
+  })),
+);
+const BackupRestoreTab = lazy(() =>
+  import("@/components/admin/settings/BackupRestoreTab").then((m) => ({
+    default: m.BackupRestoreTab,
+  })),
+);
 
 type SettingsSearch = {
-  tab?: "general" | "festive" | "fonts" | "integrations" | "verification" | "auth" | "protection" | "speed" | "links" | "activate" | "backup";
+  tab?:
+    | "general"
+    | "festive"
+    | "fonts"
+    | "integrations"
+    | "verification"
+    | "auth"
+    | "protection"
+    | "speed"
+    | "links"
+    | "activate"
+    | "backup";
 };
 
 export const Route = createFileRoute("/admin/settings")({
@@ -84,16 +123,35 @@ function SettingsPage() {
   const navigate = useNavigate();
   const router = useRouter();
   const [s, setS] = useState<SiteSettings>(() => loadSettings());
-  const [tab, setTab] = useState<"general" | "festive" | "fonts" | "integrations" | "verification" | "auth" | "protection" | "speed" | "links" | "activate">(
-    search.tab || "general"
-  );
-  
+  const [tab, setTab] = useState<
+    | "general"
+    | "festive"
+    | "fonts"
+    | "integrations"
+    | "verification"
+    | "auth"
+    | "protection"
+    | "speed"
+    | "links"
+    | "activate"
+  >(search.tab || "general");
+
   const planType = (s.licenseType || "").toLowerCase();
   const roleType = (s.licenseRole || "").toLowerCase();
   const keyType = (s.licenseKey || "").toUpperCase();
   const isVIP = roleType === "vip" || roleType === "admin";
-  const isEnterprise = isVIP || planType.includes("enterprise") || planType.includes("demo") || keyType.includes("ENT") || keyType.includes("DEMO");
-  const isEnterprisePlus = isVIP || planType.includes("enterprise+") || planType.includes("enterprise plus") || keyType.includes("ENT_PLUS") || keyType.includes("DEMO");
+  const isEnterprise =
+    isVIP ||
+    planType.includes("enterprise") ||
+    planType.includes("demo") ||
+    keyType.includes("ENT") ||
+    keyType.includes("DEMO");
+  const isEnterprisePlus =
+    isVIP ||
+    planType.includes("enterprise+") ||
+    planType.includes("enterprise plus") ||
+    keyType.includes("ENT_PLUS") ||
+    keyType.includes("DEMO");
   const isPremium = isEnterprise || planType.includes("premium");
 
   useEffect(() => {
@@ -152,9 +210,21 @@ function SettingsPage() {
       title: "Footer",
       fields: [
         { key: "footerNote", label: "Footer note", textarea: true },
-        { key: "copyright", label: "Copyright line", placeholder: "© 2026 Your Company. All rights reserved." },
-        { key: "builtByText", label: "Built-by / Digital partner text", placeholder: "Website built and digital partner: Gorilla Tech Solution" },
-        { key: "builtByUrl", label: "Built-by / Digital partner URL", placeholder: "https://GorillaTechsolution.com" },
+        {
+          key: "copyright",
+          label: "Copyright line",
+          placeholder: "© 2026 Your Company. All rights reserved.",
+        },
+        {
+          key: "builtByText",
+          label: "Built-by / Digital partner text",
+          placeholder: "Website built and digital partner: Gorilla Tech Solution",
+        },
+        {
+          key: "builtByUrl",
+          label: "Built-by / Digital partner URL",
+          placeholder: "https://GorillaTechsolution.com",
+        },
       ],
     },
   ];
@@ -208,8 +278,8 @@ function SettingsPage() {
                 active
                   ? "bg-slate-900 text-white shadow-sm"
                   : isLocked
-                  ? "text-slate-400 hover:bg-slate-50"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    ? "text-slate-400 hover:bg-slate-50"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               <Icon className="h-3.5 w-3.5 shrink-0" /> {t.label}
@@ -219,26 +289,35 @@ function SettingsPage() {
         })}
       </div>
 
-      <Suspense fallback={<div className="p-8 text-center text-slate-500 animate-pulse">Loading settings...</div>}>
+      <Suspense
+        fallback={
+          <div className="p-8 text-center text-slate-500 animate-pulse">Loading settings...</div>
+        }
+      >
         {tab === "general" && <GeneralSettingsForm />}
-        {tab === "festive" && (isEnterprise ? <FestiveSettingsForm /> : (
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center mt-6">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
-              <Lock className="h-8 w-8 text-slate-400" />
+        {tab === "festive" &&
+          (isEnterprise ? (
+            <FestiveSettingsForm />
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center mt-6">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+                <Lock className="h-8 w-8 text-slate-400" />
+              </div>
+              <h3 className="mt-4 text-base font-semibold text-slate-800">
+                Enterprise Feature Locked
+              </h3>
+              <p className="mt-1 max-w-sm text-sm text-slate-500">
+                The Festive features and seasonal decorations are exclusively available on
+                Enterprise licenses. Please upgrade your license to unlock this.
+              </p>
+              <button
+                onClick={() => navigate({ to: ".", search: { tab: "activate" } })}
+                className="mt-6 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+              >
+                Activate Website
+              </button>
             </div>
-            <h3 className="mt-4 text-base font-semibold text-slate-800">Enterprise Feature Locked</h3>
-            <p className="mt-1 max-w-sm text-sm text-slate-500">
-              The Festive features and seasonal decorations are exclusively available on Enterprise licenses. Please upgrade your license to unlock this.
-            </p>
-            <button
-              onClick={() => navigate({ to: ".", search: { tab: "activate" } })}
-              className="mt-6 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-            >
-              Activate Website
-            </button>
-          </div>
-        ))}
-
+          ))}
 
         {tab === "fonts" && <FontSettingsTab />}
 
@@ -249,132 +328,144 @@ function SettingsPage() {
         {tab === "activate" && <ActivateWebsiteTab s={s} update={update} />}
         {tab === "backup" && <BackupRestoreTab />}
 
-      {tab === "speed" && (
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card
-            title="Website Speed Up Options"
-            subtitle="Enable advanced optimization options to boost your website loading time and improve Google PageSpeed scores."
-          >
-            <Toggle
-              label="Clean Unused CSS (PurgeCSS)"
-              checked={s.cleanUnusedCss}
-              onChange={(v) => update("cleanUnusedCss", v)}
-              hint="Extract and remove unused CSS selectors from the loaded stylesheets. Helps reduce stylesheet weight by up to 70%."
-            />
+        {tab === "speed" && (
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card
+              title="Website Speed Up Options"
+              subtitle="Enable advanced optimization options to boost your website loading time and improve Google PageSpeed scores."
+            >
+              <Toggle
+                label="Clean Unused CSS (PurgeCSS)"
+                checked={s.cleanUnusedCss}
+                onChange={(v) => update("cleanUnusedCss", v)}
+                hint="Extract and remove unused CSS selectors from the loaded stylesheets. Helps reduce stylesheet weight by up to 70%."
+              />
 
-            <Toggle
-              label="Minify JavaScript Files"
-              checked={s.minifyJs}
-              onChange={(v) => update("minifyJs", v)}
-              hint="Compress, mangle, and bundle scripts automatically before outputting. Reduces JS bundle sizes by up to 60%."
-            />
+              <Toggle
+                label="Minify JavaScript Files"
+                checked={s.minifyJs}
+                onChange={(v) => update("minifyJs", v)}
+                hint="Compress, mangle, and bundle scripts automatically before outputting. Reduces JS bundle sizes by up to 60%."
+              />
 
-            <Toggle
-              label="Server-Side Cache (HTML / MySQL Caching)"
-              checked={s.serverCacheEnabled}
-              onChange={(v) => update("serverCacheEnabled", v)}
-              hint="Cache static page outputs and MySQL query results in server memory. Bypasses database queries for consecutive visits."
-            />
+              <Toggle
+                label="Server-Side Cache (HTML / MySQL Caching)"
+                checked={s.serverCacheEnabled}
+                onChange={(v) => update("serverCacheEnabled", v)}
+                hint="Cache static page outputs and MySQL query results in server memory. Bypasses database queries for consecutive visits."
+              />
 
-            <Toggle
-              label="Pre-render Pages (Static Site Generation)"
-              checked={s.preRenderEnabled}
-              onChange={(v) => update("preRenderEnabled", v)}
-              hint="Pre-generate static HTML files for top articles and category pages. Delivers instant load times under high traffic spikes."
-            />
-          </Card>
+              <Toggle
+                label="Pre-render Pages (Static Site Generation)"
+                checked={s.preRenderEnabled}
+                onChange={(v) => update("preRenderEnabled", v)}
+                hint="Pre-generate static HTML files for top articles and category pages. Delivers instant load times under high traffic spikes."
+              />
+            </Card>
 
-          <Card
-            title="Daily Optimization Schedule"
-            subtitle="Automate background speed optimizations. The website will run compilation, CSS purging, and cache pre-heating daily."
-          >
-            {!isPremium ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
-                  <Lock className="h-8 w-8 text-slate-400" />
+            <Card
+              title="Daily Optimization Schedule"
+              subtitle="Automate background speed optimizations. The website will run compilation, CSS purging, and cache pre-heating daily."
+            >
+              {!isPremium ? (
+                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+                    <Lock className="h-8 w-8 text-slate-400" />
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold text-slate-800">
+                    Premium Feature Locked
+                  </h3>
+                  <p className="mt-1 max-w-sm text-sm text-slate-500">
+                    Scheduled Background Optimization is exclusively available on Enterprise and
+                    Enterprise+ licenses. Please activate your license to automate daily server
+                    maintenance.
+                  </p>
+                  <button
+                    onClick={() => navigate({ to: ".", search: { tab: "activate" } })}
+                    className="mt-6 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+                  >
+                    Activate Website
+                  </button>
                 </div>
-                <h3 className="mt-4 text-base font-semibold text-slate-800">Premium Feature Locked</h3>
-                <p className="mt-1 max-w-sm text-sm text-slate-500">
-                  Scheduled Background Optimization is exclusively available on Enterprise and Enterprise+ licenses. Please activate your license to automate daily server maintenance.
+              ) : (
+                <>
+                  <Toggle
+                    label="Enable Daily Scheduled Optimization"
+                    checked={s.optimizationScheduleEnabled}
+                    onChange={(v) => update("optimizationScheduleEnabled", v)}
+                    hint="Execute optimization routines automatically at the configured time every day."
+                  />
+
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-700">
+                      Daily Execution Time (24h format)
+                    </label>
+                    <input
+                      type="time"
+                      value={s.optimizationScheduleTime || "02:00"}
+                      onChange={(e) => update("optimizationScheduleTime", e.target.value)}
+                      disabled={!s.optimizationScheduleEnabled}
+                      className="w-full max-w-[200px] rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none disabled:bg-slate-50 disabled:text-slate-400"
+                    />
+                    <p className="mt-1 text-[11px] text-slate-500">
+                      Choose a time of low website traffic (e.g., 2:00 AM) to prevent transient
+                      performance impacts.
+                    </p>
+                  </div>
+
+                  <div className="rounded-md border border-slate-100 bg-slate-50/50 p-3">
+                    <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                      Scheduled Operations
+                    </h3>
+                    <ul className="list-disc pl-4 text-xs text-slate-500 space-y-1">
+                      <li>Purge unused CSS templates</li>
+                      <li>Clear expired cache entries and index database entries</li>
+                      <li>Pre-generate HTML templates for the top 50 articles</li>
+                      <li>Verify file system health and clear temporary media chunks</li>
+                    </ul>
+                  </div>
+                </>
+              )}
+            </Card>
+
+            <Card
+              title="Manual Cleanup & Optimization"
+              subtitle="Instantly clear temporary files, purge unused CSS, and reset server caches to improve speed."
+            >
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <h4 className="text-sm font-semibold text-amber-900 mb-1">Clean Website Cache</h4>
+                <p className="text-xs text-amber-700 mb-4">
+                  Click this button if your recent changes aren't appearing or if the website feels
+                  sluggish. It will remove temporary files, unused cache data, and unused CSS to
+                  speed up the website.
                 </p>
                 <button
-                  onClick={() => navigate({ to: ".", search: { tab: "activate" } })}
-                  className="mt-6 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-                >
-                  Activate Website
-                </button>
-              </div>
-            ) : (
-              <>
-                <Toggle
-                  label="Enable Daily Scheduled Optimization"
-                  checked={s.optimizationScheduleEnabled}
-                  onChange={(v) => update("optimizationScheduleEnabled", v)}
-                  hint="Execute optimization routines automatically at the configured time every day."
-                />
-
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-700">Daily Execution Time (24h format)</label>
-                  <input
-                    type="time"
-                    value={s.optimizationScheduleTime || "02:00"}
-                    onChange={(e) => update("optimizationScheduleTime", e.target.value)}
-                    disabled={!s.optimizationScheduleEnabled}
-                    className="w-full max-w-[200px] rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none disabled:bg-slate-50 disabled:text-slate-400"
-                  />
-                  <p className="mt-1 text-[11px] text-slate-500">
-                    Choose a time of low website traffic (e.g., 2:00 AM) to prevent transient performance impacts.
-                  </p>
-                </div>
-                
-                <div className="rounded-md border border-slate-100 bg-slate-50/50 p-3">
-                  <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Scheduled Operations</h3>
-                  <ul className="list-disc pl-4 text-xs text-slate-500 space-y-1">
-                    <li>Purge unused CSS templates</li>
-                    <li>Clear expired cache entries and index database entries</li>
-                    <li>Pre-generate HTML templates for the top 50 articles</li>
-                    <li>Verify file system health and clear temporary media chunks</li>
-                  </ul>
-                </div>
-              </>
-            )}
-          </Card>
-
-          <Card
-            title="Manual Cleanup & Optimization"
-            subtitle="Instantly clear temporary files, purge unused CSS, and reset server caches to improve speed."
-          >
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <h4 className="text-sm font-semibold text-amber-900 mb-1">Clean Website Cache</h4>
-              <p className="text-xs text-amber-700 mb-4">
-                Click this button if your recent changes aren't appearing or if the website feels sluggish. It will remove temporary files, unused cache data, and unused CSS to speed up the website.
-              </p>
-              <button
-                onClick={async () => {
-                  try {
-                    const res = await clearAllCachesServer();
-                    for (let i = localStorage.length - 1; i >= 0; i--) {
-                      const key = localStorage.key(i);
-                      if (key && (key.startsWith('nt:') || key.startsWith('nt_'))) {
-                        if (key !== 'nt_media_library_v1') { // Keep media library to avoid redownloads
-                          localStorage.removeItem(key);
+                  onClick={async () => {
+                    try {
+                      const res = await clearAllCachesServer();
+                      for (let i = localStorage.length - 1; i >= 0; i--) {
+                        const key = localStorage.key(i);
+                        if (key && (key.startsWith("nt:") || key.startsWith("nt_"))) {
+                          if (key !== "nt_media_library_v1") {
+                            // Keep media library to avoid redownloads
+                            localStorage.removeItem(key);
+                          }
                         }
                       }
+                      toast.success(res.message || "Website cache successfully cleared!");
+                      setTimeout(() => window.location.reload(), 1500);
+                    } catch (e) {
+                      toast.error("Failed to clear website cache.");
                     }
-                    toast.success(res.message || "Website cache successfully cleared!");
-                    setTimeout(() => window.location.reload(), 1500);
-                  } catch(e) {
-                    toast.error("Failed to clear website cache.");
-                  }
-                }}
-                className="inline-flex items-center gap-2 rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-amber-700 transition"
-              >
-                <RefreshCw className="h-4 w-4" /> Clean & Speed Up Website
-              </button>
-            </div>
-          </Card>
-        </div>
-      )}
+                  }}
+                  className="inline-flex items-center gap-2 rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-amber-700 transition"
+                >
+                  <RefreshCw className="h-4 w-4" /> Clean & Speed Up Website
+                </button>
+              </div>
+            </Card>
+          </div>
+        )}
       </Suspense>
     </div>
   );

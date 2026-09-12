@@ -61,11 +61,39 @@ export function RoleEditorModal({ role, isNew, onClose, onSave }: Props) {
                   type="button"
                   onClick={() => setDraft({ ...draft, color: c })}
                   className={`h-7 rounded-md px-3 text-xs font-semibold capitalize transition ${
-                    draft.color === c ? "ring-2 ring-slate-900 font-bold" : "opacity-70 hover:opacity-100"
+                    draft.color === c
+                      ? "ring-2 ring-slate-900 font-bold"
+                      : "opacity-70 hover:opacity-100"
                   }`}
                   style={{
-                    backgroundColor: c === "violet" ? "#f5f3ff" : c === "blue" ? "#eff6ff" : c === "emerald" ? "#ecfdf5" : c === "amber" ? "#fffbeb" : c === "rose" ? "#fff1f2" : c === "sky" ? "#f0f9ff" : "#f8fafc",
-                    color: c === "violet" ? "#6d28d9" : c === "blue" ? "#1d4ed8" : c === "emerald" ? "#047857" : c === "amber" ? "#b45309" : c === "rose" ? "#be123c" : c === "sky" ? "#0369a1" : "#334155",
+                    backgroundColor:
+                      c === "violet"
+                        ? "#f5f3ff"
+                        : c === "blue"
+                          ? "#eff6ff"
+                          : c === "emerald"
+                            ? "#ecfdf5"
+                            : c === "amber"
+                              ? "#fffbeb"
+                              : c === "rose"
+                                ? "#fff1f2"
+                                : c === "sky"
+                                  ? "#f0f9ff"
+                                  : "#f8fafc",
+                    color:
+                      c === "violet"
+                        ? "#6d28d9"
+                        : c === "blue"
+                          ? "#1d4ed8"
+                          : c === "emerald"
+                            ? "#047857"
+                            : c === "amber"
+                              ? "#b45309"
+                              : c === "rose"
+                                ? "#be123c"
+                                : c === "sky"
+                                  ? "#0369a1"
+                                  : "#334155",
                   }}
                 >
                   {c}

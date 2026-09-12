@@ -18,16 +18,16 @@ const FONT_FAMILY_MAP: Record<string, string> = {
   cinzel: '"Cinzel", serif, Georgia',
   playfair: '"Playfair Display", Georgia, serif',
   roboto: '"Roboto", Arial, sans-serif',
-  mono: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
 };
 
 const GRADIENT_MAP: Record<string, string> = {
   "indian-flag": "linear-gradient(to right, #FF9933, #000080, #138808)",
-  "diwali": "linear-gradient(to right, #FF8008, #FFC837, #FF007F, #7F00FF)",
-  "sunset": "linear-gradient(to right, #F5576C, #F093FB)",
-  "neon": "linear-gradient(to right, #FF007F, #7F00FF, #00F0FF)",
-  "ocean": "linear-gradient(to right, #00c6ff, #0072ff)",
-  "forest": "linear-gradient(to right, #11998e, #38ef7d)",
+  diwali: "linear-gradient(to right, #FF8008, #FFC837, #FF007F, #7F00FF)",
+  sunset: "linear-gradient(to right, #F5576C, #F093FB)",
+  neon: "linear-gradient(to right, #FF007F, #7F00FF, #00F0FF)",
+  ocean: "linear-gradient(to right, #00c6ff, #0072ff)",
+  forest: "linear-gradient(to right, #11998e, #38ef7d)",
 };
 
 const otherCategories = ["Entertainment", "Health", "Education", "Jobs", "Travel", "Lifestyle"];
@@ -36,14 +36,17 @@ export function TopBar() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState(defaultSettings);
-    const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [showCustom, setShowCustom] = useState(false);
   const [localAqi, setLocalAqi] = useState("DEL 165 AQI");
   const navigate = useNavigate();
   const dbCats = useCategories();
-  const allItems = dbCats.length > 0 ? dbCats.map((c: any) => c.name) : sections.filter(s => s !== "Others").concat(otherCategories);
+  const allItems =
+    dbCats.length > 0
+      ? dbCats.map((c: any) => c.name)
+      : sections.filter((s) => s !== "Others").concat(otherCategories);
 
-    useEffect(() => {
+  useEffect(() => {
     setSettings(loadSettings());
     setMounted(true);
 
@@ -61,14 +64,16 @@ export function TopBar() {
       } catch {}
 
       fetch("https://get.geojs.io/v1/ip/geo.json")
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           if (data && data.city) {
             const cityCode = data.city.substring(0, 3).toUpperCase();
             const aqi = Math.floor(Math.random() * 100) + 40;
             const aqiStr = `${cityCode} ${aqi} AQI`;
             setLocalAqi(aqiStr);
-            try { sessionStorage.setItem("nt:cached-aqi", aqiStr); } catch {}
+            try {
+              sessionStorage.setItem("nt:cached-aqi", aqiStr);
+            } catch {}
           }
         })
         .catch(() => {});
@@ -85,13 +90,18 @@ export function TopBar() {
   }, []);
 
   const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
   const todayShort = new Date().toLocaleDateString("en-US", {
-    month: "short", day: "numeric",
+    month: "short",
+    day: "numeric",
   });
 
-  const hasCustomRight = mounted && settings.festiveThemeEnabled !== false && !!settings.topBarWeatherCustomText;
+  const hasCustomRight =
+    mounted && settings.festiveThemeEnabled !== false && !!settings.topBarWeatherCustomText;
   const delay = Number(settings.topBarSwapDelay) || 5;
 
   useEffect(() => {
@@ -105,27 +115,28 @@ export function TopBar() {
     return () => clearInterval(interval);
   }, [hasCustomRight, delay]);
 
-  const gradientStyle = mounted && settings.topBarTextGradient && GRADIENT_MAP[settings.topBarTextGradient]
-    ? {
-        backgroundImage: GRADIENT_MAP[settings.topBarTextGradient],
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-        display: "inline-block"
-      }
-    : undefined;
+  const gradientStyle =
+    mounted && settings.topBarTextGradient && GRADIENT_MAP[settings.topBarTextGradient]
+      ? {
+          backgroundImage: GRADIENT_MAP[settings.topBarTextGradient],
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+          display: "inline-block",
+        }
+      : undefined;
 
   return (
-    <div 
+    <div
       className="sticky top-0 z-45 h-11 border-b border-border bg-background/90 backdrop-blur-md transition-colors duration-300"
-      style={{ 
+      style={{
         backgroundColor: (mounted && settings.topBarBgColor) || undefined,
-        borderColor: (mounted && settings.topBarBgColor) ? "transparent" : undefined
+        borderColor: mounted && settings.topBarBgColor ? "transparent" : undefined,
       }}
     >
-      <div 
+      <div
         className={`mx-auto flex h-full max-w-7xl items-center justify-between gap-2 px-4 text-[11px] uppercase tracking-widest ${
-          (mounted && settings.topBarTextColor) ? "" : "text-muted-foreground"
+          mounted && settings.topBarTextColor ? "" : "text-muted-foreground"
         }`}
         style={{ color: (mounted && settings.topBarTextColor) || undefined }}
       >
@@ -137,18 +148,24 @@ export function TopBar() {
         </div>
 
         <div className="relative hidden h-4 flex-1 min-w-0 overflow-hidden md:block">
-          <div className={`absolute inset-y-0 left-0 flex items-center gap-4 transition-all duration-500 ${showCustom && hasCustomRight ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}>
+          <div
+            className={`absolute inset-y-0 left-0 flex items-center gap-4 transition-all duration-500 ${showCustom && hasCustomRight ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}
+          >
             <span>{localAqi}</span>
             <span>MUM 82 AQI</span>
             <span>KOL 145 AQI</span>
           </div>
           {hasCustomRight && (
-            <span 
+            <span
               className={`absolute inset-y-0 left-0 flex items-center font-bold transition-all duration-500 ${showCustom ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
               style={{
                 ...gradientStyle,
-                fontFamily: FONT_FAMILY_MAP[settings.customAlertFontFamily || "inter"] || FONT_FAMILY_MAP["inter"],
-                fontSize: settings.customAlertFontSize ? `${settings.customAlertFontSize}px` : undefined,
+                fontFamily:
+                  FONT_FAMILY_MAP[settings.customAlertFontFamily || "inter"] ||
+                  FONT_FAMILY_MAP["inter"],
+                fontSize: settings.customAlertFontSize
+                  ? `${settings.customAlertFontSize}px`
+                  : undefined,
               }}
             >
               {settings.topBarWeatherCustomText}
@@ -157,7 +174,9 @@ export function TopBar() {
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <LanguageSwitcher />
-          <Link to="/subscription" className="hidden hover:text-foreground sm:inline">{t("nav.subscribe")}</Link>
+          <Link to="/subscription" className="hidden hover:text-foreground sm:inline">
+            {t("nav.subscribe")}
+          </Link>
           <span className="hidden text-border sm:inline">|</span>
           <UserMenu />
           <SearchBox className="grid h-7 w-7 place-items-center text-foreground hover:bg-muted transition-colors rounded-sm" />
@@ -169,7 +188,6 @@ export function TopBar() {
                 aria-label="Open navigation"
                 className="grid h-7 w-7 place-items-center text-foreground md:hidden rounded-sm hover:bg-muted transition-colors"
               >
-
                 <Menu className="h-4 w-4" />
               </button>
             </SheetTrigger>
@@ -178,21 +196,34 @@ export function TopBar() {
                 <SheetHeader className="border-b border-border px-5 py-4 text-left">
                   <SheetTitle
                     className="text-2xl uppercase tracking-wider font-extrabold"
-                    style={{ fontFamily: '"Inter", system-ui, sans-serif', fontWeight: 800, letterSpacing: "0.05em" }}
+                    style={{
+                      fontFamily: '"Inter", system-ui, sans-serif',
+                      fontWeight: 800,
+                      letterSpacing: "0.05em",
+                    }}
                   >
                     <span
-                      style={settings.logoColorPrimary ? { color: settings.logoColorPrimary } : undefined}
-                      className={!settings.logoColorPrimary || settings.logoColorPrimary === "#000000" ? "text-foreground dark:text-white" : ""}
+                      style={
+                        settings.logoColorPrimary ? { color: settings.logoColorPrimary } : undefined
+                      }
+                      className={
+                        !settings.logoColorPrimary || settings.logoColorPrimary === "#000000"
+                          ? "text-foreground dark:text-white"
+                          : ""
+                      }
                     >
                       {settings.logoTextPrimary !== undefined && settings.logoTextPrimary !== ""
                         ? settings.logoTextPrimary
-                        : (settings.logoText ? settings.logoText.split(" ")[0] : "NEWS")}
-                    </span>
-                    {" "}
+                        : settings.logoText
+                          ? settings.logoText.split(" ")[0]
+                          : "NEWS"}
+                    </span>{" "}
                     <span style={{ color: settings.logoColorSecondary || "#dc2626" }}>
                       {settings.logoTextSecondary !== undefined && settings.logoTextSecondary !== ""
                         ? settings.logoTextSecondary
-                        : (settings.logoText && settings.logoText.split(" ").length > 1 ? settings.logoText.split(" ").slice(1).join(" ") : "THEME")}
+                        : settings.logoText && settings.logoText.split(" ").length > 1
+                          ? settings.logoText.split(" ").slice(1).join(" ")
+                          : "THEME"}
                     </span>
                   </SheetTitle>
                   <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground truncate">
@@ -251,7 +282,13 @@ export function TopBar() {
                     <ThemeToggle />
                   </div>
                   <UserMenu variant="mobile" />
-                  <Link to="/subscription" className="hover:text-foreground" onClick={() => setOpen(false)}>{t("nav.subscribe")}</Link>
+                  <Link
+                    to="/subscription"
+                    className="hover:text-foreground"
+                    onClick={() => setOpen(false)}
+                  >
+                    {t("nav.subscribe")}
+                  </Link>
                 </div>
               </div>
             </SheetContent>
@@ -261,7 +298,3 @@ export function TopBar() {
     </div>
   );
 }
-
-
-
-

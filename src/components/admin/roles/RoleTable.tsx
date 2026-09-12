@@ -26,7 +26,7 @@ export function RoleTable({ roles, onEdit, onDelete }: Props) {
               <td className="px-5 py-3">
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold ${roleBadgeClass(
-                    r.color
+                    r.color,
                   )}`}
                 >
                   <ShieldCheck className="h-3.5 w-3.5" /> {r.name}
@@ -46,9 +46,13 @@ export function RoleTable({ roles, onEdit, onDelete }: Props) {
               </td>
               <td className="px-5 py-3 text-xs text-slate-500">
                 {r.builtin ? (
-                  <span className="rounded bg-slate-100 px-2 py-0.5 text-slate-600 font-semibold">Built-in</span>
+                  <span className="rounded bg-slate-100 px-2 py-0.5 text-slate-600 font-semibold">
+                    Built-in
+                  </span>
                 ) : (
-                  <span className="rounded bg-blue-50 px-2 py-0.5 text-blue-700 font-semibold">Custom</span>
+                  <span className="rounded bg-blue-50 px-2 py-0.5 text-blue-700 font-semibold">
+                    Custom
+                  </span>
                 )}
               </td>
               <td className="px-5 py-3 text-right">

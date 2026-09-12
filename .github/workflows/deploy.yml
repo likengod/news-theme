@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - 'v*'
+      - "v*"
   pull_request:
     branches:
       - main
@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install Dependencies
         run: npm install --legacy-peer-deps
@@ -82,16 +82,16 @@ jobs:
             TARGET_DIR="${{ secrets.DEPLOY_PATH || '/home/todaytripura/htdocs/todaytripura.com' }}"
             echo "Deploying to: $TARGET_DIR"
             cd "$TARGET_DIR" || exit 1
-            
+
             # Fetch latest commits
             git pull origin main
-            
+
             # Install production dependencies
             npm install --production=false --legacy-peer-deps
-            
+
             # Build production assets
             npm run build
-            
+
             # Restart application (supports PM2, systemd, or background node)
             if command -v pm2 >/dev/null 2>&1; then
               pm2 reload all || pm2 restart all
@@ -102,5 +102,5 @@ jobs:
               fuser -k 3099/tcp 2>/dev/null || true
               nohup node server.js > server.log 2>&1 &
             fi
-            
+
             echo "Deployment completed successfully!"

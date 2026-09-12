@@ -2,7 +2,12 @@ import { useState, useEffect } from "react";
 import { Save, Link as LinkIcon } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaYoutube, FaWhatsapp } from "react-icons/fa6";
 import { toast } from "sonner";
-import { loadSocialLinks, saveSocialLinks, SOCIAL_PLATFORMS, type SocialLinks } from "@/lib/social-links";
+import {
+  loadSocialLinks,
+  saveSocialLinks,
+  SOCIAL_PLATFORMS,
+  type SocialLinks,
+} from "@/lib/social-links";
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   facebook: FaFacebookF,
@@ -15,7 +20,9 @@ export function SocialLinksForm() {
   const [links, setLinks] = useState<SocialLinks>(loadSocialLinks());
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => { setLinks(loadSocialLinks()); }, []);
+  useEffect(() => {
+    setLinks(loadSocialLinks());
+  }, []);
 
   const handleSave = () => {
     saveSocialLinks(links);
@@ -28,8 +35,12 @@ export function SocialLinksForm() {
     <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-5 py-3">
         <LinkIcon className="h-4 w-4 text-slate-500" />
-        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600">Social Media Links</h2>
-        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">Used on Earn Points page</span>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600">
+          Social Media Links
+        </h2>
+        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+          Used on Earn Points page
+        </span>
       </div>
       <div className="grid gap-4 p-5 sm:grid-cols-2">
         {SOCIAL_PLATFORMS.map((p) => {
@@ -54,7 +65,9 @@ export function SocialLinksForm() {
       </div>
       <div className="border-t border-slate-100 bg-slate-50 px-5 py-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-slate-500">After saving, the earn-points page will use your real links.</p>
+          <p className="text-xs text-slate-500">
+            After saving, the earn-points page will use your real links.
+          </p>
           <button
             onClick={handleSave}
             className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors ${

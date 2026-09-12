@@ -6,7 +6,10 @@ export const Route = createFileRoute("/data-deletion-policy")({
   head: () => ({
     meta: [
       { title: "Data Deletion Policy | News Theme" },
-      { name: "description", content: "How to request deletion of your personal data from News Theme systems." },
+      {
+        name: "description",
+        content: "How to request deletion of your personal data from News Theme systems.",
+      },
       { property: "og:url", content: "https://gorillatechsolution.com/data-deletion-policy" },
     ],
     links: [{ rel: "canonical", href: "https://gorillatechsolution.com/data-deletion-policy" }],
@@ -20,7 +23,7 @@ export const Route = createFileRoute("/data-deletion-policy")({
 
 function DataDeletionPolicyPage() {
   const page = Route.useLoaderData();
-  
+
   return (
     <PolicyLayout
       title={page?.title || ""}
@@ -31,10 +34,13 @@ function DataDeletionPolicyPage() {
               heading: s.heading,
               body: <div dangerouslySetInnerHTML={{ __html: s.body }} />,
             }))
-          : [{ heading: page?.title || "", body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} /> }]
+          : [
+              {
+                heading: page?.title || "",
+                body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} />,
+              },
+            ]
       }
     />
   );
 }
-
-

@@ -4,7 +4,11 @@ import { MediaField } from "@/components/admin/MediaField";
 import { Field } from "./Field";
 
 export default function AuthorizedPanel({
-  value, onChange, onSave, onReset, saving,
+  value,
+  onChange,
+  onSave,
+  onReset,
+  saving,
 }: {
   value: AuthorizedSettings;
   onChange: (v: AuthorizedSettings) => void;
@@ -23,7 +27,8 @@ export default function AuthorizedPanel({
             <Building2 className="h-4 w-4" /> Authorized signature & back card config
           </h2>
           <p className="mt-0.5 text-xs text-slate-500">
-            Edit office contact, disclaimer notes, and upload transparent PNG/WEBP authorized signature for press cards.
+            Edit office contact, disclaimer notes, and upload transparent PNG/WEBP authorized
+            signature for press cards.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -38,7 +43,11 @@ export default function AuthorizedPanel({
             disabled={saving}
             className="inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-4 py-1.5 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-60"
           >
-            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+            {saving ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Save className="h-3.5 w-3.5" />
+            )}
             Save settings
           </button>
         </div>
@@ -52,7 +61,8 @@ export default function AuthorizedPanel({
               Authorized Signature Config
             </h3>
             <p className="mt-0.5 text-[11px] text-slate-500">
-              Upload signature image or customize cursive text shown on the back of journalist press cards.
+              Upload signature image or customize cursive text shown on the back of journalist press
+              cards.
             </p>
           </div>
 
@@ -86,8 +96,14 @@ export default function AuthorizedPanel({
 
           {value.signatureImageUrl ? (
             <div className="rounded-md border border-dashed border-slate-300 bg-white p-3 text-center">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Signature Image Preview</p>
-              <img src={value.signatureImageUrl} alt="Signature Preview" className="mx-auto h-12 max-w-[200px] object-contain" />
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Signature Image Preview
+              </p>
+              <img
+                src={value.signatureImageUrl}
+                alt="Signature Preview"
+                className="mx-auto h-12 max-w-[200px] object-contain"
+              />
               <div className="mt-2 mx-auto w-32 border-b border-slate-400" />
               <p className="mt-1 text-[10px] font-black uppercase italic tracking-widest text-slate-800">
                 {value.signatureLabel || "AUTHORIZED SIGNATURE"}
@@ -95,8 +111,13 @@ export default function AuthorizedPanel({
             </div>
           ) : (
             <div className="rounded-md border border-dashed border-slate-200 bg-white p-3 text-center">
-              <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Default Cursive Text Preview</p>
-              <p className="text-slate-700" style={{ fontFamily: "'Dancing Script', 'Brush Script MT', cursive", fontSize: 22 }}>
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Default Cursive Text Preview
+              </p>
+              <p
+                className="text-slate-700"
+                style={{ fontFamily: "'Dancing Script', 'Brush Script MT', cursive", fontSize: 22 }}
+              >
                 {value.signatureName || "Editor-in-Chief"}
               </p>
               <div className="mt-1 mx-auto w-32 border-b border-slate-400" />
@@ -187,7 +208,9 @@ export default function AuthorizedPanel({
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700">Back Card Legal Disclaimer</label>
+            <label className="mb-1 block text-xs font-medium text-slate-700">
+              Back Card Legal Disclaimer
+            </label>
             <textarea
               value={value.cardDisclaimer}
               onChange={(e) => set("cardDisclaimer", e.target.value)}

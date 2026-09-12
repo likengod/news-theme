@@ -17,7 +17,12 @@ type Props = {
 
 const DEFAULT_TAGS = ["Breaking", "Northeast", "Report", "Update"];
 
-export function ArticleFooter({ slug, author, tags = DEFAULT_TAGS, articleTitle = "Untitled Article" }: Props) {
+export function ArticleFooter({
+  slug,
+  author,
+  tags = DEFAULT_TAGS,
+  articleTitle = "Untitled Article",
+}: Props) {
   const initials = author
     .split(" ")
     .map((n) => n[0])

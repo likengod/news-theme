@@ -675,7 +675,7 @@ export default function ArticleEditor({
                       <option value="Corporate">Corporate</option>
                       <option value="Business">Business</option>
                       <option value="Friendly">Friendly</option>
-                      {isEnterprise && (<option value="5 ws">5 ws</option>)}
+                      {isEnterprise && <option value="5 ws">5 ws</option>}
                     </select>
                   </div>
                 </div>
@@ -778,5 +778,3 @@ export default function ArticleEditor({
     </div>
   );
 }
-
-

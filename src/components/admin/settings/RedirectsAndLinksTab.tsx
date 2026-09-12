@@ -15,7 +15,7 @@ export function RedirectsAndLinksTab() {
   const [rules, setRules] = useState<RedirectRule[]>([]);
   const [newSource, setNewSource] = useState("");
   const [newDestination, setNewDestination] = useState("");
-  
+
   const [scanning, setScanning] = useState(false);
   const [brokenLinks, setBrokenLinks] = useState<BrokenLinkItem[]>([]);
   const [hasScanned, setHasScanned] = useState(false);
@@ -31,7 +31,7 @@ export function RedirectsAndLinksTab() {
     if (!newSource || !newDestination) {
       return toast.error("Both source and destination URLs are required");
     }
-    
+
     let src = newSource.trim();
     if (!src.startsWith("/") && !src.startsWith("http")) {
       src = "/" + src;
@@ -51,7 +51,7 @@ export function RedirectsAndLinksTab() {
 
     const updated = [newRule, ...rules];
     setRules(updated);
-    
+
     try {
       await saveRedirectRulesServer({ data: updated });
       toast.success("Redirect rule added successfully!");
@@ -99,7 +99,7 @@ export function RedirectsAndLinksTab() {
           articleId: item.articleId,
           brokenUrl: item.brokenUrl,
           correctedUrl: item.suggestedFix,
-        }
+        },
       });
       toast.success("Link auto-corrected in database!");
       setBrokenLinks((prev) => prev.filter((b) => b.id !== item.id));
@@ -118,10 +118,14 @@ export function RedirectsAndLinksTab() {
           subtitle="Configure 301 (Permanent) redirects from old or broken URLs to active pages. Useful for SEO migrations."
         >
           <div className="rounded-md border border-slate-100 bg-slate-50 p-4 space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Add Redirect Rule</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Add Redirect Rule
+            </h3>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Source Path (e.g. /old-slug)</label>
+                <label className="mb-1 block text-xs font-medium text-slate-700">
+                  Source Path (e.g. /old-slug)
+                </label>
                 <input
                   type="text"
                   value={newSource}
@@ -131,7 +135,9 @@ export function RedirectsAndLinksTab() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Destination (e.g. /about)</label>
+                <label className="mb-1 block text-xs font-medium text-slate-700">
+                  Destination (e.g. /about)
+                </label>
                 <input
                   type="text"
                   value={newDestination}
@@ -169,10 +175,16 @@ export function RedirectsAndLinksTab() {
                 ) : (
                   rules.map((r) => (
                     <tr key={r.id} className="hover:bg-slate-50/50">
-                      <td className="px-4 py-2 font-mono text-[11px] max-w-[150px] truncate" title={r.source}>
+                      <td
+                        className="px-4 py-2 font-mono text-[11px] max-w-[150px] truncate"
+                        title={r.source}
+                      >
                         {r.source}
                       </td>
-                      <td className="px-4 py-2 font-mono text-[11px] max-w-[150px] truncate" title={r.destination}>
+                      <td
+                        className="px-4 py-2 font-mono text-[11px] max-w-[150px] truncate"
+                        title={r.destination}
+                      >
                         {r.destination}
                       </td>
                       <td className="px-4 py-2 text-center font-semibold text-slate-950 tabular-nums">
@@ -243,7 +255,10 @@ export function RedirectsAndLinksTab() {
                   </tr>
                 ) : brokenLinks.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-4 py-6 text-center text-emerald-600 font-semibold flex items-center justify-center gap-1.5">
+                    <td
+                      colSpan={4}
+                      className="px-4 py-6 text-center text-emerald-600 font-semibold flex items-center justify-center gap-1.5"
+                    >
                       <CheckCircle className="h-4 w-4" /> Perfect SEO Health! No broken links found.
                     </td>
                   </tr>
@@ -251,17 +266,26 @@ export function RedirectsAndLinksTab() {
                   brokenLinks.map((b) => (
                     <tr key={b.id} className="hover:bg-slate-50/50">
                       <td className="px-4 py-3">
-                        <p className="font-semibold text-slate-900 max-w-[160px] truncate" title={b.articleTitle}>
+                        <p
+                          className="font-semibold text-slate-900 max-w-[160px] truncate"
+                          title={b.articleTitle}
+                        >
                           {b.articleTitle}
                         </p>
                         <p className="text-[10px] text-slate-400 font-mono">ID: {b.articleId}</p>
                       </td>
-                      <td className="px-4 py-3 font-mono text-[11px] text-red-600 max-w-[150px] truncate" title={b.brokenUrl}>
+                      <td
+                        className="px-4 py-3 font-mono text-[11px] text-red-600 max-w-[150px] truncate"
+                        title={b.brokenUrl}
+                      >
                         {b.brokenUrl}
                       </td>
                       <td className="px-4 py-3">
                         {b.suggestedFix ? (
-                          <span className="font-mono text-[11px] text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded" title={b.suggestedFix}>
+                          <span
+                            className="font-mono text-[11px] text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded"
+                            title={b.suggestedFix}
+                          >
                             {b.suggestedFix}
                           </span>
                         ) : (

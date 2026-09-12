@@ -27,12 +27,7 @@ export type RewardGroup = {
 };
 
 // Roles that never earn reward points.
-export const NON_EARNING_ROLES = new Set([
-  "admin",
-  "author",
-  "editor",
-  "developer",
-]);
+export const NON_EARNING_ROLES = new Set(["admin", "author", "editor", "developer"]);
 
 const KEY = "nt:rewards:v1";
 
@@ -60,7 +55,12 @@ export const DEFAULT_REWARDS: RewardGroup[] = [
     oneTime: [],
     recurring: [
       { id: "r_share", title: "Share news", reward: "₹0.20 per share", cap: "up to ₹1 / day" },
-      { id: "r_comment", title: "Comment on unique articles (after first time)", reward: "₹0.50 per unique article", cap: "up to ₹2 / day" },
+      {
+        id: "r_comment",
+        title: "Comment on unique articles (after first time)",
+        reward: "₹0.50 per unique article",
+        cap: "up to ₹2 / day",
+      },
     ],
   },
   {
@@ -70,7 +70,12 @@ export const DEFAULT_REWARDS: RewardGroup[] = [
     oneTime: [],
     recurring: [
       { id: "p_share", title: "Share news", reward: "₹0.40 per share", cap: "up to ₹2 / day" },
-      { id: "p_comment", title: "Comment on unique articles (after first time)", reward: "₹0.1 per unique article", cap: "up to ₹4 / day" },
+      {
+        id: "p_comment",
+        title: "Comment on unique articles (after first time)",
+        reward: "₹0.1 per unique article",
+        cap: "up to ₹4 / day",
+      },
     ],
   },
   {
@@ -107,10 +112,12 @@ import { query } from "./db.server";
 
 // ─── Server Functions (MySQL Rewards Persistence) ───────────────────────────
 
-export const getRewardsServer = createServerFn({ method: "GET" })
-  .handler(async (): Promise<RewardGroup[]> => {
+export const getRewardsServer = createServerFn({ method: "GET" }).handler(
+  async (): Promise<RewardGroup[]> => {
     try {
-      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'rewards_config'");
+      const rows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'rewards_config'",
+      );
       if (rows.length > 0 && rows[0].value) {
         const parsed = JSON.parse(rows[0].value) as RewardGroup[];
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -119,7 +126,8 @@ export const getRewardsServer = createServerFn({ method: "GET" })
       }
     } catch {}
     return DEFAULT_REWARDS;
-  });
+  },
+);
 
 export const saveRewardsServer = createServerFn({ method: "POST" })
   .middleware([requireAuth])
@@ -129,7 +137,7 @@ export const saveRewardsServer = createServerFn({ method: "POST" })
     await query(
       `INSERT INTO site_settings (setting_key, value) VALUES ('rewards_config', ?)
        ON DUPLICATE KEY UPDATE value = ?`,
-      [json, json]
+      [json, json],
     );
     return { success: true };
   });
@@ -154,11 +162,20 @@ export function saveRewards(groups: RewardGroup[]) {
   saveRewardsServer({ data: groups }).catch(() => {});
 }
 
-export const newRecurring = (): RecurringReward => ({ id: uid(), title: "", reward: "", cap: "", rank: "all" });
+export const newRecurring = (): RecurringReward => ({
+  id: uid(),
+  title: "",
+  reward: "",
+  cap: "",
+  rank: "all",
+});
 export const newOneTime = (): OneTimeReward => ({ id: uid(), title: "", points: 0, rank: "all" });
 
 /** Get merged rewards for a specific role, combining role-specific + "all" group */
-export function getRewardsForRole(roleId: string): { oneTime: OneTimeReward[]; recurring: RecurringReward[] } {
+export function getRewardsForRole(roleId: string): {
+  oneTime: OneTimeReward[];
+  recurring: RecurringReward[];
+} {
   const groups = loadRewards();
   const allGroup = groups.find((g) => g.roleId === "all");
   const roleGroup = groups.find((g) => g.roleId === roleId);

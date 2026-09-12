@@ -6,7 +6,10 @@ export const Route = createFileRoute("/dmca")({
   head: () => ({
     meta: [
       { title: "DMCA — News Theme" },
-      { name: "description", content: "How to submit a DMCA copyright takedown notice to News Theme." },
+      {
+        name: "description",
+        content: "How to submit a DMCA copyright takedown notice to News Theme.",
+      },
       { property: "og:url", content: "https://gorillatechsolution.com/dmca" },
     ],
     links: [{ rel: "canonical", href: "https://gorillatechsolution.com/dmca" }],
@@ -20,7 +23,7 @@ export const Route = createFileRoute("/dmca")({
 
 function DmcaPage() {
   const page = Route.useLoaderData();
-  
+
   return (
     <PolicyLayout
       title={page?.title || ""}
@@ -31,7 +34,12 @@ function DmcaPage() {
               heading: s.heading,
               body: <div dangerouslySetInnerHTML={{ __html: s.body }} />,
             }))
-          : [{ heading: page?.title || "", body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} /> }]
+          : [
+              {
+                heading: page?.title || "",
+                body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} />,
+              },
+            ]
       }
     />
   );

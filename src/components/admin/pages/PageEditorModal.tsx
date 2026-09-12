@@ -38,7 +38,9 @@ export function PageEditorModal({ page, onClose, onSave }: Props) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600">Intro / Subtitle</label>
+            <label className="mb-1 block text-xs font-semibold text-slate-600">
+              Intro / Subtitle
+            </label>
             <input
               type="text"
               value={draft.intro}
@@ -48,7 +50,9 @@ export function PageEditorModal({ page, onClose, onSave }: Props) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600">Page Body Content (HTML or Markdown)</label>
+            <label className="mb-1 block text-xs font-semibold text-slate-600">
+              Page Body Content (HTML or Markdown)
+            </label>
             <textarea
               value={draft.body}
               onChange={(e) => setDraft({ ...draft, body: e.target.value })}

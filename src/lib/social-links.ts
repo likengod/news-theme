@@ -36,8 +36,32 @@ export type SocialPlatform = {
 };
 
 export const SOCIAL_PLATFORMS: SocialPlatform[] = [
-  { key: "facebook", label: "Facebook Page URL", placeholder: "https://facebook.com/yournewspage", color: "#1877F2", helperText: "Users must visit this URL before claiming Follow points" },
-  { key: "youtube", label: "YouTube Channel URL", placeholder: "https://youtube.com/@yourchannel", color: "#FF0000", helperText: "Users must visit & subscribe before claiming points" },
-  { key: "instagram", label: "Instagram Profile URL", placeholder: "https://instagram.com/yourprofile", color: "#E4405F", helperText: "Users must visit this URL before claiming Follow points" },
-  { key: "whatsapp", label: "WhatsApp Channel URL", placeholder: "https://whatsapp.com/channel/yourchannelid", color: "#25D366", helperText: "Users must visit & join before claiming points" },
+  {
+    key: "facebook",
+    label: "Facebook Page URL",
+    placeholder: "https://facebook.com/yournewspage",
+    color: "#1877F2",
+    helperText: "Users must visit this URL before claiming Follow points",
+  },
+  {
+    key: "youtube",
+    label: "YouTube Channel URL",
+    placeholder: "https://youtube.com/@yourchannel",
+    color: "#FF0000",
+    helperText: "Users must visit & subscribe before claiming points",
+  },
+  {
+    key: "instagram",
+    label: "Instagram Profile URL",
+    placeholder: "https://instagram.com/yourprofile",
+    color: "#E4405F",
+    helperText: "Users must visit this URL before claiming Follow points",
+  },
+  {
+    key: "whatsapp",
+    label: "WhatsApp Channel URL",
+    placeholder: "https://whatsapp.com/channel/yourchannelid",
+    color: "#25D366",
+    helperText: "Users must visit & join before claiming points",
+  },
 ];

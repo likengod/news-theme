@@ -28,7 +28,8 @@ export function ProtectionSettingsForm({ s, update }: Props) {
                 <ShieldAlert className="h-4 w-4 text-emerald-600" />
               </label>
               <p className="text-xs text-slate-500">
-                When enabled, the server will automatically redirect all standard HTTP traffic to secure HTTPS. (Requires a valid SSL certificate like Let's Encrypt on your server).
+                When enabled, the server will automatically redirect all standard HTTP traffic to
+                secure HTTPS. (Requires a valid SSL certificate like Let's Encrypt on your server).
               </p>
             </div>
             <button
@@ -54,7 +55,8 @@ export function ProtectionSettingsForm({ s, update }: Props) {
                 Enable Anti-Theft & Content Protection
               </label>
               <p className="text-xs text-slate-500">
-                When enabled, copying text, printing, right-clicking, and mobile screenshots will trigger a security notice modal requesting users to share the original link instead.
+                When enabled, copying text, printing, right-clicking, and mobile screenshots will
+                trigger a security notice modal requesting users to share the original link instead.
               </p>
             </div>
             <button
@@ -103,7 +105,8 @@ export function ProtectionSettingsForm({ s, update }: Props) {
               className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 font-sans text-xs leading-relaxed text-slate-800 focus:border-slate-900 focus:outline-none"
             />
             <p className="mt-1 text-[11px] text-slate-400">
-              Explain why direct link sharing supports your newsroom survival. Use double line breaks for paragraph breaks.
+              Explain why direct link sharing supports your newsroom survival. Use double line
+              breaks for paragraph breaks.
             </p>
           </div>
 
@@ -118,7 +121,8 @@ export function ProtectionSettingsForm({ s, update }: Props) {
                 {s.protectionModalTitle || "Content Protection - News Theme"}
               </div>
               <p className="whitespace-pre-line text-slate-600 text-[11px] leading-relaxed">
-                {s.protectionModalMessage || "Our journalists work hard to bring you authentic news..."}
+                {s.protectionModalMessage ||
+                  "Our journalists work hard to bring you authentic news..."}
               </p>
             </div>
           </div>

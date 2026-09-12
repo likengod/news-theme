@@ -6,7 +6,10 @@ export const Route = createFileRoute("/refund-policy")({
   head: () => ({
     meta: [
       { title: "Refund Policy — News Theme" },
-      { name: "description", content: "Refund eligibility, timelines and process for News Theme subscriptions." },
+      {
+        name: "description",
+        content: "Refund eligibility, timelines and process for News Theme subscriptions.",
+      },
       { property: "og:url", content: "https://gorillatechsolution.com/refund-policy" },
     ],
     links: [{ rel: "canonical", href: "https://gorillatechsolution.com/refund-policy" }],
@@ -20,7 +23,7 @@ export const Route = createFileRoute("/refund-policy")({
 
 function RefundPage() {
   const page = Route.useLoaderData();
-  
+
   return (
     <PolicyLayout
       title={page?.title || ""}
@@ -31,7 +34,12 @@ function RefundPage() {
               heading: s.heading,
               body: <div dangerouslySetInnerHTML={{ __html: s.body }} />,
             }))
-          : [{ heading: page?.title || "", body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} /> }]
+          : [
+              {
+                heading: page?.title || "",
+                body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} />,
+              },
+            ]
       }
     />
   );

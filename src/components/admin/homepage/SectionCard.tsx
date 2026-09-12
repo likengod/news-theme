@@ -59,9 +59,7 @@ export function SectionCard({ label, hint, value, showCategory, onChange, childr
         {/* Primary controls */}
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="mb-1 block text-[11px] font-medium text-slate-500">
-              Heading text
-            </span>
+            <span className="mb-1 block text-[11px] font-medium text-slate-500">Heading text</span>
             <input
               type="text"
               value={localTitle}
@@ -91,11 +89,7 @@ export function SectionCard({ label, hint, value, showCategory, onChange, childr
           )}
         </div>
 
-        {children && (
-          <div className="pt-2 border-t border-slate-100">
-            {children}
-          </div>
-        )}
+        {children && <div className="pt-2 border-t border-slate-100">{children}</div>}
 
         {/* Style toggle */}
         <button
@@ -105,9 +99,7 @@ export function SectionCard({ label, hint, value, showCategory, onChange, childr
         >
           <Settings2 className="h-3.5 w-3.5" />
           {showStyle ? "Hide" : "Change"} heading style
-          <ChevronDown
-            className={`h-3.5 w-3.5 transition ${showStyle ? "rotate-180" : ""}`}
-          />
+          <ChevronDown className={`h-3.5 w-3.5 transition ${showStyle ? "rotate-180" : ""}`} />
         </button>
 
         {showStyle && (
@@ -128,9 +120,7 @@ export function SectionCard({ label, hint, value, showCategory, onChange, childr
 
             <label className="flex items-end gap-2">
               <div>
-                <span className="mb-1 block text-[11px] font-medium text-slate-500">
-                  Color
-                </span>
+                <span className="mb-1 block text-[11px] font-medium text-slate-500">Color</span>
                 <input
                   type="color"
                   value={localColor}

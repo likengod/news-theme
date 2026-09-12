@@ -1,19 +1,19 @@
 import { createServerFn } from "@tanstack/react-start";
-import { 
-  loadDbConfig, 
-  getPool, 
-  closePool, 
-  testDbConnection, 
+import {
+  loadDbConfig,
+  getPool,
+  closePool,
+  testDbConnection,
   initializeDatabase,
-  hashPassword
+  hashPassword,
 } from "./db.server";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 
 // 1. Check if setup wizard is required
-export const checkSetupStatus = createServerFn({ method: "GET" })
-  .handler(async (): Promise<{ required: boolean }> => {
+export const checkSetupStatus = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ required: boolean }> => {
     try {
       const config = loadDbConfig();
       if (!config) {
@@ -43,7 +43,8 @@ export const checkSetupStatus = createServerFn({ method: "GET" })
       console.log("[Setup Status] Connection check warning:", err?.message || err);
       return { required: true };
     }
-  });
+  },
+);
 
 // 2. Test database credentials and auto-create DB if missing
 export const testDatabaseConnection = createServerFn({ method: "POST" })
@@ -92,7 +93,9 @@ export const executeSetup = createServerFn({ method: "POST" })
         const { execSync } = await import("child_process");
         const root = path.resolve(process.cwd());
         const authUrl = process.env.GIT_AUTH_URL || "https://github.com/likengod/news-theme.git";
-        try { execSync("git config --global --add safe.directory *", { cwd: root, stdio: "ignore" }); } catch {}
+        try {
+          execSync("git config --global --add safe.directory *", { cwd: root, stdio: "ignore" });
+        } catch {}
         try {
           execSync(`git remote set-url origin ${authUrl}`, { cwd: root, stdio: "ignore" });
         } catch {

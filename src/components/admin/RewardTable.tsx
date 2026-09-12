@@ -13,7 +13,16 @@ type Props = {
   renderCell?: (item: any, colKey: string) => React.ReactNode;
 };
 
-export function RewardTable({ title, columns, data, onAdd, onEdit, onDelete, addLabel = "Add", renderCell }: Props) {
+export function RewardTable({
+  title,
+  columns,
+  data,
+  onAdd,
+  onEdit,
+  onDelete,
+  addLabel = "Add",
+  renderCell,
+}: Props) {
   return (
     <section className="rounded-lg border border-slate-200 bg-white">
       <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
@@ -29,7 +38,9 @@ export function RewardTable({ title, columns, data, onAdd, onEdit, onDelete, add
         <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
           <tr>
             {columns.map((c) => (
-              <th key={c.key} className={`px-5 py-3 ${c.align === "right" ? "text-right" : ""}`}>{c.label}</th>
+              <th key={c.key} className={`px-5 py-3 ${c.align === "right" ? "text-right" : ""}`}>
+                {c.label}
+              </th>
             ))}
             <th className="px-5 py-3 text-right">Actions</th>
           </tr>
@@ -38,16 +49,25 @@ export function RewardTable({ title, columns, data, onAdd, onEdit, onDelete, add
           {data.map((item) => (
             <tr key={item.id} className="hover:bg-slate-50/60">
               {columns.map((c) => (
-                <td key={c.key} className={`px-5 py-3 ${c.align === "right" ? "text-right" : ""} ${c.key === "title" ? "font-medium" : "text-slate-600"}`}>
-                  {renderCell ? renderCell(item, c.key) : (item[c.key] || "—")}
+                <td
+                  key={c.key}
+                  className={`px-5 py-3 ${c.align === "right" ? "text-right" : ""} ${c.key === "title" ? "font-medium" : "text-slate-600"}`}
+                >
+                  {renderCell ? renderCell(item, c.key) : item[c.key] || "—"}
                 </td>
               ))}
               <td className="px-5 py-3 text-right">
                 <div className="inline-flex gap-2">
-                  <button onClick={() => onEdit(item)} className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-xs hover:bg-slate-50">
+                  <button
+                    onClick={() => onEdit(item)}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-xs hover:bg-slate-50"
+                  >
                     <Pencil className="h-3 w-3" /> Edit
                   </button>
-                  <button onClick={() => onDelete(item.id)} className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-red-600 hover:bg-red-50">
+                  <button
+                    onClick={() => onDelete(item.id)}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-red-600 hover:bg-red-50"
+                  >
                     <Trash2 className="h-3 w-3" /> Delete
                   </button>
                 </div>
@@ -55,7 +75,11 @@ export function RewardTable({ title, columns, data, onAdd, onEdit, onDelete, add
             </tr>
           ))}
           {data.length === 0 && (
-            <tr><td colSpan={columns.length + 1} className="px-5 py-6 text-center text-slate-400">No items yet.</td></tr>
+            <tr>
+              <td colSpan={columns.length + 1} className="px-5 py-6 text-center text-slate-400">
+                No items yet.
+              </td>
+            </tr>
           )}
         </tbody>
       </table>

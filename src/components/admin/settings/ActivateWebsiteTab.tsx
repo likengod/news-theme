@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { CheckCircle2, Key, ShieldAlert, ShoppingCart, Loader2, Calendar, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  CheckCircle2,
+  Key,
+  ShieldAlert,
+  ShoppingCart,
+  Loader2,
+  Calendar,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { type SiteSettings, saveSettings } from "@/lib/site-content";
 import { Card } from "@/components/admin/settings/SettingsHelpers";
 import { LicensePricingModal } from "@/components/admin/settings/LicensePricingModal";
@@ -49,7 +58,11 @@ export function ActivateWebsiteTab({
         months = 1;
       }
 
-      if (rawKey.includes("ENTPLUS") || rawKey.includes("ENTERPRISE-PLUS") || rawKey.includes("ENTERPRISE+")) {
+      if (
+        rawKey.includes("ENTPLUS") ||
+        rawKey.includes("ENTERPRISE-PLUS") ||
+        rawKey.includes("ENTERPRISE+")
+      ) {
         plan = "Enterprise+";
         role = "VIP";
       } else if (rawKey.includes("ENTERPRISE")) {
@@ -130,6 +143,8 @@ export function ActivateWebsiteTab({
   };
 
   const handleDeactivate = async () => {
+    if (!window.confirm("Are you sure you want to change or deactivate your license? This will restrict your website features.")) return;
+    
     setInputValue("");
     const updatedSettings = {
       ...s,
@@ -151,7 +166,10 @@ export function ActivateWebsiteTab({
   };
 
   const daysRemaining = s.licenseExpiresAt
-    ? Math.max(0, Math.ceil((new Date(s.licenseExpiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    ? Math.max(
+        0,
+        Math.ceil((new Date(s.licenseExpiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+      )
     : null;
 
   return (
@@ -162,10 +180,13 @@ export function ActivateWebsiteTab({
             <div className="shrink-0 max-w-lg">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                <h3 className="text-base font-bold text-slate-900 tracking-tight">Software License Active</h3>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                  Software License Active
+                </h3>
               </div>
               <p className="mt-1 text-xs text-slate-500">
-                Your license is verified and all enterprise features, advertisements, and background automation are unlocked.
+                Your license is verified and all enterprise features, advertisements, and background
+                automation are unlocked.
               </p>
             </div>
 
@@ -181,7 +202,9 @@ export function ActivateWebsiteTab({
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-2 border-t border-slate-100">
             <div className="rounded-lg bg-slate-50 p-3 border border-slate-100">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Plan Tier</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                Plan Tier
+              </span>
               <div className="mt-1 flex items-center gap-1.5">
                 <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-extrabold text-emerald-800">
                   {s.licenseType || "Enterprise+"}
@@ -193,7 +216,9 @@ export function ActivateWebsiteTab({
             </div>
 
             <div className="rounded-lg bg-slate-50 p-3 border border-slate-100">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Status</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                Status
+              </span>
               <div className="mt-1 flex items-center gap-1.5 text-xs font-bold text-emerald-600">
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
                 <span>Active & Verified</span>
@@ -201,7 +226,9 @@ export function ActivateWebsiteTab({
             </div>
 
             <div className="rounded-lg bg-slate-50 p-3 border border-slate-100">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Validity</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                Validity
+              </span>
               <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-slate-700">
                 <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
                 <span>{daysRemaining !== null ? `${daysRemaining} Days Left` : "Permanent"}</span>
@@ -209,8 +236,13 @@ export function ActivateWebsiteTab({
             </div>
 
             <div className="rounded-lg bg-slate-50 p-3 border border-slate-100">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">License Key</span>
-              <div className="mt-1 font-mono text-xs font-bold text-slate-700 truncate" title="Hidden for security">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                License Key
+              </span>
+              <div
+                className="mt-1 font-mono text-xs font-bold text-slate-700 truncate"
+                title="Hidden for security"
+              >
                 {s.licenseKey ? `••••••••••••••••${s.licenseKey.slice(-4)}` : "Hidden"}
               </div>
             </div>
@@ -224,9 +256,7 @@ export function ActivateWebsiteTab({
           <div className="flex flex-col md:flex-row items-start gap-6">
             <div className="flex-1 space-y-4 w-full">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  License Key
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">License Key</label>
                 <div className="flex flex-wrap sm:flex-nowrap gap-3">
                   <div className="relative flex-1 w-full">
                     <Key className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -272,9 +302,9 @@ export function ActivateWebsiteTab({
         </Card>
       )}
 
-      <LicensePricingModal 
-        isOpen={isPricingModalOpen} 
-        onClose={() => setIsPricingModalOpen(false)} 
+      <LicensePricingModal
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
       />
     </div>
   );

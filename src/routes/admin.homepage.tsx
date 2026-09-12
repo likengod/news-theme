@@ -41,13 +41,9 @@ function Group({
       >
         <div>
           <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-          {description && (
-            <p className="text-[11px] text-slate-500">{description}</p>
-          )}
+          {description && <p className="text-[11px] text-slate-500">{description}</p>}
         </div>
-        <ChevronDown
-          className={`h-4 w-4 text-slate-500 transition ${open ? "rotate-180" : ""}`}
-        />
+        <ChevronDown className={`h-4 w-4 text-slate-500 transition ${open ? "rotate-180" : ""}`} />
       </button>
       {open && <div className="space-y-3 px-4 pb-4">{children}</div>}
     </section>
@@ -70,10 +66,7 @@ function HomepageEditorPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  const update = <K extends keyof HomepageConfig>(
-    key: K,
-    value: HomepageConfig[K],
-  ) => {
+  const update = <K extends keyof HomepageConfig>(key: K, value: HomepageConfig[K]) => {
     setCfg((p) => ({ ...p, [key]: value }));
     setDirty(true);
   };
@@ -138,9 +131,7 @@ function HomepageEditorPage() {
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
             <div>
-              <h3 className="text-sm font-semibold text-slate-800">
-                Stock Market Ticker Bar
-              </h3>
+              <h3 className="text-sm font-semibold text-slate-800">Stock Market Ticker Bar</h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 Displays live indices (NIFTY 50, SENSEX, GOLD, SILVER, CRUDE OIL) under the header.
               </p>
@@ -159,9 +150,7 @@ function HomepageEditorPage() {
 
           <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
             <div>
-              <h3 className="text-sm font-semibold text-slate-800">
-                Breaking News Bar
-              </h3>
+              <h3 className="text-sm font-semibold text-slate-800">Breaking News Bar</h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 Displays latest breaking headlines scrolling ticker.
               </p>
@@ -212,10 +201,7 @@ function HomepageEditorPage() {
         description="Embed live YouTube or Facebook stream on homepage hero."
         defaultOpen={false}
       >
-        <LiveVideoEditor
-          value={cfg.liveVideo}
-          onChange={(v) => update("liveVideo", v)}
-        />
+        <LiveVideoEditor value={cfg.liveVideo} onChange={(v) => update("liveVideo", v)} />
       </Group>
 
       {/* News grid */}

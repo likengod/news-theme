@@ -11,9 +11,7 @@ export function NotFound() {
       <Header showTicker={false} showBreakingBar={false} />
       <main className="flex-1 px-4 py-16">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-red-600">
-            Error 404
-          </p>
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-red-600">Error 404</p>
           <h1
             className="mt-4 font-bold leading-none text-foreground"
             style={{
@@ -30,8 +28,8 @@ export function NotFound() {
             This story is missing from our archive
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground sm:text-base">
-            The page you're looking for may have been moved, removed, or never existed.
-            Try heading back to the homepage or explore a category below.
+            The page you're looking for may have been moved, removed, or never existed. Try heading
+            back to the homepage or explore a category below.
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">

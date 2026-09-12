@@ -50,7 +50,7 @@ export function LazySection({
           {children}
         </Suspense>
       ) : (
-        fallback ?? <SectionSkeleton height={minHeight} />
+        (fallback ?? <SectionSkeleton height={minHeight} />)
       )}
     </div>
   );
@@ -58,10 +58,6 @@ export function LazySection({
 
 function SectionSkeleton({ height }: { height: number }) {
   return (
-    <div
-      aria-hidden="true"
-      className="animate-pulse bg-muted/30"
-      style={{ minHeight: height }}
-    />
+    <div aria-hidden="true" className="animate-pulse bg-muted/30" style={{ minHeight: height }} />
   );
 }

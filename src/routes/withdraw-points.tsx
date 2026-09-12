@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Wallet, Gift, Crown, Smartphone, ShoppingBag, UtensilsCrossed, Check, Lock } from "lucide-react";
+import {
+  Wallet,
+  Gift,
+  Crown,
+  Smartphone,
+  ShoppingBag,
+  UtensilsCrossed,
+  Check,
+  Lock,
+} from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { authClient as supabase } from "@/lib/auth-client";
@@ -11,7 +20,10 @@ export const Route = createFileRoute("/withdraw-points")({
   head: () => ({
     meta: [
       { title: "Withdraw Points – News Theme Wallet" },
-      { name: "description", content: "Redeem your wallet points for premium subscriptions, recharges, and gift cards." },
+      {
+        name: "description",
+        content: "Redeem your wallet points for premium subscriptions, recharges, and gift cards.",
+      },
     ],
   }),
   component: WithdrawPointsPage,
@@ -31,12 +43,56 @@ type Voucher = {
 };
 
 const VOUCHERS: Voucher[] = [
-  { id: "premium6m", title: "Premium User — 6 Months Free", cost: 0, tag: "Featured", icon: Crown, color: "amber", featured: true, freeUnlock: true },
-  { id: "recharge299", title: "Phone Recharge ₹299", cost: 299, tag: "Mobile", icon: Smartphone, color: "sky" },
-  { id: "flipkart500", title: "Flipkart Wallet ₹500", cost: 500, tag: "Shopping", icon: ShoppingBag, color: "indigo" },
-  { id: "amazon500", title: "Amazon Gift Card ₹500", cost: 500, tag: "Shopping", icon: ShoppingBag, color: "orange" },
-  { id: "swiggy500", title: "Swiggy Gift Card ₹500", cost: 500, tag: "Food", icon: UtensilsCrossed, color: "rose" },
-  { id: "zomato500", title: "Zomato Gift Card ₹500", cost: 500, tag: "Food", icon: UtensilsCrossed, color: "red" },
+  {
+    id: "premium6m",
+    title: "Premium User — 6 Months Free",
+    cost: 0,
+    tag: "Featured",
+    icon: Crown,
+    color: "amber",
+    featured: true,
+    freeUnlock: true,
+  },
+  {
+    id: "recharge299",
+    title: "Phone Recharge ₹299",
+    cost: 299,
+    tag: "Mobile",
+    icon: Smartphone,
+    color: "sky",
+  },
+  {
+    id: "flipkart500",
+    title: "Flipkart Wallet ₹500",
+    cost: 500,
+    tag: "Shopping",
+    icon: ShoppingBag,
+    color: "indigo",
+  },
+  {
+    id: "amazon500",
+    title: "Amazon Gift Card ₹500",
+    cost: 500,
+    tag: "Shopping",
+    icon: ShoppingBag,
+    color: "orange",
+  },
+  {
+    id: "swiggy500",
+    title: "Swiggy Gift Card ₹500",
+    cost: 500,
+    tag: "Food",
+    icon: UtensilsCrossed,
+    color: "rose",
+  },
+  {
+    id: "zomato500",
+    title: "Zomato Gift Card ₹500",
+    cost: 500,
+    tag: "Food",
+    icon: UtensilsCrossed,
+    color: "red",
+  },
 ];
 
 const STORAGE = "nt:withdraw:v1";
@@ -74,7 +130,9 @@ function WithdrawPointsPage() {
   }, []);
 
   const canWithdraw = state.balance >= MIN_WITHDRAW;
-  const hasClaimedFree = Object.keys(state.claimed).some((id) => VOUCHERS.find((v) => v.id === id)?.freeUnlock);
+  const hasClaimedFree = Object.keys(state.claimed).some(
+    (id) => VOUCHERS.find((v) => v.id === id)?.freeUnlock,
+  );
 
   const claim = async (v: Voucher) => {
     if (!userId) return toast.error("Please sign in first");
@@ -126,10 +184,15 @@ function WithdrawPointsPage() {
       <main className="mx-auto max-w-5xl px-4 py-10">
         <header className="mb-6 flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Wallet</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Wallet
+            </p>
             <h1 className="mt-2 font-serif text-4xl font-bold">Withdraw Points</h1>
           </div>
-          <Link to="/earn-points" className="text-xs font-semibold text-emerald-700 underline-offset-2 hover:underline">
+          <Link
+            to="/earn-points"
+            className="text-xs font-semibold text-emerald-700 underline-offset-2 hover:underline"
+          >
             ← Back to Earn Points
           </Link>
         </header>
@@ -142,8 +205,12 @@ function WithdrawPointsPage() {
                 <Wallet className="h-6 w-6" />
               </span>
               <div>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">Wallet balance</p>
-                <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">₹{state.balance}</p>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Wallet balance
+                </p>
+                <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">
+                  ₹{state.balance}
+                </p>
               </div>
             </div>
             <button
@@ -155,7 +222,9 @@ function WithdrawPointsPage() {
                   : toast.error(`Reach ${MIN_WITHDRAW} points to unlock withdrawals`)
               }
               className={`rounded-md px-5 py-2 text-sm font-bold text-white transition ${
-                canWithdraw ? "bg-emerald-600 hover:bg-emerald-700" : "cursor-not-allowed bg-muted-foreground/40"
+                canWithdraw
+                  ? "bg-emerald-600 hover:bg-emerald-700"
+                  : "cursor-not-allowed bg-muted-foreground/40"
               }`}
             >
               {canWithdraw ? "Withdraw" : `Locked · ${MIN_WITHDRAW}+ needed`}
@@ -163,10 +232,15 @@ function WithdrawPointsPage() {
           </div>
           <div className="mt-4">
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div className="h-full bg-emerald-600 transition-all" style={{ width: `${progress}%` }} />
+              <div
+                className="h-full bg-emerald-600 transition-all"
+                style={{ width: `${progress}%` }}
+              />
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              {canWithdraw ? "You can withdraw now." : `${MIN_WITHDRAW - state.balance} more points to unlock withdrawals.`}
+              {canWithdraw
+                ? "You can withdraw now."
+                : `${MIN_WITHDRAW - state.balance} more points to unlock withdrawals.`}
             </p>
           </div>
         </section>
@@ -185,7 +259,9 @@ function WithdrawPointsPage() {
                 <div
                   key={v.id}
                   className={`relative overflow-hidden rounded-xl border p-5 transition ${
-                    v.featured ? "border-amber-300 bg-amber-50/60 dark:bg-amber-950/20" : "border-border bg-card"
+                    v.featured
+                      ? "border-amber-300 bg-amber-50/60 dark:bg-amber-950/20"
+                      : "border-border bg-card"
                   }`}
                 >
                   {v.featured && (
@@ -193,19 +269,30 @@ function WithdrawPointsPage() {
                       Free
                     </span>
                   )}
-                  <span className={`mb-3 grid h-10 w-10 place-items-center rounded-full bg-${v.color}-100 text-${v.color}-700`}>
+                  <span
+                    className={`mb-3 grid h-10 w-10 place-items-center rounded-full bg-${v.color}-100 text-${v.color}-700`}
+                  >
                     <Icon className="h-5 w-5" />
                   </span>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{v.tag}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    {v.tag}
+                  </p>
                   <p className="mt-1 text-sm font-bold leading-snug">{v.title}</p>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Cost: <span className="font-semibold text-foreground">{v.cost === 0 ? "Free" : `₹${v.cost}`}</span>
+                    Cost:{" "}
+                    <span className="font-semibold text-foreground">
+                      {v.cost === 0 ? "Free" : `₹${v.cost}`}
+                    </span>
                   </p>
 
                   {claimedCode ? (
                     <div className="mt-3 rounded-md border border-emerald-300 bg-emerald-50 p-2 text-xs dark:bg-emerald-950/40">
-                      <p className="font-semibold text-emerald-700 dark:text-emerald-300">Claimed</p>
-                      <p className="font-mono text-[11px] text-emerald-900 dark:text-emerald-200">{claimedCode}</p>
+                      <p className="font-semibold text-emerald-700 dark:text-emerald-300">
+                        Claimed
+                      </p>
+                      <p className="font-mono text-[11px] text-emerald-900 dark:text-emerald-200">
+                        {claimedCode}
+                      </p>
                     </div>
                   ) : (
                     <button
@@ -216,8 +303,8 @@ function WithdrawPointsPage() {
                         locked
                           ? "cursor-not-allowed bg-muted text-muted-foreground"
                           : v.featured
-                          ? "bg-amber-500 text-white hover:bg-amber-600"
-                          : "bg-emerald-600 text-white hover:bg-emerald-700"
+                            ? "bg-amber-500 text-white hover:bg-amber-600"
+                            : "bg-emerald-600 text-white hover:bg-emerald-700"
                       }`}
                     >
                       {locked ? <Lock className="h-3 w-3" /> : <Check className="h-3 w-3" />}

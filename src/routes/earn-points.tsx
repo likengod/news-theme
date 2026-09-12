@@ -1,16 +1,34 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { UserPlus, MessageCircle, Share2, BookOpen, Wallet, Coins, AlertCircle, Lock } from "lucide-react";
+import {
+  UserPlus,
+  MessageCircle,
+  Share2,
+  BookOpen,
+  Wallet,
+  Coins,
+  AlertCircle,
+  Lock,
+} from "lucide-react";
 import { FaFacebookF, FaInstagram, FaYoutube, FaWhatsapp } from "react-icons/fa6";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { authClient as supabase } from "@/lib/auth-client";
-import { getUniqueSharesCount, getUniqueReadsCount, getUniqueCommentsCount } from "@/lib/user-actions-tracker";
+import {
+  getUniqueSharesCount,
+  getUniqueReadsCount,
+  getUniqueCommentsCount,
+} from "@/lib/user-actions-tracker";
 import { loadRewards, type OneTimeReward, type RecurringReward } from "@/lib/rewards";
 import { loadSocialLinks } from "@/lib/social-links";
-import { loadAllPendingClaims, getClaimsForUser, upsertClaim, type PendingClaim } from "@/lib/pending-claims";
+import {
+  loadAllPendingClaims,
+  getClaimsForUser,
+  upsertClaim,
+  type PendingClaim,
+} from "@/lib/pending-claims";
 import { ProofModal, type SocialTaskDef } from "@/components/earn-points/ProofModal";
 import { TaskCard, DailyTaskCard } from "@/components/earn-points/TaskCard";
 
@@ -20,9 +38,16 @@ export const Route = createFileRoute("/earn-points")({
   head: () => ({
     meta: [
       { title: "Earn Points – News Theme Wallet Rewards" },
-      { name: "description", content: "Complete tasks and earn wallet points on News Theme. Follow us on social media, share news, and grow your rewards." },
+      {
+        name: "description",
+        content:
+          "Complete tasks and earn wallet points on News Theme. Follow us on social media, share news, and grow your rewards.",
+      },
       { property: "og:title", content: "Earn Points – News Theme" },
-      { property: "og:description", content: "Complete tasks and earn wallet points on News Theme." },
+      {
+        property: "og:description",
+        content: "Complete tasks and earn wallet points on News Theme.",
+      },
       { property: "og:type", content: "website" },
     ],
   }),
@@ -33,20 +58,40 @@ export const Route = createFileRoute("/earn-points")({
 
 const SOCIAL_TASK_META: Record<string, Omit<SocialTaskDef, "id" | "title" | "points">> = {
   fb: {
-    platform: "Facebook", icon: FaFacebookF, iconColor: "#1877F2", actionLabel: "Follow",
-    hrefKey: "facebook", handleLabel: "Your Facebook profile URL or username", handlePlaceholder: "https://facebook.com/yourname or @yourname",
+    platform: "Facebook",
+    icon: FaFacebookF,
+    iconColor: "#1877F2",
+    actionLabel: "Follow",
+    hrefKey: "facebook",
+    handleLabel: "Your Facebook profile URL or username",
+    handlePlaceholder: "https://facebook.com/yourname or @yourname",
   },
   yt: {
-    platform: "YouTube", icon: FaYoutube, iconColor: "#FF0000", actionLabel: "Subscribe",
-    hrefKey: "youtube", handleLabel: "Your YouTube channel URL or username", handlePlaceholder: "https://youtube.com/@yourhandle",
+    platform: "YouTube",
+    icon: FaYoutube,
+    iconColor: "#FF0000",
+    actionLabel: "Subscribe",
+    hrefKey: "youtube",
+    handleLabel: "Your YouTube channel URL or username",
+    handlePlaceholder: "https://youtube.com/@yourhandle",
   },
   ig: {
-    platform: "Instagram", icon: FaInstagram, iconColor: "#E4405F", actionLabel: "Follow",
-    hrefKey: "instagram", handleLabel: "Your Instagram username", handlePlaceholder: "@yourinstagram",
+    platform: "Instagram",
+    icon: FaInstagram,
+    iconColor: "#E4405F",
+    actionLabel: "Follow",
+    hrefKey: "instagram",
+    handleLabel: "Your Instagram username",
+    handlePlaceholder: "@yourinstagram",
   },
   wa: {
-    platform: "WhatsApp", icon: FaWhatsapp, iconColor: "#25D366", actionLabel: "Join",
-    hrefKey: "whatsapp", handleLabel: "Your WhatsApp number (for verification)", handlePlaceholder: "+91 98765 43210",
+    platform: "WhatsApp",
+    icon: FaWhatsapp,
+    iconColor: "#25D366",
+    actionLabel: "Join",
+    hrefKey: "whatsapp",
+    handleLabel: "Your WhatsApp number (for verification)",
+    handlePlaceholder: "+91 98765 43210",
   },
 };
 
@@ -58,8 +103,12 @@ const OTHER_TASK_ICONS: Record<string, React.ComponentType<{ className?: string 
 };
 
 const DAILY_TASK_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  r_share: Share2, p_share: Share2, share_daily: Share2,
-  r_comment: MessageCircle, p_comment: MessageCircle, comment_daily: MessageCircle,
+  r_share: Share2,
+  p_share: Share2,
+  share_daily: Share2,
+  r_comment: MessageCircle,
+  p_comment: MessageCircle,
+  comment_daily: MessageCircle,
 };
 
 /* ────────────── State helpers ────────────── */
@@ -69,7 +118,10 @@ type State = { completed: Record<string, boolean>; balance: number };
 
 function loadState(userId: string): State {
   if (typeof window === "undefined") return { completed: {}, balance: 0 };
-  try { const raw = localStorage.getItem(`${STORAGE}:${userId}`); if (raw) return JSON.parse(raw) as State; } catch {}
+  try {
+    const raw = localStorage.getItem(`${STORAGE}:${userId}`);
+    if (raw) return JSON.parse(raw) as State;
+  } catch {}
   return { completed: {}, balance: 0 };
 }
 function saveState(userId: string, state: State) {
@@ -81,7 +133,9 @@ function saveState(userId: string, state: State) {
 
 function EarnPointsPage() {
   const settings = useSiteSettings();
-  const isPremium = ["Enterprise", "Enterprise+", "Premium"].includes(settings.licenseType || "") || settings.licenseRole === "VIP";
+  const isPremium =
+    ["Enterprise", "Enterprise+", "Premium"].includes(settings.licenseType || "") ||
+    settings.licenseRole === "VIP";
 
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -128,7 +182,8 @@ function EarnPointsPage() {
 
         // Auto-grant signup bonus
         if (!loaded.completed.signup) {
-          const signupTask = otherTasks.find((t) => t.id === "signup") ?? socialTasks.find((t) => t.id === "signup");
+          const signupTask =
+            otherTasks.find((t) => t.id === "signup") ?? socialTasks.find((t) => t.id === "signup");
           loaded.completed.signup = true;
           loaded.balance += signupTask?.points ?? 25;
         }
@@ -165,21 +220,47 @@ function EarnPointsPage() {
   const submitSocialProof = (task: SocialTaskDef, handle: string) => {
     if (!userId || !userEmail) return;
     upsertClaim({
-      id: task.id, userId, userName: userEmail, platform: task.platform,
-      handle, submittedAt: new Date().toISOString(), status: "pending", points: task.points,
+      id: task.id,
+      userId,
+      userName: userEmail,
+      platform: task.platform,
+      handle,
+      submittedAt: new Date().toISOString(),
+      status: "pending",
+      points: task.points,
     });
     setPendingClaims(getClaimsForUser(userId));
     setProofModal(null);
-    toast.success(`Submitted! Our team will verify your ${task.platform} follow within 24–48 hours.`);
+    toast.success(
+      `Submitted! Our team will verify your ${task.platform} follow within 24–48 hours.`,
+    );
   };
 
   const claimOther = (task: OneTimeReward) => {
-    if (!userId) { toast.error("Please sign in to claim points"); return; }
-    if (state.completed[task.id]) { toast.info("Already claimed"); return; }
-    if (task.id === "first_shares" && shareCount < 5) { toast.error(`Share 5 unique articles first. You have ${shareCount} so far.`); return; }
-    if (task.id === "first_comments" && commentCount < 5) { toast.error(`Comment on 5 unique articles first. You have ${commentCount} so far.`); return; }
-    if (task.id === "first_reads" && readCount < 5) { toast.error(`Read 5 unique articles first. You have ${readCount} so far.`); return; }
-    const next: State = { completed: { ...state.completed, [task.id]: true }, balance: state.balance + task.points };
+    if (!userId) {
+      toast.error("Please sign in to claim points");
+      return;
+    }
+    if (state.completed[task.id]) {
+      toast.info("Already claimed");
+      return;
+    }
+    if (task.id === "first_shares" && shareCount < 5) {
+      toast.error(`Share 5 unique articles first. You have ${shareCount} so far.`);
+      return;
+    }
+    if (task.id === "first_comments" && commentCount < 5) {
+      toast.error(`Comment on 5 unique articles first. You have ${commentCount} so far.`);
+      return;
+    }
+    if (task.id === "first_reads" && readCount < 5) {
+      toast.error(`Read 5 unique articles first. You have ${readCount} so far.`);
+      return;
+    }
+    const next: State = {
+      completed: { ...state.completed, [task.id]: true },
+      balance: state.balance + task.points,
+    };
     saveState(userId, next);
     setState(next);
     toast.success(`+${task.points} points added!`);
@@ -189,8 +270,10 @@ function EarnPointsPage() {
 
   /* ✨ Progress helpers ✨ */
   const getProgress = (id: string) => {
-    if (id === "first_shares") return { text: `${shareCount}/5 articles shared`, ok: shareCount >= 5 };
-    if (id === "first_comments") return { text: `${commentCount}/5 articles commented`, ok: commentCount >= 5 };
+    if (id === "first_shares")
+      return { text: `${shareCount}/5 articles shared`, ok: shareCount >= 5 };
+    if (id === "first_comments")
+      return { text: `${commentCount}/5 articles commented`, ok: commentCount >= 5 };
     if (id === "first_reads") return { text: `${readCount}/5 articles read`, ok: readCount >= 5 };
     return { text: "", ok: true };
   };
@@ -206,7 +289,8 @@ function EarnPointsPage() {
             </div>
             <h1 className="mt-6 text-xl font-bold text-card-foreground">Feature Locked</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              The Wallet and Rewards system is exclusively available on Premium, Enterprise, and Enterprise+ licenses. Please upgrade your license to unlock this feature.
+              The Wallet and Rewards system is exclusively available on Premium, Enterprise, and
+              Enterprise+ licenses. Please upgrade your license to unlock this feature.
             </p>
             <Link
               to="/"
@@ -227,10 +311,13 @@ function EarnPointsPage() {
 
       <main className="mx-auto max-w-5xl px-4 py-10">
         <header className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Wallet Rewards</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Wallet Rewards
+          </p>
           <h1 className="mt-2 font-serif text-4xl font-bold leading-tight">Earn Points</h1>
           <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-            Complete tasks to grow your News Theme wallet. Social media points are credited after admin verification.
+            Complete tasks to grow your News Theme wallet. Social media points are credited after
+            admin verification.
           </p>
         </header>
 
@@ -242,8 +329,12 @@ function EarnPointsPage() {
                 <Wallet className="h-6 w-6" />
               </span>
               <div>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">Wallet balance</p>
-                <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">₹{state.balance}</p>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Wallet balance
+                </p>
+                <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">
+                  ₹{state.balance}
+                </p>
                 {userEmail && <p className="text-xs text-muted-foreground">{userEmail}</p>}
               </div>
             </div>
@@ -252,14 +343,23 @@ function EarnPointsPage() {
                 <p>Total one-time rewards available</p>
                 <p className="text-lg font-semibold text-foreground">₹{totalAvailable}</p>
               </div>
-              <Link to="/withdraw-points" className="rounded-md bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700">
+              <Link
+                to="/withdraw-points"
+                className="rounded-md bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700"
+              >
                 Withdraw Points →
               </Link>
             </div>
           </div>
           {!userId && (
             <div className="mt-4 rounded-lg border border-dashed border-emerald-300 bg-white/60 p-3 text-sm">
-              <Link to="/auth" className="font-semibold text-emerald-700 underline-offset-2 hover:underline">Sign in</Link> to start earning.
+              <Link
+                to="/auth"
+                className="font-semibold text-emerald-700 underline-offset-2 hover:underline"
+              >
+                Sign in
+              </Link>{" "}
+              to start earning.
             </div>
           )}
         </section>
@@ -270,7 +370,9 @@ function EarnPointsPage() {
             <h2 className="mb-1 flex items-center gap-2 text-xl font-bold">
               <Coins className="h-5 w-5 text-amber-500" /> Social Media Tasks
             </h2>
-            <p className="mb-4 text-xs text-slate-500">Points credited after admin verifies your follow. Our team checks within 24–48 hours.</p>
+            <p className="mb-4 text-xs text-slate-500">
+              Points credited after admin verifies your follow. Our team checks within 24–48 hours.
+            </p>
             <div className="grid gap-3 sm:grid-cols-2">
               {socialTasks.map((task) => {
                 const meta = SOCIAL_TASK_META[task.id];
@@ -286,8 +388,16 @@ function EarnPointsPage() {
                     done={!!state.completed[task.id]}
                     pending={pending}
                     onClaim={() => {
-                      if (!userId) { toast.error("Sign in to earn points"); return; }
-                      const fullTask: SocialTaskDef = { ...meta, id: task.id, title: task.title, points: task.points };
+                      if (!userId) {
+                        toast.error("Sign in to earn points");
+                        return;
+                      }
+                      const fullTask: SocialTaskDef = {
+                        ...meta,
+                        id: task.id,
+                        title: task.title,
+                        points: task.points,
+                      };
                       setProofModal(fullTask);
                     }}
                     actionLabel={`${meta.actionLabel} & Claim`}
@@ -299,7 +409,9 @@ function EarnPointsPage() {
             <div className="mt-4 flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-xs text-blue-800">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
               <div>
-                <strong>Why pending verification?</strong> Social platforms do not allow websites to verify follows automatically. Our admins manually check your submitted handle within 24–48 hours.
+                <strong>Why pending verification?</strong> Social platforms do not allow websites to
+                verify follows automatically. Our admins manually check your submitted handle within
+                24–48 hours.
               </div>
             </div>
           </section>
@@ -359,9 +471,13 @@ function EarnPointsPage() {
         <section className="rounded-xl border border-border bg-muted/30 p-5 text-xs text-muted-foreground">
           <p className="mb-1 font-semibold text-foreground">How social verification works</p>
           <ul className="list-disc space-y-1 pl-5">
-            <li>Click <strong>Follow & Claim</strong> → our page opens + a proof form appears</li>
+            <li>
+              Click <strong>Follow & Claim</strong> → our page opens + a proof form appears
+            </li>
             <li>Enter your handle/username and confirm you followed</li>
-            <li>Our admin team checks your handle within <strong>24–48 hours</strong></li>
+            <li>
+              Our admin team checks your handle within <strong>24–48 hours</strong>
+            </li>
             <li>Points are credited after approval — you'll see them in your wallet</li>
             <li>Fake submissions permanently ban you from the rewards program</li>
           </ul>

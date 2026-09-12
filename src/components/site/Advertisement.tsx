@@ -52,10 +52,22 @@ export default function Advertisement({
 }: AdProps) {
   const ctx = useAdSettings();
 
-  const initialMode = slot && ctx?.adConfig ? (ctx.adConfig.modes[slot] || "image") : (slot ? loadAdSlotMode(slot) : "image");
-  const initialScript = slot && ctx?.adConfig ? (ctx.adConfig.scripts[slot] || "") : (slot ? loadAdSlotScript(slot) : "");
-  const initialSlides = slot && ctx?.adConfig ? (ctx.adConfig.slots[slot] || []) : (slot ? loadAds(slot) : []);
-  const initialInterval = slot && ctx?.adConfig ? ((ctx.adConfig.rotations[slot] || 5) * 1000) : (slot ? loadAdRotation(slot) * 1000 : 4000);
+  const initialMode =
+    slot && ctx?.adConfig
+      ? ctx.adConfig.modes[slot] || "image"
+      : slot
+        ? loadAdSlotMode(slot)
+        : "image";
+  const initialScript =
+    slot && ctx?.adConfig ? ctx.adConfig.scripts[slot] || "" : slot ? loadAdSlotScript(slot) : "";
+  const initialSlides =
+    slot && ctx?.adConfig ? ctx.adConfig.slots[slot] || [] : slot ? loadAds(slot) : [];
+  const initialInterval =
+    slot && ctx?.adConfig
+      ? (ctx.adConfig.rotations[slot] || 5) * 1000
+      : slot
+        ? loadAdRotation(slot) * 1000
+        : 4000;
 
   const [slotMode, setSlotMode] = useState<AdSlotMode>(initialMode);
   const [slotScript, setSlotScript] = useState(initialScript);
@@ -91,10 +103,16 @@ export default function Advertisement({
             let img = s.image;
             if (slot === "home1" || slot === "ad3" || slot === "popup" || slot === "reel_ads") {
               // Strictly portrait slots: prioritize portrait image, filter out legacy landscape
-              img = s.imagePortrait || (s.orientation === "portrait" ? s.image : "") || (s.imageLandscape && s.image === s.imageLandscape ? "" : s.image);
+              img =
+                s.imagePortrait ||
+                (s.orientation === "portrait" ? s.image : "") ||
+                (s.imageLandscape && s.image === s.imageLandscape ? "" : s.image);
             } else if (slot === "home2" || slot === "leaderboard") {
               // Strictly landscape slots: prioritize landscape image, filter out legacy portrait
-              img = s.imageLandscape || (s.orientation === "landscape" ? s.image : "") || (s.imagePortrait && s.image === s.imagePortrait ? "" : s.image);
+              img =
+                s.imageLandscape ||
+                (s.orientation === "landscape" ? s.image : "") ||
+                (s.imagePortrait && s.image === s.imagePortrait ? "" : s.image);
             }
             return { image: img, href: s.href };
           })
@@ -112,8 +130,6 @@ export default function Advertisement({
     setCanSeeAds(currentRoleSeesPopups());
   }, []);
 
-
-
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(false);
   const rootRef = useRef<HTMLElement | null>(null);
@@ -125,15 +141,15 @@ export default function Advertisement({
       setVisible(true);
       return;
     }
-    const io = new IntersectionObserver(
-      ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0.1 },
-    );
+    const io = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), {
+      threshold: 0.1,
+    });
     io.observe(el);
     return () => io.disconnect();
   }, []);
 
-  const hasScriptAd = slotMode === "script" || items.some((s) => s.type === "script" || !!s.scriptCode);
+  const hasScriptAd =
+    slotMode === "script" || items.some((s) => s.type === "script" || !!s.scriptCode);
 
   useEffect(() => {
     if (items.length <= 1 || !visible || hasScriptAd) return;
@@ -144,7 +160,8 @@ export default function Advertisement({
   }, [items.length, finalInterval, visible, hasScriptAd]);
 
   const currentItem = items[index];
-  const isScriptAd = slotMode === "script" || currentItem?.type === "script" || !!currentItem?.scriptCode;
+  const isScriptAd =
+    slotMode === "script" || currentItem?.type === "script" || !!currentItem?.scriptCode;
 
   if (!canSeeAds) return null;
   if (items.length === 0 && !isScriptAd) return null;
@@ -176,35 +193,34 @@ export default function Advertisement({
               <div
                 key={i}
                 className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-                  style={{ opacity: i === index ? 1 : 0 }}
-                  aria-hidden={i !== index}
-                >
-                  {s.type === "script" || s.scriptCode ? (
-                    <ScriptAdRenderer code={s.scriptCode || ""} />
-                  ) : s.video ? (
-                    <video
-                      src={s.video}
-                      poster={s.poster}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      className="h-full w-full object-contain"
+                style={{ opacity: i === index ? 1 : 0 }}
+                aria-hidden={i !== index}
+              >
+                {s.type === "script" || s.scriptCode ? (
+                  <ScriptAdRenderer code={s.scriptCode || ""} />
+                ) : s.video ? (
+                  <video
+                    src={s.video}
+                    poster={s.poster}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="h-full w-full object-contain"
+                  />
+                ) : s.image ? (
+                  i === index ? (
+                    <img
+                      src={s.image}
+                      alt="Advertisement"
+                      loading="lazy"
+                      decoding="async"
+                      className={`h-full w-full ${slot === "home1" || slot === "ad3" ? "object-cover" : "object-contain"}`}
                     />
-                  ) : s.image ? (
-                    i === index ? (
-                      <img
-                        src={s.image}
-                        alt="Advertisement"
-                        loading="lazy"
-                        decoding="async"
-                        className={`h-full w-full ${slot === "home1" || slot === "ad3" ? "object-cover" : "object-contain"}`}
-                      />
-                    ) : null
-                  ) : null}
-                </div>
-              ))
-            }
+                  ) : null
+                ) : null}
+              </div>
+            ))}
             {items.length > 1 && (
               <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
                 {items.map((_, i) => (

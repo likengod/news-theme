@@ -17,7 +17,9 @@ export const Route = createFileRoute("/setup")({
     <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full bg-slate-800 p-6 rounded-lg border border-red-500/30">
         <h2 className="text-red-400 font-bold text-lg mb-2">Setup Wizard Error</h2>
-        <p className="text-xs text-slate-300 font-mono break-all">{error?.message || String(error)}</p>
+        <p className="text-xs text-slate-300 font-mono break-all">
+          {error?.message || String(error)}
+        </p>
         <button
           onClick={() => window.location.reload()}
           className="mt-4 px-4 py-2 bg-amber-500 text-slate-900 rounded font-semibold text-xs hover:bg-amber-400"
@@ -132,26 +134,31 @@ function SetupWizardPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-xl">
         <div className="bg-slate-800 py-8 px-4 shadow-xl rounded-lg border border-slate-700 sm:px-10">
-          
           {/* Progress Indicators */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <div className={`flex items-center justify-center h-8 w-8 rounded-full border ${step >= 1 ? "bg-amber-500 border-amber-500 text-slate-900" : "border-slate-600 text-slate-400"} font-bold text-sm`}>
+                <div
+                  className={`flex items-center justify-center h-8 w-8 rounded-full border ${step >= 1 ? "bg-amber-500 border-amber-500 text-slate-900" : "border-slate-600 text-slate-400"} font-bold text-sm`}
+                >
                   {step > 1 ? <Check className="h-4 w-4" /> : "1"}
                 </div>
                 <span className="ml-2 text-sm font-medium text-slate-300">Database</span>
               </div>
               <div className="flex-1 h-0.5 bg-slate-700 mx-4" />
               <div className="flex items-center">
-                <div className={`flex items-center justify-center h-8 w-8 rounded-full border ${step >= 2 ? "bg-amber-500 border-amber-500 text-slate-900" : "border-slate-600 text-slate-400"} font-bold text-sm`}>
+                <div
+                  className={`flex items-center justify-center h-8 w-8 rounded-full border ${step >= 2 ? "bg-amber-500 border-amber-500 text-slate-900" : "border-slate-600 text-slate-400"} font-bold text-sm`}
+                >
                   {step > 2 ? <Check className="h-4 w-4" /> : "2"}
                 </div>
                 <span className="ml-2 text-sm font-medium text-slate-300">Admin Account</span>
               </div>
               <div className="flex-1 h-0.5 bg-slate-700 mx-4" />
               <div className="flex items-center">
-                <div className={`flex items-center justify-center h-8 w-8 rounded-full border ${step >= 3 ? "bg-amber-500 border-amber-500 text-slate-900" : "border-slate-600 text-slate-400"} font-bold text-sm`}>
+                <div
+                  className={`flex items-center justify-center h-8 w-8 rounded-full border ${step >= 3 ? "bg-amber-500 border-amber-500 text-slate-900" : "border-slate-600 text-slate-400"} font-bold text-sm`}
+                >
                   3
                 </div>
                 <span className="ml-2 text-sm font-medium text-slate-300">Install</span>
@@ -167,7 +174,8 @@ function SetupWizardPage() {
                   <Database className="h-5 w-5 text-amber-500" /> Connect Database
                 </h3>
                 <p className="mt-1 text-xs text-slate-400">
-                  Input connection credentials for your MySQL instance. If the database does not exist, we will try to create it.
+                  Input connection credentials for your MySQL instance. If the database does not
+                  exist, we will try to create it.
                 </p>
               </div>
 
@@ -241,7 +249,8 @@ function SetupWizardPage() {
                 >
                   {testing ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" /> Verifying Connection &amp; Database...
+                      <Loader2 className="h-4 w-4 animate-spin" /> Verifying Connection &amp;
+                      Database...
                     </>
                   ) : (
                     <>
@@ -267,7 +276,9 @@ function SetupWizardPage() {
 
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300">Full Name / Display Name</label>
+                  <label className="text-xs font-semibold text-slate-300">
+                    Full Name / Display Name
+                  </label>
                   <input
                     name="displayName"
                     value={adminConfig.displayName}
@@ -325,7 +336,11 @@ function SetupWizardPage() {
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
                       aria-label="Toggle administrator confirm password visibility"
                     >
-                      {showConfirmPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showConfirmPwd ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -374,7 +389,9 @@ function SetupWizardPage() {
               <div className="bg-slate-900/60 p-4 rounded-md border border-slate-700 text-xs space-y-3">
                 <div>
                   <span className="font-bold block text-slate-400">MySQL Connection:</span>
-                  <span className="font-mono">{dbConfig.user}@{dbConfig.host}:{dbConfig.port}/{dbConfig.database}</span>
+                  <span className="font-mono">
+                    {dbConfig.user}@{dbConfig.host}:{dbConfig.port}/{dbConfig.database}
+                  </span>
                 </div>
                 <div>
                   <span className="font-bold block text-slate-400">Admin Email:</span>
@@ -410,7 +427,6 @@ function SetupWizardPage() {
               </div>
             </div>
           )}
-
         </div>
       </div>
     </div>

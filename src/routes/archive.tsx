@@ -46,7 +46,20 @@ export const Route = createFileRoute("/archive")({
 
 function fmtDate(d: Date): string {
   if (isNaN(d.getTime())) return "";
-  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
   const day = d.getUTCDate();
   const month = months[d.getUTCMonth()];
   const year = d.getUTCFullYear();
@@ -57,10 +70,24 @@ function ArchivePage() {
   const search = Route.useSearch();
   const loaderData = Route.useLoaderData();
   const page = search.page ?? 1;
-  
+
   const { items, total, totalPages } = loaderData;
 
-  const months = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const months = [
+    "",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
   const label = [
     search.day ? Number(search.day) : null,
     search.month ? months[Number(search.month)] : null,
@@ -75,7 +102,9 @@ function ArchivePage() {
 
       <main className="mx-auto max-w-7xl px-4 py-10">
         <header className="border-b border-border pb-6">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground">Archive</p>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground">
+            Archive
+          </p>
           <h1 className="mt-2 font-serif text-5xl font-bold text-foreground md:text-6xl">
             {label || "All Stories"}
           </h1>
@@ -94,18 +123,26 @@ function ArchivePage() {
             {items.map((p, i) => (
               <React.Fragment key={`${p.title}-${i}`}>
                 <article className="py-6 first:pt-0">
-                <div>
-                  <h3 className="headline font-serif text-lg font-bold leading-snug text-primary line-clamp-2">
-                    <Link to={`/news/${p.slug}`} className="hover:underline">{p.title}</Link>
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">{p.excerpt}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-widest">
-                    <span className="text-muted-foreground normal-case tracking-normal">{fmtDate(new Date(p.date))}</span>
-                    <span className="font-semibold text-foreground">· {p.category}</span>
-                    <span className="ml-auto"><Views count={p.views} /></span>
+                  <div>
+                    <h3 className="headline font-serif text-lg font-bold leading-snug text-primary line-clamp-2">
+                      <Link to={`/news/${p.slug}`} className="hover:underline">
+                        {p.title}
+                      </Link>
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">
+                      {p.excerpt}
+                    </p>
+                    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-widest">
+                      <span className="text-muted-foreground normal-case tracking-normal">
+                        {fmtDate(new Date(p.date))}
+                      </span>
+                      <span className="font-semibold text-foreground">· {p.category}</span>
+                      <span className="ml-auto">
+                        <Views count={p.views} />
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </article>
+                </article>
                 {(i + 1) % 3 === 0 && (
                   <div className="py-6">
                     <Advertisement slot="leaderboard" aspectRatio="728 / 90" />

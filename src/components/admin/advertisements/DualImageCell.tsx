@@ -33,7 +33,7 @@ async function convertFileToWebp(file: File): Promise<File> {
             resolve(new File([blob], webpName, { type: "image/webp" }));
           },
           "image/webp",
-          0.82
+          0.82,
         );
       };
       img.onerror = () => resolve(file);
@@ -45,7 +45,11 @@ async function convertFileToWebp(file: File): Promise<File> {
 }
 
 async function convertDataUrlToWebp(dataUrl: string): Promise<string> {
-  if (!dataUrl || dataUrl.startsWith("data:image/webp") || dataUrl.toLowerCase().endsWith(".webp")) {
+  if (
+    !dataUrl ||
+    dataUrl.startsWith("data:image/webp") ||
+    dataUrl.toLowerCase().endsWith(".webp")
+  ) {
     return dataUrl;
   }
   return new Promise((resolve) => {
@@ -164,7 +168,9 @@ export function SingleSlotImagePicker({
       </div>
 
       <div className="mt-1 flex items-center gap-1">
-        <span className={`rounded px-1.5 py-0.2 text-[8px] font-bold uppercase tracking-wider text-white ${badgeColor}`}>
+        <span
+          className={`rounded px-1.5 py-0.2 text-[8px] font-bold uppercase tracking-wider text-white ${badgeColor}`}
+        >
           {label}
         </span>
         <span className="rounded bg-emerald-50 border border-emerald-200 px-1 py-0.2 text-[7.5px] font-extrabold uppercase tracking-wider text-emerald-700">
@@ -176,8 +182,12 @@ export function SingleSlotImagePicker({
       {menuOpen && (
         <div className="absolute left-1/2 top-full z-50 mt-1.5 w-56 -translate-x-1/2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl animate-in fade-in-50 zoom-in-95">
           <div className="border-b border-slate-100 bg-slate-50/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 flex items-center justify-between">
-            <span>{label} ({recSize})</span>
-            <span className="text-[8px] font-extrabold text-emerald-600 bg-emerald-100/70 px-1 rounded">WEBP ONLY</span>
+            <span>
+              {label} ({recSize})
+            </span>
+            <span className="text-[8px] font-extrabold text-emerald-600 bg-emerald-100/70 px-1 rounded">
+              WEBP ONLY
+            </span>
           </div>
           <button
             type="button"
@@ -190,7 +200,9 @@ export function SingleSlotImagePicker({
             <Upload className="h-4 w-4 shrink-0 text-slate-500" />
             <div>
               <div className="font-medium text-slate-900">Upload WebP image</div>
-              <div className="text-[10px] text-slate-400">Select .webp from device (auto-converts)</div>
+              <div className="text-[10px] text-slate-400">
+                Select .webp from device (auto-converts)
+              </div>
             </div>
           </button>
           <button
@@ -204,7 +216,9 @@ export function SingleSlotImagePicker({
             <FolderOpen className="h-4 w-4 shrink-0 text-slate-500" />
             <div>
               <div className="font-medium text-slate-900">Media Library</div>
-              <div className="text-[10px] text-slate-400">Select image (auto-converts to .webp)</div>
+              <div className="text-[10px] text-slate-400">
+                Select image (auto-converts to .webp)
+              </div>
             </div>
           </button>
         </div>
@@ -257,10 +271,17 @@ export function DualImageCell({
     ad.imageLandscape ||
     (ad.image && (effectiveOrient === "landscape" || !ad.imagePortrait) ? ad.image : "");
 
-  const landscapeSize = slot === "home2" ? "406 × 196 px" : slot === "leaderboard" ? "728 × 90 px, etc." : "1200 × 675 px";
-  
+  const landscapeSize =
+    slot === "home2"
+      ? "406 × 196 px"
+      : slot === "leaderboard"
+        ? "728 × 90 px, etc."
+        : "1200 × 675 px";
+
   if (slot === "home1" || slot === "ad3") {
-    const portraitValOnly = ad.imagePortrait || (ad.orientation === "portrait" ? ad.image : (!ad.imageLandscape ? ad.image : ""));
+    const portraitValOnly =
+      ad.imagePortrait ||
+      (ad.orientation === "portrait" ? ad.image : !ad.imageLandscape ? ad.image : "");
     return (
       <div className="flex justify-start">
         <SingleSlotImagePicker
@@ -284,7 +305,9 @@ export function DualImageCell({
   }
 
   if (slot === "home2") {
-    const landscapeValOnly = ad.imageLandscape || (ad.orientation === "landscape" ? ad.image : (!ad.imagePortrait ? ad.image : ""));
+    const landscapeValOnly =
+      ad.imageLandscape ||
+      (ad.orientation === "landscape" ? ad.image : !ad.imagePortrait ? ad.image : "");
     return (
       <div className="flex justify-start">
         <SingleSlotImagePicker

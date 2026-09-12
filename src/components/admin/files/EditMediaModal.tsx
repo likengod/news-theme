@@ -25,11 +25,14 @@ export function EditMediaModal({ item, onClose, onSave }: Props) {
       <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-slate-100 p-4">
           <h2 className="text-lg font-semibold text-slate-800">Edit Media Details</h2>
-          <button onClick={onClose} className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+          <button
+            onClick={onClose}
+            className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">File Name *</label>
@@ -41,7 +44,7 @@ export function EditMediaModal({ item, onClose, onSave }: Props) {
               className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
             />
           </div>
-          
+
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Alt Text</label>
             <input

@@ -1,1 +1,26 @@
-import{s as e}from"./jsx-runtime-CF8L0Gwd.js";import{t}from"./react-YNiYR47K.js";import{i as n}from"./createServerFn-Ciss0-sp.js";import{t as r}from"./useRouter-qlf10565.js";var i=e(t(),1);function a(e){let t=r();return i.useCallback(async(...r)=>{try{let t=await e(...r);if(n(t))throw t;return t}catch(e){if(n(e))return e.options._fromLocation=t.stores.location.get(),t.navigate(t.resolveRedirect(e).options);throw e}},[t,e])}export{a as t};
+import { s as e } from "./jsx-runtime-CF8L0Gwd.js";
+import { t } from "./react-YNiYR47K.js";
+import { i as n } from "./createServerFn-Ciss0-sp.js";
+import { t as r } from "./useRouter-qlf10565.js";
+var i = e(t(), 1);
+function a(e) {
+  let t = r();
+  return i.useCallback(
+    async (...r) => {
+      try {
+        let t = await e(...r);
+        if (n(t)) throw t;
+        return t;
+      } catch (e) {
+        if (n(e))
+          return (
+            (e.options._fromLocation = t.stores.location.get()),
+            t.navigate(t.resolveRedirect(e).options)
+          );
+        throw e;
+      }
+    },
+    [t, e],
+  );
+}
+export { a as t };

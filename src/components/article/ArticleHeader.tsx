@@ -5,11 +5,11 @@ import { loadSettings } from "@/lib/site-content";
 
 const FESTIVE_GRADIENT_MAP: Record<string, string> = {
   "indian-flag": "linear-gradient(to right, #FF9933, #000080, #138808)",
-  "diwali": "linear-gradient(to right, #FF8008, #FFC837, #FF007F, #7F00FF)",
-  "sunset": "linear-gradient(to right, #F5576C, #F093FB)",
-  "neon": "linear-gradient(to right, #FF007F, #7F00FF, #00F0FF)",
-  "ocean": "linear-gradient(to right, #00c6ff, #0072ff)",
-  "forest": "linear-gradient(to right, #11998e, #38ef7d)",
+  diwali: "linear-gradient(to right, #FF8008, #FFC837, #FF007F, #7F00FF)",
+  sunset: "linear-gradient(to right, #F5576C, #F093FB)",
+  neon: "linear-gradient(to right, #FF007F, #7F00FF, #00F0FF)",
+  ocean: "linear-gradient(to right, #00c6ff, #0072ff)",
+  forest: "linear-gradient(to right, #11998e, #38ef7d)",
 };
 
 type Props = {
@@ -45,26 +45,30 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
 
   const activeGradient = settings.festiveCategoryTitleGradient || settings.topBarTextGradient;
 
-  const badgeStyle = activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
-    ? {
-        backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-        display: "inline-block",
-      }
-    : {
-        color: settings.festiveCategoryTitleColor || settings.topBarTextColor || "#000000",
-      };
+  const badgeStyle =
+    activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
+      ? {
+          backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+          display: "inline-block",
+        }
+      : {
+          color: settings.festiveCategoryTitleColor || settings.topBarTextColor || "#000000",
+        };
 
-  const badgeText = settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText
-    ? settings.topBarWeatherCustomText
-    : category;
+  const badgeText =
+    settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText
+      ? settings.topBarWeatherCustomText
+      : category;
 
   return (
     <>
       <nav className="mb-1 text-xs uppercase tracking-widest text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">Home</Link>
+        <Link to="/" className="hover:text-foreground">
+          Home
+        </Link>
         <span className="mx-2">/</span>
         <Link
           to="/$slug"
@@ -87,9 +91,7 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
           {title}
         </h1>
         {deck && (
-          <p className="mt-3 text-lg leading-relaxed text-muted-foreground md:text-xl">
-            {deck}
-          </p>
+          <p className="mt-3 text-lg leading-relaxed text-muted-foreground md:text-xl">{deck}</p>
         )}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-y-3 gap-x-2 text-[10px] sm:text-xs uppercase tracking-widest text-muted-foreground">
           <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-4 gap-y-1 flex-1">
@@ -105,7 +107,7 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
             <Views count={views} />
           </div>
 
-          {(settings.googleNews && settings.googleNews !== "#") && (
+          {settings.googleNews && settings.googleNews !== "#" && (
             <a
               href={settings.googleNews || "https://news.google.com/"}
               target="_blank"
@@ -113,9 +115,15 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
               title="Follow on Google News"
               className="flex shrink-0 items-center gap-2 transition hover:opacity-80 normal-case tracking-normal rounded hover:bg-muted p-1 sm:p-0"
             >
-              <img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Google_News_icon.svg" alt="Google News" className="h-6 w-6 sm:h-7 sm:w-7" />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/d/da/Google_News_icon.svg"
+                alt="Google News"
+                className="h-6 w-6 sm:h-7 sm:w-7"
+              />
               <div className="flex flex-col items-start justify-center text-left font-sans">
-                <span className="text-[9px] font-medium tracking-wide text-[#3c4043] uppercase leading-none mb-[1px]">Follow on</span>
+                <span className="text-[9px] font-medium tracking-wide text-[#3c4043] uppercase leading-none mb-[1px]">
+                  Follow on
+                </span>
                 <span className="text-[15px] font-medium leading-none tracking-tight flex items-center">
                   <span className="text-[#4285F4]">G</span>
                   <span className="text-[#EA4335]">o</span>

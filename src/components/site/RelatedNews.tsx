@@ -10,12 +10,36 @@ import wsImg from "@/assets/news-wallstreet.webp";
 import tradeImg from "@/assets/news-trade.webp";
 
 const POOL = [
-  { title: "Fed Signals Pause on Cuts as Inflation Reignites in Core Services", img: fedImg, kicker: "Business" },
-  { title: "Bitcoin Tags Fresh High as Spot ETF Inflows Cross $50B Mark", img: cryptoImg, kicker: "Crypto" },
-  { title: "Nvidia's Blackwell Surge Pushes Hyperscaler Capex to $320B", img: techImg, kicker: "Tech" },
-  { title: "Goldman, JPMorgan Beat as Trading Desks Rake in Record Quarter", img: wsImg, kicker: "Markets" },
-  { title: "Brent Slides Below $74 as OPEC+ Eyes Earlier Supply Return", img: oilImg, kicker: "Energy" },
-  { title: "Pacific Container Rates Whipsaw on Tariff Truce Speculation", img: tradeImg, kicker: "Global" },
+  {
+    title: "Fed Signals Pause on Cuts as Inflation Reignites in Core Services",
+    img: fedImg,
+    kicker: "Business",
+  },
+  {
+    title: "Bitcoin Tags Fresh High as Spot ETF Inflows Cross $50B Mark",
+    img: cryptoImg,
+    kicker: "Crypto",
+  },
+  {
+    title: "Nvidia's Blackwell Surge Pushes Hyperscaler Capex to $320B",
+    img: techImg,
+    kicker: "Tech",
+  },
+  {
+    title: "Goldman, JPMorgan Beat as Trading Desks Rake in Record Quarter",
+    img: wsImg,
+    kicker: "Markets",
+  },
+  {
+    title: "Brent Slides Below $74 as OPEC+ Eyes Earlier Supply Return",
+    img: oilImg,
+    kicker: "Energy",
+  },
+  {
+    title: "Pacific Container Rates Whipsaw on Tariff Truce Speculation",
+    img: tradeImg,
+    kicker: "Global",
+  },
   { title: "ECB Holds but Lagarde Opens Door to a Spring Move", img: heroImg, kicker: "Policy" },
 ];
 
@@ -33,12 +57,7 @@ export function RelatedNews({ currentSlug }: { currentSlug?: string }) {
           const slug = slugify(it.title);
           const views = viewsFor(slug);
           return (
-            <Link
-              key={slug}
-              to="/news/$slug"
-              params={{ slug }}
-              className="group block"
-            >
+            <Link key={slug} to="/news/$slug" params={{ slug }} className="group block">
               <div className="overflow-hidden">
                 <img
                   src={it.img}

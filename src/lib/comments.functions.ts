@@ -31,7 +31,8 @@ export const getAdminComments = createServerFn({ method: "GET" })
     }
 
     if (q) {
-      filterSql += " AND (body LIKE ? OR user_name LIKE ? OR user_email LIKE ? OR article_title LIKE ?)";
+      filterSql +=
+        " AND (body LIKE ? OR user_name LIKE ? OR user_email LIKE ? OR article_title LIKE ?)";
       const term = `%${q}%`;
       params.push(term, term, term, term);
     }
@@ -43,7 +44,7 @@ export const getAdminComments = createServerFn({ method: "GET" })
          FROM comments${filterSql} 
          ORDER BY created_at DESC, id DESC 
          LIMIT ? OFFSET ?`,
-        [...params, safeLimit, offset]
+        [...params, safeLimit, offset],
       ),
     ]);
 
@@ -86,7 +87,10 @@ export const deleteComment = createServerFn({ method: "POST" })
 export const getArticleComments = createServerFn({ method: "GET" })
   .validator((slug: string) => slug)
   .handler(async ({ data: slug }): Promise<CommentRow[]> => {
-    const rows = await query("SELECT * FROM comments WHERE article_slug = ? AND status = 'Approved' ORDER BY created_at ASC", [slug]);
+    const rows = await query(
+      "SELECT * FROM comments WHERE article_slug = ? AND status = 'Approved' ORDER BY created_at ASC",
+      [slug],
+    );
     return rows.map((r: any) => ({
       id: r.id,
       articleSlug: r.article_slug,
@@ -101,7 +105,15 @@ export const getArticleComments = createServerFn({ method: "GET" })
 
 // Public: Post a new comment
 export const postArticleComment = createServerFn({ method: "POST" })
-  .validator((data: { articleSlug: string; articleTitle: string; name: string; email: string; body: string }) => data)
+  .validator(
+    (data: {
+      articleSlug: string;
+      articleTitle: string;
+      name: string;
+      email: string;
+      body: string;
+    }) => data,
+  )
   .handler(async ({ data }) => {
     // 1. Enforce Option A validations on the server-side as well
     const SITE_NAME = "News Theme";
@@ -119,28 +131,36 @@ export const postArticleComment = createServerFn({ method: "POST" })
 
     const containsLink = URL_PATTERNS.some((re) => re.test(data.body));
     if (containsLink) {
-      throw new Error(`YOU CAN'T POST THIS COMMENT, BECAUSE OUR ${SITE_NAME.toUpperCase()} DISABLED THIS FEATURE TO PROTECT FOR SCAMER SPAM AND PROMOTION.`);
+      throw new Error(
+        `YOU CAN'T POST THIS COMMENT, BECAUSE OUR ${SITE_NAME.toUpperCase()} DISABLED THIS FEATURE TO PROTECT FOR SCAMER SPAM AND PROMOTION.`,
+      );
     }
 
     if (data.body.length < MIN_CHARACTERS) {
       throw new Error(`Comment must be at least ${MIN_CHARACTERS} characters long.`);
     }
 
-    const words = data.body.toLowerCase().trim().split(/\s+/).filter((w) => w.length > 2);
+    const words = data.body
+      .toLowerCase()
+      .trim()
+      .split(/\s+/)
+      .filter((w) => w.length > 2);
     const counts: Record<string, number> = {};
     for (const w of words) {
       const cleanWord = w.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
       if (!cleanWord) continue;
       counts[cleanWord] = (counts[cleanWord] || 0) + 1;
       if (counts[cleanWord] > 5) {
-        throw new Error(`A single word cannot be repeated more than 5 times. Please submit a genuine comment.`);
+        throw new Error(
+          `A single word cannot be repeated more than 5 times. Please submit a genuine comment.`,
+        );
       }
     }
 
     // 2. Insert into the database as "Approved" (auto-approved since it passed the validation checks)
     await query(
       "INSERT INTO comments (article_slug, article_title, user_name, user_email, body, status) VALUES (?, ?, ?, ?, ?, ?)",
-      [data.articleSlug, data.articleTitle, data.name, data.email, data.body, "Approved"]
+      [data.articleSlug, data.articleTitle, data.name, data.email, data.body, "Approved"],
     );
 
     return { success: true };

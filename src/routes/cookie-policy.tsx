@@ -6,7 +6,10 @@ export const Route = createFileRoute("/cookie-policy")({
   head: () => ({
     meta: [
       { title: "Cookie Policy — News Theme" },
-      { name: "description", content: "How News Theme uses cookies and similar technologies, and how to manage them." },
+      {
+        name: "description",
+        content: "How News Theme uses cookies and similar technologies, and how to manage them.",
+      },
       { property: "og:url", content: "https://gorillatechsolution.com/cookie-policy" },
     ],
     links: [{ rel: "canonical", href: "https://gorillatechsolution.com/cookie-policy" }],
@@ -20,7 +23,7 @@ export const Route = createFileRoute("/cookie-policy")({
 
 function CookiePage() {
   const page = Route.useLoaderData();
-  
+
   return (
     <PolicyLayout
       title={page?.title || ""}
@@ -31,7 +34,12 @@ function CookiePage() {
               heading: s.heading,
               body: <div dangerouslySetInnerHTML={{ __html: s.body }} />,
             }))
-          : [{ heading: page?.title || "", body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} /> }]
+          : [
+              {
+                heading: page?.title || "",
+                body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} />,
+              },
+            ]
       }
     />
   );

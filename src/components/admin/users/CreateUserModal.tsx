@@ -34,7 +34,9 @@ export function CreateUserModal({ roles, onClose, onCreate }: Props) {
 
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600">Email Address *</label>
+            <label className="mb-1 block text-xs font-semibold text-slate-600">
+              Email Address *
+            </label>
             <input
               type="email"
               value={email}

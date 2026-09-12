@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 function searchDir(dir) {
   const files = fs.readdirSync(dir);
@@ -7,13 +7,18 @@ function searchDir(dir) {
     const fullPath = path.join(dir, file);
     const stat = fs.statSync(fullPath);
     if (stat.isDirectory()) {
-      if (file !== 'node_modules' && file !== '.git' && file !== '.output' && file !== '.tanstack') {
+      if (
+        file !== "node_modules" &&
+        file !== ".git" &&
+        file !== ".output" &&
+        file !== ".tanstack"
+      ) {
         searchDir(fullPath);
       }
     } else if (stat.isFile()) {
-      if (file.endsWith('.ts') || file.endsWith('.tsx')) {
-        const content = fs.readFileSync(fullPath, 'utf8');
-        if (content.includes('toLocaleDateString')) {
+      if (file.endsWith(".ts") || file.endsWith(".tsx")) {
+        const content = fs.readFileSync(fullPath, "utf8");
+        if (content.includes("toLocaleDateString")) {
           console.log(`Found in: ${fullPath}`);
         }
       }
@@ -21,5 +26,5 @@ function searchDir(dir) {
   }
 }
 
-console.log('Searching for toLocaleDateString...');
-searchDir('c:\\Users\\gorillatech\\Music\\TodayTripura\\src');
+console.log("Searching for toLocaleDateString...");
+searchDir("c:\\Users\\gorillatech\\Music\\TodayTripura\\src");

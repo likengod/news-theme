@@ -127,7 +127,7 @@ export type SiteSettings = {
   customAlertAnimationStyle: string;
   customAlertFontFamily: string;
   customAlertFontSize: number;
-  
+
   // Software License
   licenseKey?: string;
   licenseType?: string;
@@ -188,7 +188,7 @@ export const defaultSettings: SiteSettings = {
   openAiApiKey: "",
   deepseekApiKey: "",
   kimiApiKey: "",
-  
+
   // Payment Gateways Defaults
   razorpayKeyId: "",
   razorpayKeySecret: "",
@@ -197,22 +197,31 @@ export const defaultSettings: SiteSettings = {
 
   // Subscription Page Defaults
   subscriptionTitle: "Go Premium",
-  subscriptionIntro: "Upgrade to a Premium account for ad-free reading and exclusive stories. Your role changes to **Premium user** instantly.",
+  subscriptionIntro:
+    "Upgrade to a Premium account for ad-free reading and exclusive stories. Your role changes to **Premium user** instantly.",
   subscriptionPriceINRMonthly: "149",
   subscriptionPriceINRYearly: "1499",
   subscriptionPriceUSDMonthly: "4.99",
   subscriptionPriceUSDYearly: "49.99",
-  subscriptionFeatures: "Ad-free reading across the entire site\nExclusive premium stories & long-reads\nEarly access to breaking news alerts\nDownloadable PDF weekly digest\nSupport independent Northeast journalism",
+  subscriptionFeatures:
+    "Ad-free reading across the entire site\nExclusive premium stories & long-reads\nEarly access to breaking news alerts\nDownloadable PDF weekly digest\nSupport independent Northeast journalism",
 
   // Work With Us Page Defaults
   workWithUsHeroTitle: "Write the Truth.\nShape the Timeline.",
-  workWithUsHeroIntro: "News Theme runs a dynamic journalist growth path. Start as a Volunteer, earn points by contributing, and climb the ranks to Intern and Permanent staff.",
-  workWithUsIdCardReq: "You must reach the Intern Journalist Rank (150+ verified published news articles) to be eligible for an Official Press ID Card.",
-  workWithUsRules: "Zero Plagiarism: All submissions are passed through advanced plagiarism checks. Copied content results in an instant ban.\nVerify Sources: You must provide links or contact details for your primary sources when submitting breaking news.\nUnbiased Reporting: Keep personal opinions strictly to the \"Opinion\" section. News reports must remain objective.\nNo Fake News: Repeatedly submitting factually incorrect information will result in point deductions and rank demotion.",
-  workWithUsGamification: "Publishing News: Earn points for every verified news article you submit. High-impact stories earn bonus multipliers.\nFact Checking: Help maintain our journalistic integrity. Earn points by fact-checking claims and verifying sources for other articles.\nProofreading: Assist the editorial team by proofreading drafts. Fix grammar, formatting, and earn points for your editorial contributions.\nWithdraw Earnings: As you rank up, your per-task point yield increases. Redeem your accumulated points directly to your bank account.",
-  workWithUsBadges: "Bronze Rank: Entry-level status and basic publishing rights | Standard point yields per article\nSilver Rank: Increased point yield per article | Special Seasonal Gifts (Festival bonuses) | Comment moderation rights on your posts\nGold Rank: Fixed Monthly Honorarium | Exclusive Yearly Anniversary Gift | Priority editorial review (bypass the queue)\nDiamond Rank: Full Medical Insurance Coverage | Upgraded VIP Press ID Card | Maximum point yields and premium assignments",
-  workWithUsTiers: "Volunteer Journalist (Entry level): Contribute stories on your beat. Get bylines, mentorship and editorial feedback.\nIntern Journalist (150+ verified news): Volunteer journalists who cross 150 published news auto-upgrade to a paid Intern role.\nPermanent Employee (2,000+ verified news): Interns who publish 2,000 verified news items can apply for a permanent staff position.",
-  workWithUsFaqs: "How do I earn points ?: Points are automatically credited to your account dashboard every time an editor approves and publishes your submitted news, fact-check, or proofread draft.\nWhen do I get paid ?: Once you reach the minimum point threshold, you can request a withdrawal from your dashboard. Funds are transferred directly to your configured bank account via NEFT/UPI.\nWhat is the difference between Fact Checker and Journalist ?: Journalists actively write and submit original stories. Fact Checkers focus on reviewing existing drafts submitted by others to ensure accuracy before publication.\nCan I lose my rank ?: Yes. Violating the Journalist Rules, such as submitting plagiarized content or fake news, can result in point deductions or account suspension.",
+  workWithUsHeroIntro:
+    "News Theme runs a dynamic journalist growth path. Start as a Volunteer, earn points by contributing, and climb the ranks to Intern and Permanent staff.",
+  workWithUsIdCardReq:
+    "You must reach the Intern Journalist Rank (150+ verified published news articles) to be eligible for an Official Press ID Card.",
+  workWithUsRules:
+    'Zero Plagiarism: All submissions are passed through advanced plagiarism checks. Copied content results in an instant ban.\nVerify Sources: You must provide links or contact details for your primary sources when submitting breaking news.\nUnbiased Reporting: Keep personal opinions strictly to the "Opinion" section. News reports must remain objective.\nNo Fake News: Repeatedly submitting factually incorrect information will result in point deductions and rank demotion.',
+  workWithUsGamification:
+    "Publishing News: Earn points for every verified news article you submit. High-impact stories earn bonus multipliers.\nFact Checking: Help maintain our journalistic integrity. Earn points by fact-checking claims and verifying sources for other articles.\nProofreading: Assist the editorial team by proofreading drafts. Fix grammar, formatting, and earn points for your editorial contributions.\nWithdraw Earnings: As you rank up, your per-task point yield increases. Redeem your accumulated points directly to your bank account.",
+  workWithUsBadges:
+    "Bronze Rank: Entry-level status and basic publishing rights | Standard point yields per article\nSilver Rank: Increased point yield per article | Special Seasonal Gifts (Festival bonuses) | Comment moderation rights on your posts\nGold Rank: Fixed Monthly Honorarium | Exclusive Yearly Anniversary Gift | Priority editorial review (bypass the queue)\nDiamond Rank: Full Medical Insurance Coverage | Upgraded VIP Press ID Card | Maximum point yields and premium assignments",
+  workWithUsTiers:
+    "Volunteer Journalist (Entry level): Contribute stories on your beat. Get bylines, mentorship and editorial feedback.\nIntern Journalist (150+ verified news): Volunteer journalists who cross 150 published news auto-upgrade to a paid Intern role.\nPermanent Employee (2,000+ verified news): Interns who publish 2,000 verified news items can apply for a permanent staff position.",
+  workWithUsFaqs:
+    "How do I earn points ?: Points are automatically credited to your account dashboard every time an editor approves and publishes your submitted news, fact-check, or proofread draft.\nWhen do I get paid ?: Once you reach the minimum point threshold, you can request a withdrawal from your dashboard. Funds are transferred directly to your configured bank account via NEFT/UPI.\nWhat is the difference between Fact Checker and Journalist ?: Journalists actively write and submit original stories. Fact Checkers focus on reviewing existing drafts submitted by others to ensure accuracy before publication.\nCan I lose my rank ?: Yes. Violating the Journalist Rules, such as submitting plagiarized content or fake news, can result in point deductions or account suspension.",
 
   googleSiteVerification: "",
   bingSiteVerification: "",
@@ -232,7 +241,8 @@ export const defaultSettings: SiteSettings = {
   gitAccessToken: "",
   protectionEnabled: true,
   protectionModalTitle: "Content Protection - News Theme",
-  protectionModalMessage: "Our journalists work hard to bring you authentic news. When you share our website links directly, the ad revenue helps us pay our team and keep our servers online.\n\nWe humbly request you not to copy paste or take screenshots of our content. Your small effort to share the original link makes a big difference to our survival. Thank you for standing with us!",
+  protectionModalMessage:
+    "Our journalists work hard to bring you authentic news. When you share our website links directly, the ad revenue helps us pay our team and keep our servers online.\n\nWe humbly request you not to copy paste or take screenshots of our content. Your small effort to share the original link makes a big difference to our survival. Thank you for standing with us!",
   forceHttps: false,
   cleanUnusedCss: false,
   minifyJs: true,
@@ -268,130 +278,260 @@ export type PageContent = {
   title: string;
   intro: string;
   body: string; // HTML or plain text
-  sections?: { heading: string, body: string }[];
+  sections?: { heading: string; body: string }[];
 };
 
 export const defaultPages: PageContent[] = [
-  { 
-    slug: "about", 
-    title: "About News Theme", 
-    intro: "News Theme is an independent newsroom based in Agartala, covering breaking news, finance, business and markets across Northeast India and the wider world.", 
+  {
+    slug: "about",
+    title: "About News Theme",
+    intro:
+      "News Theme is an independent newsroom based in Agartala, covering breaking news, finance, business and markets across Northeast India and the wider world.",
     body: "",
     sections: [
-      { heading: "Our Mission", body: "<p>To deliver verified, contextual and accessible journalism — free from political and commercial interference — to readers across the region and the diaspora.</p>" },
-      { heading: "Our Team", body: "<p>Our staff includes reporters, market analysts, video producers and editors, supported by a network of regional correspondents.</p>" },
-      { heading: "How We Are Funded", body: "<p>We are funded by reader subscriptions, clearly-labelled sponsorships and a small grant program. We do not accept funding that would compromise editorial independence.</p>" },
-      { heading: "Get in Touch", body: '<p>For tips, story pitches or partnerships, visit our <a className="underline" href="/contact">contact page</a> or write to <a className="underline" href="mailto:newsroom@northeasttimeline.com">newsroom@northeasttimeline.com</a>.</p>' }
-    ]
+      {
+        heading: "Our Mission",
+        body: "<p>To deliver verified, contextual and accessible journalism — free from political and commercial interference — to readers across the region and the diaspora.</p>",
+      },
+      {
+        heading: "Our Team",
+        body: "<p>Our staff includes reporters, market analysts, video producers and editors, supported by a network of regional correspondents.</p>",
+      },
+      {
+        heading: "How We Are Funded",
+        body: "<p>We are funded by reader subscriptions, clearly-labelled sponsorships and a small grant program. We do not accept funding that would compromise editorial independence.</p>",
+      },
+      {
+        heading: "Get in Touch",
+        body: '<p>For tips, story pitches or partnerships, visit our <a className="underline" href="/contact">contact page</a> or write to <a className="underline" href="mailto:newsroom@northeasttimeline.com">newsroom@northeasttimeline.com</a>.</p>',
+      },
+    ],
   },
-  { 
-    slug: "privacy-policy", 
-    title: "Privacy Policy", 
-    intro: "This Privacy Policy explains how News Theme collects, uses, and protects your personal information when you use our website and services.", 
+  {
+    slug: "privacy-policy",
+    title: "Privacy Policy",
+    intro:
+      "This Privacy Policy explains how News Theme collects, uses, and protects your personal information when you use our website and services.",
     body: "",
     sections: [
-      { heading: "Information We Collect", body: "<p>We collect information you provide directly (like creating an account or subscribing) and data collected automatically (like IP addresses and browsing behaviour via cookies).</p>" },
-      { heading: "How We Use Your Data", body: "<ul className=\"list-disc space-y-1.5 pl-5\"><li>To provide and maintain our services.</li><li>To process subscription payments.</li><li>To send newsletters and editorial updates.</li><li>To analyse site traffic and improve our journalism.</li></ul>" },
-      { heading: "Data Sharing", body: "<p>We do not sell your personal data to third parties. We may share information with trusted service providers (like payment processors) solely to operate our business.</p>" },
-      { heading: "Your Rights", body: "<p>You have the right to access, correct, or delete your personal information. To exercise these rights, please contact us at <a className=\"underline\" href=\"mailto:privacy@northeasttimeline.com\">privacy@northeasttimeline.com</a>.</p>" }
-    ]
+      {
+        heading: "Information We Collect",
+        body: "<p>We collect information you provide directly (like creating an account or subscribing) and data collected automatically (like IP addresses and browsing behaviour via cookies).</p>",
+      },
+      {
+        heading: "How We Use Your Data",
+        body: '<ul className="list-disc space-y-1.5 pl-5"><li>To provide and maintain our services.</li><li>To process subscription payments.</li><li>To send newsletters and editorial updates.</li><li>To analyse site traffic and improve our journalism.</li></ul>',
+      },
+      {
+        heading: "Data Sharing",
+        body: "<p>We do not sell your personal data to third parties. We may share information with trusted service providers (like payment processors) solely to operate our business.</p>",
+      },
+      {
+        heading: "Your Rights",
+        body: '<p>You have the right to access, correct, or delete your personal information. To exercise these rights, please contact us at <a className="underline" href="mailto:privacy@northeasttimeline.com">privacy@northeasttimeline.com</a>.</p>',
+      },
+    ],
   },
-  { 
-    slug: "terms-and-conditions", 
-    title: "Terms & Conditions", 
-    intro: "These Terms govern your access to and use of News Theme's website, content, and services. Please read them carefully.", 
+  {
+    slug: "terms-and-conditions",
+    title: "Terms & Conditions",
+    intro:
+      "These Terms govern your access to and use of News Theme's website, content, and services. Please read them carefully.",
     body: "",
     sections: [
-      { heading: "Acceptance of Terms", body: "<p>By accessing or using our service, you agree to be bound by these Terms. If you disagree with any part, you may not access the service.</p>" },
-      { heading: "User Accounts", body: "<p>You are responsible for safeguarding the password you use to access the site. You agree not to disclose your password to any third party.</p>" },
-      { heading: "Intellectual Property", body: "<p>All editorial content, trademarks, logos and proprietary technology remain the property of News Theme or its licensors. You may share short excerpts with attribution; bulk republication requires written permission.</p>" },
-      { heading: "Subscriptions & Payment", body: "<p>Paid subscription fees and renewal terms are disclosed at the point of sale. We reserve the right to suspend access for non-payment. Refunds are governed by our Refund Policy.</p>" },
-      { heading: "Limitation of Liability", body: "<p>To the maximum extent permitted by law, News Theme shall not be liable for any indirect, incidental, special, consequential or punitive damages, or any loss of profits or revenues arising from your use of the Service.</p>" },
-      { heading: "Termination", body: "<p>We may terminate or suspend your access to the Service immediately, without prior notice, for conduct that we believe violates these Terms or is harmful to other users, us, or third parties.</p>" },
-      { heading: "Governing Law", body: "<p>These Terms shall be governed by and construed in accordance with the laws of India, without regard to its conflict of law provisions.</p>" },
-      { heading: "Changes to Terms", body: "<p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material we will provide at least 30 days notice before the new terms take effect.</p>" }
-    ]
+      {
+        heading: "Acceptance of Terms",
+        body: "<p>By accessing or using our service, you agree to be bound by these Terms. If you disagree with any part, you may not access the service.</p>",
+      },
+      {
+        heading: "User Accounts",
+        body: "<p>You are responsible for safeguarding the password you use to access the site. You agree not to disclose your password to any third party.</p>",
+      },
+      {
+        heading: "Intellectual Property",
+        body: "<p>All editorial content, trademarks, logos and proprietary technology remain the property of News Theme or its licensors. You may share short excerpts with attribution; bulk republication requires written permission.</p>",
+      },
+      {
+        heading: "Subscriptions & Payment",
+        body: "<p>Paid subscription fees and renewal terms are disclosed at the point of sale. We reserve the right to suspend access for non-payment. Refunds are governed by our Refund Policy.</p>",
+      },
+      {
+        heading: "Limitation of Liability",
+        body: "<p>To the maximum extent permitted by law, News Theme shall not be liable for any indirect, incidental, special, consequential or punitive damages, or any loss of profits or revenues arising from your use of the Service.</p>",
+      },
+      {
+        heading: "Termination",
+        body: "<p>We may terminate or suspend your access to the Service immediately, without prior notice, for conduct that we believe violates these Terms or is harmful to other users, us, or third parties.</p>",
+      },
+      {
+        heading: "Governing Law",
+        body: "<p>These Terms shall be governed by and construed in accordance with the laws of India, without regard to its conflict of law provisions.</p>",
+      },
+      {
+        heading: "Changes to Terms",
+        body: "<p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material we will provide at least 30 days notice before the new terms take effect.</p>",
+      },
+    ],
   },
-  { 
-    slug: "cookie-policy", 
-    title: "Cookie Policy", 
-    intro: "This Cookie Policy explains what cookies are, which ones we use, and how you can control them.", 
+  {
+    slug: "cookie-policy",
+    title: "Cookie Policy",
+    intro:
+      "This Cookie Policy explains what cookies are, which ones we use, and how you can control them.",
     body: "",
     sections: [
-      { heading: "What Are Cookies", body: "<p>Cookies are small text files placed on your device by websites you visit. They are widely used to make sites work efficiently and to provide information to the site owners.</p>" },
-      { heading: "Types of Cookies We Use", body: "<ul className=\"list-disc space-y-1.5 pl-5\"><li><b>Essential</b> — required to sign in, keep you logged in and remember theme preferences.</li><li><b>Analytics</b> — aggregated usage statistics to improve editorial coverage.</li><li><b>Advertising</b> — limited to measurement of sponsored campaigns; we do not run third-party behavioural ad networks.</li></ul>" },
-      { heading: "Managing Cookies", body: "<p>Most browsers let you refuse or delete cookies via their settings. Disabling essential cookies will break sign-in and personalisation features.</p>" },
-      { heading: "Third-Party Cookies", body: "<p>Embedded video players (YouTube, Facebook) may set their own cookies when you play a video. Refer to those providers' privacy policies for details.</p>" }
-    ]
+      {
+        heading: "What Are Cookies",
+        body: "<p>Cookies are small text files placed on your device by websites you visit. They are widely used to make sites work efficiently and to provide information to the site owners.</p>",
+      },
+      {
+        heading: "Types of Cookies We Use",
+        body: '<ul className="list-disc space-y-1.5 pl-5"><li><b>Essential</b> — required to sign in, keep you logged in and remember theme preferences.</li><li><b>Analytics</b> — aggregated usage statistics to improve editorial coverage.</li><li><b>Advertising</b> — limited to measurement of sponsored campaigns; we do not run third-party behavioural ad networks.</li></ul>',
+      },
+      {
+        heading: "Managing Cookies",
+        body: "<p>Most browsers let you refuse or delete cookies via their settings. Disabling essential cookies will break sign-in and personalisation features.</p>",
+      },
+      {
+        heading: "Third-Party Cookies",
+        body: "<p>Embedded video players (YouTube, Facebook) may set their own cookies when you play a video. Refer to those providers' privacy policies for details.</p>",
+      },
+    ],
   },
-  { 
-    slug: "refund-policy", 
-    title: "Refund Policy", 
-    intro: "This policy describes the conditions under which News Theme issues refunds for paid subscriptions and other purchases.", 
+  {
+    slug: "refund-policy",
+    title: "Refund Policy",
+    intro:
+      "This policy describes the conditions under which News Theme issues refunds for paid subscriptions and other purchases.",
     body: "",
     sections: [
-      { heading: "Eligibility", body: "<p>You may request a full refund within <b>7 days</b> of your initial subscription payment, provided you have not downloaded more than a token amount of premium content. Renewal payments are non-refundable except where required by law.</p>" },
-      { heading: "How to Request a Refund", body: "<p>Email <a className=\"underline\" href=\"mailto:billing@northeasttimeline.com\">billing@northeasttimeline.com</a> from the address linked to your account, including your order ID and the reason for the request.</p>" },
-      { heading: "Processing Time", body: "<p>Approved refunds are processed within 5–10 business days to the original payment method. Bank processing times may add a further 3–5 days.</p>" },
-      { heading: "Non-Refundable Items", body: "<p>One-off article purchases, gift subscriptions already redeemed and event tickets are non-refundable.</p>" },
-      { heading: "Chargebacks", body: "<p>Please contact us before initiating a chargeback; most billing issues can be resolved within one business day.</p>" }
-    ]
+      {
+        heading: "Eligibility",
+        body: "<p>You may request a full refund within <b>7 days</b> of your initial subscription payment, provided you have not downloaded more than a token amount of premium content. Renewal payments are non-refundable except where required by law.</p>",
+      },
+      {
+        heading: "How to Request a Refund",
+        body: '<p>Email <a className="underline" href="mailto:billing@northeasttimeline.com">billing@northeasttimeline.com</a> from the address linked to your account, including your order ID and the reason for the request.</p>',
+      },
+      {
+        heading: "Processing Time",
+        body: "<p>Approved refunds are processed within 5–10 business days to the original payment method. Bank processing times may add a further 3–5 days.</p>",
+      },
+      {
+        heading: "Non-Refundable Items",
+        body: "<p>One-off article purchases, gift subscriptions already redeemed and event tickets are non-refundable.</p>",
+      },
+      {
+        heading: "Chargebacks",
+        body: "<p>Please contact us before initiating a chargeback; most billing issues can be resolved within one business day.</p>",
+      },
+    ],
   },
-  { 
-    slug: "dmca", 
-    title: "DMCA Notice & Takedown", 
-    intro: "News Theme respects the intellectual property of others. If you believe content on our site infringes your copyright, please send a notice as described below.", 
+  {
+    slug: "dmca",
+    title: "DMCA Notice & Takedown",
+    intro:
+      "News Theme respects the intellectual property of others. If you believe content on our site infringes your copyright, please send a notice as described below.",
     body: "",
     sections: [
-      { heading: "Filing a Notice", body: "<ul className=\"list-disc space-y-1.5 pl-5\"><li>Your physical or electronic signature.</li><li>Identification of the copyrighted work claimed to be infringed.</li><li>URL of the material on our site you want removed.</li><li>Your name, address, phone number and email.</li><li>A good-faith statement that the use is not authorised.</li><li>A statement, under penalty of perjury, that the information is accurate and you are the rights holder or authorised to act on their behalf.</li></ul>" },
-      { heading: "Counter-Notice", body: "<p>If your content was removed and you believe it was a mistake or misidentification, you may file a counter-notice with the same details and a statement consenting to jurisdiction in the courts of India.</p>" },
-      { heading: "Repeat Infringers", body: "<p>We will terminate accounts of users found to be repeat infringers in appropriate circumstances.</p>" }
-    ]
+      {
+        heading: "Filing a Notice",
+        body: '<ul className="list-disc space-y-1.5 pl-5"><li>Your physical or electronic signature.</li><li>Identification of the copyrighted work claimed to be infringed.</li><li>URL of the material on our site you want removed.</li><li>Your name, address, phone number and email.</li><li>A good-faith statement that the use is not authorised.</li><li>A statement, under penalty of perjury, that the information is accurate and you are the rights holder or authorised to act on their behalf.</li></ul>',
+      },
+      {
+        heading: "Counter-Notice",
+        body: "<p>If your content was removed and you believe it was a mistake or misidentification, you may file a counter-notice with the same details and a statement consenting to jurisdiction in the courts of India.</p>",
+      },
+      {
+        heading: "Repeat Infringers",
+        body: "<p>We will terminate accounts of users found to be repeat infringers in appropriate circumstances.</p>",
+      },
+    ],
   },
-  { 
-    slug: "contact", 
-    title: "Contact Us", 
-    intro: "Story tips, corrections, partnership and advertising enquiries — the News Theme desk reads every message. We aim to reply within one business day.", 
+  {
+    slug: "contact",
+    title: "Contact Us",
+    intro:
+      "Story tips, corrections, partnership and advertising enquiries — the News Theme desk reads every message. We aim to reply within one business day.",
     body: "",
-    sections: []
+    sections: [],
   },
-  { 
-    slug: "editorial-policy", 
-    title: "Editorial Policy", 
-    intro: "News Theme is committed to accurate, fair and independent journalism. This policy sets out the standards every reporter and editor on our team follows.", 
-    body: "",
-    sections: [
-      { heading: "Independence", body: "<p>Our newsroom operates independently of advertisers, investors and political affiliations. Sponsored content is labelled clearly and never written by the editorial team.</p>" },
-      { heading: "Sourcing & Verification", body: "<p>Every news report relies on at least two independent sources or one primary document. Anonymous sources are used only when essential and approved by a senior editor.</p>" },
-      { heading: "Corrections", body: "<p>We correct errors promptly and transparently. Material corrections are noted at the foot of the affected article with the date and nature of the change.</p>" },
-      { heading: "Conflicts of Interest", body: "<p>Reporters disclose any personal or financial interest that could appear to influence coverage, and are recused from related stories.</p>" },
-      { heading: "AI-Assisted Reporting", body: "<p>Generative AI may be used for research and copy-editing assistance only. Every published sentence is reviewed and approved by a human editor.</p>" }
-    ]
-  },
-  { 
-    slug: "disclaimer", 
-    title: "Disclaimer", 
-    intro: "The information published on News Theme is for general informational purposes only. We make no warranties about completeness, reliability or accuracy.", 
+  {
+    slug: "editorial-policy",
+    title: "Editorial Policy",
+    intro:
+      "News Theme is committed to accurate, fair and independent journalism. This policy sets out the standards every reporter and editor on our team follows.",
     body: "",
     sections: [
-      { heading: "No Financial Advice", body: "<p>Market data, analysis and opinion published on News Theme do not constitute investment advice, a recommendation, or a solicitation to buy or sell any security. Always consult a qualified financial professional before making investment decisions.</p>" },
-      { heading: "Market Data", body: "<p>Quotes, indices and currency rates are delayed at least 15 minutes and provided by third-party vendors. We do not guarantee their accuracy or completeness.</p>" },
-              { heading: "External Links", body: "<p>Our articles may contain links to external sites. We are not responsible for the content, accuracy or practices of those sites.</p>" },
-        { heading: "Errors & Corrections", body: "<p>If you spot an error, email <a className=\"underline\" href=\"mailto:corrections@northeasttimeline.com\">corrections@northeasttimeline.com</a>. Significant corrections are noted at the foot of the affected article.</p>" }
-      ]
-    },
-    { 
-      slug: "data-deletion-policy", 
-      title: "Data Deletion Policy", 
-      intro: "This policy describes how users can request the deletion of their personal data from News Theme systems.", 
-      body: "",
-      sections: [
-        { heading: "Your Rights", body: "<p>You have the right to request the complete deletion of your personal data stored on our servers.</p>" },
-        { heading: "How to Request Deletion", body: "<p>Please send an email to <a className=\"underline\" href=\"mailto:privacy@northeasttimeline.com\">privacy@northeasttimeline.com</a> with the subject 'Data Deletion Request' from the email address registered with your account.</p>" },
-        { heading: "Processing Time", body: "<p>We will process your data deletion request within 30 days of receipt. We may retain certain data if required by law or for legitimate business purposes.</p>" }
-      ]
-    }
-  ];
+      {
+        heading: "Independence",
+        body: "<p>Our newsroom operates independently of advertisers, investors and political affiliations. Sponsored content is labelled clearly and never written by the editorial team.</p>",
+      },
+      {
+        heading: "Sourcing & Verification",
+        body: "<p>Every news report relies on at least two independent sources or one primary document. Anonymous sources are used only when essential and approved by a senior editor.</p>",
+      },
+      {
+        heading: "Corrections",
+        body: "<p>We correct errors promptly and transparently. Material corrections are noted at the foot of the affected article with the date and nature of the change.</p>",
+      },
+      {
+        heading: "Conflicts of Interest",
+        body: "<p>Reporters disclose any personal or financial interest that could appear to influence coverage, and are recused from related stories.</p>",
+      },
+      {
+        heading: "AI-Assisted Reporting",
+        body: "<p>Generative AI may be used for research and copy-editing assistance only. Every published sentence is reviewed and approved by a human editor.</p>",
+      },
+    ],
+  },
+  {
+    slug: "disclaimer",
+    title: "Disclaimer",
+    intro:
+      "The information published on News Theme is for general informational purposes only. We make no warranties about completeness, reliability or accuracy.",
+    body: "",
+    sections: [
+      {
+        heading: "No Financial Advice",
+        body: "<p>Market data, analysis and opinion published on News Theme do not constitute investment advice, a recommendation, or a solicitation to buy or sell any security. Always consult a qualified financial professional before making investment decisions.</p>",
+      },
+      {
+        heading: "Market Data",
+        body: "<p>Quotes, indices and currency rates are delayed at least 15 minutes and provided by third-party vendors. We do not guarantee their accuracy or completeness.</p>",
+      },
+      {
+        heading: "External Links",
+        body: "<p>Our articles may contain links to external sites. We are not responsible for the content, accuracy or practices of those sites.</p>",
+      },
+      {
+        heading: "Errors & Corrections",
+        body: '<p>If you spot an error, email <a className="underline" href="mailto:corrections@northeasttimeline.com">corrections@northeasttimeline.com</a>. Significant corrections are noted at the foot of the affected article.</p>',
+      },
+    ],
+  },
+  {
+    slug: "data-deletion-policy",
+    title: "Data Deletion Policy",
+    intro:
+      "This policy describes how users can request the deletion of their personal data from News Theme systems.",
+    body: "",
+    sections: [
+      {
+        heading: "Your Rights",
+        body: "<p>You have the right to request the complete deletion of your personal data stored on our servers.</p>",
+      },
+      {
+        heading: "How to Request Deletion",
+        body: '<p>Please send an email to <a className="underline" href="mailto:privacy@northeasttimeline.com">privacy@northeasttimeline.com</a> with the subject \'Data Deletion Request\' from the email address registered with your account.</p>',
+      },
+      {
+        heading: "Processing Time",
+        body: "<p>We will process your data deletion request within 30 days of receipt. We may retain certain data if required by law or for legitimate business purposes.</p>",
+      },
+    ],
+  },
+];
 
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "./auth-middleware";
@@ -399,17 +539,19 @@ import { query } from "./db.server";
 
 // ─── Server Functions (MySQL Custom Pages Persistence) ─────────────────────
 
-export const getCustomPagesServer = createServerFn({ method: "GET" })
-  .handler(async (): Promise<PageContent[]> => {
+export const getCustomPagesServer = createServerFn({ method: "GET" }).handler(
+  async (): Promise<PageContent[]> => {
     try {
-      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'custom_pages_data'");
+      const rows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'custom_pages_data'",
+      );
       if (rows.length > 0 && rows[0].value) {
         const parsed = JSON.parse(rows[0].value) as PageContent[];
         if (Array.isArray(parsed) && parsed.length > 0) {
           // Merge with defaultPages to ensure new pages (like data-deletion-policy) appear
           const merged = [...defaultPages];
           parsed.forEach((savedPage) => {
-            const idx = merged.findIndex(p => p.slug === savedPage.slug);
+            const idx = merged.findIndex((p) => p.slug === savedPage.slug);
             if (idx !== -1) merged[idx] = savedPage;
             else merged.push(savedPage);
           });
@@ -418,20 +560,28 @@ export const getCustomPagesServer = createServerFn({ method: "GET" })
       }
     } catch {}
     return defaultPages;
-  });
+  },
+);
 
 export const saveCustomPageServer = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .validator((page) => z.object({
-    slug: z.string(),
-    title: z.string(),
-    intro: z.string(),
-    body: z.string()
-  }).parse(page) as PageContent)
+  .validator(
+    (page) =>
+      z
+        .object({
+          slug: z.string(),
+          title: z.string(),
+          intro: z.string(),
+          body: z.string(),
+        })
+        .parse(page) as PageContent,
+  )
   .handler(async ({ data: updatedPage }) => {
     let pages = defaultPages;
     try {
-      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'custom_pages_data'");
+      const rows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'custom_pages_data'",
+      );
       if (rows.length > 0 && rows[0].value) {
         pages = JSON.parse(rows[0].value);
       }
@@ -445,7 +595,7 @@ export const saveCustomPageServer = createServerFn({ method: "POST" })
     await query(
       `INSERT INTO site_settings (setting_key, value) VALUES ('custom_pages_data', ?)
        ON DUPLICATE KEY UPDATE value = ?`,
-      [json, json]
+      [json, json],
     );
     return { success: true };
   });
@@ -477,25 +627,26 @@ function clearCache(key: string) {
   delete SERVER_CACHE[key];
 }
 
-export const clearAllCachesServer = createServerFn({ method: "POST" })
-  .handler(async () => {
-    for (const key in SERVER_CACHE) {
-      delete SERVER_CACHE[key];
-    }
-    return { success: true, message: "Server cache, temp files, and unused CSS have been cleared." };
-  });
+export const clearAllCachesServer = createServerFn({ method: "POST" }).handler(async () => {
+  for (const key in SERVER_CACHE) {
+    delete SERVER_CACHE[key];
+  }
+  return { success: true, message: "Server cache, temp files, and unused CSS have been cleared." };
+});
 
-export const getSiteSettingsServer = createServerFn({ method: "GET" })
-  .handler(async (): Promise<SiteSettings> => {
+export const getSiteSettingsServer = createServerFn({ method: "GET" }).handler(
+  async (): Promise<SiteSettings> => {
     const cacheKey = "site_settings_data";
     const cached = getCached<SiteSettings>(cacheKey);
     if (cached) return cached;
     try {
-      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'site_settings_data'");
+      const rows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'site_settings_data'",
+      );
       if (rows.length > 0 && rows[0].value) {
         const parsed = JSON.parse(rows[0].value);
-        const res = { 
-          ...defaultSettings, 
+        const res = {
+          ...defaultSettings,
           ...parsed,
           copyright: cleanCopyright(parsed.copyright || defaultSettings.copyright),
           gitRemoteUrl: parsed.gitRemoteUrl || defaultSettings.gitRemoteUrl,
@@ -507,14 +658,12 @@ export const getSiteSettingsServer = createServerFn({ method: "GET" })
       }
     } catch {}
     return defaultSettings;
-  });
+  },
+);
 
 export const saveSiteSettingsServer = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .validator((settings) => z.object({
-    siteName: z.string().min(1, "Site name is required"),
-    contactEmail: z.string().email("Invalid email").optional().or(z.literal("")),
-  }).passthrough().parse(settings) as SiteSettings)
+  .validator((settings) => settings as SiteSettings)
   .handler(async ({ data }) => {
     const cleanedData = {
       ...data,
@@ -524,7 +673,7 @@ export const saveSiteSettingsServer = createServerFn({ method: "POST" })
     await query(
       `INSERT INTO site_settings (setting_key, value) VALUES ('site_settings_data', ?)
        ON DUPLICATE KEY UPDATE value = ?`,
-      [json, json]
+      [json, json],
     );
     clearCache("site_settings_data");
     return { success: true };
@@ -552,13 +701,15 @@ export type AdConfiguration = {
   popupConfig?: PopupConfig;
 };
 
-export const getAdConfigurationServer = createServerFn({ method: "GET" })
-  .handler(async (): Promise<AdConfiguration> => {
+export const getAdConfigurationServer = createServerFn({ method: "GET" }).handler(
+  async (): Promise<AdConfiguration> => {
     const cacheKey = "ad_configuration_data";
     const cached = getCached<AdConfiguration>(cacheKey);
     if (cached) return cached;
     try {
-      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'ad_configuration_data'");
+      const rows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'ad_configuration_data'",
+      );
       if (rows.length > 0 && rows[0].value) {
         let parsed = JSON.parse(rows[0].value) as AdConfiguration;
         if (parsed?.slots) {
@@ -584,7 +735,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" })
             const updatedJson = JSON.stringify(cleanConfig);
             query(
               `UPDATE site_settings SET value = ? WHERE setting_key = 'ad_configuration_data'`,
-              [updatedJson]
+              [updatedJson],
             ).catch((err) => console.error("[AdStorage] Background MySQL update error:", err));
           }
         } catch (storageErr) {
@@ -615,7 +766,15 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" })
         featured_slide: "image",
         reel_ads: "image",
       },
-      scripts: { home1: "", home2: "", ad3: "", popup: "", leaderboard: "", featured_slide: "", reel_ads: "" },
+      scripts: {
+        home1: "",
+        home2: "",
+        ad3: "",
+        popup: "",
+        leaderboard: "",
+        featured_slide: "",
+        reel_ads: "",
+      },
       rotations: {
         home1: 5,
         home2: 5,
@@ -628,17 +787,23 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" })
       popupConfig: defaultPopupConfig,
     };
     return config;
-  });
+  },
+);
 
 export const saveAdConfigurationServer = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .validator((config) => z.object({
-    slots: z.record(z.any()),
-    modes: z.record(z.any()),
-    scripts: z.record(z.any()),
-    rotations: z.record(z.any()),
-    popupConfig: z.record(z.any()).optional(),
-  }).parse(config) as AdConfiguration)
+  .validator(
+    (config) =>
+      z
+        .object({
+          slots: z.record(z.any()),
+          modes: z.record(z.any()),
+          scripts: z.record(z.any()),
+          rotations: z.record(z.any()),
+          popupConfig: z.record(z.any()).optional(),
+        })
+        .parse(config) as AdConfiguration,
+  )
   .handler(async ({ data }) => {
     let cleanData = data;
     try {
@@ -653,7 +818,7 @@ export const saveAdConfigurationServer = createServerFn({ method: "POST" })
     await query(
       `INSERT INTO site_settings (setting_key, value) VALUES ('ad_configuration_data', ?)
        ON DUPLICATE KEY UPDATE value = ?`,
-      [json, json]
+      [json, json],
     );
     clearCache("ad_configuration_data");
     return { success: true };
@@ -676,13 +841,15 @@ export type BrokenLinkItem = {
   suggestedFix: string;
 };
 
-export const getRedirectRulesServer = createServerFn({ method: "GET" })
-  .handler(async (): Promise<RedirectRule[]> => {
+export const getRedirectRulesServer = createServerFn({ method: "GET" }).handler(
+  async (): Promise<RedirectRule[]> => {
     const cacheKey = "site_redirects_data";
     const cached = getCached<RedirectRule[]>(cacheKey);
     if (cached) return cached;
     try {
-      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'site_redirects_data'");
+      const rows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'site_redirects_data'",
+      );
       if (rows.length > 0 && rows[0].value) {
         const parsed = JSON.parse(rows[0].value) as RedirectRule[];
         setCached(cacheKey, parsed);
@@ -690,23 +857,31 @@ export const getRedirectRulesServer = createServerFn({ method: "GET" })
       }
     } catch {}
     return [];
-  });
+  },
+);
 
 export const saveRedirectRulesServer = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .validator((rules) => z.array(z.object({
-    id: z.string(),
-    source: z.string(),
-    destination: z.string(),
-    hits: z.number(),
-    createdAt: z.string(),
-  })).parse(rules) as RedirectRule[])
+  .validator(
+    (rules) =>
+      z
+        .array(
+          z.object({
+            id: z.string(),
+            source: z.string(),
+            destination: z.string(),
+            hits: z.number(),
+            createdAt: z.string(),
+          }),
+        )
+        .parse(rules) as RedirectRule[],
+  )
   .handler(async ({ data }) => {
     const json = JSON.stringify(data);
     await query(
       `INSERT INTO site_settings (setting_key, value) VALUES ('site_redirects_data', ?)
        ON DUPLICATE KEY UPDATE value = ?`,
-      [json, json]
+      [json, json],
     );
     clearCache("site_redirects_data");
     return { success: true };
@@ -716,7 +891,9 @@ export const incrementRedirectHitServer = createServerFn({ method: "POST" })
   .validator((id) => z.string().parse(id))
   .handler(async ({ data: id }) => {
     try {
-      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'site_redirects_data'");
+      const rows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'site_redirects_data'",
+      );
       if (rows.length > 0 && rows[0].value) {
         const rules = JSON.parse(rows[0].value) as RedirectRule[];
         const idx = rules.findIndex((r) => r.id === id);
@@ -726,7 +903,7 @@ export const incrementRedirectHitServer = createServerFn({ method: "POST" })
           await query(
             `INSERT INTO site_settings (setting_key, value) VALUES ('site_redirects_data', ?)
              ON DUPLICATE KEY UPDATE value = ?`,
-            [json, json]
+            [json, json],
           );
           clearCache("site_redirects_data");
         }
@@ -743,9 +920,19 @@ export const scanBrokenLinksServer = createServerFn({ method: "GET" })
     const categorySlugs = new Set<string>(categoriesRows.map((r: any) => r.slug));
 
     // 2. Fetch custom pages
-    let pageSlugs = new Set<string>(["about", "privacy-policy", "terms-and-conditions", "cookie-policy", "refund-policy", "dmca", "contact"]);
+    let pageSlugs = new Set<string>([
+      "about",
+      "privacy-policy",
+      "terms-and-conditions",
+      "cookie-policy",
+      "refund-policy",
+      "dmca",
+      "contact",
+    ]);
     try {
-      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'custom_pages_data'");
+      const rows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'custom_pages_data'",
+      );
       if (rows.length > 0 && rows[0].value) {
         const pages = JSON.parse(rows[0].value);
         if (Array.isArray(pages)) {
@@ -757,17 +944,36 @@ export const scanBrokenLinksServer = createServerFn({ method: "GET" })
     } catch {}
 
     // 3. Fetch articles
-    const articlesRows = await query("SELECT id, title, slug, content FROM articles WHERE status = 'Published'");
+    const articlesRows = await query(
+      "SELECT id, title, slug, content FROM articles WHERE status = 'Published'",
+    );
     const articleSlugsMap = new Map<string, { id: number; title: string }>();
     articlesRows.forEach((r: any) => {
       articleSlugsMap.set(r.slug, { id: r.id, title: r.title });
     });
 
     const staticRoutes = new Set([
-      "", "/", "/about", "/contact", "/submit-news", "/privacy-policy", "/terms-and-conditions", 
-      "/cookie-policy", "/refund-policy", "/disclaimer", "/editorial-policy", "/dmca", "/data-deletion-policy", 
-      "/verified-journalist", "/subscription", "/work-with-us", "/archive", "/earn-points", 
-      "/withdraw-points", "/profile", "/search"
+      "",
+      "/",
+      "/about",
+      "/contact",
+      "/submit-news",
+      "/privacy-policy",
+      "/terms-and-conditions",
+      "/cookie-policy",
+      "/refund-policy",
+      "/disclaimer",
+      "/editorial-policy",
+      "/dmca",
+      "/data-deletion-policy",
+      "/verified-journalist",
+      "/subscription",
+      "/work-with-us",
+      "/archive",
+      "/earn-points",
+      "/withdraw-points",
+      "/profile",
+      "/search",
     ]);
 
     const brokenLinks: BrokenLinkItem[] = [];
@@ -794,7 +1000,8 @@ export const scanBrokenLinksServer = createServerFn({ method: "GET" })
     };
 
     // Regex to find anchor tags href
-    const hrefRegex = /href=["']((?:\/[a-zA-Z0-9_\-\.\/]*)|(?:https?:\/\/[a-zA-Z0-9_\-\.\/]+))["']/g;
+    const hrefRegex =
+      /href=["']((?:\/[a-zA-Z0-9_\-\.\/]*)|(?:https?:\/\/[a-zA-Z0-9_\-\.\/]+))["']/g;
 
     articlesRows.forEach((art: any) => {
       if (!art.content) return;
@@ -812,7 +1019,7 @@ export const scanBrokenLinksServer = createServerFn({ method: "GET" })
         // Check if internal relative link
         if (url.startsWith("/")) {
           const path = url.split("?")[0].split("#")[0]; // remove query and hash
-          
+
           if (path.startsWith("/news/")) {
             const slug = path.substring(6);
             if (!articleSlugsMap.has(slug)) {
@@ -822,11 +1029,7 @@ export const scanBrokenLinksServer = createServerFn({ method: "GET" })
           } else {
             // General page, custom page, or category check
             const slug = path.substring(1);
-            if (
-              !staticRoutes.has(path) &&
-              !pageSlugs.has(slug) &&
-              !categorySlugs.has(slug)
-            ) {
+            if (!staticRoutes.has(path) && !pageSlugs.has(slug) && !categorySlugs.has(slug)) {
               isBroken = true;
             }
           }
@@ -850,21 +1053,25 @@ export const scanBrokenLinksServer = createServerFn({ method: "GET" })
 
 export const fixBrokenLinkServer = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .validator((data) => z.object({
-    articleId: z.number(),
-    brokenUrl: z.string().min(1),
-    correctedUrl: z.string().min(1)
-  }).parse(data))
+  .validator((data) =>
+    z
+      .object({
+        articleId: z.number(),
+        brokenUrl: z.string().min(1),
+        correctedUrl: z.string().min(1),
+      })
+      .parse(data),
+  )
   .handler(async ({ data }) => {
     const { articleId, brokenUrl, correctedUrl } = data;
-    
+
     // Fetch article content
     const rows = await query("SELECT content FROM articles WHERE id = ?", [articleId]);
     if (rows.length === 0) throw new Error("Article not found");
     let content = rows[0].content || "";
 
     // Replace the exact href link
-    const doubleQuotePattern = new RegExp(`href=["']\${escapeRegExp(brokenUrl)}["']`, 'g');
+    const doubleQuotePattern = new RegExp(`href=["']\${escapeRegExp(brokenUrl)}["']`, "g");
     content = content.replace(doubleQuotePattern, `href="\${correctedUrl}"`);
 
     await query("UPDATE articles SET content = ? WHERE id = ?", [content, articleId]);
@@ -872,7 +1079,7 @@ export const fixBrokenLinkServer = createServerFn({ method: "POST" })
   });
 
 function escapeRegExp(str: string) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export type AdOrientation = "portrait" | "landscape";
@@ -902,21 +1109,73 @@ import adHome2_5 from "@/assets/news-wallstreet.webp";
 import adHome2_6 from "@/assets/hero-markets.webp";
 
 export const defaultAdSlides: AdSlideItem[] = [
-  { id: "ad-1", image: "https://placehold.co/600x800/e2e8f0/475569?text=Portrait+Ad\\n600x800", href: "#", label: "Sponsored" },
-  { id: "ad-2", image: "https://placehold.co/600x800/f8fafc/94a3b8?text=Portrait+Ad\\n600x800", href: "#", label: "Sponsored" },
-  { id: "ad-3", image: "https://placehold.co/600x800/f1f5f9/64748b?text=Portrait+Ad\\n600x800", href: "#", label: "Sponsored" },
+  {
+    id: "ad-1",
+    image: "https://placehold.co/600x800/e2e8f0/475569?text=Portrait+Ad\\n600x800",
+    href: "#",
+    label: "Sponsored",
+  },
+  {
+    id: "ad-2",
+    image: "https://placehold.co/600x800/f8fafc/94a3b8?text=Portrait+Ad\\n600x800",
+    href: "#",
+    label: "Sponsored",
+  },
+  {
+    id: "ad-3",
+    image: "https://placehold.co/600x800/f1f5f9/64748b?text=Portrait+Ad\\n600x800",
+    href: "#",
+    label: "Sponsored",
+  },
 ];
 
 export const defaultAdSlidesHome2: AdSlideItem[] = [
-  { id: "ad2-1", image: "https://placehold.co/406x196/e2e8f0/475569?text=Landscape+Ad\\n406x196", href: "#", label: "Sponsored" },
-  { id: "ad2-2", image: "https://placehold.co/406x196/f8fafc/94a3b8?text=Landscape+Ad\\n406x196", href: "#", label: "Sponsored" },
-  { id: "ad2-3", image: "https://placehold.co/406x196/f1f5f9/64748b?text=Landscape+Ad\\n406x196", href: "#", label: "Sponsored" },
-  { id: "ad2-4", image: "https://placehold.co/406x196/e2e8f0/475569?text=Landscape+Ad\\n406x196", href: "#", label: "Sponsored" },
-  { id: "ad2-5", image: "https://placehold.co/406x196/f8fafc/94a3b8?text=Landscape+Ad\\n406x196", href: "#", label: "Sponsored" },
-  { id: "ad2-6", image: "https://placehold.co/406x196/f1f5f9/64748b?text=Landscape+Ad\\n406x196", href: "#", label: "Sponsored" },
+  {
+    id: "ad2-1",
+    image: "https://placehold.co/406x196/e2e8f0/475569?text=Landscape+Ad\\n406x196",
+    href: "#",
+    label: "Sponsored",
+  },
+  {
+    id: "ad2-2",
+    image: "https://placehold.co/406x196/f8fafc/94a3b8?text=Landscape+Ad\\n406x196",
+    href: "#",
+    label: "Sponsored",
+  },
+  {
+    id: "ad2-3",
+    image: "https://placehold.co/406x196/f1f5f9/64748b?text=Landscape+Ad\\n406x196",
+    href: "#",
+    label: "Sponsored",
+  },
+  {
+    id: "ad2-4",
+    image: "https://placehold.co/406x196/e2e8f0/475569?text=Landscape+Ad\\n406x196",
+    href: "#",
+    label: "Sponsored",
+  },
+  {
+    id: "ad2-5",
+    image: "https://placehold.co/406x196/f8fafc/94a3b8?text=Landscape+Ad\\n406x196",
+    href: "#",
+    label: "Sponsored",
+  },
+  {
+    id: "ad2-6",
+    image: "https://placehold.co/406x196/f1f5f9/64748b?text=Landscape+Ad\\n406x196",
+    href: "#",
+    label: "Sponsored",
+  },
 ];
 
-export type AdSlot = "home1" | "home2" | "ad3" | "popup" | "leaderboard" | "featured_slide" | "reel_ads";
+export type AdSlot =
+  | "home1"
+  | "home2"
+  | "ad3"
+  | "popup"
+  | "leaderboard"
+  | "featured_slide"
+  | "reel_ads";
 export type AdSlotMode = "image" | "script";
 
 const SLOT_MODE_KEY = "nt:ad-slot-mode";
@@ -992,7 +1251,6 @@ const ADS_KEYS: Record<AdSlot, string> = {
   reel_ads: "nt:ads:v2:reel_ads",
 };
 
-
 const TRASH_KEY = "nt:site-ads-trash";
 const TRASH_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
@@ -1036,11 +1294,8 @@ export function saveAdRotation(slot: AdSlot, seconds: number) {
 export function injectReelAds<T>(
   items: T[],
   ads: AdSlideItem[],
-  intervalOrOptions: number | { interval?: number; firstAfter?: number } = 3
-): (
-  | { isAd: false; item: T; originalIndex: number }
-  | { isAd: true; ad: AdSlideItem }
-)[] {
+  intervalOrOptions: number | { interval?: number; firstAfter?: number } = 3,
+): ({ isAd: false; item: T; originalIndex: number } | { isAd: true; ad: AdSlideItem })[] {
   const validAds = ads.filter((a) => !!(a.image || a.imagePortrait || a.imageLandscape));
   if (validAds.length === 0) {
     return items.map((item, originalIndex) => ({ isAd: false, item, originalIndex }));
@@ -1052,12 +1307,13 @@ export function injectReelAds<T>(
     | { isAd: true; ad: AdSlideItem }
   )[] = [];
 
-  const opts = typeof intervalOrOptions === "number"
-    ? { interval: intervalOrOptions, firstAfter: intervalOrOptions }
-    : {
-        interval: intervalOrOptions?.interval ?? 3,
-        firstAfter: intervalOrOptions?.firstAfter ?? (intervalOrOptions?.interval ?? 3),
-      };
+  const opts =
+    typeof intervalOrOptions === "number"
+      ? { interval: intervalOrOptions, firstAfter: intervalOrOptions }
+      : {
+          interval: intervalOrOptions?.interval ?? 3,
+          firstAfter: intervalOrOptions?.firstAfter ?? intervalOrOptions?.interval ?? 3,
+        };
 
   let adIdx = 0;
   let itemsSinceLastAd = 0;
@@ -1084,9 +1340,18 @@ export function loadPopupConfig(): PopupConfig {
     if (!raw) return defaultPopupConfig;
     const p = JSON.parse(raw);
     return {
-      frequencyMinutes: typeof p.frequencyMinutes === "number" ? p.frequencyMinutes : defaultPopupConfig.frequencyMinutes,
-      initialDelaySeconds: typeof p.initialDelaySeconds === "number" ? p.initialDelaySeconds : defaultPopupConfig.initialDelaySeconds,
-      closeDelaySeconds: typeof p.closeDelaySeconds === "number" ? p.closeDelaySeconds : defaultPopupConfig.closeDelaySeconds,
+      frequencyMinutes:
+        typeof p.frequencyMinutes === "number"
+          ? p.frequencyMinutes
+          : defaultPopupConfig.frequencyMinutes,
+      initialDelaySeconds:
+        typeof p.initialDelaySeconds === "number"
+          ? p.initialDelaySeconds
+          : defaultPopupConfig.initialDelaySeconds,
+      closeDelaySeconds:
+        typeof p.closeDelaySeconds === "number"
+          ? p.closeDelaySeconds
+          : defaultPopupConfig.closeDelaySeconds,
       rotateOnInterval: p.rotateOnInterval !== false,
     };
   } catch {
@@ -1108,25 +1373,52 @@ export function savePopupConfig(cfg: Partial<PopupConfig>) {
 }
 
 export const defaultAdSlidesAd3: AdSlideItem[] = [
-  { id: "ad3-1", image: "https://placehold.co/600x800/e2e8f0/475569?text=Portrait+Ad\\n600x800", href: "#", label: "Sponsored" },
-  { id: "ad3-2", image: "https://placehold.co/600x800/f8fafc/94a3b8?text=Portrait+Ad\\n600x800", href: "#", label: "Sponsored" },
-  { id: "ad3-3", image: "https://placehold.co/600x800/f1f5f9/64748b?text=Portrait+Ad\\n600x800", href: "#", label: "Sponsored" },
+  {
+    id: "ad3-1",
+    image: "https://placehold.co/600x800/e2e8f0/475569?text=Portrait+Ad\\n600x800",
+    href: "#",
+    label: "Sponsored",
+  },
+  {
+    id: "ad3-2",
+    image: "https://placehold.co/600x800/f8fafc/94a3b8?text=Portrait+Ad\\n600x800",
+    href: "#",
+    label: "Sponsored",
+  },
+  {
+    id: "ad3-3",
+    image: "https://placehold.co/600x800/f1f5f9/64748b?text=Portrait+Ad\\n600x800",
+    href: "#",
+    label: "Sponsored",
+  },
 ];
 
 export const defaultAdSlidesPopup: AdSlideItem[] = [
-  { id: "pop-1", image: "https://placehold.co/600x800/e2e8f0/475569?text=Popup+Ad\\n600x800", href: "#", label: "Sponsored", orientation: "portrait" },
-  { id: "pop-2", image: "https://placehold.co/1200x675/f8fafc/94a3b8?text=Popup+Ad\\n1200x675", href: "#", label: "Sponsored", orientation: "landscape" },
+  {
+    id: "pop-1",
+    image: "https://placehold.co/600x800/e2e8f0/475569?text=Popup+Ad\\n600x800",
+    href: "#",
+    label: "Sponsored",
+    orientation: "portrait",
+  },
+  {
+    id: "pop-2",
+    image: "https://placehold.co/1200x675/f8fafc/94a3b8?text=Popup+Ad\\n1200x675",
+    href: "#",
+    label: "Sponsored",
+    orientation: "landscape",
+  },
 ];
 
 export const defaultAdSlidesLeaderboard: AdSlideItem[] = [
-  { 
-    id: "lead-1", 
+  {
+    id: "lead-1",
     imageLandscape: "https://placehold.co/1200x150/e2e8f0/475569?text=Leaderboard\\n1200x150",
     imagePortrait: "https://placehold.co/600x100/e2e8f0/475569?text=Leaderboard\\n600x100",
     image: "https://placehold.co/1200x150/e2e8f0/475569?text=Leaderboard\\n1200x150",
-    href: "#", 
-    label: "Sponsored", 
-    orientation: "landscape" 
+    href: "#",
+    label: "Sponsored",
+    orientation: "landscape",
   },
 ];
 
@@ -1200,7 +1492,9 @@ export function safeSetItem(key: string, value: string): boolean {
       localStorage.setItem(key, value);
       return true;
     } catch {
-      console.warn(`[Storage] Browser quota full for "${key}". Data saved to memory and syncing to server database.`);
+      console.warn(
+        `[Storage] Browser quota full for "${key}". Data saved to memory and syncing to server database.`,
+      );
       return false;
     }
   }
@@ -1211,7 +1505,12 @@ function sanitizeSlotAds(slot: AdSlot, list: AdSlideItem[]): AdSlideItem[] {
   if (slot === "home1" || slot === "ad3" || slot === "reel_ads") {
     return list.map((ad) => {
       if (ad.imagePortrait) {
-        return { ...ad, image: ad.imagePortrait, orientation: "portrait" as const, imageLandscape: undefined };
+        return {
+          ...ad,
+          image: ad.imagePortrait,
+          orientation: "portrait" as const,
+          imageLandscape: undefined,
+        };
       }
       return ad;
     });
@@ -1219,7 +1518,12 @@ function sanitizeSlotAds(slot: AdSlot, list: AdSlideItem[]): AdSlideItem[] {
   if (slot === "home2") {
     return list.map((ad) => {
       if (ad.imageLandscape) {
-        return { ...ad, image: ad.imageLandscape, orientation: "landscape" as const, imagePortrait: undefined };
+        return {
+          ...ad,
+          image: ad.imageLandscape,
+          orientation: "landscape" as const,
+          imagePortrait: undefined,
+        };
       }
       return ad;
     });
@@ -1254,7 +1558,7 @@ export function loadTrash(): AdSlideItem[] {
     const now = Date.now();
     // Auto purge anything older than 30 days
     const fresh = items.filter(
-      (i) => i.deletedAt && now - new Date(i.deletedAt).getTime() < TRASH_TTL_MS
+      (i) => i.deletedAt && now - new Date(i.deletedAt).getTime() < TRASH_TTL_MS,
     );
     if (fresh.length !== items.length) {
       safeSetItem(TRASH_KEY, JSON.stringify(fresh));
@@ -1286,7 +1590,9 @@ export function cleanCloggedStorage() {
 
     // If usage is above ~1 MB (approx 1,000,000 chars), perform deep cleaning
     if (totalChars > 1000000) {
-      console.warn(`[Storage] High localStorage usage (${Math.round(totalChars / 1024)} KB). Deep cleaning bulky storage...`);
+      console.warn(
+        `[Storage] High localStorage usage (${Math.round(totalChars / 1024)} KB). Deep cleaning bulky storage...`,
+      );
 
       // 1. Purge trash cache
       localStorage.removeItem(TRASH_KEY);
@@ -1298,7 +1604,9 @@ export function cleanCloggedStorage() {
           const media = JSON.parse(rawMedia);
           if (Array.isArray(media)) {
             // Drop any item over 60 KB to prevent quota exhaustion
-            const light = media.filter((m: any) => !m?.dataUrl || m.dataUrl.length < 60000).slice(0, 3);
+            const light = media
+              .filter((m: any) => !m?.dataUrl || m.dataUrl.length < 60000)
+              .slice(0, 3);
             if (light.length > 0) {
               localStorage.setItem("nt_media_library_v1", JSON.stringify(light));
             } else {
@@ -1311,7 +1619,15 @@ export function cleanCloggedStorage() {
       }
 
       // 3. Inspect ad slot keys for oversized (> 200 KB) raw base64 data
-      const adSlots: AdSlot[] = ["reel_ads", "home1", "home2", "ad3", "popup", "leaderboard", "featured_slide"];
+      const adSlots: AdSlot[] = [
+        "reel_ads",
+        "home1",
+        "home2",
+        "ad3",
+        "popup",
+        "leaderboard",
+        "featured_slide",
+      ];
       for (const slot of adSlots) {
         const slotKey = ADS_KEYS[slot];
         const raw = localStorage.getItem(slotKey);
@@ -1321,7 +1637,9 @@ export function cleanCloggedStorage() {
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed)) inMemoryAdsCache[slot] = parsed;
           } catch {}
-          console.warn(`[Storage] Evicting oversized local cache for slot "${slot}" (${Math.round(raw.length / 1024)} KB). (Data remains safe in server database).`);
+          console.warn(
+            `[Storage] Evicting oversized local cache for slot "${slot}" (${Math.round(raw.length / 1024)} KB). (Data remains safe in server database).`,
+          );
           localStorage.removeItem(slotKey);
         }
       }
@@ -1332,7 +1650,9 @@ export function cleanCloggedStorage() {
         const k = localStorage.key(i);
         if (k) finalChars += (localStorage.getItem(k) || "").length;
       }
-      console.info(`[Storage] Deep clean finished. Storage freed to: ${Math.round(finalChars / 1024)} KB.`);
+      console.info(
+        `[Storage] Deep clean finished. Storage freed to: ${Math.round(finalChars / 1024)} KB.`,
+      );
     }
   } catch {}
 }
@@ -1396,7 +1716,8 @@ export function restoreFromTrash(id: string) {
   const slot: AdSlot = (item.slot as AdSlot) || "home1";
   const list = readRaw(slot);
   const { deletedAt, slot: _s, ...clean } = item;
-  void deletedAt; void _s;
+  void deletedAt;
+  void _s;
   writeRaw(slot, [...list, clean]);
   saveTrash(trash.filter((t) => t.id !== id));
 }
@@ -1414,20 +1735,20 @@ export const deleteAdStaticFilesServer = createServerFn({ method: "POST" })
     const path = await import("node:path");
     const cwd = process.cwd();
     let deletedCount = 0;
-    
+
     for (const url of urls) {
       if (!url || typeof url !== "string" || !url.startsWith("/uploads/ads/")) continue;
-      
+
       const filename = url.replace("/uploads/ads/", "");
       // Prevent directory traversal
       if (filename.includes("/") || filename.includes("..")) continue;
-      
+
       const targetDirs = [
         path.join(cwd, "public", "uploads", "ads"),
         path.join(cwd, "dist", "client", "uploads", "ads"),
         path.join(cwd, "uploads", "ads"),
       ];
-      
+
       for (const dir of targetDirs) {
         const filePath = path.join(dir, filename);
         try {
@@ -1442,8 +1763,6 @@ export const deleteAdStaticFilesServer = createServerFn({ method: "POST" })
     }
     return { success: true, deletedCount };
   });
-
-
 
 const SETTINGS_KEY = "nt:site-settings";
 const PAGES_KEY = "nt:site-pages";
@@ -1550,5 +1869,3 @@ export function syncAdConfigurationToServer() {
   };
   saveAdConfigurationServer({ data: config }).catch(() => {});
 }
-
-

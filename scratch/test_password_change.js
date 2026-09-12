@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
 
 function hashPassword(password) {
   const salt = "northeast_timeline_salt_2026";
@@ -9,19 +9,19 @@ function hashPassword(password) {
 
 async function run() {
   try {
-    const configPath = path.resolve('db-config.json');
+    const configPath = path.resolve("db-config.json");
     if (!fs.existsSync(configPath)) {
-      console.log('db-config.json not found');
+      console.log("db-config.json not found");
       return;
     }
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    const mysql = require('c:\\Users\\gorillatech\\Music\\TodayTripura\\node_modules\\mysql2\\promise');
+    const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    const mysql = require("c:\\Users\\gorillatech\\Music\\TodayTripura\\node_modules\\mysql2\\promise");
     const conn = await mysql.createConnection({
       host: config.host,
       port: Number(config.port) || 3306,
       user: config.user,
       password: config.password,
-      database: config.database
+      database: config.database,
     });
 
     // 1. Get first user
@@ -39,11 +39,16 @@ async function run() {
     const newHash = hashPassword(newPassword);
 
     console.log("Updating password to:", newPassword);
-    const [result] = await conn.query("UPDATE users SET password_hash = ? WHERE id = ?", [newHash, user.id]);
+    const [result] = await conn.query("UPDATE users SET password_hash = ? WHERE id = ?", [
+      newHash,
+      user.id,
+    ]);
     console.log("Update result:", result);
 
     // Read back
-    const [updatedUsers] = await conn.query("SELECT password_hash FROM users WHERE id = ?", [user.id]);
+    const [updatedUsers] = await conn.query("SELECT password_hash FROM users WHERE id = ?", [
+      user.id,
+    ]);
     const updatedUser = updatedUsers[0];
     console.log("Updated hash matches expected:", updatedUser.password_hash === newHash);
 
@@ -52,12 +57,15 @@ async function run() {
     console.log("Login verification success:", updatedUser.password_hash === verifyHash);
 
     // Restore old hash
-    await conn.query("UPDATE users SET password_hash = ? WHERE id = ?", [user.password_hash, user.id]);
+    await conn.query("UPDATE users SET password_hash = ? WHERE id = ?", [
+      user.password_hash,
+      user.id,
+    ]);
     console.log("Restored old hash");
 
     await conn.end();
   } catch (err) {
-    console.error('Error during test:', err);
+    console.error("Error during test:", err);
   }
 }
 

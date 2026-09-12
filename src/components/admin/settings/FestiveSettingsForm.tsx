@@ -6,11 +6,11 @@ import { useFontConfig } from "@/components/site/AdSettingsContext";
 
 const FESTIVE_GRADIENT_MAP: Record<string, string> = {
   "indian-flag": "linear-gradient(to right, #FF9933, #000080, #138808)",
-  "diwali": "linear-gradient(to right, #FF8008, #FFC837, #FF007F, #7F00FF)",
-  "sunset": "linear-gradient(to right, #F5576C, #F093FB)",
-  "neon": "linear-gradient(to right, #FF007F, #7F00FF, #00F0FF)",
-  "ocean": "linear-gradient(to right, #00c6ff, #0072ff)",
-  "forest": "linear-gradient(to right, #11998e, #38ef7d)",
+  diwali: "linear-gradient(to right, #FF8008, #FFC837, #FF007F, #7F00FF)",
+  sunset: "linear-gradient(to right, #F5576C, #F093FB)",
+  neon: "linear-gradient(to right, #FF007F, #7F00FF, #00F0FF)",
+  ocean: "linear-gradient(to right, #00c6ff, #0072ff)",
+  forest: "linear-gradient(to right, #11998e, #38ef7d)",
 };
 
 // Pure CSS keyframe animations â€” injected via style tag, works without tailwindcss-animate
@@ -25,13 +25,16 @@ const ROTATION_KEYFRAMES = `
 `;
 
 const ROTATION_ANIMATION_STYLE: Record<string, React.CSSProperties> = {
-  "slide-up":    { animation: "rot-slide-up    0.35s cubic-bezier(0.22,1,0.36,1) both" },
-  "slide-down":  { animation: "rot-slide-down  0.35s cubic-bezier(0.22,1,0.36,1) both" },
-  "slide-left":  { animation: "rot-slide-left  0.35s cubic-bezier(0.22,1,0.36,1) both" },
+  "slide-up": { animation: "rot-slide-up    0.35s cubic-bezier(0.22,1,0.36,1) both" },
+  "slide-down": { animation: "rot-slide-down  0.35s cubic-bezier(0.22,1,0.36,1) both" },
+  "slide-left": { animation: "rot-slide-left  0.35s cubic-bezier(0.22,1,0.36,1) both" },
   "slide-right": { animation: "rot-slide-right 0.35s cubic-bezier(0.22,1,0.36,1) both" },
-  "fade":        { animation: "rot-fade        0.35s ease both" },
-  "zoom":        { animation: "rot-zoom        0.35s cubic-bezier(0.34,1.56,0.64,1) both" },
-  "flip":        { animation: "rot-flip        0.5s  cubic-bezier(0.22,1,0.36,1) both", perspective: "400px" },
+  fade: { animation: "rot-fade        0.35s ease both" },
+  zoom: { animation: "rot-zoom        0.35s cubic-bezier(0.34,1.56,0.64,1) both" },
+  flip: {
+    animation: "rot-flip        0.5s  cubic-bezier(0.22,1,0.36,1) both",
+    perspective: "400px",
+  },
 };
 
 const PRESET_COLORS = [
@@ -85,31 +88,37 @@ export function FestiveSettingsForm() {
   const activeColor = settings.festiveCategoryTitleColor || settings.topBarTextColor || "#000000";
 
   const selectedFont = fontConfig.fonts.find((f) => f.id === settings.customAlertFontFamily);
-  const customAlertFontFamilyCss = selectedFont ? `"${selectedFont.family}", sans-serif` : '"Inter", system-ui, sans-serif';
-  const rotationAnimStyle = ROTATION_ANIMATION_STYLE[settings.customAlertAnimationStyle || "slide-up"] || ROTATION_ANIMATION_STYLE["slide-up"];
+  const customAlertFontFamilyCss = selectedFont
+    ? `"${selectedFont.family}", sans-serif`
+    : '"Inter", system-ui, sans-serif';
+  const rotationAnimStyle =
+    ROTATION_ANIMATION_STYLE[settings.customAlertAnimationStyle || "slide-up"] ||
+    ROTATION_ANIMATION_STYLE["slide-up"];
 
-  const textStyle = activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
-    ? {
-        backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-        display: "inline-block",
-      }
-    : { color: activeColor };
+  const textStyle =
+    activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
+      ? {
+          backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+          display: "inline-block",
+        }
+      : { color: activeColor };
 
-  const badgeStyle = activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
-    ? {
-        backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
-        backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-      }
-    : {
-        backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
-        color: settings.festiveCategoryBadgeTextColor || "#FFFFFF",
-      };
+  const badgeStyle =
+    activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
+      ? {
+          backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
+          backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+        }
+      : {
+          backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
+          color: settings.festiveCategoryBadgeTextColor || "#FFFFFF",
+        };
 
   const [animNonce, setAnimNonce] = useState(0);
 
@@ -148,7 +157,8 @@ export function FestiveSettingsForm() {
                 Festive Theme & Custom Alert Rotation
               </h2>
               <p className="text-xs text-slate-500">
-                Set custom alert message, rotation delay, text color, and gradient (Default color: #000000 Black).
+                Set custom alert message, rotation delay, text color, and gradient (Default color:
+                #000000 Black).
               </p>
             </div>
           </div>
@@ -168,18 +178,25 @@ export function FestiveSettingsForm() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/80 mb-6 transition-colors">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
-              <Power className={`h-4 w-4 ${isFestiveEnabled ? "text-emerald-600" : "text-slate-400"}`} />
+              <Power
+                className={`h-4 w-4 ${isFestiveEnabled ? "text-emerald-600" : "text-slate-400"}`}
+              />
               <span className="text-sm font-bold text-slate-800">
                 Festive Theme & Custom Alert Rotation
               </span>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                isFestiveEnabled ? "bg-emerald-100 text-emerald-800 border border-emerald-200" : "bg-slate-200 text-slate-600 border border-slate-300"
-              }`}>
+              <span
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  isFestiveEnabled
+                    ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                    : "bg-slate-200 text-slate-600 border border-slate-300"
+                }`}
+              >
                 {isFestiveEnabled ? "ON (Active)" : "OFF (Disabled)"}
               </span>
             </div>
             <p className="text-xs text-slate-500">
-              Turn ON to rotate custom alert messages across Top Bar, category headers, section badges, and QR cards. Turn OFF to display standard category titles only.
+              Turn ON to rotate custom alert messages across Top Bar, category headers, section
+              badges, and QR cards. Turn OFF to display standard category titles only.
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -290,7 +307,10 @@ export function FestiveSettingsForm() {
               {/* Quick Presets */}
               <div className="flex flex-wrap gap-2">
                 {PRESET_COLORS.map((p) => {
-                  const isSelected = (settings.festiveCategoryTitleColor === p.hex || settings.topBarTextColor === p.hex) && !activeGradient;
+                  const isSelected =
+                    (settings.festiveCategoryTitleColor === p.hex ||
+                      settings.topBarTextColor === p.hex) &&
+                    !activeGradient;
                   return (
                     <button
                       key={p.hex}
@@ -360,7 +380,8 @@ export function FestiveSettingsForm() {
                 <option value="flip">🔄 3D Flip Swap</option>
               </select>
               <p className="mt-1 text-[11px] text-slate-400">
-                Controls how the text ticker rotates between Category Title and Custom Alert message.
+                Controls how the text ticker rotates between Category Title and Custom Alert
+                message.
               </p>
             </div>
 
@@ -377,7 +398,12 @@ export function FestiveSettingsForm() {
                 <option value="">Default System Font (Inter)</option>
                 {fontConfig.fonts.map((f) => (
                   <option key={f.id} value={f.id}>
-                    {f.name} {f.source === "google" ? "(Google Fonts)" : f.source === "upload" ? "(Uploaded)" : ""}
+                    {f.name}{" "}
+                    {f.source === "google"
+                      ? "(Google Fonts)"
+                      : f.source === "upload"
+                        ? "(Uploaded)"
+                        : ""}
                   </option>
                 ))}
               </select>
@@ -403,7 +429,8 @@ export function FestiveSettingsForm() {
                 className="w-full accent-slate-900 h-2 bg-slate-200 rounded-lg cursor-pointer"
               />
               <p className="mt-1 text-[11px] text-slate-400">
-                Increases or decreases text size specifically for Custom Alert / Weather Title Message (Category Title size is preserved).
+                Increases or decreases text size specifically for Custom Alert / Weather Title
+                Message (Category Title size is preserved).
               </p>
             </div>
           </div>
@@ -439,14 +466,21 @@ export function FestiveSettingsForm() {
               <div className="mt-4 space-y-4">
                 {/* 1. Top Bar Preview Box */}
                 <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-xs overflow-hidden">
-                  <span className="text-[10px] text-slate-400 font-medium block mb-1">Top Bar Custom Alert Message:</span>
+                  <span className="text-[10px] text-slate-400 font-medium block mb-1">
+                    Top Bar Custom Alert Message:
+                  </span>
                   <div className="relative h-8 overflow-hidden flex items-center">
                     <span
                       key={`topbar-${showCustomText ? "custom" : "default"}-${animNonce}`}
                       className="absolute inset-x-0 font-bold truncate"
                       style={{
                         ...(showCustomText ? textStyle : {}),
-                        ...(showCustomText ? { fontFamily: customAlertFontFamilyCss, fontSize: `${settings.customAlertFontSize || 14}px` } : {}),
+                        ...(showCustomText
+                          ? {
+                              fontFamily: customAlertFontFamilyCss,
+                              fontSize: `${settings.customAlertFontSize || 14}px`,
+                            }
+                          : {}),
                         ...rotationAnimStyle,
                       }}
                     >
@@ -457,7 +491,9 @@ export function FestiveSettingsForm() {
 
                 {/* 2. Category Title Preview Box (Category Title size 100% preserved) */}
                 <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-xs overflow-hidden">
-                  <span className="text-[10px] text-slate-400 font-medium block mb-1">Category Title Swap (Preserved Size):</span>
+                  <span className="text-[10px] text-slate-400 font-medium block mb-1">
+                    Category Title Swap (Preserved Size):
+                  </span>
                   <div className="relative h-10 overflow-hidden flex items-center">
                     <h1
                       key={`cat-${showCustomText ? "custom" : "default"}-${animNonce}`}
@@ -512,7 +548,8 @@ export function FestiveSettingsForm() {
             </div>
 
             <p className="mt-4 text-[11px] text-slate-500 italic">
-              âœ¨ Every {settings.topBarSwapDelay || 5} seconds, text automatically rotates between default headers and your custom message! Default text color is black (#000000).
+              ✨ Every {settings.topBarSwapDelay || 5} seconds, text automatically rotates between
+              default headers and your custom message! Default text color is black (#000000).
             </p>
           </div>
         </div>
@@ -523,7 +560,9 @@ export function FestiveSettingsForm() {
         <button
           onClick={handleSave}
           className={`inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm font-bold text-white shadow-xl transition-all active:scale-95 ${
-            saved ? "bg-emerald-600 ring-4 ring-emerald-200" : "bg-slate-900 hover:bg-slate-800 ring-4 ring-slate-300/40"
+            saved
+              ? "bg-emerald-600 ring-4 ring-emerald-200"
+              : "bg-slate-900 hover:bg-slate-800 ring-4 ring-slate-300/40"
           }`}
         >
           <Save className="h-4 w-4" />
@@ -533,5 +572,3 @@ export function FestiveSettingsForm() {
     </div>
   );
 }
-
-

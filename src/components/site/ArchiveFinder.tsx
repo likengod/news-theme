@@ -25,22 +25,45 @@ export function ArchiveFinder() {
       <p className="text-xs font-bold uppercase tracking-[0.2em] text-foreground">Archive</p>
       <p className="text-[11px] text-muted-foreground">Find stories by date</p>
       <div className="grid grid-cols-3 gap-2">
-        <select name="day" aria-label="Day" defaultValue="" className="w-full border border-border bg-background px-2 py-2 text-sm outline-none focus:border-foreground">
+        <select
+          name="day"
+          aria-label="Day"
+          defaultValue=""
+          className="w-full border border-border bg-background px-2 py-2 text-sm outline-none focus:border-foreground"
+        >
           <option value="">Day</option>
           {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-            <option key={d} value={String(d).padStart(2, "0")}>{d}</option>
+            <option key={d} value={String(d).padStart(2, "0")}>
+              {d}
+            </option>
           ))}
         </select>
-        <select name="month" aria-label="Month" defaultValue="" className="w-full border border-border bg-background px-2 py-2 text-sm outline-none focus:border-foreground">
+        <select
+          name="month"
+          aria-label="Month"
+          defaultValue=""
+          className="w-full border border-border bg-background px-2 py-2 text-sm outline-none focus:border-foreground"
+        >
           <option value="">Month</option>
-          {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((m, i) => (
-            <option key={m} value={String(i + 1).padStart(2, "0")}>{m}</option>
-          ))}
+          {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map(
+            (m, i) => (
+              <option key={m} value={String(i + 1).padStart(2, "0")}>
+                {m}
+              </option>
+            ),
+          )}
         </select>
-        <select name="year" aria-label="Year" defaultValue="" className="w-full border border-border bg-background px-2 py-2 text-sm outline-none focus:border-foreground">
+        <select
+          name="year"
+          aria-label="Year"
+          defaultValue=""
+          className="w-full border border-border bg-background px-2 py-2 text-sm outline-none focus:border-foreground"
+        >
           <option value="">Year</option>
           {Array.from({ length: 16 }, (_, i) => 2026 - i).map((y) => (
-            <option key={y} value={String(y)}>{y}</option>
+            <option key={y} value={String(y)}>
+              {y}
+            </option>
           ))}
         </select>
       </div>

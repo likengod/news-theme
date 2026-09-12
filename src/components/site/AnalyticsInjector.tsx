@@ -25,7 +25,12 @@ export function AnalyticsInjector() {
     addMeta("p:domain_verify", s.pinterestSiteVerification);
     addMeta("yandex-verification", s.yandexVerification);
 
-    const addScript = (id: string, src?: string, inline?: string, attrs: Record<string, string> = {}) => {
+    const addScript = (
+      id: string,
+      src?: string,
+      inline?: string,
+      attrs: Record<string, string> = {},
+    ) => {
       if (document.getElementById(id)) return;
       const el = document.createElement("script");
       el.id = id;
@@ -78,11 +83,7 @@ export function AnalyticsInjector() {
     if (s.firebaseConfigJson) {
       try {
         const cfg = JSON.parse(s.firebaseConfigJson);
-        addScript(
-          "firebase-init",
-          undefined,
-          `window.__FIREBASE_CONFIG__=${JSON.stringify(cfg)};`,
-        );
+        addScript("firebase-init", undefined, `window.__FIREBASE_CONFIG__=${JSON.stringify(cfg)};`);
       } catch {
         // ignore invalid JSON
       }

@@ -12,18 +12,9 @@ export type Role = {
 
 const VIEWER_KEY = "nt:viewer-role";
 
-
 const KEY = "ne_roles_v1";
 
-export const ROLE_COLORS = [
-  "violet",
-  "blue",
-  "emerald",
-  "amber",
-  "slate",
-  "rose",
-  "sky",
-] as const;
+export const ROLE_COLORS = ["violet", "blue", "emerald", "amber", "slate", "rose", "sky"] as const;
 
 export const roleBadgeClass = (color: string) => {
   const map: Record<string, string> = {
@@ -39,14 +30,55 @@ export const roleBadgeClass = (color: string) => {
 };
 
 const DEFAULTS: Role[] = [
-  { id: "admin", name: "Admin", description: "Full access to every admin tool and setting.", color: "violet", builtin: true, seesPopupAds: false },
-  { id: "editor", name: "Editor", description: "Can publish and edit any article.", color: "blue", builtin: true, seesPopupAds: false },
-  { id: "author", name: "Author", description: "Can write and submit own articles.", color: "emerald", builtin: true, seesPopupAds: false },
-  { id: "journalist", name: "Journalist", description: "Verified journalist who reports and submits news.", color: "sky", builtin: true, seesPopupAds: false },
-  { id: "premium", name: "Premium user", description: "Paid reader with access to premium articles and ad-free reading.", color: "amber", builtin: true, seesPopupAds: false },
-  { id: "reader", name: "Reader", description: "Default signed-in visitor.", color: "slate", builtin: true, seesPopupAds: true },
+  {
+    id: "admin",
+    name: "Admin",
+    description: "Full access to every admin tool and setting.",
+    color: "violet",
+    builtin: true,
+    seesPopupAds: false,
+  },
+  {
+    id: "editor",
+    name: "Editor",
+    description: "Can publish and edit any article.",
+    color: "blue",
+    builtin: true,
+    seesPopupAds: false,
+  },
+  {
+    id: "author",
+    name: "Author",
+    description: "Can write and submit own articles.",
+    color: "emerald",
+    builtin: true,
+    seesPopupAds: false,
+  },
+  {
+    id: "journalist",
+    name: "Journalist",
+    description: "Verified journalist who reports and submits news.",
+    color: "sky",
+    builtin: true,
+    seesPopupAds: false,
+  },
+  {
+    id: "premium",
+    name: "Premium user",
+    description: "Paid reader with access to premium articles and ad-free reading.",
+    color: "amber",
+    builtin: true,
+    seesPopupAds: false,
+  },
+  {
+    id: "reader",
+    name: "Reader",
+    description: "Default signed-in visitor.",
+    color: "slate",
+    builtin: true,
+    seesPopupAds: true,
+  },
 ];
-
 
 function mergeBuiltins(roles: Role[]): Role[] {
   // Ensure every built-in role always exists (even for older saved data),
@@ -66,10 +98,12 @@ import { query } from "./db.server";
 
 // ─── Server Functions (MySQL Roles Persistence) ─────────────────────────────
 
-export const getRolesServer = createServerFn({ method: "GET" })
-  .handler(async (): Promise<Role[]> => {
+export const getRolesServer = createServerFn({ method: "GET" }).handler(
+  async (): Promise<Role[]> => {
     try {
-      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'user_roles_config'");
+      const rows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'user_roles_config'",
+      );
       if (rows.length > 0 && rows[0].value) {
         const parsed = JSON.parse(rows[0].value) as Role[];
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -78,7 +112,8 @@ export const getRolesServer = createServerFn({ method: "GET" })
       }
     } catch {}
     return DEFAULTS;
-  });
+  },
+);
 
 export const saveRolesServer = createServerFn({ method: "POST" })
   .middleware([requireAuth])
@@ -88,7 +123,7 @@ export const saveRolesServer = createServerFn({ method: "POST" })
     await query(
       `INSERT INTO site_settings (setting_key, value) VALUES ('user_roles_config', ?)
        ON DUPLICATE KEY UPDATE value = ?`,
-      [json, json]
+      [json, json],
     );
     return { success: true };
   });
@@ -97,9 +132,11 @@ export const upgradeToPremiumServer = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .handler(async ({ context }) => {
     // Check existing role
-    const [rows]: any = await query("SELECT role FROM user_roles WHERE user_id = ?", [context.userId]);
+    const [rows]: any = await query("SELECT role FROM user_roles WHERE user_id = ?", [
+      context.userId,
+    ]);
     const currentRole = rows?.[0]?.role || "reader";
-    
+
     // Don't downgrade admins, editors, journalists, or authors
     if (["admin", "editor", "journalist", "author", "premium"].includes(currentRole)) {
       return { success: true, message: "Already have equal or higher privileges." };
@@ -108,7 +145,9 @@ export const upgradeToPremiumServer = createServerFn({ method: "POST" })
     // Delete any existing role first
     await query("DELETE FROM user_roles WHERE user_id = ?", [context.userId]);
     // Insert premium role
-    await query("INSERT INTO user_roles (id, user_id, role) VALUES (UUID(), ?, 'premium')", [context.userId]);
+    await query("INSERT INTO user_roles (id, user_id, role) VALUES (UUID(), ?, 'premium')", [
+      context.userId,
+    ]);
     return { success: true };
   });
 
@@ -156,4 +195,3 @@ export function currentRoleSeesPopups(): boolean {
   const role = loadRoles().find((r) => r.id === id);
   return role?.seesPopupAds ?? true;
 }
-

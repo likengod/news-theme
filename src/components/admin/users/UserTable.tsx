@@ -1,4 +1,15 @@
-import { ShieldCheck, ShieldOff, Trash2, Copy, RefreshCw, KeyRound, Wallet, UserPen, X, CheckSquare } from "lucide-react";
+import {
+  ShieldCheck,
+  ShieldOff,
+  Trash2,
+  Copy,
+  RefreshCw,
+  KeyRound,
+  Wallet,
+  UserPen,
+  X,
+  CheckSquare,
+} from "lucide-react";
 import { toast } from "sonner";
 import { roleBadgeClass, type Role } from "@/lib/roles";
 import type { AdminUserRow } from "@/lib/admin-users.functions";
@@ -133,14 +144,23 @@ export function UserTable({
                       <div className="flex items-center gap-3">
                         <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-slate-900 text-xs font-bold text-white uppercase">
                           {r.avatarUrl ? (
-                            <img src={r.avatarUrl} alt="" className="h-full w-full rounded-full object-cover" />
+                            <img
+                              src={r.avatarUrl}
+                              alt=""
+                              className="h-full w-full rounded-full object-cover"
+                            />
                           ) : (
                             (r.displayName || r.email).slice(0, 2)
                           )}
                         </div>
                         <div className="min-w-0">
                           <p className="truncate font-semibold text-slate-900">
-                            {r.displayName || "Un-named"} {isSelf && <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 font-normal">(You)</span>}
+                            {r.displayName || "Un-named"}{" "}
+                            {isSelf && (
+                              <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 font-normal">
+                                (You)
+                              </span>
+                            )}
                           </p>
                           <p className="truncate text-xs text-slate-500">{r.email}</p>
                         </div>
@@ -175,7 +195,7 @@ export function UserTable({
                         disabled={isSelf}
                         onChange={(e) => onSetRole(r.id, e.target.value as AdminUserRow["role"])}
                         className={`rounded-full border px-2.5 py-1 text-xs font-semibold focus:outline-none ${roleBadgeClass(
-                          roles.find((x) => x.id === r.role)?.color ?? "slate"
+                          roles.find((x) => x.id === r.role)?.color ?? "slate",
                         )}`}
                       >
                         {roles.map((rl) => (
@@ -198,7 +218,10 @@ export function UserTable({
                         disabled={isSelf}
                         onChange={(e) => {
                           const nextStatus = e.target.value;
-                          if ((nextStatus === "Active" && r.status !== "Active") || (nextStatus === "Suspended" && r.status === "Active")) {
+                          if (
+                            (nextStatus === "Active" && r.status !== "Active") ||
+                            (nextStatus === "Suspended" && r.status === "Active")
+                          ) {
                             onToggleBan(r);
                           }
                         }}
@@ -208,8 +231,12 @@ export function UserTable({
                             : "border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
                         }`}
                       >
-                        <option value="Active" className="bg-white text-emerald-700 font-semibold">● Active</option>
-                        <option value="Suspended" className="bg-white text-red-700 font-semibold">● Suspended</option>
+                        <option value="Active" className="bg-white text-emerald-700 font-semibold">
+                          ● Active
+                        </option>
+                        <option value="Suspended" className="bg-white text-red-700 font-semibold">
+                          ● Suspended
+                        </option>
                       </select>
                     </td>
 

@@ -2,8 +2,19 @@ import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  BadgeCheck, ShieldCheck, Search, Loader2, XCircle, ShieldOff, Phone, Mail,
-  MapPin, Droplet, Calendar, User, Globe,
+  BadgeCheck,
+  ShieldCheck,
+  Search,
+  Loader2,
+  XCircle,
+  ShieldOff,
+  Phone,
+  Mail,
+  MapPin,
+  Droplet,
+  Calendar,
+  User,
+  Globe,
 } from "lucide-react";
 import { lookupJournalist, type JournalistLookup } from "@/lib/journalist.functions";
 import { loadAuthorized, type AuthorizedSettings } from "@/lib/authorized-settings";
@@ -13,9 +24,16 @@ export const Route = createFileRoute("/verified-journalist")({
   head: () => ({
     meta: [
       { title: "Verify a Journalist — News Theme" },
-      { name: "description", content: "Enter a Journalist ID or 10-digit User ID to verify an accredited News Theme reporter." },
+      {
+        name: "description",
+        content:
+          "Enter a Journalist ID or 10-digit User ID to verify an accredited News Theme reporter.",
+      },
       { property: "og:title", content: "Verify a Journalist — News Theme" },
-      { property: "og:description", content: "Instantly check if a byline belongs to a verified News Theme reporter." },
+      {
+        property: "og:description",
+        content: "Instantly check if a byline belongs to a verified News Theme reporter.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -85,13 +103,21 @@ function VerifiedPage() {
           Verify a Journalist
         </h1>
         <p className="mt-3 text-base text-slate-600">
-          Enter a reporter's <strong>Journalist ID</strong> (e.g. <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs">ABC1234Z</code>) or their 10-digit <strong>User ID</strong> to view their official press card.
+          Enter a reporter's <strong>Journalist ID</strong> (e.g.{" "}
+          <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs">ABC1234Z</code>) or
+          their 10-digit <strong>User ID</strong> to view their official press card.
         </p>
       </section>
 
       <section className="mx-auto max-w-xl px-5 pb-8">
-        <form onSubmit={onSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <label htmlFor="uid" className="block text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <form
+          onSubmit={onSubmit}
+          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+        >
+          <label
+            htmlFor="uid"
+            className="block text-xs font-semibold uppercase tracking-wider text-slate-500"
+          >
             Journalist ID or User ID
           </label>
           <div className="mt-2 flex gap-2">
@@ -102,7 +128,7 @@ function VerifiedPage() {
                 maxLength={16}
                 placeholder="ABC1234Z or 1234567890"
                 value={uid}
-                onChange={(e) => setUid(e.target.value.replace(/[^A-Za-z0-9]/g, "").slice(0, 16))}
+                onChange={(e) => setUid(e.target.value.replace(/[^A-Za-z0-9\-]/g, "").slice(0, 16))}
                 className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-9 pr-3 font-mono text-base tracking-widest focus:border-slate-900 focus:outline-none"
               />
             </div>
@@ -111,7 +137,11 @@ function VerifiedPage() {
               disabled={busy || uid.trim().length < 3}
               className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-40"
             >
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+              {busy ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ShieldCheck className="h-4 w-4" />
+              )}
               Verify
             </button>
           </div>
@@ -130,9 +160,13 @@ function VerifiedPage() {
               <XCircle className="mx-auto h-8 w-8 text-amber-600" />
               <p className="mt-2 font-semibold text-amber-900">Journalist data not found</p>
               <p className="mt-1 text-sm text-amber-800">
-                This ID does not belong to us. Please double-check the number, or contact our office to confirm the reporter's credentials.
+                This ID does not belong to us. Please double-check the number, or contact our office
+                to confirm the reporter's credentials.
               </p>
-              <a href="mailto:trust@northeasttimeline.com" className="mt-3 inline-block text-sm font-semibold text-amber-900 underline">
+              <a
+                href="mailto:trust@northeasttimeline.com"
+                className="mt-3 inline-block text-sm font-semibold text-amber-900 underline"
+              >
                 trust@northeasttimeline.com
               </a>
             </div>
@@ -145,7 +179,9 @@ function VerifiedPage() {
       <section className="mx-auto max-w-3xl px-5 pb-16">
         <p className="text-center text-xs text-slate-500">
           Spotted a fake byline? Email{" "}
-          <a className="underline" href="mailto:trust@northeasttimeline.com">trust@northeasttimeline.com</a>{" "}
+          <a className="underline" href="mailto:trust@northeasttimeline.com">
+            trust@northeasttimeline.com
+          </a>{" "}
           — we investigate within 48 hours.
         </p>
       </section>
@@ -156,14 +192,18 @@ function VerifiedPage() {
 
 function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> }) {
   const [auth, setAuth] = useState<AuthorizedSettings>(loadAuthorized());
-  useEffect(() => { setAuth(loadAuthorized()); }, []);
+  useEffect(() => {
+    setAuth(loadAuthorized());
+  }, []);
 
   const inactive = !data.active;
   const roleLabel = ROLE_LABEL[data.role] ?? "Journalist";
   const name = (data.displayName ?? "News Theme Reporter").toUpperCase();
   const isSuspended = !data.active;
-  const defaultValid = new Date(new Date(data.memberSince).getTime() + 3 * 365 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
-  const validStr = isSuspended ? "SUSPENDED" : (data.validTill || defaultValid);
+  const defaultValid = new Date(
+    new Date(data.memberSince).getTime() + 3 * 365 * 24 * 60 * 60 * 1000,
+  ).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+  const validStr = isSuspended ? "SUSPENDED" : data.validTill || defaultValid;
 
   if (!data.verified) {
     return (
@@ -174,8 +214,8 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
             {data.displayName ?? "This account"} is not an accredited journalist
           </p>
           <p className="mt-1 text-sm text-slate-600">
-            The account exists on News Theme (role:{" "}
-            <span className="font-medium">{roleLabel}</span>) but is not authorised to publish under a verified byline.
+            The account exists on News Theme (role: <span className="font-medium">{roleLabel}</span>
+            ) but is not authorised to publish under a verified byline.
           </p>
         </div>
       </div>
@@ -184,7 +224,8 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
 
   // Press-card design — CR-80 standard (2.13″ × 3.39″ scaled ×1.6 → 326 × 520 px)
   const journalistId = data.journalistId ?? `NT-${data.publicUserId}`;
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://northeasttimeline.com";
+  const origin =
+    typeof window !== "undefined" ? window.location.origin : "https://northeasttimeline.com";
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${origin}/verified-journalist?id=${journalistId}`)}`;
 
   return (
@@ -221,7 +262,9 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
             <BadgeCheck className="h-4.5 w-4.5 text-[#34c759]" />
           </div>
           <p className="text-[10px] font-extrabold leading-tight tracking-wide text-white">
-            <span className="text-red-300">NORTHEAST</span><br />TIMELINE
+            <span className="text-red-300">NORTHEAST</span>
+            <br />
+            TIMELINE
           </p>
         </div>
 
@@ -239,7 +282,10 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
         />
 
         {/* ── Photo (LCP Image) ── */}
-        <div className="absolute z-20" style={{ left: 138, top: 74, transform: "translateX(-50%)" }}>
+        <div
+          className="absolute z-20"
+          style={{ left: 138, top: 74, transform: "translateX(-50%)" }}
+        >
           {data.avatarUrl ? (
             <img
               src={data.avatarUrl}
@@ -296,7 +342,11 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
             <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-start">
               <div className="py-1 text-center">
                 <p className="text-[8px] font-bold text-slate-900">Valid Till:</p>
-                <p className={`text-[8px] font-bold ${isSuspended ? "text-red-600 font-black uppercase" : "text-slate-600"}`}>{validStr}</p>
+                <p
+                  className={`text-[8px] font-bold ${isSuspended ? "text-red-600 font-black uppercase" : "text-slate-600"}`}
+                >
+                  {validStr}
+                </p>
               </div>
               <div className="mx-0.5 self-stretch border-l border-dashed border-red-400" />
               <div className="py-1 text-center">
@@ -353,7 +403,10 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
         </div>
 
         {/* ── Bottom Section: QR Code + Scan text (left of QR — enlarged size: 76px) ── */}
-        <div className="absolute bottom-1.5 z-20 flex items-center justify-center gap-3" style={{ left: 0, right: 50 }}>
+        <div
+          className="absolute bottom-1.5 z-20 flex items-center justify-center gap-3"
+          style={{ left: 0, right: 50 }}
+        >
           <div className="text-right text-[8.5px] font-extrabold uppercase tracking-tight leading-tight">
             <p className="text-red-600">Scan QR Code</p>
             <p className="text-[8px] font-bold text-slate-700">To Verify Journalist</p>
@@ -375,7 +428,12 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
         {/* ── Bottom-right navy accent (before PRESS bar) ── */}
         <div
           className="absolute bottom-0 z-10 bg-[#1a2040]"
-          style={{ right: 50, width: 80, height: 50, clipPath: "polygon(35% 100%, 100% 45%, 100% 100%)" }}
+          style={{
+            right: 50,
+            width: 80,
+            height: 50,
+            clipPath: "polygon(35% 100%, 100% 45%, 100% 100%)",
+          }}
         />
       </div>
 
@@ -416,18 +474,26 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
           <div className="grid grid-cols-[1fr_auto_1fr] items-center">
             <div className="py-1 text-center px-1">
               <p className="text-[10px] font-bold text-slate-900">Phone:</p>
-              <p className={`mt-0.5 truncate text-slate-600 ${
-                (auth.officePhone || data.phone || "").length > 15 ? "text-[8.5px]" : "text-[10px]"
-              }`}>
+              <p
+                className={`mt-0.5 truncate text-slate-600 ${
+                  (auth.officePhone || data.phone || "").length > 15
+                    ? "text-[8.5px]"
+                    : "text-[10px]"
+                }`}
+              >
                 {auth.officePhone || data.phone || "—"}
               </p>
             </div>
             <div className="mx-1 self-stretch border-l border-dashed border-red-300" />
             <div className="py-1 text-center px-1">
               <p className="text-[10px] font-bold text-slate-900">Email:</p>
-              <p className={`mt-0.5 truncate text-slate-600 ${
-                (auth.officeEmail || data.email || "").length > 22 ? "text-[8.5px]" : "text-[10px]"
-              }`}>
+              <p
+                className={`mt-0.5 truncate text-slate-600 ${
+                  (auth.officeEmail || data.email || "").length > 22
+                    ? "text-[8.5px]"
+                    : "text-[10px]"
+                }`}
+              >
                 {auth.officeEmail || data.email || "—"}
               </p>
             </div>
@@ -438,9 +504,13 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
           <div className="grid grid-cols-[1fr_auto_1fr] items-center">
             <div className="py-1 text-center px-1">
               <p className="text-[10px] font-bold text-slate-900">Website:</p>
-              <p className={`mt-0.5 truncate text-slate-600 ${
-                (auth.officeWebsite || "northeasttimeline.com").length > 22 ? "text-[8.5px]" : "text-[10px]"
-              }`}>
+              <p
+                className={`mt-0.5 truncate text-slate-600 ${
+                  (auth.officeWebsite || "northeasttimeline.com").length > 22
+                    ? "text-[8.5px]"
+                    : "text-[10px]"
+                }`}
+              >
                 {auth.officeWebsite || "northeasttimeline.com"}
               </p>
             </div>
@@ -482,10 +552,14 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
 
         {/* ── Note & Disclaimer ── */}
         {(() => {
-          const noteText = auth.cardNote || "This card certifies that the bearer is an authorized journalist of News Theme. If found, please return to the above address.";
-          const disclaimerText = auth.cardDisclaimer || "Tampering or misuse of this card is a punishable offense.";
+          const noteText =
+            auth.cardNote ||
+            "This card certifies that the bearer is an authorized journalist of News Theme. If found, please return to the above address.";
+          const disclaimerText =
+            auth.cardDisclaimer || "Tampering or misuse of this card is a punishable offense.";
           const totalLength = noteText.length + disclaimerText.length;
-          const lineBreaks = (noteText.match(/\n/g) || []).length + (disclaimerText.match(/\n/g) || []).length;
+          const lineBreaks =
+            (noteText.match(/\n/g) || []).length + (disclaimerText.match(/\n/g) || []).length;
 
           let sizeCls = "text-[10px] leading-snug";
           if (totalLength > 220 || lineBreaks >= 4) {
@@ -497,11 +571,13 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
           return (
             <div className={`px-5 pb-3 text-slate-600 ${sizeCls}`}>
               <p className="whitespace-pre-line">
-                <span className="font-bold text-red-600">– Note:</span><br />
+                <span className="font-bold text-red-600">– Note:</span>
+                <br />
                 {noteText}
               </p>
               <p className="mt-2 whitespace-pre-line">
-                <span className="font-bold text-red-600">– Disclaimer:</span><br />
+                <span className="font-bold text-red-600">– Disclaimer:</span>
+                <br />
                 {disclaimerText}
               </p>
             </div>
@@ -536,7 +612,10 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
               ) : (
                 <p
                   className="text-slate-700"
-                  style={{ fontFamily: "'Dancing Script', 'Brush Script MT', 'Segoe Script', cursive", fontSize: 20 }}
+                  style={{
+                    fontFamily: "'Dancing Script', 'Brush Script MT', 'Segoe Script', cursive",
+                    fontSize: 20,
+                  }}
                 >
                   {auth.signatureName || "Editor-in-Chief"}
                 </p>

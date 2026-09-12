@@ -60,7 +60,9 @@ export function loadReelsConfig(): ReelsConfig {
     return {
       ...defaultReelsConfig,
       ...parsed,
-      urls: Array.isArray(parsed.urls) ? parsed.urls.filter((u: unknown) => typeof u === "string") : [],
+      urls: Array.isArray(parsed.urls)
+        ? parsed.urls.filter((u: unknown) => typeof u === "string")
+        : [],
       youtube: { ...defaultReelsConfig.youtube, ...(parsed.youtube ?? {}) },
       facebook: { ...defaultReelsConfig.facebook, ...(parsed.facebook ?? {}) },
     };
@@ -103,7 +105,9 @@ export function extractYouTubeId(url: string): string | null {
 export function toEmbedSrc(provider: ReelsProvider, url: string): string | null {
   if (provider === "youtube") {
     const id = extractYouTubeId(url);
-    return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1&autoplay=1` : null;
+    return id
+      ? `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1&autoplay=1`
+      : null;
   }
   const trimmed = url.trim();
   if (!/^https?:\/\/(www\.)?facebook\.com\//i.test(trimmed)) return null;

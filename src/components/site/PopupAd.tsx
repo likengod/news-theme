@@ -24,10 +24,17 @@ export function PopupAd() {
   const [ads, setAds] = useState<AdSlideItem[]>([]);
   const [idx, setIdx] = useState(0);
 
-  const initialMode = ctx?.adConfig ? (ctx.adConfig.modes["popup"] || "image") : loadAdSlotMode("popup");
-  const initialScript = ctx?.adConfig ? (ctx.adConfig.scripts["popup"] || "") : loadAdSlotScript("popup");
-  const initialRotation = ctx?.adConfig ? (ctx.adConfig.rotations["popup"] || 6) : loadAdRotation("popup");
-  const initialPopupConfig: PopupConfig = ctx?.adConfig?.popupConfig || loadPopupConfig() || defaultPopupConfig;
+  const initialMode = ctx?.adConfig
+    ? ctx.adConfig.modes["popup"] || "image"
+    : loadAdSlotMode("popup");
+  const initialScript = ctx?.adConfig
+    ? ctx.adConfig.scripts["popup"] || ""
+    : loadAdSlotScript("popup");
+  const initialRotation = ctx?.adConfig
+    ? ctx.adConfig.rotations["popup"] || 6
+    : loadAdRotation("popup");
+  const initialPopupConfig: PopupConfig =
+    ctx?.adConfig?.popupConfig || loadPopupConfig() || defaultPopupConfig;
 
   const [slotMode, setSlotMode] = useState<AdSlotMode>(initialMode);
   const [slotScript, setSlotScript] = useState(initialScript);
@@ -77,14 +84,20 @@ export function PopupAd() {
   // Trigger popup according to popupConfig frequency and delays
   useEffect(() => {
     if (!currentRoleSeesPopups()) return;
-    if (isSearchOpen || (typeof document !== "undefined" && document.body.classList.contains("search-modal-open"))) return;
+    if (
+      isSearchOpen ||
+      (typeof document !== "undefined" && document.body.classList.contains("search-modal-open"))
+    )
+      return;
 
     const mode = slotMode;
     const script = slotScript;
 
     if (mode === "script" && (!script || script.trim().length === 0)) return;
 
-    const all = (ctx?.adConfig ? (ctx.adConfig.slots["popup"] || []) : loadAds("popup")).filter((a) => !!a.image);
+    const all = (ctx?.adConfig ? ctx.adConfig.slots["popup"] || [] : loadAds("popup")).filter(
+      (a) => !!a.image,
+    );
     if (mode === "image" && all.length === 0) return;
 
     const want: "portrait" | "landscape" = isMobile ? "portrait" : "landscape";
@@ -210,14 +223,21 @@ export function PopupAd() {
       aria-label="Advertisement"
       className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4 animate-in fade-in duration-300"
     >
-      <div className={`relative ${frameClass} overflow-hidden rounded-lg bg-black shadow-2xl flex items-center justify-center`}>
+      <div
+        className={`relative ${frameClass} overflow-hidden rounded-lg bg-black shadow-2xl flex items-center justify-center`}
+      >
         {slotMode === "script" ? (
           <div className="w-full h-full p-2 bg-slate-950 flex items-center justify-center overflow-auto">
             <ScriptAdRenderer code={slotScript} />
           </div>
         ) : (
           ad && (
-            <a href={ad.href || "#"} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
+            <a
+              href={ad.href || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block h-full w-full"
+            >
               <img
                 key={ad.id}
                 src={ad.image}
@@ -229,7 +249,7 @@ export function PopupAd() {
         )}
 
         <span className="absolute left-2 top-2 rounded bg-black/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
-          {(slotMode === "image" && ad?.label) ? ad.label : "Sponsored"}
+          {slotMode === "image" && ad?.label ? ad.label : "Sponsored"}
         </span>
 
         {slotMode === "image" && ads.length > 1 && (

@@ -11,11 +11,11 @@ import { getCategoryData } from "@/lib/taxonomy.functions";
 
 const FESTIVE_GRADIENT_MAP: Record<string, string> = {
   "indian-flag": "linear-gradient(to right, #FF9933, #000080, #138808)",
-  "diwali": "linear-gradient(to right, #FF8008, #FFC837, #FF007F, #7F00FF)",
-  "sunset": "linear-gradient(to right, #F5576C, #F093FB)",
-  "neon": "linear-gradient(to right, #FF007F, #7F00FF, #00F0FF)",
-  "ocean": "linear-gradient(to right, #00c6ff, #0072ff)",
-  "forest": "linear-gradient(to right, #11998e, #38ef7d)",
+  diwali: "linear-gradient(to right, #FF8008, #FFC837, #FF007F, #7F00FF)",
+  sunset: "linear-gradient(to right, #F5576C, #F093FB)",
+  neon: "linear-gradient(to right, #FF007F, #7F00FF, #00F0FF)",
+  ocean: "linear-gradient(to right, #00c6ff, #0072ff)",
+  forest: "linear-gradient(to right, #11998e, #38ef7d)",
 };
 
 const FONT_FAMILY_MAP: Record<string, string> = {
@@ -24,7 +24,7 @@ const FONT_FAMILY_MAP: Record<string, string> = {
   cinzel: '"Cinzel", serif, Georgia',
   playfair: '"Playfair Display", Georgia, serif',
   roboto: '"Roboto", Arial, sans-serif',
-  mono: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
 };
 
 const SLUG_ROTATION_KEYFRAMES = `
@@ -38,13 +38,13 @@ const SLUG_ROTATION_KEYFRAMES = `
 `;
 
 const TEXT_ROTATION_CSS: Record<string, React.CSSProperties> = {
-  "slide-up":    { animation: "rot-slide-up    0.35s cubic-bezier(0.22,1,0.36,1) both" },
-  "slide-down":  { animation: "rot-slide-down  0.35s cubic-bezier(0.22,1,0.36,1) both" },
-  "slide-left":  { animation: "rot-slide-left  0.35s cubic-bezier(0.22,1,0.36,1) both" },
+  "slide-up": { animation: "rot-slide-up    0.35s cubic-bezier(0.22,1,0.36,1) both" },
+  "slide-down": { animation: "rot-slide-down  0.35s cubic-bezier(0.22,1,0.36,1) both" },
+  "slide-left": { animation: "rot-slide-left  0.35s cubic-bezier(0.22,1,0.36,1) both" },
   "slide-right": { animation: "rot-slide-right 0.35s cubic-bezier(0.22,1,0.36,1) both" },
-  "fade":        { animation: "rot-fade        0.35s ease both" },
-  "zoom":        { animation: "rot-zoom        0.35s cubic-bezier(0.34,1.56,0.64,1) both" },
-  "flip":        { animation: "rot-flip        0.5s  cubic-bezier(0.22,1,0.36,1) both" },
+  fade: { animation: "rot-fade        0.35s ease both" },
+  zoom: { animation: "rot-zoom        0.35s cubic-bezier(0.34,1.56,0.64,1) both" },
+  flip: { animation: "rot-flip        0.5s  cubic-bezier(0.22,1,0.36,1) both" },
 };
 
 export const Route = createFileRoute("/$slug")({
@@ -55,7 +55,7 @@ export const Route = createFileRoute("/$slug")({
   loader: async ({ params, deps }) => {
     try {
       const data = await getCategoryData({
-        data: { slug: params.slug, page: deps.page || 1, limit: 10 }
+        data: { slug: params.slug, page: deps.page || 1, limit: 10 },
       });
       return data;
     } catch (err) {
@@ -69,7 +69,10 @@ export const Route = createFileRoute("/$slug")({
     return {
       meta: [
         { title: `${cap} – News Theme` },
-        { name: "description", content: `Latest ${cap} news, analysis and reports from News Theme.` },
+        {
+          name: "description",
+          content: `Latest ${cap} news, analysis and reports from News Theme.`,
+        },
       ],
     };
   },
@@ -125,21 +128,27 @@ function CategoryPage() {
 
   const { category, featured, list, latest, totalPages = 1 } = loaderData;
 
-  const categoryTitleStyle = settings.festiveCategoryTitleGradient && FESTIVE_GRADIENT_MAP[settings.festiveCategoryTitleGradient]
-    ? {
-        backgroundImage: FESTIVE_GRADIENT_MAP[settings.festiveCategoryTitleGradient],
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-        display: "inline-block"
-      }
-    : settings.festiveCategoryTitleColor
-    ? { color: settings.festiveCategoryTitleColor }
-    : undefined;
+  const categoryTitleStyle =
+    settings.festiveCategoryTitleGradient &&
+    FESTIVE_GRADIENT_MAP[settings.festiveCategoryTitleGradient]
+      ? {
+          backgroundImage: FESTIVE_GRADIENT_MAP[settings.festiveCategoryTitleGradient],
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+          display: "inline-block",
+        }
+      : settings.festiveCategoryTitleColor
+        ? { color: settings.festiveCategoryTitleColor }
+        : undefined;
 
-  const isShowingCustomAlert = Boolean(settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText);
+  const isShowingCustomAlert = Boolean(
+    settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText,
+  );
   // Text rotation: pure CSS keyframe animation (no tailwindcss-animate needed)
-  const rotationAnimStyle = TEXT_ROTATION_CSS[settings.customAlertAnimationStyle || "slide-up"] || TEXT_ROTATION_CSS["slide-up"];
+  const rotationAnimStyle =
+    TEXT_ROTATION_CSS[settings.customAlertAnimationStyle || "slide-up"] ||
+    TEXT_ROTATION_CSS["slide-up"];
 
   const currentTitleStyle = {
     ...categoryTitleStyle,
@@ -159,7 +168,9 @@ function CategoryPage() {
         <header className="border-b border-border pb-3 overflow-hidden">
           {/* Breadcrumb */}
           <nav className="mb-1 flex items-center gap-1 text-[11px] uppercase tracking-widest text-muted-foreground">
-            <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+            <Link to="/" className="hover:text-foreground transition-colors">
+              Home
+            </Link>
             <span className="mx-1">/</span>
             <span className="text-foreground font-semibold">{category.name}</span>
           </nav>
@@ -195,19 +206,29 @@ function CategoryPage() {
                       className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="aspect-[4/3] w-full bg-slate-100 flex items-center justify-center text-slate-400">No Image</div>
+                    <div className="aspect-[4/3] w-full bg-slate-100 flex items-center justify-center text-slate-400">
+                      No Image
+                    </div>
                   )}
                 </Link>
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-widest">
                   {f.kickers.map((k) => (
-                    <span key={k} className="text-foreground">{k}</span>
+                    <span key={k} className="text-foreground">
+                      {k}
+                    </span>
                   ))}
-                  <span className="text-muted-foreground normal-case tracking-normal">· {f.date}</span>
+                  <span className="text-muted-foreground normal-case tracking-normal">
+                    · {f.date}
+                  </span>
                 </div>
                 <h2 className="headline mt-2 font-serif text-xl font-bold leading-snug text-primary line-clamp-3">
-                  <Link to={`/news/${f.slug}`} className="hover:underline">{f.title}</Link>
+                  <Link to={`/news/${f.slug}`} className="hover:underline">
+                    {f.title}
+                  </Link>
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-5">{f.excerpt}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-5">
+                  {f.excerpt}
+                </p>
                 {/* Author + Views + Share */}
                 <div className="mt-3 flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
                   <div className="flex items-center gap-2.5">
@@ -242,7 +263,9 @@ function CategoryPage() {
         )}
 
         {featured.length === 0 && list.length === 0 && (
-          <p className="py-10 text-center text-sm text-muted-foreground">No articles in this category yet.</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">
+            No articles in this category yet.
+          </p>
         )}
 
         {/* List + sidebar */}
@@ -252,54 +275,70 @@ function CategoryPage() {
               {list.map((p, i) => (
                 <React.Fragment key={p.title}>
                   <article className="grid grid-cols-[140px_1fr] gap-5 py-6 first:pt-0 md:grid-cols-[200px_1fr]">
-                  <Link to={`/news/${p.slug}`} className="block overflow-hidden">
-                    {p.img ? (
-                      <img src={p.img} alt={p.title} className="aspect-[4/3] w-full object-cover" />
-                    ) : (
-                      <div className="aspect-[4/3] w-full bg-slate-100 flex items-center justify-center text-slate-400">No Image</div>
-                    )}
-                  </Link>
-                  <div>
-                    <h3 className="headline font-serif text-lg font-bold leading-snug text-primary line-clamp-2">
-                      <Link to={`/news/${p.slug}`} className="hover:underline">{p.title}</Link>
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">{p.excerpt}</p>
-                    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-widest">
-                      <span className="text-muted-foreground normal-case tracking-normal">{p.date}</span>
-                      {p.tags.map((t) => (
-                        <span key={t} className="font-semibold text-foreground">· {t}</span>
-                      ))}
-                    </div>
-                    {/* Author + Views + Share */}
-                    <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
-                      <div className="flex items-center gap-2.5">
-                        <span className="inline-flex items-center gap-1">
-                          <User className="h-3 w-3 shrink-0" />
-                          <span className="font-medium text-foreground">{p.author}</span>
+                    <Link to={`/news/${p.slug}`} className="block overflow-hidden">
+                      {p.img ? (
+                        <img
+                          src={p.img}
+                          alt={p.title}
+                          className="aspect-[4/3] w-full object-cover"
+                        />
+                      ) : (
+                        <div className="aspect-[4/3] w-full bg-slate-100 flex items-center justify-center text-slate-400">
+                          No Image
+                        </div>
+                      )}
+                    </Link>
+                    <div>
+                      <h3 className="headline font-serif text-lg font-bold leading-snug text-primary line-clamp-2">
+                        <Link to={`/news/${p.slug}`} className="hover:underline">
+                          {p.title}
+                        </Link>
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">
+                        {p.excerpt}
+                      </p>
+                      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-widest">
+                        <span className="text-muted-foreground normal-case tracking-normal">
+                          {p.date}
                         </span>
-                        <span>·</span>
-                        <Views count={p.views} />
+                        {p.tags.map((t) => (
+                          <span key={t} className="font-semibold text-foreground">
+                            · {t}
+                          </span>
+                        ))}
                       </div>
-                      <button
-                        type="button"
-                        aria-label="Share article"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (navigator.share) {
-                            navigator.share({ title: p.title, url: `/news/${p.slug}` });
-                          } else {
-                            navigator.clipboard.writeText(window.location.origin + `/news/${p.slug}`);
-                            alert("Link copied!");
-                          }
-                        }}
-                        className="flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[11px] text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-colors"
-                      >
-                        <Share2 className="h-3 w-3" />
-                        Share
-                      </button>
+                      {/* Author + Views + Share */}
+                      <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                        <div className="flex items-center gap-2.5">
+                          <span className="inline-flex items-center gap-1">
+                            <User className="h-3 w-3 shrink-0" />
+                            <span className="font-medium text-foreground">{p.author}</span>
+                          </span>
+                          <span>·</span>
+                          <Views count={p.views} />
+                        </div>
+                        <button
+                          type="button"
+                          aria-label="Share article"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (navigator.share) {
+                              navigator.share({ title: p.title, url: `/news/${p.slug}` });
+                            } else {
+                              navigator.clipboard.writeText(
+                                window.location.origin + `/news/${p.slug}`,
+                              );
+                              alert("Link copied!");
+                            }
+                          }}
+                          className="flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[11px] text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-colors"
+                        >
+                          <Share2 className="h-3 w-3" />
+                          Share
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </article>
+                  </article>
                   {(i + 1) % 3 === 0 && (
                     <div className="py-6">
                       <Advertisement slot="leaderboard" aspectRatio="728 / 90" />
@@ -319,16 +358,27 @@ function CategoryPage() {
                     {latest.map((l) => (
                       <li key={l.title} className="grid grid-cols-[1fr_72px] gap-3">
                         <div>
-                          <Link to={`/news/${l.slug}`} className="headline block font-serif text-sm font-bold leading-snug text-primary hover:underline line-clamp-2">
+                          <Link
+                            to={`/news/${l.slug}`}
+                            className="headline block font-serif text-sm font-bold leading-snug text-primary hover:underline line-clamp-2"
+                          >
                             {l.title}
                           </Link>
-                          <p className="mt-1 text-[11px] uppercase tracking-widest text-muted-foreground normal-case tracking-normal">{l.date}</p>
+                          <p className="mt-1 text-[11px] uppercase tracking-widest text-muted-foreground normal-case tracking-normal">
+                            {l.date}
+                          </p>
                         </div>
                         <Link to={`/news/${l.slug}`} className="block overflow-hidden">
                           {l.img ? (
-                            <img src={l.img} alt={l.title} className="aspect-square w-full object-cover" />
+                            <img
+                              src={l.img}
+                              alt={l.title}
+                              className="aspect-square w-full object-cover"
+                            />
                           ) : (
-                            <div className="aspect-square w-full bg-slate-100 flex items-center justify-center text-slate-400">No Image</div>
+                            <div className="aspect-square w-full bg-slate-100 flex items-center justify-center text-slate-400">
+                              No Image
+                            </div>
                           )}
                         </Link>
                       </li>
@@ -337,10 +387,7 @@ function CategoryPage() {
                 </div>
               )}
 
-              <Advertisement
-                slot="ad3"
-                aspectRatio="3/4"
-              />
+              <Advertisement slot="ad3" aspectRatio="3/4" />
 
               <ArchiveFinder />
             </aside>
@@ -380,7 +427,9 @@ function CategoryPage() {
               params={{ slug: category.slug }}
               search={{ page: Math.min(totalPages, page + 1) }}
               className={`rounded border border-border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider ${
-                page >= totalPages ? "pointer-events-none opacity-40" : "hover:bg-muted text-foreground"
+                page >= totalPages
+                  ? "pointer-events-none opacity-40"
+                  : "hover:bg-muted text-foreground"
               }`}
             >
               Next

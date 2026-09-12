@@ -88,10 +88,7 @@ function UpdatesPage() {
   const refresh = async () => {
     setLoading(true);
     try {
-      const [statusRes, historyRes] = await Promise.all([
-        getGitStatus(),
-        getDeployHistory(),
-      ]);
+      const [statusRes, historyRes] = await Promise.all([getGitStatus(), getDeployHistory()]);
       setGitStatus(statusRes);
       setDeployments(historyRes.deployments ?? []);
     } catch (err: any) {
@@ -181,9 +178,10 @@ function UpdatesPage() {
 
   const currentVersion = gitStatus?.version || "v1.0.57";
   const latestVersion = gitStatus?.latestVersion || currentVersion;
-  const hasNewVersion = Boolean(gitStatus?.hasNewVersion || (latestVersion !== currentVersion));
+  const hasNewVersion = Boolean(gitStatus?.hasNewVersion || latestVersion !== currentVersion);
   const updatesAvailable = (gitStatus?.behind ?? 0) > 0 || hasNewVersion;
-  const updatesCount = gitStatus?.behind && gitStatus.behind > 0 ? gitStatus.behind : (hasNewVersion ? 1 : 0);
+  const updatesCount =
+    gitStatus?.behind && gitStatus.behind > 0 ? gitStatus.behind : hasNewVersion ? 1 : 0;
 
   return (
     <div className="space-y-8 pb-12">
@@ -207,9 +205,7 @@ function UpdatesPage() {
                 <Zap className="h-4 w-4 fill-white text-white" />
               )}
               <span>
-                {pulling || building 
-                  ? "Updating System..." 
-                  : `Update to ${latestVersion}`}
+                {pulling || building ? "Updating System..." : `Update to ${latestVersion}`}
               </span>
             </button>
           ) : (
@@ -257,7 +253,9 @@ function UpdatesPage() {
           <div className="flex flex-col items-center justify-center py-12 text-slate-400">
             <Rocket className="mb-2 h-8 w-8 opacity-30" />
             <p className="text-sm font-semibold">No deployments recorded</p>
-            <p className="text-xs">Click "Update Now" or "Build Production Bundle" to create a record.</p>
+            <p className="text-xs">
+              Click "Update Now" or "Build Production Bundle" to create a record.
+            </p>
           </div>
         ) : (
           <ul className="divide-y divide-slate-100">
@@ -272,8 +270,12 @@ function UpdatesPage() {
                     className="flex cursor-pointer items-center gap-4 px-6 py-4 transition hover:bg-slate-50/80"
                     onClick={() => viewLog(d.id)}
                   >
-                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${style.bg}`}>
-                      <Icon className={`h-4 w-4 ${style.text} ${d.status === "Building" ? "animate-spin" : ""}`} />
+                    <span
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${style.bg}`}
+                    >
+                      <Icon
+                        className={`h-4 w-4 ${style.text} ${d.status === "Building" ? "animate-spin" : ""}`}
+                      />
                     </span>
 
                     <div className="min-w-0 flex-1">
@@ -281,7 +283,9 @@ function UpdatesPage() {
                         <span className="font-mono text-xs font-bold text-slate-800">
                           {d.commit_hash}
                         </span>
-                        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase ${style.bg} ${style.text}`}>
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase ${style.bg} ${style.text}`}
+                        >
                           {d.status}
                         </span>
                         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">

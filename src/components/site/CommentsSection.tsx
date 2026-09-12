@@ -34,7 +34,11 @@ function containsLinkOrScript(s: string) {
 }
 
 function hasExcessiveWordRepetition(s: string): boolean {
-  const words = s.toLowerCase().trim().split(/\s+/).filter((w) => w.length > 2); // check words > 2 chars
+  const words = s
+    .toLowerCase()
+    .trim()
+    .split(/\s+/)
+    .filter((w) => w.length > 2); // check words > 2 chars
   const counts: Record<string, number> = {};
   for (const w of words) {
     const cleanWord = w.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
@@ -47,7 +51,13 @@ function hasExcessiveWordRepetition(s: string): boolean {
   return false;
 }
 
-export function CommentsSection({ articleSlug, articleTitle }: { articleSlug: string; articleTitle: string }) {
+export function CommentsSection({
+  articleSlug,
+  articleTitle,
+}: {
+  articleSlug: string;
+  articleTitle: string;
+}) {
   const getCommentsFn = useServerFn(getArticleComments);
   const postCommentFn = useServerFn(postArticleComment);
 
@@ -72,13 +82,15 @@ export function CommentsSection({ articleSlug, articleTitle }: { articleSlug: st
     try {
       setLoading(true);
       const res = await getCommentsFn({ data: articleSlug });
-      setComments(res.map((r: any) => ({
-        id: r.id,
-        user: r.user,
-        email: r.email,
-        body: r.body,
-        date: r.date,
-      })));
+      setComments(
+        res.map((r: any) => ({
+          id: r.id,
+          user: r.user,
+          email: r.email,
+          body: r.body,
+          date: r.date,
+        })),
+      );
     } catch (err: any) {
       console.error("Failed to load comments:", err);
     } finally {
@@ -104,17 +116,23 @@ export function CommentsSection({ articleSlug, articleTitle }: { articleSlug: st
     }
 
     if (containsLinkOrScript(body)) {
-      toast(`YOU CAN'T POST THIS COMMENT, BECAUSE OUR ${SITE_NAME.toUpperCase()} DISABLED THIS FEATURE TO PROTECT FOR SCAMER SPAM AND PROMOTION.`);
+      toast(
+        `YOU CAN'T POST THIS COMMENT, BECAUSE OUR ${SITE_NAME.toUpperCase()} DISABLED THIS FEATURE TO PROTECT FOR SCAMER SPAM AND PROMOTION.`,
+      );
       return;
     }
 
     if (body.length < MIN_CHARACTERS) {
-      toast(`Please ${authorName}, your comment is too short — it must be at least ${MIN_CHARACTERS} characters (currently ${body.length} characters).`);
+      toast(
+        `Please ${authorName}, your comment is too short — it must be at least ${MIN_CHARACTERS} characters (currently ${body.length} characters).`,
+      );
       return;
     }
 
     if (hasExcessiveWordRepetition(body)) {
-      toast(`Please ${authorName}, your comment has been flagged. A single word cannot be repeated more than 5 times. Please submit a genuine comment.`);
+      toast(
+        `Please ${authorName}, your comment has been flagged. A single word cannot be repeated more than 5 times. Please submit a genuine comment.`,
+      );
       return;
     }
 
@@ -127,12 +145,14 @@ export function CommentsSection({ articleSlug, articleTitle }: { articleSlug: st
           name: authorName,
           email: authorEmail,
           body,
-        }
+        },
       });
       if (userId) {
         trackComment(userId, articleSlug);
       }
-      toast.success("Comment submitted! It is pending administrator approval before appearing here.");
+      toast.success(
+        "Comment submitted! It is pending administrator approval before appearing here.",
+      );
       setDraft("");
       setName("");
       setEmail("");
@@ -161,7 +181,10 @@ export function CommentsSection({ articleSlug, articleTitle }: { articleSlug: st
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="mt-5 space-y-4 rounded-lg border border-border bg-card p-4">
+        <form
+          onSubmit={submit}
+          className="mt-5 space-y-4 rounded-lg border border-border bg-card p-4"
+        >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
@@ -239,7 +262,9 @@ export function CommentsSection({ articleSlug, articleTitle }: { articleSlug: st
                   </span>
                 </div>
               </div>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{c.body}</p>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                {c.body}
+              </p>
             </li>
           ))}
           {comments.length === 0 && (

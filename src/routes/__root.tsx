@@ -15,9 +15,22 @@ import { ThemeProvider, themeInitScript } from "../lib/theme";
 import { Toaster } from "@/components/ui/sonner";
 import { AnalyticsInjector } from "@/components/site/AnalyticsInjector";
 import { AdSettingsProvider } from "@/components/site/AdSettingsContext";
-import { getSiteSettingsServer, getAdConfigurationServer, getRedirectRulesServer, incrementRedirectHitServer, defaultSettings } from "@/lib/site-content";
+import {
+  getSiteSettingsServer,
+  getAdConfigurationServer,
+  getRedirectRulesServer,
+  incrementRedirectHitServer,
+  defaultSettings,
+} from "@/lib/site-content";
 import { getHomepageConfigServer, defaultHomepageConfig } from "@/lib/homepage-config";
-import { getFontConfigServer, defaultFontConfig, buildGoogleFontsUrl, buildFontFaceCss, buildSectionCssVars, FONT_CONFIG_KEY } from "@/lib/font-config";
+import {
+  getFontConfigServer,
+  defaultFontConfig,
+  buildGoogleFontsUrl,
+  buildFontFaceCss,
+  buildSectionCssVars,
+  FONT_CONFIG_KEY,
+} from "@/lib/font-config";
 import type { FontConfiguration } from "@/lib/font-config";
 import { getCategories } from "@/lib/taxonomy.functions";
 import "@/lib/i18n";
@@ -74,12 +87,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   beforeLoad: async ({ location }) => {
     // Don't intercept server-only API endpoints or RSS feeds
     if (location.pathname.startsWith("/api/") || location.pathname === "/api/rss") return;
-    
+
     // 1. Check setup status first before executing any DB queries
     try {
       const status = await checkSetupStatus();
       const isSetupPage = location.pathname === "/setup";
-      
+
       if (status.required) {
         if (!isSetupPage) {
           throw redirect({ to: "/setup" });
@@ -92,7 +105,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       }
     } catch (err: any) {
       // Re-throw TanStack Router redirects
-      if (err.isRedirect || err.status === 301 || err.status === 302 || err.status === 307 || err.headers) {
+      if (
+        err.isRedirect ||
+        err.status === 301 ||
+        err.status === 302 ||
+        err.status === 307 ||
+        err.headers
+      ) {
         throw err;
       }
       console.error("[__root beforeLoad] Setup check error:", err);
@@ -103,7 +122,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       const rules = await getRedirectRulesServer();
       const currentPath = location.pathname;
       const matched = rules.find(
-        (r) => r.source.toLowerCase().trim() === currentPath.toLowerCase().trim()
+        (r) => r.source.toLowerCase().trim() === currentPath.toLowerCase().trim(),
       );
       if (matched && matched.destination) {
         incrementRedirectHitServer({ data: matched.id }).catch(() => {});
@@ -121,21 +140,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   loader: async ({ location }) => {
     // If on setup page, return blank defaults without making DB queries
     if (location.pathname === "/setup") {
-      return { settings: null, homepageConfig: null, adsConfig: null, redirectRules: [], fontConfig: null, categories: [] };
+      return {
+        settings: null,
+        homepageConfig: null,
+        adsConfig: null,
+        redirectRules: [],
+        fontConfig: null,
+        categories: [],
+      };
     }
     try {
-      const [settings, homepageConfig, adsConfig, redirectRules, fontConfig, categories] = await Promise.all([
-        getSiteSettingsServer(),
-        getHomepageConfigServer(),
-        getAdConfigurationServer(),
-        getRedirectRulesServer(),
-        getFontConfigServer(),
-        getCategories(),
-      ]);
+      const [settings, homepageConfig, adsConfig, redirectRules, fontConfig, categories] =
+        await Promise.all([
+          getSiteSettingsServer(),
+          getHomepageConfigServer(),
+          getAdConfigurationServer(),
+          getRedirectRulesServer(),
+          getFontConfigServer(),
+          getCategories(),
+        ]);
       return { settings, homepageConfig, adsConfig, redirectRules, fontConfig, categories };
     } catch (err) {
       console.error("[Root Loader] Failed to prefetch config:", err);
-      return { settings: null, homepageConfig: null, adsConfig: null, redirectRules: [], fontConfig: null, categories: [] };
+      return {
+        settings: null,
+        homepageConfig: null,
+        adsConfig: null,
+        redirectRules: [],
+        fontConfig: null,
+        categories: [],
+      };
     }
   },
   head: ({ loaderData }) => {
@@ -143,7 +177,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const title = s?.siteName
       ? `${s.siteName} – ${s.tagline || "Breaking News"}`
       : "News Timeline – Breaking News | Finance | Business | Market";
-    const desc = s?.metaDescription || "News Timeline delivers breaking news, market intelligence, and sharp business analysis covering finance, technology, energy and global markets.";
+    const desc =
+      s?.metaDescription ||
+      "News Timeline delivers breaking news, market intelligence, and sharp business analysis covering finance, technology, energy and global markets.";
 
     const metaTags = [
       { charSet: "utf-8" },
@@ -159,7 +195,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: desc },
     ];
-    
+
     if (s?.forceHttps) {
       metaTags.push({ httpEquiv: "Content-Security-Policy", content: "upgrade-insecure-requests" });
     }
@@ -171,7 +207,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       metaTags.push({ name: "msvalidate.01", content: s.bingSiteVerification });
     }
     if (s?.facebookDomainVerification) {
-      metaTags.push({ name: "facebook-domain-verification", content: s.facebookDomainVerification });
+      metaTags.push({
+        name: "facebook-domain-verification",
+        content: s.facebookDomainVerification,
+      });
     }
     if (s?.pinterestSiteVerification) {
       metaTags.push({ name: "p:domain_verify", content: s.pinterestSiteVerification });
@@ -258,7 +297,11 @@ function RootComponent() {
   const loaderData = Route.useLoaderData();
 
   useEffect(() => {
-    if (loaderData?.settings?.forceHttps && window.location.protocol === "http:" && window.location.hostname !== "localhost") {
+    if (
+      loaderData?.settings?.forceHttps &&
+      window.location.protocol === "http:" &&
+      window.location.hostname !== "localhost"
+    ) {
       window.location.protocol = "https:";
     }
     if (typeof window === "undefined" || !loaderData) return;

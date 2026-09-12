@@ -6,7 +6,10 @@ export const Route = createFileRoute("/terms-and-conditions")({
   head: () => ({
     meta: [
       { title: "Terms & Conditions — News Theme" },
-      { name: "description", content: "The terms governing your use of News Theme's website, apps and services." },
+      {
+        name: "description",
+        content: "The terms governing your use of News Theme's website, apps and services.",
+      },
       { property: "og:title", content: "Terms & Conditions — News Theme" },
       { property: "og:url", content: "https://gorillatechsolution.com/terms-and-conditions" },
     ],
@@ -21,7 +24,7 @@ export const Route = createFileRoute("/terms-and-conditions")({
 
 function TermsPage() {
   const page = Route.useLoaderData();
-  
+
   return (
     <PolicyLayout
       title={page?.title || ""}
@@ -32,7 +35,12 @@ function TermsPage() {
               heading: s.heading,
               body: <div dangerouslySetInnerHTML={{ __html: s.body }} />,
             }))
-          : [{ heading: page?.title || "", body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} /> }]
+          : [
+              {
+                heading: page?.title || "",
+                body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} />,
+              },
+            ]
       }
     />
   );

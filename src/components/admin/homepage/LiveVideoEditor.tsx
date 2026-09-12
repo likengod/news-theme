@@ -31,7 +31,10 @@ export function LiveVideoEditor({ value, onChange }: Props) {
 
       <div className="rounded-md bg-emerald-50 p-2.5 text-xs text-emerald-800 border border-emerald-200 flex items-start gap-2">
         <span className="font-bold">⚡ High Performance:</span>
-        <span>Uses a modular click-to-play Lite Facade. YouTube's ~900KB scripts will <b>never</b> slow down initial page loads or Google PageSpeed scores. The stream only loads when clicked.</span>
+        <span>
+          Uses a modular click-to-play Lite Facade. YouTube's ~900KB scripts will <b>never</b> slow
+          down initial page loads or Google PageSpeed scores. The stream only loads when clicked.
+        </span>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -54,9 +57,7 @@ export function LiveVideoEditor({ value, onChange }: Props) {
           </select>
         </label>
         <label className="block">
-          <span className="mb-1 block text-[11px] font-medium text-slate-500">
-            Overlay title
-          </span>
+          <span className="mb-1 block text-[11px] font-medium text-slate-500">Overlay title</span>
           <input
             type="text"
             value={value.title}
@@ -76,9 +77,7 @@ export function LiveVideoEditor({ value, onChange }: Props) {
             type="text"
             placeholder="UCxxxxxxxxxxxxxxxxxxxx"
             value={value.youtubeChannelId}
-            onChange={(e) =>
-              onChange({ ...value, youtubeChannelId: e.target.value })
-            }
+            onChange={(e) => onChange({ ...value, youtubeChannelId: e.target.value })}
             className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
           />
           <span className="mt-1 block text-[11px] text-slate-500">
@@ -94,9 +93,7 @@ export function LiveVideoEditor({ value, onChange }: Props) {
             type="url"
             placeholder="https://www.facebook.com/YourPage"
             value={value.facebookPageUrl}
-            onChange={(e) =>
-              onChange({ ...value, facebookPageUrl: e.target.value })
-            }
+            onChange={(e) => onChange({ ...value, facebookPageUrl: e.target.value })}
             className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
           />
         </label>
@@ -110,9 +107,7 @@ export function LiveVideoEditor({ value, onChange }: Props) {
           type="url"
           placeholder="https://... (Leave blank for default sleek live backdrop)"
           value={value.thumbnailUrl || ""}
-          onChange={(e) =>
-            onChange({ ...value, thumbnailUrl: e.target.value })
-          }
+          onChange={(e) => onChange({ ...value, thumbnailUrl: e.target.value })}
           className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
         />
         <span className="mt-1 block text-[11px] text-slate-500">

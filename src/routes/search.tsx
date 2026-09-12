@@ -44,7 +44,20 @@ export const Route = createFileRoute("/search")({
 
 function fmtDate(d: Date): string {
   if (isNaN(d.getTime())) return "";
-  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
   const day = d.getUTCDate();
   const month = months[d.getUTCMonth()];
   const year = d.getUTCFullYear();
@@ -69,7 +82,9 @@ function SearchPage() {
 
       <main className="mx-auto max-w-7xl px-4 py-10">
         <header className="border-b border-border pb-6">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground">Search Feed</p>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground">
+            Search Feed
+          </p>
           <h1 className="mt-2 font-serif text-4xl font-bold text-foreground md:text-5xl">
             {initialQ || initialCat !== "All" ? (
               <>
@@ -90,7 +105,9 @@ function SearchPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              window.location.assign(`/search?q=${encodeURIComponent(input.trim())}&category=${encodeURIComponent(category)}&page=1`);
+              window.location.assign(
+                `/search?q=${encodeURIComponent(input.trim())}&category=${encodeURIComponent(category)}&page=1`,
+              );
             }}
             className="mt-5 flex flex-col md:flex-row max-w-3xl items-stretch md:items-center border border-border bg-background"
           >
@@ -105,7 +122,7 @@ function SearchPage() {
                 className="w-full bg-transparent px-3 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
             </div>
-            
+
             <div className="flex border-t md:border-t-0 md:border-l border-border items-center bg-background pr-4">
               <select
                 value={category}
@@ -113,9 +130,13 @@ function SearchPage() {
                 className="bg-transparent px-4 py-3 text-sm text-foreground focus:outline-none cursor-pointer"
               >
                 <option value="All">All Categories</option>
-                {sections.filter(s => s !== "Others").map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
+                {sections
+                  .filter((s) => s !== "Others")
+                  .map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -141,15 +162,25 @@ function SearchPage() {
                 className="grid grid-cols-[140px_1fr] gap-5 py-6 first:pt-0 md:grid-cols-[200px_1fr]"
               >
                 <Link to={`/news/${p.slug}`} className="block overflow-hidden">
-                  <img src={p.featuredImage || heroImg} alt={p.title} className="aspect-[4/3] w-full object-cover rounded-sm hover:scale-105 transition-transform duration-300" />
+                  <img
+                    src={p.featuredImage || heroImg}
+                    alt={p.title}
+                    className="aspect-[4/3] w-full object-cover rounded-sm hover:scale-105 transition-transform duration-300"
+                  />
                 </Link>
                 <div>
                   <h3 className="headline font-serif text-lg font-bold leading-snug text-primary line-clamp-2">
-                    <Link to={`/news/${p.slug}`} className="hover:underline">{p.title}</Link>
+                    <Link to={`/news/${p.slug}`} className="hover:underline">
+                      {p.title}
+                    </Link>
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">{p.excerpt}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">
+                    {p.excerpt}
+                  </p>
                   <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-widest">
-                    <span className="text-muted-foreground normal-case tracking-normal">{fmtDate(new Date(p.date))}</span>
+                    <span className="text-muted-foreground normal-case tracking-normal">
+                      {fmtDate(new Date(p.date))}
+                    </span>
                     <span className="font-semibold text-foreground">· {p.category}</span>
                     <span className="ml-auto">
                       <Views count={p.views} />
@@ -170,9 +201,9 @@ function SearchPage() {
                     ← Prev
                   </Link>
                 )}
-                  <div className="flex items-center px-4 text-sm font-medium text-muted-foreground">
-                    Page {current} of {totalPages}
-                  </div>
+                <div className="flex items-center px-4 text-sm font-medium text-muted-foreground">
+                  Page {current} of {totalPages}
+                </div>
                 {current < totalPages && (
                   <Link
                     to="/search"

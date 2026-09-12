@@ -1,1 +1,4 @@
-function e(){throw Error(`Invariant failed`)}export{e as t};
+function e() {
+  throw Error(`Invariant failed`);
+}
+export { e as t };

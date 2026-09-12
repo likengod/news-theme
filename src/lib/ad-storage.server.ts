@@ -76,7 +76,10 @@ export function persistBase64Image(dataUrl: string, prefix = "ad"): string {
 /**
  * Iterates through ad items in a slot, converting any base64 images into static file URLs.
  */
-export function persistSlotAds(ads: AdSlideItem[], slotName: string): { ads: AdSlideItem[]; changed: boolean } {
+export function persistSlotAds(
+  ads: AdSlideItem[],
+  slotName: string,
+): { ads: AdSlideItem[]; changed: boolean } {
   if (!Array.isArray(ads) || ads.length === 0) {
     return { ads: ads || [], changed: false };
   }
@@ -92,11 +95,17 @@ export function persistSlotAds(ads: AdSlideItem[], slotName: string): { ads: AdS
       adChanged = true;
     }
     if (cleanAd.imagePortrait && cleanAd.imagePortrait.startsWith("data:image/")) {
-      cleanAd.imagePortrait = persistBase64Image(cleanAd.imagePortrait, `${slotName}_${id}_portrait`);
+      cleanAd.imagePortrait = persistBase64Image(
+        cleanAd.imagePortrait,
+        `${slotName}_${id}_portrait`,
+      );
       adChanged = true;
     }
     if (cleanAd.imageLandscape && cleanAd.imageLandscape.startsWith("data:image/")) {
-      cleanAd.imageLandscape = persistBase64Image(cleanAd.imageLandscape, `${slotName}_${id}_landscape`);
+      cleanAd.imageLandscape = persistBase64Image(
+        cleanAd.imageLandscape,
+        `${slotName}_${id}_landscape`,
+      );
       adChanged = true;
     }
 
@@ -110,7 +119,10 @@ export function persistSlotAds(ads: AdSlideItem[], slotName: string): { ads: AdS
 /**
  * Scans the entire AdConfiguration object across all slots and persists any base64 images.
  */
-export function persistAllAdConfiguration(config: AdConfiguration): { config: AdConfiguration; changed: boolean } {
+export function persistAllAdConfiguration(config: AdConfiguration): {
+  config: AdConfiguration;
+  changed: boolean;
+} {
   if (!config || !config.slots) return { config, changed: false };
 
   let overallChanged = false;

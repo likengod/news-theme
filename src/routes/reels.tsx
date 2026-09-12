@@ -47,11 +47,7 @@ function ReelsPage() {
 
   const isMobile = useIsMobile();
   const displayReels = useMemo(() => {
-    return injectReelAds(
-      currentReels,
-      reelAds,
-      isMobile ? { firstAfter: 1, interval: 2 } : 3
-    );
+    return injectReelAds(currentReels, reelAds, isMobile ? { firstAfter: 1, interval: 2 } : 3);
   }, [currentReels, reelAds, isMobile]);
 
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
@@ -91,12 +87,11 @@ function ReelsPage() {
               const ad = entry.ad;
               const adImg = ad.imagePortrait || ad.imageLandscape || ad.image;
               const adHref = ad.href || "#";
-              const isGenericLabel = !ad.label || /^(sponsored|sponsor|ad|ads|advertisement|sponsored ad)$/i.test(ad.label.trim());
+              const isGenericLabel =
+                !ad.label ||
+                /^(sponsored|sponsor|ad|ads|advertisement|sponsored ad)$/i.test(ad.label.trim());
               return (
-                <div
-                  key={`reel-ad-${index}`}
-                  className="group flex flex-col"
-                >
+                <div key={`reel-ad-${index}`} className="group flex flex-col">
                   <a
                     href={adHref}
                     target="_blank"
@@ -190,9 +185,11 @@ function ReelsPage() {
         {totalPages > 1 && (
           <div className="mt-10 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border pt-6">
             <div className="text-xs text-muted-foreground order-2 sm:order-1">
-              Showing <strong className="text-foreground">{startIndex + 1}</strong>–
-              <strong className="text-foreground">{Math.min(startIndex + ITEMS_PER_PAGE, totalItems)}</strong> of{" "}
-              <strong className="text-foreground">{totalItems}</strong> reels
+              Showing <strong className="text-foreground">{startIndex + 1}</strong>-
+              <strong className="text-foreground">
+                {Math.min(startIndex + ITEMS_PER_PAGE, totalItems)}
+              </strong>{" "}
+              of <strong className="text-foreground">{totalItems}</strong> reels
             </div>
 
             <div className="flex items-center gap-1.5 order-1 sm:order-2">

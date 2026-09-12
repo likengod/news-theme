@@ -9,11 +9,11 @@ type AnimatedContainerProps = {
   duration?: number;
 };
 
-export function AnimatedContainer({ 
-  children, 
+export function AnimatedContainer({
+  children,
   className,
   delay = 0,
-  duration = 0.5
+  duration = 0.5,
 }: AnimatedContainerProps) {
   return (
     <motion.div

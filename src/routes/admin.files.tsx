@@ -28,21 +28,24 @@ function FileManagerPage() {
   const onUpload = async (files: FileList | null) => {
     if (!files?.length) return;
     let count = 0;
-    
+
     // Auto-fetch domain name
     const domain = window.location.hostname;
-    
+
     for (const f of Array.from(files)) {
       try {
-        const defaultName = f.name.split('.').slice(0, -1).join('.') || f.name;
-        let customName = window.prompt(`Enter a custom name for ${f.name} (or leave blank to keep original):`, defaultName);
+        const defaultName = f.name.split(".").slice(0, -1).join(".") || f.name;
+        let customName = window.prompt(
+          `Enter a custom name for ${f.name} (or leave blank to keep original):`,
+          defaultName,
+        );
         if (customName === null) continue; // Cancelled
-        
+
         customName = customName.trim() || f.name;
-        
+
         const timestamp = new Date().toLocaleString();
         const customDescription = `Uploaded at: ${timestamp} | Source: ${domain}`;
-        
+
         let siteName = "News Theme";
         try {
           const settings = JSON.parse(localStorage.getItem("nt:site-settings") || "{}");
@@ -51,7 +54,7 @@ function FileManagerPage() {
 
         // Generate the Invisible Watermark string
         const watermarkData = `Site Name: ${siteName} | Copyright: ${domain} | Timestamp: ${timestamp} | Note: Do not copy without permission.`;
-        
+
         await trackUpload(f, "other", customName, customDescription, watermarkData);
         count++;
       } catch {
@@ -137,7 +140,11 @@ function FileManagerPage() {
           altText: m.altText,
           description: m.description,
           size: formatBytes(m.size),
-          type: m.type.startsWith("video/") ? "video" : m.type.startsWith("image/") ? "image" : "document",
+          type: m.type.startsWith("video/")
+            ? "video"
+            : m.type.startsWith("image/")
+              ? "image"
+              : "document",
         }))}
         onDelete={handleDelete}
         onEdit={handleEdit}

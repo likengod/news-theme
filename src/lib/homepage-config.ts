@@ -46,7 +46,16 @@ export const defaultHomepageConfig: HomepageConfig = {
   heroCultureMusic: { title: "Culture & Music", fontSize: 12, color: "#1A1110" },
   heroOpinion: { title: "Opinion", fontSize: 12, color: "#1A1110" },
   heroPopular: { title: "Popular", fontSize: 12, color: "#1A1110" },
-  heroFeatured: { title: "Featured", fontSize: 12, color: "#1A1110", category: "Auto (Latest)", autoSlide: true, slideInterval: 5, showMultiple: true, slideCount: 3 },
+  heroFeatured: {
+    title: "Featured",
+    fontSize: 12,
+    color: "#1A1110",
+    category: "Auto (Latest)",
+    autoSlide: true,
+    slideInterval: 5,
+    showMultiple: true,
+    slideCount: 3,
+  },
   watch: { title: "Watch", fontSize: 16, color: "#1A1110" },
   marketsMagazine: { title: "Markets Magazine", fontSize: 16, color: "#1A1110" },
   showTicker: true,
@@ -67,7 +76,6 @@ export const defaultHomepageConfig: HomepageConfig = {
   ],
 };
 
-
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "./auth-middleware";
 import { query } from "./db.server";
@@ -77,10 +85,12 @@ const EVENT = "nt:homepage-updated";
 
 // ─── Server Functions (MySQL Database Persistence) ─────────────────────────
 
-export const getHomepageConfigServer = createServerFn({ method: "GET" })
-  .handler(async (): Promise<HomepageConfig> => {
+export const getHomepageConfigServer = createServerFn({ method: "GET" }).handler(
+  async (): Promise<HomepageConfig> => {
     try {
-      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'homepage_config'");
+      const rows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'homepage_config'",
+      );
       if (rows.length > 0 && rows[0].value) {
         const parsed = JSON.parse(rows[0].value);
         return {
@@ -94,7 +104,8 @@ export const getHomepageConfigServer = createServerFn({ method: "GET" })
       }
     } catch {}
     return defaultHomepageConfig;
-  });
+  },
+);
 
 export const saveHomepageConfigServer = createServerFn({ method: "POST" })
   .middleware([requireAuth])
@@ -104,7 +115,7 @@ export const saveHomepageConfigServer = createServerFn({ method: "POST" })
     await query(
       `INSERT INTO site_settings (setting_key, value) VALUES ('homepage_config', ?)
        ON DUPLICATE KEY UPDATE value = ?`,
-      [json, json]
+      [json, json],
     );
     return { success: true };
   });
@@ -154,15 +165,9 @@ export function styleFor(s: SectionStyle): React.CSSProperties {
 
 /** Pick items matching a category (kicker substring match), latest first. */
 export function articlesByCategory(category?: string): Article[] {
-  const pool: Article[] = [
-    lead as Article,
-    ...top as Article[],
-    ...grid as Article[],
-  ];
+  const pool: Article[] = [lead as Article, ...(top as Article[]), ...(grid as Article[])];
   if (!category || category === "Auto (Latest)") return pool;
   const c = category.toLowerCase();
   const matched = pool.filter((a) => (a.kicker ?? "").toLowerCase().includes(c));
   return matched.length > 0 ? matched : pool;
 }
-
-

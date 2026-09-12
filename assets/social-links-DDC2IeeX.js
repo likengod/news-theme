@@ -1,1 +1,145 @@
-import{n as e,t}from"./createServerFn-Ciss0-sp.js";import{t as n}from"./auth-middleware-JDjVgB0Q.js";var r=`nt:rewards:v1`,i=()=>Math.random().toString(36).slice(2,9),a=[{roleId:`all`,label:`All users`,enabled:!0,note:`One-time tasks available to every earning user.`,oneTime:[{id:`signup`,title:`Create an account`,points:25},{id:`yt`,title:`Subscribe our YouTube channel`,points:25},{id:`fb`,title:`Like & follow us on Facebook`,points:20},{id:`ig`,title:`Follow us on Instagram`,points:20},{id:`wa`,title:`Join our WhatsApp channel`,points:25}],recurring:[]},{roleId:`reader`,label:`Reader`,enabled:!0,oneTime:[],recurring:[{id:`r_share`,title:`Share news`,reward:`₹0.20 per share`,cap:`up to ₹1 / day`},{id:`r_comment`,title:`Comment on unique articles (after first time)`,reward:`₹0.50 per unique article`,cap:`up to ₹2 / day`}]},{roleId:`premium`,label:`Premium user`,enabled:!0,oneTime:[],recurring:[{id:`p_share`,title:`Share news`,reward:`₹0.40 per share`,cap:`up to ₹2 / day`},{id:`p_comment`,title:`Comment on unique articles (after first time)`,reward:`₹0.1 per unique article`,cap:`up to ₹4 / day`}]},{roleId:`journalist`,label:`Journalist`,enabled:!0,note:`Journalists earn points per published news based on their rank. Set points and thresholds below.`,oneTime:[],recurring:[]}];function o(e){let t=e.map(e=>e.roleId===`journalist`?{...e,note:`Journalists earn points per published news based on their rank. Set points and thresholds below.`,recurring:e.recurring.filter(e=>e.id!==`j_publish`)}:e),n=new Map(t.map(e=>[e.roleId,e]));for(let e of a)n.has(e.roleId)||n.set(e.roleId,e);return Array.from(n.values())}var s=t({method:`GET`}).handler(e(`4fa6f5bc37fef053d73e12215a610604a3727a81c4d2685fff68092276b1b89b`)),c=t({method:`POST`}).middleware([n]).handler(e(`3680d7ceec851db2d9971fd03a526ac19102d718a3bfc6d25320ac29524d8bdc`));function l(){if(typeof window>`u`)return a;try{let e=localStorage.getItem(r);if(!e)return a;let t=JSON.parse(e);return Array.isArray(t)&&t.length?o(t):a}catch{return a}}function u(e){typeof window<`u`&&localStorage.setItem(r,JSON.stringify(e)),c({data:e}).catch(()=>{})}var d=()=>({id:i(),title:``,reward:``,cap:``,rank:`all`}),f=()=>({id:i(),title:``,points:0,rank:`all`}),p=`nt:pending-social-claims:v1`;function m(){if(typeof window>`u`)return[];try{let e=localStorage.getItem(p);if(e)return JSON.parse(e)}catch{}return[]}function h(e){localStorage.setItem(p,JSON.stringify(e))}function g(e){return m().filter(t=>t.userId===e)}function _(e){let t=m(),n=t.findIndex(t=>t.userId===e.userId&&t.id===e.id);n>=0?t[n]=e:t.push(e),h(t)}var v=t({method:`GET`}).handler(e(`2480919bc2e170d233713b1c2830944913d8799c4dcb5c1adeca1e419a19f7a6`)),y=t({method:`POST`}).middleware([n]).handler(e(`cc59c9c287ab31b02d5dd933dfcae74b25340d1c5e5cf66e469416924854aa55`));function b(e,t,n){let r=m(),i=r.find(n=>n.userId===e&&n.id===t);return i?(i.status=n,h(r),y({data:{userId:e,claimId:t,status:n,points:i.points}}).catch(()=>{}),i):null}var x=`nt:admin:social-links:v1`,S={facebook:``,youtube:``,instagram:``,whatsapp:``};function C(){if(typeof window>`u`)return S;try{let e=localStorage.getItem(x);if(e)return{...S,...JSON.parse(e)}}catch{}return S}function w(e){localStorage.setItem(x,JSON.stringify(e))}export{m as a,s as c,d,u as f,v as i,l,w as n,b as o,g as r,_ as s,C as t,f as u};
+import { n as e, t } from "./createServerFn-Ciss0-sp.js";
+import { t as n } from "./auth-middleware-JDjVgB0Q.js";
+var r = `nt:rewards:v1`,
+  i = () => Math.random().toString(36).slice(2, 9),
+  a = [
+    {
+      roleId: `all`,
+      label: `All users`,
+      enabled: !0,
+      note: `One-time tasks available to every earning user.`,
+      oneTime: [
+        { id: `signup`, title: `Create an account`, points: 25 },
+        { id: `yt`, title: `Subscribe our YouTube channel`, points: 25 },
+        { id: `fb`, title: `Like & follow us on Facebook`, points: 20 },
+        { id: `ig`, title: `Follow us on Instagram`, points: 20 },
+        { id: `wa`, title: `Join our WhatsApp channel`, points: 25 },
+      ],
+      recurring: [],
+    },
+    {
+      roleId: `reader`,
+      label: `Reader`,
+      enabled: !0,
+      oneTime: [],
+      recurring: [
+        { id: `r_share`, title: `Share news`, reward: `₹0.20 per share`, cap: `up to ₹1 / day` },
+        {
+          id: `r_comment`,
+          title: `Comment on unique articles (after first time)`,
+          reward: `₹0.50 per unique article`,
+          cap: `up to ₹2 / day`,
+        },
+      ],
+    },
+    {
+      roleId: `premium`,
+      label: `Premium user`,
+      enabled: !0,
+      oneTime: [],
+      recurring: [
+        { id: `p_share`, title: `Share news`, reward: `₹0.40 per share`, cap: `up to ₹2 / day` },
+        {
+          id: `p_comment`,
+          title: `Comment on unique articles (after first time)`,
+          reward: `₹0.1 per unique article`,
+          cap: `up to ₹4 / day`,
+        },
+      ],
+    },
+    {
+      roleId: `journalist`,
+      label: `Journalist`,
+      enabled: !0,
+      note: `Journalists earn points per published news based on their rank. Set points and thresholds below.`,
+      oneTime: [],
+      recurring: [],
+    },
+  ];
+function o(e) {
+  let t = e.map((e) =>
+      e.roleId === `journalist`
+        ? {
+            ...e,
+            note: `Journalists earn points per published news based on their rank. Set points and thresholds below.`,
+            recurring: e.recurring.filter((e) => e.id !== `j_publish`),
+          }
+        : e,
+    ),
+    n = new Map(t.map((e) => [e.roleId, e]));
+  for (let e of a) n.has(e.roleId) || n.set(e.roleId, e);
+  return Array.from(n.values());
+}
+var s = t({ method: `GET` }).handler(
+    e(`4fa6f5bc37fef053d73e12215a610604a3727a81c4d2685fff68092276b1b89b`),
+  ),
+  c = t({ method: `POST` })
+    .middleware([n])
+    .handler(e(`3680d7ceec851db2d9971fd03a526ac19102d718a3bfc6d25320ac29524d8bdc`));
+function l() {
+  if (typeof window > `u`) return a;
+  try {
+    let e = localStorage.getItem(r);
+    if (!e) return a;
+    let t = JSON.parse(e);
+    return Array.isArray(t) && t.length ? o(t) : a;
+  } catch {
+    return a;
+  }
+}
+function u(e) {
+  (typeof window < `u` && localStorage.setItem(r, JSON.stringify(e)),
+    c({ data: e }).catch(() => {}));
+}
+var d = () => ({ id: i(), title: ``, reward: ``, cap: ``, rank: `all` }),
+  f = () => ({ id: i(), title: ``, points: 0, rank: `all` }),
+  p = `nt:pending-social-claims:v1`;
+function m() {
+  if (typeof window > `u`) return [];
+  try {
+    let e = localStorage.getItem(p);
+    if (e) return JSON.parse(e);
+  } catch {}
+  return [];
+}
+function h(e) {
+  localStorage.setItem(p, JSON.stringify(e));
+}
+function g(e) {
+  return m().filter((t) => t.userId === e);
+}
+function _(e) {
+  let t = m(),
+    n = t.findIndex((t) => t.userId === e.userId && t.id === e.id);
+  (n >= 0 ? (t[n] = e) : t.push(e), h(t));
+}
+var v = t({ method: `GET` }).handler(
+    e(`2480919bc2e170d233713b1c2830944913d8799c4dcb5c1adeca1e419a19f7a6`),
+  ),
+  y = t({ method: `POST` })
+    .middleware([n])
+    .handler(e(`cc59c9c287ab31b02d5dd933dfcae74b25340d1c5e5cf66e469416924854aa55`));
+function b(e, t, n) {
+  let r = m(),
+    i = r.find((n) => n.userId === e && n.id === t);
+  return i
+    ? ((i.status = n),
+      h(r),
+      y({ data: { userId: e, claimId: t, status: n, points: i.points } }).catch(() => {}),
+      i)
+    : null;
+}
+var x = `nt:admin:social-links:v1`,
+  S = { facebook: ``, youtube: ``, instagram: ``, whatsapp: `` };
+function C() {
+  if (typeof window > `u`) return S;
+  try {
+    let e = localStorage.getItem(x);
+    if (e) return { ...S, ...JSON.parse(e) };
+  } catch {}
+  return S;
+}
+function w(e) {
+  localStorage.setItem(x, JSON.stringify(e));
+}
+export { m as a, s as c, d, u as f, v as i, l, w as n, b as o, g as r, _ as s, C as t, f as u };

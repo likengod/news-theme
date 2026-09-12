@@ -3,7 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import { getCategories, saveCategory, deleteCategory, importCategories, type CategoryRow } from "@/lib/taxonomy.functions";
+import {
+  getCategories,
+  saveCategory,
+  deleteCategory,
+  importCategories,
+  type CategoryRow,
+} from "@/lib/taxonomy.functions";
 import { slugify } from "@/lib/news-data";
 import { CategoryTable } from "@/components/admin/categories/CategoryTable";
 import { CsvImportExport } from "@/components/admin/CsvImportExport";
@@ -103,13 +109,19 @@ function CategoriesPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <CsvImportExport
-            data={allCats}
-            filename="categories"
-            onImport={handleImport}
-          />
+          <CsvImportExport data={allCats} filename="categories" onImport={handleImport} />
           <button
-            onClick={() => setEditing({ id: Date.now(), name: "", slug: "", description: "", metaTitle: "", metaDescription: "", showInHeader: false })}
+            onClick={() =>
+              setEditing({
+                id: Date.now(),
+                name: "",
+                slug: "",
+                description: "",
+                metaDescription: "",
+                showInHeader: false,
+                sortOrder: 0,
+              })
+            }
             className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
           >
             <Plus className="h-4 w-4" /> Add Category
@@ -151,7 +163,8 @@ function CategoriesPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-slate-200 pt-4">
           <p className="text-xs text-slate-500">
-            Page <strong>{safePage}</strong> of <strong>{totalPages}</strong> ({cats.length} total categories)
+            Page <strong>{safePage}</strong> of <strong>{totalPages}</strong> ({cats.length} total
+            categories)
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -180,11 +193,15 @@ function CategoriesPage() {
               {editing.id > 1000000 ? "Add Category" : `Edit Category — ${editing.name}`}
             </h2>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-600">Category Name *</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-600">
+                Category Name *
+              </label>
               <input
                 type="text"
                 value={editing.name}
-                onChange={(e) => setEditing({ ...editing, name: e.target.value, slug: slugify(e.target.value) })}
+                onChange={(e) =>
+                  setEditing({ ...editing, name: e.target.value, slug: slugify(e.target.value) })
+                }
                 className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
               />
             </div>
@@ -209,6 +226,19 @@ function CategoriesPage() {
                 Show in top header navigation
               </label>
             </div>
+            {editing.showInHeader && (
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">Header Position (Order)</label>
+                <input
+                  type="number"
+                  value={editing.sortOrder || 0}
+                  onChange={(e) => setEditing({ ...editing, sortOrder: parseInt(e.target.value) || 0 })}
+                  className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
+                  placeholder="e.g. 1, 2, 3"
+                />
+                <p className="mt-1 text-[10px] text-slate-500">Lower numbers appear first (e.g., 1 appears before 2).</p>
+              </div>
+            )}
             <div>
               <label className="mb-1 block text-xs font-semibold text-slate-600">Description</label>
               <textarea
@@ -219,10 +249,16 @@ function CategoriesPage() {
               />
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-              <button onClick={() => setEditing(null)} className="rounded-md border border-slate-200 px-4 py-2 text-xs font-semibold hover:bg-slate-50">
+              <button
+                onClick={() => setEditing(null)}
+                className="rounded-md border border-slate-200 px-4 py-2 text-xs font-semibold hover:bg-slate-50"
+              >
                 Cancel
               </button>
-              <button onClick={() => handleSave(editing)} className="rounded-md bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+              <button
+                onClick={() => handleSave(editing)}
+                className="rounded-md bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+              >
                 Save Category
               </button>
             </div>

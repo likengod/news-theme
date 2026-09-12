@@ -5,10 +5,34 @@ import { toast } from "sonner";
 import { loadSocialLinks, saveSocialLinks, type SocialLinks } from "@/lib/social-links";
 
 const PLATFORMS = [
-  { key: "facebook" as const, label: "Facebook Page URL", icon: FaFacebookF, color: "#1877F2", placeholder: "https://facebook.com/..." },
-  { key: "youtube" as const, label: "YouTube Channel URL", icon: FaYoutube, color: "#FF0000", placeholder: "https://youtube.com/@..." },
-  { key: "instagram" as const, label: "Instagram Profile URL", icon: FaInstagram, color: "#E4405F", placeholder: "https://instagram.com/..." },
-  { key: "whatsapp" as const, label: "WhatsApp Channel URL", icon: FaWhatsapp, color: "#25D366", placeholder: "https://whatsapp.com/channel/..." },
+  {
+    key: "facebook" as const,
+    label: "Facebook Page URL",
+    icon: FaFacebookF,
+    color: "#1877F2",
+    placeholder: "https://facebook.com/...",
+  },
+  {
+    key: "youtube" as const,
+    label: "YouTube Channel URL",
+    icon: FaYoutube,
+    color: "#FF0000",
+    placeholder: "https://youtube.com/@...",
+  },
+  {
+    key: "instagram" as const,
+    label: "Instagram Profile URL",
+    icon: FaInstagram,
+    color: "#E4405F",
+    placeholder: "https://instagram.com/...",
+  },
+  {
+    key: "whatsapp" as const,
+    label: "WhatsApp Channel URL",
+    icon: FaWhatsapp,
+    color: "#25D366",
+    placeholder: "https://whatsapp.com/channel/...",
+  },
 ];
 
 export function SocialLinksEditor() {

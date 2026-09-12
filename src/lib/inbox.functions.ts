@@ -14,12 +14,16 @@ export type InboxStatus = "Pending" | "Approved" | "Rejected";
  * Submit a contact message (public — no auth required)
  */
 export const submitContactMessage = createServerFn({ method: "POST" })
-  .validator((data) => z.object({
-    name: z.string().min(1, "Name is required").max(100),
-    email: z.string().email("Invalid email").max(100),
-    subject: z.string().max(100).optional(),
-    message: z.string().min(1, "Message is required").max(5000),
-  }).parse(data))
+  .validator((data) =>
+    z
+      .object({
+        name: z.string().min(1, "Name is required").max(100),
+        email: z.string().email("Invalid email").max(100),
+        subject: z.string().max(100).optional(),
+        message: z.string().min(1, "Message is required").max(5000),
+      })
+      .parse(data),
+  )
   .handler(async ({ data }) => {
     await query(
       `INSERT INTO inbox_requests (type, user_email, user_name, title, details, status)
@@ -30,7 +34,7 @@ export const submitContactMessage = createServerFn({ method: "POST" })
         data.name.trim(),
         `Contact: ${data.subject || "General Enquiry"}`,
         data.message.trim(),
-      ]
+      ],
     );
     return { ok: true };
   });
@@ -39,19 +43,23 @@ export const submitContactMessage = createServerFn({ method: "POST" })
  * Submit a work-with-us application (public — no auth required)
  */
 export const submitWorkWithUs = createServerFn({ method: "POST" })
-  .validator((data) => z.object({
-    name: z.string().min(1, "Name is required").max(100),
-    email: z.string().email("Invalid email").max(100),
-    phone: z.string().max(20).optional(),
-    alternativePhone: z.string().max(20).optional(),
-    city: z.string().max(100).optional(),
-    zip: z.string().max(20).optional(),
-    country: z.string().max(100).optional(),
-    beat: z.string().max(100).optional(),
-    tier: z.string().max(50),
-    portfolio: z.string().max(500).optional(),
-    pitch: z.string().min(1, "Pitch is required").max(5000)
-  }).parse(data))
+  .validator((data) =>
+    z
+      .object({
+        name: z.string().min(1, "Name is required").max(100),
+        email: z.string().email("Invalid email").max(100),
+        phone: z.string().max(20).optional(),
+        alternativePhone: z.string().max(20).optional(),
+        city: z.string().max(100).optional(),
+        zip: z.string().max(20).optional(),
+        country: z.string().max(100).optional(),
+        beat: z.string().max(100).optional(),
+        tier: z.string().max(50),
+        portfolio: z.string().max(500).optional(),
+        pitch: z.string().min(1, "Pitch is required").max(5000),
+      })
+      .parse(data),
+  )
   .handler(async ({ data }) => {
     const details = JSON.stringify({
       phone: data.phone || "",
@@ -73,7 +81,7 @@ export const submitWorkWithUs = createServerFn({ method: "POST" })
         data.name.trim(),
         `Work Application — ${data.tier}`,
         details,
-      ]
+      ],
     );
     return { ok: true };
   });
@@ -83,18 +91,22 @@ export const submitWorkWithUs = createServerFn({ method: "POST" })
  */
 export const submitWithdrawRequest = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .validator((data) => z.object({
-    voucherId: z.string().min(1, "Voucher is required"),
-    voucherTitle: z.string(),
-    amount: z.number().positive(),
-    paymentMethod: z.string().optional(),
-    paymentDetails: z.string().optional()
-  }).parse(data))
+  .validator((data) =>
+    z
+      .object({
+        voucherId: z.string().min(1, "Voucher is required"),
+        voucherTitle: z.string(),
+        amount: z.number().positive(),
+        paymentMethod: z.string().optional(),
+        paymentDetails: z.string().optional(),
+      })
+      .parse(data),
+  )
   .handler(async ({ data, context }) => {
     // Get user info
     const users = await query(
       "SELECT p.display_name, p.email, p.bank_name, p.bank_account_no, p.bank_ifsc FROM profiles p WHERE p.id = ?",
-      [context.userId]
+      [context.userId],
     );
     const profile = users[0] ?? {};
 
@@ -119,7 +131,7 @@ export const submitWithdrawRequest = createServerFn({ method: "POST" })
         profile.display_name || "",
         `Withdraw: ${data.voucherTitle}`,
         details,
-      ]
+      ],
     );
     return { ok: true };
   });
@@ -132,17 +144,13 @@ export const submitDeleteAccountRequest = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .handler(async ({ context }) => {
     // Get user profile
-    const profiles = await query(
-      "SELECT display_name, email FROM profiles WHERE id = ?",
-      [context.userId]
-    );
+    const profiles = await query("SELECT display_name, email FROM profiles WHERE id = ?", [
+      context.userId,
+    ]);
     const profile = profiles[0] ?? {};
 
     // Mark on profiles table
-    await query(
-      "UPDATE profiles SET delete_requested = TRUE WHERE id = ?",
-      [context.userId]
-    );
+    await query("UPDATE profiles SET delete_requested = TRUE WHERE id = ?", [context.userId]);
 
     // Add to inbox for admin review
     await query(
@@ -155,7 +163,7 @@ export const submitDeleteAccountRequest = createServerFn({ method: "POST" })
         profile.display_name || "Unknown User",
         "Account Deletion Request",
         `User ${profile.display_name || profile.email} has requested account deletion.`,
-      ]
+      ],
     );
     return { ok: true };
   });
@@ -166,7 +174,9 @@ export const submitDeleteAccountRequest = createServerFn({ method: "POST" })
  * Admin: Get all inbox requests (optionally filter by type/status)
  */
 export const adminGetInboxRequests = createServerFn({ method: "GET" })
-  .validator((data) => z.object({ type: z.string().optional(), status: z.string().optional() }).optional().parse(data))
+  .validator((data) =>
+    z.object({ type: z.string().optional(), status: z.string().optional() }).optional().parse(data),
+  )
   .handler(async ({ data }) => {
     let sql = "SELECT * FROM inbox_requests WHERE 1=1";
     const params: any[] = [];
@@ -188,29 +198,29 @@ export const adminGetInboxRequests = createServerFn({ method: "GET" })
 /**
  * Admin: Get inbox summary counts
  */
-export const adminGetInboxSummary = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const rows = await query(
-      `SELECT type, status, COUNT(*) as count
+export const adminGetInboxSummary = createServerFn({ method: "GET" }).handler(async () => {
+  const rows = await query(
+    `SELECT type, status, COUNT(*) as count
        FROM inbox_requests
-       GROUP BY type, status`
-    );
-    return { summary: rows };
-  });
+       GROUP BY type, status`,
+  );
+  return { summary: rows };
+});
 
 /**
  * Admin: Update inbox request status (Approved / Rejected)
  */
 export const adminUpdateInboxStatus = createServerFn({ method: "POST" })
-  .validator((data) => z.object({
-    id: z.number(),
-    status: z.enum(["Pending", "Approved", "Rejected"])
-  }).parse(data))
+  .validator((data) =>
+    z
+      .object({
+        id: z.number(),
+        status: z.enum(["Pending", "Approved", "Rejected"]),
+      })
+      .parse(data),
+  )
   .handler(async ({ data }) => {
-    await query(
-      "UPDATE inbox_requests SET status = ? WHERE id = ?",
-      [data.status, data.id]
-    );
+    await query("UPDATE inbox_requests SET status = ? WHERE id = ?", [data.status, data.id]);
     return { ok: true };
   });
 
@@ -219,10 +229,14 @@ export const adminUpdateInboxStatus = createServerFn({ method: "POST" })
  * This is destructive and irreversible.
  */
 export const adminApproveAccountDeletion = createServerFn({ method: "POST" })
-  .validator((data) => z.object({
-    requestId: z.number(),
-    userId: z.string().uuid()
-  }).parse(data))
+  .validator((data) =>
+    z
+      .object({
+        requestId: z.number(),
+        userId: z.string().uuid(),
+      })
+      .parse(data),
+  )
   .handler(async ({ data }) => {
     // Delete user data in correct order (FK constraints)
     // Sessions → roles → profiles → users (CASCADE handles most, but explicit is safer)
@@ -232,10 +246,7 @@ export const adminApproveAccountDeletion = createServerFn({ method: "POST" })
     await query("DELETE FROM users WHERE id = ?", [data.userId]);
 
     // Mark request as approved
-    await query(
-      "UPDATE inbox_requests SET status = 'Approved' WHERE id = ?",
-      [data.requestId]
-    );
+    await query("UPDATE inbox_requests SET status = 'Approved' WHERE id = ?", [data.requestId]);
 
     return { ok: true };
   });

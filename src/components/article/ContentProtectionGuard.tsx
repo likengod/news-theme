@@ -41,7 +41,7 @@ export function ContentProtectionGuard() {
         (isCmdOrCtrl && (e.key === "p" || e.key === "P")) || // Print
         (isCmdOrCtrl && (e.key === "s" || e.key === "S")) || // Save
         (isCmdOrCtrl && (e.key === "u" || e.key === "U")) || // View Source
-        e.key === "PrintScreen"                              // PrintScreen Key
+        e.key === "PrintScreen" // PrintScreen Key
       ) {
         e.preventDefault();
         triggerSecurityNotice();
@@ -111,15 +111,17 @@ export function ContentProtectionGuard() {
     return null;
   }
 
-  const modalTitle = settings.protectionModalTitle || `Content Protection - ${settings.siteName || "News Theme"}`;
-  const modalMessage = settings.protectionModalMessage || 
+  const modalTitle =
+    settings.protectionModalTitle || `Content Protection - ${settings.siteName || "News Theme"}`;
+  const modalMessage =
+    settings.protectionModalMessage ||
     "Our journalists work hard to bring you authentic news. When you share our website links directly, the ad revenue helps us pay our team and keep our servers online.\n\nWe humbly request you not to copy paste or take screenshots of our content. Your small effort to share the original link makes a big difference to our survival. Thank you for standing with us!";
 
   return (
     <>
       {/* Centered Protection Warning Modal Overlay */}
       {showModal && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200"
           onClick={(e) => e.target === e.currentTarget && setShowModal(false)}
         >
@@ -164,12 +166,16 @@ export function ContentProtectionGuard() {
               >
                 I Understand / Close
               </button>
-              
+
               <button
                 onClick={handleCopyShareLink}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white sm:w-auto sm:text-sm"
               >
-                {copiedLink ? <Check className="h-4 w-4 text-emerald-400 dark:text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                {copiedLink ? (
+                  <Check className="h-4 w-4 text-emerald-400 dark:text-emerald-600" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
                 {copiedLink ? "Link Copied!" : "Copy Link to Share"}
               </button>
             </div>
@@ -196,13 +202,17 @@ export function ContentProtectionGuard() {
         }
         
         /* Blur article content during screenshot or app switcher preview */
-        ${isBlurred ? `
+        ${
+          isBlurred
+            ? `
           article {
             filter: blur(18px) !important;
             opacity: 0.2 !important;
             transition: filter 0.05s ease-in-out, opacity 0.05s ease-in-out;
           }
-        ` : ""}
+        `
+            : ""
+        }
 
         /* Hide article body when user attempts to print or export to PDF */
         @media print {

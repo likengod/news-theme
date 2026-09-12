@@ -3,7 +3,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import { getAdminComments, updateCommentStatus, deleteComment, type CommentRow } from "@/lib/comments.functions";
+import {
+  getAdminComments,
+  updateCommentStatus,
+  deleteComment,
+  type CommentRow,
+} from "@/lib/comments.functions";
 import { CommentTable } from "@/components/admin/comments/CommentTable";
 
 export const Route = createFileRoute("/admin/comments")({
@@ -87,7 +92,9 @@ function CommentsPage() {
                 setPage(1);
               }}
               className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
-                tab === t ? "bg-slate-900 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                tab === t
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
               {t}
@@ -116,11 +123,7 @@ function CommentsPage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-900 border-t-transparent"></div>
         </div>
       ) : (
-        <CommentTable
-          comments={rows}
-          onSetStatus={setStatus}
-          onDelete={remove}
-        />
+        <CommentTable comments={rows} onSetStatus={setStatus} onDelete={remove} />
       )}
 
       {/* Server Pagination */}

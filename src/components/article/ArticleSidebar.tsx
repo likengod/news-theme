@@ -18,10 +18,7 @@ export function ArticleSidebar() {
   return (
     <aside className="space-y-8">
       <Suspense fallback={<div className="aspect-[3/4] w-full animate-pulse bg-muted" />}>
-        <Advertisement
-          slot="ad3"
-          aspectRatio="3/4"
-        />
+        <Advertisement slot="ad3" aspectRatio="3/4" />
       </Suspense>
 
       <div>
@@ -31,13 +28,14 @@ export function ArticleSidebar() {
         <ol className="space-y-4">
           {TRENDING.map((t, i) => (
             <li key={t} className="flex gap-3">
-              <span className="font-serif text-2xl font-bold text-muted-foreground">
-                {i + 1}
-              </span>
+              <span className="font-serif text-2xl font-bold text-muted-foreground">{i + 1}</span>
               <Link
                 to="/news/$slug"
                 params={{
-                  slug: t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+                  slug: t
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, "-")
+                    .replace(/^-|-$/g, ""),
                 }}
                 className="headline line-clamp-3 font-serif text-sm font-bold leading-snug text-primary hover:underline"
               >

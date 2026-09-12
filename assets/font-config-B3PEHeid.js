@@ -1,10 +1,352 @@
-import{n as e,t}from"./createServerFn-Ciss0-sp.js";import{t as n}from"./auth-middleware-JDjVgB0Q.js";var r=[{key:`headlines`,label:`Headlines`,description:`H1, H2, H3, H4 headings`,cssVar:`--font-headlines`},{key:`body`,label:`Body Text`,description:`Paragraphs, article content`,cssVar:`--font-body`},{key:`navigation`,label:`Navigation`,description:`Menu items, nav links`,cssVar:`--font-nav`},{key:`footer`,label:`Footer`,description:`Footer text and links`,cssVar:`--font-footer`},{key:`ticker`,label:`News Ticker`,description:`Breaking news ticker bar`,cssVar:`--font-ticker`},{key:`buttons`,label:`Buttons & CTAs`,description:`Buttons, call-to-action elements`,cssVar:`--font-buttons`}],i=[{name:`Inter`,family:`Inter`,weights:[`400`,`500`,`600`,`700`],category:`Sans-serif`},{name:`Roboto`,family:`Roboto`,weights:[`400`,`500`,`700`],category:`Sans-serif`},{name:`Poppins`,family:`Poppins`,weights:[`400`,`500`,`600`,`700`],category:`Sans-serif`},{name:`Open Sans`,family:`Open Sans`,weights:[`400`,`600`,`700`],category:`Sans-serif`},{name:`Lato`,family:`Lato`,weights:[`400`,`700`],category:`Sans-serif`},{name:`Montserrat`,family:`Montserrat`,weights:[`400`,`500`,`600`,`700`],category:`Sans-serif`},{name:`Nunito`,family:`Nunito`,weights:[`400`,`600`,`700`],category:`Sans-serif`},{name:`Raleway`,family:`Raleway`,weights:[`400`,`500`,`600`,`700`],category:`Sans-serif`},{name:`Work Sans`,family:`Work Sans`,weights:[`400`,`500`,`600`,`700`],category:`Sans-serif`},{name:`Outfit`,family:`Outfit`,weights:[`400`,`500`,`600`,`700`],category:`Sans-serif`},{name:`DM Sans`,family:`DM Sans`,weights:[`400`,`500`,`700`],category:`Sans-serif`},{name:`Source Sans 3`,family:`Source Sans 3`,weights:[`400`,`600`,`700`],category:`Sans-serif`},{name:`Playfair Display`,family:`Playfair Display`,weights:[`400`,`700`,`800`,`900`],category:`Serif`},{name:`Merriweather`,family:`Merriweather`,weights:[`400`,`700`],category:`Serif`},{name:`Lora`,family:`Lora`,weights:[`400`,`500`,`600`,`700`],category:`Serif`},{name:`PT Serif`,family:`PT Serif`,weights:[`400`,`700`],category:`Serif`},{name:`News Cycle`,family:`News Cycle`,weights:[`400`,`700`],category:`Serif`},{name:`Bodoni Moda`,family:`Bodoni Moda`,weights:[`700`,`800`,`900`],category:`Serif`},{name:`DM Serif Display`,family:`DM Serif Display`,weights:[`400`],category:`Serif`},{name:`Hind Siliguri`,family:`Hind Siliguri`,weights:[`300`,`400`,`500`,`600`,`700`],category:`Bengali`},{name:`Anek Bangla`,family:`Anek Bangla`,weights:[`400`,`500`,`600`,`700`,`800`],category:`Bengali`},{name:`Noto Sans Bengali`,family:`Noto Sans Bengali`,weights:[`400`,`500`,`600`,`700`],category:`Bengali`},{name:`Mina`,family:`Mina`,weights:[`400`,`700`],category:`Bengali`},{name:`JetBrains Mono`,family:`JetBrains Mono`,weights:[`400`,`600`],category:`Monospace`},{name:`Fira Code`,family:`Fira Code`,weights:[`400`,`500`,`700`],category:`Monospace`},{name:`Dancing Script`,family:`Dancing Script`,weights:[`400`,`700`],category:`Display`},{name:`Oswald`,family:`Oswald`,weights:[`400`,`500`,`600`,`700`],category:`Sans-serif`},{name:`Noto Serif Bengali`,family:`Noto Serif Bengali`,weights:[`400`,`500`,`600`,`700`],category:`Bengali`},{name:`Tiro Bangla`,family:`Tiro Bangla`,weights:[`400`],category:`Bengali`},{name:`Galada`,family:`Galada`,weights:[`400`],category:`Bengali`}],a=[{id:`sys-noto-serif-bengali`,name:`Noto Serif Bengali`,family:`Noto Serif Bengali`,source:`google`,weights:[`400`,`500`,`600`,`700`,`800`,`900`],isDefault:!0,isSystem:!0,createdAt:new Date().toISOString()},{id:`sys-solaiman-lipi`,name:`SolaimanLipi`,family:`SolaimanLipi`,source:`upload`,weights:[`400`,`700`],isDefault:!1,isSystem:!0,createdAt:new Date().toISOString()},{id:`sys-anek-bangla`,name:`Anek Bangla`,family:`Anek Bangla`,source:`google`,weights:[`400`,`500`,`600`,`700`,`800`],isDefault:!1,isSystem:!0,createdAt:new Date().toISOString()},{id:`sys-kalpurush`,name:`Kalpurush`,family:`Kalpurush`,source:`upload`,weights:[`400`,`700`],isDefault:!1,isSystem:!0,createdAt:new Date().toISOString()},{id:`sys-hind-siliguri`,name:`Hind Siliguri`,family:`Hind Siliguri`,source:`google`,weights:[`300`,`400`,`500`,`600`,`700`],isDefault:!1,isSystem:!0,createdAt:new Date().toISOString()},{id:`sys-noto-bengali`,name:`Noto Sans Bengali`,family:`Noto Sans Bengali`,source:`google`,weights:[`400`,`500`,`600`,`700`],isDefault:!1,isSystem:!0,createdAt:new Date().toISOString()},{id:`sys-inter`,name:`Inter`,family:`Inter`,source:`google`,weights:[`400`,`500`,`600`,`700`],isDefault:!1,isSystem:!0,createdAt:new Date().toISOString()},{id:`sys-news-cycle`,name:`News Cycle`,family:`News Cycle`,source:`google`,weights:[`400`,`700`],isDefault:!1,isSystem:!0,createdAt:new Date().toISOString()}],o={fonts:a,sectionMapping:{headlines:`sys-noto-serif-bengali`,body:`sys-noto-serif-bengali`,navigation:`sys-noto-serif-bengali`,footer:`sys-noto-serif-bengali`,ticker:`sys-noto-serif-bengali`,buttons:`sys-noto-serif-bengali`}};function s(e){if(!e)return[...a];let t=new Set(a.map(e=>e.id)),n=e.filter(e=>!t.has(e.id));return[...a,...n]}var c=t({method:`GET`}).handler(e(`315817cf7049c35693ab4ae90f01139b3471377a5fba02601046ce0bfe6b9d72`)),l=t({method:`POST`}).middleware([n]).handler(e(`a9524f219d84d7feedeb9446b2f236f589c9b507df590a19a028c57c50e8eddb`)),u=`nt:font-config`;function d(){if(typeof window>`u`)return o;try{let e=localStorage.getItem(u);if(e){let t=JSON.parse(e),n={...o.sectionMapping,...t.sectionMapping||{}};for(let e of Object.keys(n))(n[e]===`sys-tiro-bangla`||n[e]===`sys-galada`||n[e]===`sys-hind-siliguri`||n[e]===`sys-solaiman-lipi`)&&(n[e]=`sys-noto-serif-bengali`);return{...o,...t,fonts:s(t.fonts),sectionMapping:n}}}catch(e){console.error(`Failed to load font config from localStorage`,e)}return o}function f(e){if(!(typeof window>`u`))try{localStorage.setItem(u,JSON.stringify(e)),window.dispatchEvent(new Event(`nt:fonts-updated`)),window.dispatchEvent(new Event(`nt:settings-updated`)),l({data:e}).catch(e=>{console.error(`Failed to sync font config to server`,e)})}catch(e){console.error(`Error saving font config`,e)}}function p(e){let t=e.filter(e=>e.source===`google`);return t.length===0?``:`https://fonts.googleapis.com/css2?${t.map(e=>{let t=e.family.replace(/ /g,`+`);return!e.weights||e.weights.length===0?`family=${t}`:`family=${t}:wght@${[...e.weights].sort().join(`;`)}`}).join(`&`)}&display=swap`}function m(e){let t=e.filter(e=>e.source===`upload`&&e.fileDataUrl);return t.length===0?``:t.map(e=>{let t=e.weights&&e.weights.length>0?e.weights[0]:`normal`;return`
+import { n as e, t } from "./createServerFn-Ciss0-sp.js";
+import { t as n } from "./auth-middleware-JDjVgB0Q.js";
+var r = [
+    {
+      key: `headlines`,
+      label: `Headlines`,
+      description: `H1, H2, H3, H4 headings`,
+      cssVar: `--font-headlines`,
+    },
+    {
+      key: `body`,
+      label: `Body Text`,
+      description: `Paragraphs, article content`,
+      cssVar: `--font-body`,
+    },
+    {
+      key: `navigation`,
+      label: `Navigation`,
+      description: `Menu items, nav links`,
+      cssVar: `--font-nav`,
+    },
+    {
+      key: `footer`,
+      label: `Footer`,
+      description: `Footer text and links`,
+      cssVar: `--font-footer`,
+    },
+    {
+      key: `ticker`,
+      label: `News Ticker`,
+      description: `Breaking news ticker bar`,
+      cssVar: `--font-ticker`,
+    },
+    {
+      key: `buttons`,
+      label: `Buttons & CTAs`,
+      description: `Buttons, call-to-action elements`,
+      cssVar: `--font-buttons`,
+    },
+  ],
+  i = [
+    {
+      name: `Inter`,
+      family: `Inter`,
+      weights: [`400`, `500`, `600`, `700`],
+      category: `Sans-serif`,
+    },
+    { name: `Roboto`, family: `Roboto`, weights: [`400`, `500`, `700`], category: `Sans-serif` },
+    {
+      name: `Poppins`,
+      family: `Poppins`,
+      weights: [`400`, `500`, `600`, `700`],
+      category: `Sans-serif`,
+    },
+    {
+      name: `Open Sans`,
+      family: `Open Sans`,
+      weights: [`400`, `600`, `700`],
+      category: `Sans-serif`,
+    },
+    { name: `Lato`, family: `Lato`, weights: [`400`, `700`], category: `Sans-serif` },
+    {
+      name: `Montserrat`,
+      family: `Montserrat`,
+      weights: [`400`, `500`, `600`, `700`],
+      category: `Sans-serif`,
+    },
+    { name: `Nunito`, family: `Nunito`, weights: [`400`, `600`, `700`], category: `Sans-serif` },
+    {
+      name: `Raleway`,
+      family: `Raleway`,
+      weights: [`400`, `500`, `600`, `700`],
+      category: `Sans-serif`,
+    },
+    {
+      name: `Work Sans`,
+      family: `Work Sans`,
+      weights: [`400`, `500`, `600`, `700`],
+      category: `Sans-serif`,
+    },
+    {
+      name: `Outfit`,
+      family: `Outfit`,
+      weights: [`400`, `500`, `600`, `700`],
+      category: `Sans-serif`,
+    },
+    { name: `DM Sans`, family: `DM Sans`, weights: [`400`, `500`, `700`], category: `Sans-serif` },
+    {
+      name: `Source Sans 3`,
+      family: `Source Sans 3`,
+      weights: [`400`, `600`, `700`],
+      category: `Sans-serif`,
+    },
+    {
+      name: `Playfair Display`,
+      family: `Playfair Display`,
+      weights: [`400`, `700`, `800`, `900`],
+      category: `Serif`,
+    },
+    { name: `Merriweather`, family: `Merriweather`, weights: [`400`, `700`], category: `Serif` },
+    { name: `Lora`, family: `Lora`, weights: [`400`, `500`, `600`, `700`], category: `Serif` },
+    { name: `PT Serif`, family: `PT Serif`, weights: [`400`, `700`], category: `Serif` },
+    { name: `News Cycle`, family: `News Cycle`, weights: [`400`, `700`], category: `Serif` },
+    {
+      name: `Bodoni Moda`,
+      family: `Bodoni Moda`,
+      weights: [`700`, `800`, `900`],
+      category: `Serif`,
+    },
+    { name: `DM Serif Display`, family: `DM Serif Display`, weights: [`400`], category: `Serif` },
+    {
+      name: `Hind Siliguri`,
+      family: `Hind Siliguri`,
+      weights: [`300`, `400`, `500`, `600`, `700`],
+      category: `Bengali`,
+    },
+    {
+      name: `Anek Bangla`,
+      family: `Anek Bangla`,
+      weights: [`400`, `500`, `600`, `700`, `800`],
+      category: `Bengali`,
+    },
+    {
+      name: `Noto Sans Bengali`,
+      family: `Noto Sans Bengali`,
+      weights: [`400`, `500`, `600`, `700`],
+      category: `Bengali`,
+    },
+    { name: `Mina`, family: `Mina`, weights: [`400`, `700`], category: `Bengali` },
+    {
+      name: `JetBrains Mono`,
+      family: `JetBrains Mono`,
+      weights: [`400`, `600`],
+      category: `Monospace`,
+    },
+    {
+      name: `Fira Code`,
+      family: `Fira Code`,
+      weights: [`400`, `500`, `700`],
+      category: `Monospace`,
+    },
+    {
+      name: `Dancing Script`,
+      family: `Dancing Script`,
+      weights: [`400`, `700`],
+      category: `Display`,
+    },
+    {
+      name: `Oswald`,
+      family: `Oswald`,
+      weights: [`400`, `500`, `600`, `700`],
+      category: `Sans-serif`,
+    },
+    {
+      name: `Noto Serif Bengali`,
+      family: `Noto Serif Bengali`,
+      weights: [`400`, `500`, `600`, `700`],
+      category: `Bengali`,
+    },
+    { name: `Tiro Bangla`, family: `Tiro Bangla`, weights: [`400`], category: `Bengali` },
+    { name: `Galada`, family: `Galada`, weights: [`400`], category: `Bengali` },
+  ],
+  a = [
+    {
+      id: `sys-noto-serif-bengali`,
+      name: `Noto Serif Bengali`,
+      family: `Noto Serif Bengali`,
+      source: `google`,
+      weights: [`400`, `500`, `600`, `700`, `800`, `900`],
+      isDefault: !0,
+      isSystem: !0,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: `sys-solaiman-lipi`,
+      name: `SolaimanLipi`,
+      family: `SolaimanLipi`,
+      source: `upload`,
+      weights: [`400`, `700`],
+      isDefault: !1,
+      isSystem: !0,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: `sys-anek-bangla`,
+      name: `Anek Bangla`,
+      family: `Anek Bangla`,
+      source: `google`,
+      weights: [`400`, `500`, `600`, `700`, `800`],
+      isDefault: !1,
+      isSystem: !0,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: `sys-kalpurush`,
+      name: `Kalpurush`,
+      family: `Kalpurush`,
+      source: `upload`,
+      weights: [`400`, `700`],
+      isDefault: !1,
+      isSystem: !0,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: `sys-hind-siliguri`,
+      name: `Hind Siliguri`,
+      family: `Hind Siliguri`,
+      source: `google`,
+      weights: [`300`, `400`, `500`, `600`, `700`],
+      isDefault: !1,
+      isSystem: !0,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: `sys-noto-bengali`,
+      name: `Noto Sans Bengali`,
+      family: `Noto Sans Bengali`,
+      source: `google`,
+      weights: [`400`, `500`, `600`, `700`],
+      isDefault: !1,
+      isSystem: !0,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: `sys-inter`,
+      name: `Inter`,
+      family: `Inter`,
+      source: `google`,
+      weights: [`400`, `500`, `600`, `700`],
+      isDefault: !1,
+      isSystem: !0,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: `sys-news-cycle`,
+      name: `News Cycle`,
+      family: `News Cycle`,
+      source: `google`,
+      weights: [`400`, `700`],
+      isDefault: !1,
+      isSystem: !0,
+      createdAt: new Date().toISOString(),
+    },
+  ],
+  o = {
+    fonts: a,
+    sectionMapping: {
+      headlines: `sys-noto-serif-bengali`,
+      body: `sys-noto-serif-bengali`,
+      navigation: `sys-noto-serif-bengali`,
+      footer: `sys-noto-serif-bengali`,
+      ticker: `sys-noto-serif-bengali`,
+      buttons: `sys-noto-serif-bengali`,
+    },
+  };
+function s(e) {
+  if (!e) return [...a];
+  let t = new Set(a.map((e) => e.id)),
+    n = e.filter((e) => !t.has(e.id));
+  return [...a, ...n];
+}
+var c = t({ method: `GET` }).handler(
+    e(`315817cf7049c35693ab4ae90f01139b3471377a5fba02601046ce0bfe6b9d72`),
+  ),
+  l = t({ method: `POST` })
+    .middleware([n])
+    .handler(e(`a9524f219d84d7feedeb9446b2f236f589c9b507df590a19a028c57c50e8eddb`)),
+  u = `nt:font-config`;
+function d() {
+  if (typeof window > `u`) return o;
+  try {
+    let e = localStorage.getItem(u);
+    if (e) {
+      let t = JSON.parse(e),
+        n = { ...o.sectionMapping, ...(t.sectionMapping || {}) };
+      for (let e of Object.keys(n))
+        (n[e] === `sys-tiro-bangla` ||
+          n[e] === `sys-galada` ||
+          n[e] === `sys-hind-siliguri` ||
+          n[e] === `sys-solaiman-lipi`) &&
+          (n[e] = `sys-noto-serif-bengali`);
+      return { ...o, ...t, fonts: s(t.fonts), sectionMapping: n };
+    }
+  } catch (e) {
+    console.error(`Failed to load font config from localStorage`, e);
+  }
+  return o;
+}
+function f(e) {
+  if (!(typeof window > `u`))
+    try {
+      (localStorage.setItem(u, JSON.stringify(e)),
+        window.dispatchEvent(new Event(`nt:fonts-updated`)),
+        window.dispatchEvent(new Event(`nt:settings-updated`)),
+        l({ data: e }).catch((e) => {
+          console.error(`Failed to sync font config to server`, e);
+        }));
+    } catch (e) {
+      console.error(`Error saving font config`, e);
+    }
+}
+function p(e) {
+  let t = e.filter((e) => e.source === `google`);
+  return t.length === 0
+    ? ``
+    : `https://fonts.googleapis.com/css2?${t
+        .map((e) => {
+          let t = e.family.replace(/ /g, `+`);
+          return !e.weights || e.weights.length === 0
+            ? `family=${t}`
+            : `family=${t}:wght@${[...e.weights].sort().join(`;`)}`;
+        })
+        .join(`&`)}&display=swap`;
+}
+function m(e) {
+  let t = e.filter((e) => e.source === `upload` && e.fileDataUrl);
+  return t.length === 0
+    ? ``
+    : t.map((e) => {
+        let t = e.weights && e.weights.length > 0 ? e.weights[0] : `normal`;
+        return `
 @font-face {
   font-family: '${e.family}';
   src: url('${e.fileDataUrl}') format('woff2');
   font-display: swap;
   font-weight: ${t};
-}`.trim()}).join(`
+}`.trim();
+      }).join(`
 
-`)}function h(e,t){return t.find(t=>t.id===e)}function g(e){let t=[];for(let n of r){let r=e.sectionMapping[n.key],i=`"Noto Serif Bengali", "SolaimanLipi", "Kalpurush", Georgia, serif`;if(r){let t=h(r,e.fonts);t&&(i=`"${t.family}", "Noto Serif Bengali", "SolaimanLipi", "Kalpurush", Georgia, serif`)}t.push(`  ${n.cssVar}: ${i};`)}return`:root {\n${t.join(`
-`)}\n}`}function _(){return`font-${Date.now()}-${Math.random().toString(36).slice(2,7)}`}export{p as a,_ as c,d,f,m as i,h as l,r as n,g as o,i as r,o as s,u as t,c as u};
+`);
+}
+function h(e, t) {
+  return t.find((t) => t.id === e);
+}
+function g(e) {
+  let t = [];
+  for (let n of r) {
+    let r = e.sectionMapping[n.key],
+      i = `"Noto Serif Bengali", "SolaimanLipi", "Kalpurush", Georgia, serif`;
+    if (r) {
+      let t = h(r, e.fonts);
+      t && (i = `"${t.family}", "Noto Serif Bengali", "SolaimanLipi", "Kalpurush", Georgia, serif`);
+    }
+    t.push(`  ${n.cssVar}: ${i};`);
+  }
+  return `:root {\n${t.join(`
+`)}\n}`;
+}
+function _() {
+  return `font-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+export { p as a, _ as c, d, f, m as i, h as l, r as n, g as o, i as r, o as s, u as t, c as u };

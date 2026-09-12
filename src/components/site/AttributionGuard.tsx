@@ -54,7 +54,8 @@ export function AttributionGuard() {
         </div>
         <h2 className="text-lg font-bold text-red-400">Software License Integrity Notice</h2>
         <p className="text-xs text-slate-300 leading-relaxed">
-          Required developer attribution (<strong>GORILLA TECH SOLUTION</strong>) has been removed, hidden, or altered.
+          Required developer attribution (<strong>GORILLA TECH SOLUTION</strong>) has been removed,
+          hidden, or altered.
         </p>
         <div className="rounded-lg border border-slate-800 bg-slate-950 p-3 text-[11px] text-slate-400 font-mono">
           License Verification Required · Contact Gorilla Tech Solution

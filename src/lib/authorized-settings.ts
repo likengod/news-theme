@@ -31,7 +31,8 @@ export const DEFAULT_AUTHORIZED: AuthorizedSettings = {
   officeEmail: "contact@northeasttimeline.com",
   officeWebsite: "northeasttimeline.com",
   officePin: "799277",
-  cardNote: "This card certifies that the bearer is an authorized journalist of News Theme. If found, please return to the above address.",
+  cardNote:
+    "This card certifies that the bearer is an authorized journalist of News Theme. If found, please return to the above address.",
   cardDisclaimer: "Tampering or misuse of this card is a punishable offense.",
 };
 

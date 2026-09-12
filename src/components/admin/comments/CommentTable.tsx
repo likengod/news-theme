@@ -35,12 +35,19 @@ export function CommentTable({ comments, onSetStatus, onDelete }: Props) {
               </td>
               <td className="px-5 py-3 text-xs text-slate-700 max-w-sm">{c.body}</td>
               <td className="px-5 py-3 text-xs text-slate-600 font-medium max-w-xs truncate">
-                <a href={`/news/${c.articleSlug}`} target="_blank" rel="noopener noreferrer" className="hover:underline text-blue-600">
+                <a
+                  href={`/news/${c.articleSlug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline text-blue-600"
+                >
                   {c.articleTitle || c.articleSlug}
                 </a>
               </td>
               <td className="px-5 py-3">
-                <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${badge[c.status]}`}>
+                <span
+                  className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${badge[c.status]}`}
+                >
                   {c.status}
                 </span>
               </td>

@@ -8,7 +8,7 @@ export const Route = createFileRoute("/api/rss")({
         try {
           // Fetch latest 50 published articles
           const articles = await query(
-            "SELECT * FROM articles WHERE status = 'Published' AND date <= NOW() ORDER BY date DESC, id DESC LIMIT 50"
+            "SELECT * FROM articles WHERE status = 'Published' AND date <= NOW() ORDER BY date DESC, id DESC LIMIT 50",
           );
 
           const origin = "https://northeasttimeline.com"; // default site origin
@@ -57,7 +57,7 @@ export const Route = createFileRoute("/api/rss")({
             {
               status: 500,
               headers: { "Content-Type": "application/xml" },
-            }
+            },
           );
         }
       },
@@ -69,12 +69,18 @@ function escapeXml(unsafe: string): string {
   if (!unsafe) return "";
   return unsafe.replace(/[<>&'"]/g, (c) => {
     switch (c) {
-      case "<": return "&lt;";
-      case ">": return "&gt;";
-      case "&": return "&amp;";
-      case "'": return "&apos;";
-      case '"': return "&quot;";
-      default: return c;
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case "&":
+        return "&amp;";
+      case "'":
+        return "&apos;";
+      case '"':
+        return "&quot;";
+      default:
+        return c;
     }
   });
 }

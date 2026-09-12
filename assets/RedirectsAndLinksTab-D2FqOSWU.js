@@ -1,1 +1,358 @@
-import{s as e,t}from"./jsx-runtime-CF8L0Gwd.js";import{t as n}from"./react-YNiYR47K.js";import{D as r,a as i,n as a,w as o}from"./site-content-BDGWQAlc.js";import{t as s}from"./createLucideIcon-hjrkzsgs.js";import{t as c}from"./plus-CmmBzNRy.js";import{t as l}from"./refresh-cw-15eK9DsP.js";import{t as u}from"./trash-2-Ct1qNc1i.js";import{Bt as d,ft as f}from"./index-CMlkpObp.js";import{t as p}from"./SettingsHelpers-nrY-Ajj-.js";var m=s(`circle-check-big`,[[`path`,{d:`M21.801 10A10 10 0 1 1 17 3.335`,key:`yps3ct`}],[`path`,{d:`m9 11 3 3L22 4`,key:`1pflzl`}]]),h=e(n()),g=t();function _(){let[e,t]=(0,h.useState)([]),[n,s]=(0,h.useState)(``),[_,v]=(0,h.useState)(``),[y,b]=(0,h.useState)(!1),[x,S]=(0,h.useState)([]),[C,w]=(0,h.useState)(!1),[T,E]=(0,h.useState)(null);(0,h.useEffect)(()=>{i().then(e=>t(e)).catch(()=>{})},[]);let D=async()=>{if(!n||!_)return d.error(`Both source and destination URLs are required`);let r=n.trim();!r.startsWith(`/`)&&!r.startsWith(`http`)&&(r=`/`+r);let i=_.trim();!i.startsWith(`/`)&&!i.startsWith(`http`)&&(i=`/`+i);let a=[{id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),source:r,destination:i,hits:0,createdAt:new Date().toISOString()},...e];t(a);try{await o({data:a}),d.success(`Redirect rule added successfully!`),s(``),v(``)}catch{d.error(`Failed to save redirect rules to database`)}},O=async n=>{let r=e.filter(e=>e.id!==n);t(r);try{await o({data:r}),d.success(`Redirect rule deleted`)}catch{d.error(`Failed to update database`)}},k=async()=>{b(!0),w(!1);try{let e=await r();S(e),w(!0),d.success(`Scan completed. Found ${e.length} broken links.`)}catch(e){d.error(e.message||`Failed to scan database for broken links`)}finally{b(!1)}},A=async e=>{if(!e.suggestedFix)return d.error(`No correction suggested for this link`);E(e.id);try{await a({data:{articleId:e.articleId,brokenUrl:e.brokenUrl,correctedUrl:e.suggestedFix}}),d.success(`Link auto-corrected in database!`),S(t=>t.filter(t=>t.id!==e.id))}catch(e){d.error(e.message||`Failed to correct link`)}finally{E(null)}};return(0,g.jsx)(`div`,{className:`space-y-6`,children:(0,g.jsxs)(`div`,{className:`grid gap-6 lg:grid-cols-2`,children:[(0,g.jsxs)(p,{title:`Custom URL Redirect Manager`,subtitle:`Configure 301 (Permanent) redirects from old or broken URLs to active pages. Useful for SEO migrations.`,children:[(0,g.jsxs)(`div`,{className:`rounded-md border border-slate-100 bg-slate-50 p-4 space-y-3`,children:[(0,g.jsx)(`h3`,{className:`text-xs font-semibold uppercase tracking-wider text-slate-500`,children:`Add Redirect Rule`}),(0,g.jsxs)(`div`,{className:`grid gap-3 sm:grid-cols-2`,children:[(0,g.jsxs)(`div`,{children:[(0,g.jsx)(`label`,{className:`mb-1 block text-xs font-medium text-slate-700`,children:`Source Path (e.g. /old-slug)`}),(0,g.jsx)(`input`,{type:`text`,value:n,onChange:e=>s(e.target.value),placeholder:`/old-page-name`,className:`w-full rounded-md border border-slate-200 px-3 py-1.5 text-xs focus:border-slate-900 focus:outline-none`})]}),(0,g.jsxs)(`div`,{children:[(0,g.jsx)(`label`,{className:`mb-1 block text-xs font-medium text-slate-700`,children:`Destination (e.g. /about)`}),(0,g.jsx)(`input`,{type:`text`,value:_,onChange:e=>v(e.target.value),placeholder:`/news/new-slug`,className:`w-full rounded-md border border-slate-200 px-3 py-1.5 text-xs focus:border-slate-950 focus:outline-none`})]})]}),(0,g.jsxs)(`button`,{onClick:D,className:`inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800`,children:[(0,g.jsx)(c,{className:`h-3.5 w-3.5`}),` Add redirect`]})]}),(0,g.jsx)(`div`,{className:`mt-4 overflow-hidden rounded-md border border-slate-200 bg-white`,children:(0,g.jsxs)(`table`,{className:`min-w-full divide-y divide-slate-200 text-left text-xs`,children:[(0,g.jsx)(`thead`,{className:`bg-slate-50 font-semibold text-slate-700`,children:(0,g.jsxs)(`tr`,{children:[(0,g.jsx)(`th`,{className:`px-4 py-2`,children:`Source Path`}),(0,g.jsx)(`th`,{className:`px-4 py-2`,children:`Redirects To`}),(0,g.jsx)(`th`,{className:`px-4 py-2 text-center`,children:`Hits`}),(0,g.jsx)(`th`,{className:`px-4 py-2 text-right`,children:`Action`})]})}),(0,g.jsx)(`tbody`,{className:`divide-y divide-slate-200 text-slate-600`,children:e.length===0?(0,g.jsx)(`tr`,{children:(0,g.jsx)(`td`,{colSpan:4,className:`px-4 py-6 text-center text-slate-400`,children:`No redirects defined. Add one above.`})}):e.map(e=>(0,g.jsxs)(`tr`,{className:`hover:bg-slate-50/50`,children:[(0,g.jsx)(`td`,{className:`px-4 py-2 font-mono text-[11px] max-w-[150px] truncate`,title:e.source,children:e.source}),(0,g.jsx)(`td`,{className:`px-4 py-2 font-mono text-[11px] max-w-[150px] truncate`,title:e.destination,children:e.destination}),(0,g.jsx)(`td`,{className:`px-4 py-2 text-center font-semibold text-slate-950 tabular-nums`,children:e.hits||0}),(0,g.jsx)(`td`,{className:`px-4 py-2 text-right`,children:(0,g.jsx)(`button`,{onClick:()=>O(e.id),className:`text-red-600 hover:text-red-800 p-1`,title:`Delete redirect`,children:(0,g.jsx)(u,{className:`h-3.5 w-3.5`})})})]},e.id))})]})})]}),(0,g.jsxs)(p,{title:`Broken Link Scanner & Auto-Fixer`,subtitle:`Scan your published articles for broken internal links and auto-correct them to active pages.`,children:[(0,g.jsx)(`div`,{className:`flex flex-wrap gap-2`,children:(0,g.jsx)(`button`,{onClick:k,disabled:y,className:`inline-flex items-center gap-2 rounded-md bg-slate-950 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50`,children:y?(0,g.jsxs)(g.Fragment,{children:[(0,g.jsx)(l,{className:`h-3.5 w-3.5 animate-spin`}),` Scanning Database...`]}):(0,g.jsxs)(g.Fragment,{children:[(0,g.jsx)(f,{className:`h-3.5 w-3.5`}),` Scan Website Links`]})})}),(0,g.jsx)(`div`,{className:`mt-4 overflow-hidden rounded-md border border-slate-200 bg-white`,children:(0,g.jsxs)(`table`,{className:`min-w-full divide-y divide-slate-200 text-left text-xs`,children:[(0,g.jsx)(`thead`,{className:`bg-slate-50 font-semibold text-slate-700`,children:(0,g.jsxs)(`tr`,{children:[(0,g.jsx)(`th`,{className:`px-4 py-2`,children:`Article / Location`}),(0,g.jsx)(`th`,{className:`px-4 py-2`,children:`Broken Link URL`}),(0,g.jsx)(`th`,{className:`px-4 py-2`,children:`Suggested Fix`}),(0,g.jsx)(`th`,{className:`px-4 py-2 text-right`,children:`Action`})]})}),(0,g.jsx)(`tbody`,{className:`divide-y divide-slate-200 text-slate-600`,children:!C&&!y?(0,g.jsx)(`tr`,{children:(0,g.jsx)(`td`,{colSpan:4,className:`px-4 py-6 text-center text-slate-400`,children:`Click the scan button above to detect broken links in articles.`})}):y?(0,g.jsx)(`tr`,{children:(0,g.jsxs)(`td`,{colSpan:4,className:`px-4 py-8 text-center text-slate-500`,children:[(0,g.jsx)(l,{className:`mx-auto h-5 w-5 animate-spin text-slate-400 mb-2`}),`Parsing content database...`]})}):x.length===0?(0,g.jsx)(`tr`,{children:(0,g.jsxs)(`td`,{colSpan:4,className:`px-4 py-6 text-center text-emerald-600 font-semibold flex items-center justify-center gap-1.5`,children:[(0,g.jsx)(m,{className:`h-4 w-4`}),` Perfect SEO Health! No broken links found.`]})}):x.map(e=>(0,g.jsxs)(`tr`,{className:`hover:bg-slate-50/50`,children:[(0,g.jsxs)(`td`,{className:`px-4 py-3`,children:[(0,g.jsx)(`p`,{className:`font-semibold text-slate-900 max-w-[160px] truncate`,title:e.articleTitle,children:e.articleTitle}),(0,g.jsxs)(`p`,{className:`text-[10px] text-slate-400 font-mono`,children:[`ID: `,e.articleId]})]}),(0,g.jsx)(`td`,{className:`px-4 py-3 font-mono text-[11px] text-red-600 max-w-[150px] truncate`,title:e.brokenUrl,children:e.brokenUrl}),(0,g.jsx)(`td`,{className:`px-4 py-3`,children:e.suggestedFix?(0,g.jsx)(`span`,{className:`font-mono text-[11px] text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded`,title:e.suggestedFix,children:e.suggestedFix}):(0,g.jsx)(`span`,{className:`text-[11px] text-slate-400 italic`,children:`None found`})}),(0,g.jsx)(`td`,{className:`px-4 py-3 text-right`,children:e.suggestedFix?(0,g.jsx)(`button`,{onClick:()=>A(e),disabled:T===e.id,className:`rounded bg-slate-950 px-2.5 py-1 text-[10px] font-bold text-white hover:bg-slate-800 disabled:opacity-50`,children:T===e.id?`Fixing...`:`Auto-Fix`}):(0,g.jsx)(`span`,{className:`text-[10px] text-slate-400 italic`,children:`No suggestion`})})]},e.id))})]})})]})]})})}export{_ as RedirectsAndLinksTab,_ as default};
+import { s as e, t } from "./jsx-runtime-CF8L0Gwd.js";
+import { t as n } from "./react-YNiYR47K.js";
+import { D as r, a as i, n as a, w as o } from "./site-content-BDGWQAlc.js";
+import { t as s } from "./createLucideIcon-hjrkzsgs.js";
+import { t as c } from "./plus-CmmBzNRy.js";
+import { t as l } from "./refresh-cw-15eK9DsP.js";
+import { t as u } from "./trash-2-Ct1qNc1i.js";
+import { Bt as d, ft as f } from "./index-CMlkpObp.js";
+import { t as p } from "./SettingsHelpers-nrY-Ajj-.js";
+var m = s(`circle-check-big`, [
+    [`path`, { d: `M21.801 10A10 10 0 1 1 17 3.335`, key: `yps3ct` }],
+    [`path`, { d: `m9 11 3 3L22 4`, key: `1pflzl` }],
+  ]),
+  h = e(n()),
+  g = t();
+function _() {
+  let [e, t] = (0, h.useState)([]),
+    [n, s] = (0, h.useState)(``),
+    [_, v] = (0, h.useState)(``),
+    [y, b] = (0, h.useState)(!1),
+    [x, S] = (0, h.useState)([]),
+    [C, w] = (0, h.useState)(!1),
+    [T, E] = (0, h.useState)(null);
+  (0, h.useEffect)(() => {
+    i()
+      .then((e) => t(e))
+      .catch(() => {});
+  }, []);
+  let D = async () => {
+      if (!n || !_) return d.error(`Both source and destination URLs are required`);
+      let r = n.trim();
+      !r.startsWith(`/`) && !r.startsWith(`http`) && (r = `/` + r);
+      let i = _.trim();
+      !i.startsWith(`/`) && !i.startsWith(`http`) && (i = `/` + i);
+      let a = [
+        {
+          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+          source: r,
+          destination: i,
+          hits: 0,
+          createdAt: new Date().toISOString(),
+        },
+        ...e,
+      ];
+      t(a);
+      try {
+        (await o({ data: a }), d.success(`Redirect rule added successfully!`), s(``), v(``));
+      } catch {
+        d.error(`Failed to save redirect rules to database`);
+      }
+    },
+    O = async (n) => {
+      let r = e.filter((e) => e.id !== n);
+      t(r);
+      try {
+        (await o({ data: r }), d.success(`Redirect rule deleted`));
+      } catch {
+        d.error(`Failed to update database`);
+      }
+    },
+    k = async () => {
+      (b(!0), w(!1));
+      try {
+        let e = await r();
+        (S(e), w(!0), d.success(`Scan completed. Found ${e.length} broken links.`));
+      } catch (e) {
+        d.error(e.message || `Failed to scan database for broken links`);
+      } finally {
+        b(!1);
+      }
+    },
+    A = async (e) => {
+      if (!e.suggestedFix) return d.error(`No correction suggested for this link`);
+      E(e.id);
+      try {
+        (await a({
+          data: { articleId: e.articleId, brokenUrl: e.brokenUrl, correctedUrl: e.suggestedFix },
+        }),
+          d.success(`Link auto-corrected in database!`),
+          S((t) => t.filter((t) => t.id !== e.id)));
+      } catch (e) {
+        d.error(e.message || `Failed to correct link`);
+      } finally {
+        E(null);
+      }
+    };
+  return (0, g.jsx)(`div`, {
+    className: `space-y-6`,
+    children: (0, g.jsxs)(`div`, {
+      className: `grid gap-6 lg:grid-cols-2`,
+      children: [
+        (0, g.jsxs)(p, {
+          title: `Custom URL Redirect Manager`,
+          subtitle: `Configure 301 (Permanent) redirects from old or broken URLs to active pages. Useful for SEO migrations.`,
+          children: [
+            (0, g.jsxs)(`div`, {
+              className: `rounded-md border border-slate-100 bg-slate-50 p-4 space-y-3`,
+              children: [
+                (0, g.jsx)(`h3`, {
+                  className: `text-xs font-semibold uppercase tracking-wider text-slate-500`,
+                  children: `Add Redirect Rule`,
+                }),
+                (0, g.jsxs)(`div`, {
+                  className: `grid gap-3 sm:grid-cols-2`,
+                  children: [
+                    (0, g.jsxs)(`div`, {
+                      children: [
+                        (0, g.jsx)(`label`, {
+                          className: `mb-1 block text-xs font-medium text-slate-700`,
+                          children: `Source Path (e.g. /old-slug)`,
+                        }),
+                        (0, g.jsx)(`input`, {
+                          type: `text`,
+                          value: n,
+                          onChange: (e) => s(e.target.value),
+                          placeholder: `/old-page-name`,
+                          className: `w-full rounded-md border border-slate-200 px-3 py-1.5 text-xs focus:border-slate-900 focus:outline-none`,
+                        }),
+                      ],
+                    }),
+                    (0, g.jsxs)(`div`, {
+                      children: [
+                        (0, g.jsx)(`label`, {
+                          className: `mb-1 block text-xs font-medium text-slate-700`,
+                          children: `Destination (e.g. /about)`,
+                        }),
+                        (0, g.jsx)(`input`, {
+                          type: `text`,
+                          value: _,
+                          onChange: (e) => v(e.target.value),
+                          placeholder: `/news/new-slug`,
+                          className: `w-full rounded-md border border-slate-200 px-3 py-1.5 text-xs focus:border-slate-950 focus:outline-none`,
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                (0, g.jsxs)(`button`, {
+                  onClick: D,
+                  className: `inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800`,
+                  children: [(0, g.jsx)(c, { className: `h-3.5 w-3.5` }), ` Add redirect`],
+                }),
+              ],
+            }),
+            (0, g.jsx)(`div`, {
+              className: `mt-4 overflow-hidden rounded-md border border-slate-200 bg-white`,
+              children: (0, g.jsxs)(`table`, {
+                className: `min-w-full divide-y divide-slate-200 text-left text-xs`,
+                children: [
+                  (0, g.jsx)(`thead`, {
+                    className: `bg-slate-50 font-semibold text-slate-700`,
+                    children: (0, g.jsxs)(`tr`, {
+                      children: [
+                        (0, g.jsx)(`th`, { className: `px-4 py-2`, children: `Source Path` }),
+                        (0, g.jsx)(`th`, { className: `px-4 py-2`, children: `Redirects To` }),
+                        (0, g.jsx)(`th`, { className: `px-4 py-2 text-center`, children: `Hits` }),
+                        (0, g.jsx)(`th`, { className: `px-4 py-2 text-right`, children: `Action` }),
+                      ],
+                    }),
+                  }),
+                  (0, g.jsx)(`tbody`, {
+                    className: `divide-y divide-slate-200 text-slate-600`,
+                    children:
+                      e.length === 0
+                        ? (0, g.jsx)(`tr`, {
+                            children: (0, g.jsx)(`td`, {
+                              colSpan: 4,
+                              className: `px-4 py-6 text-center text-slate-400`,
+                              children: `No redirects defined. Add one above.`,
+                            }),
+                          })
+                        : e.map((e) =>
+                            (0, g.jsxs)(
+                              `tr`,
+                              {
+                                className: `hover:bg-slate-50/50`,
+                                children: [
+                                  (0, g.jsx)(`td`, {
+                                    className: `px-4 py-2 font-mono text-[11px] max-w-[150px] truncate`,
+                                    title: e.source,
+                                    children: e.source,
+                                  }),
+                                  (0, g.jsx)(`td`, {
+                                    className: `px-4 py-2 font-mono text-[11px] max-w-[150px] truncate`,
+                                    title: e.destination,
+                                    children: e.destination,
+                                  }),
+                                  (0, g.jsx)(`td`, {
+                                    className: `px-4 py-2 text-center font-semibold text-slate-950 tabular-nums`,
+                                    children: e.hits || 0,
+                                  }),
+                                  (0, g.jsx)(`td`, {
+                                    className: `px-4 py-2 text-right`,
+                                    children: (0, g.jsx)(`button`, {
+                                      onClick: () => O(e.id),
+                                      className: `text-red-600 hover:text-red-800 p-1`,
+                                      title: `Delete redirect`,
+                                      children: (0, g.jsx)(u, { className: `h-3.5 w-3.5` }),
+                                    }),
+                                  }),
+                                ],
+                              },
+                              e.id,
+                            ),
+                          ),
+                  }),
+                ],
+              }),
+            }),
+          ],
+        }),
+        (0, g.jsxs)(p, {
+          title: `Broken Link Scanner & Auto-Fixer`,
+          subtitle: `Scan your published articles for broken internal links and auto-correct them to active pages.`,
+          children: [
+            (0, g.jsx)(`div`, {
+              className: `flex flex-wrap gap-2`,
+              children: (0, g.jsx)(`button`, {
+                onClick: k,
+                disabled: y,
+                className: `inline-flex items-center gap-2 rounded-md bg-slate-950 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50`,
+                children: y
+                  ? (0, g.jsxs)(g.Fragment, {
+                      children: [
+                        (0, g.jsx)(l, { className: `h-3.5 w-3.5 animate-spin` }),
+                        ` Scanning Database...`,
+                      ],
+                    })
+                  : (0, g.jsxs)(g.Fragment, {
+                      children: [
+                        (0, g.jsx)(f, { className: `h-3.5 w-3.5` }),
+                        ` Scan Website Links`,
+                      ],
+                    }),
+              }),
+            }),
+            (0, g.jsx)(`div`, {
+              className: `mt-4 overflow-hidden rounded-md border border-slate-200 bg-white`,
+              children: (0, g.jsxs)(`table`, {
+                className: `min-w-full divide-y divide-slate-200 text-left text-xs`,
+                children: [
+                  (0, g.jsx)(`thead`, {
+                    className: `bg-slate-50 font-semibold text-slate-700`,
+                    children: (0, g.jsxs)(`tr`, {
+                      children: [
+                        (0, g.jsx)(`th`, {
+                          className: `px-4 py-2`,
+                          children: `Article / Location`,
+                        }),
+                        (0, g.jsx)(`th`, { className: `px-4 py-2`, children: `Broken Link URL` }),
+                        (0, g.jsx)(`th`, { className: `px-4 py-2`, children: `Suggested Fix` }),
+                        (0, g.jsx)(`th`, { className: `px-4 py-2 text-right`, children: `Action` }),
+                      ],
+                    }),
+                  }),
+                  (0, g.jsx)(`tbody`, {
+                    className: `divide-y divide-slate-200 text-slate-600`,
+                    children:
+                      !C && !y
+                        ? (0, g.jsx)(`tr`, {
+                            children: (0, g.jsx)(`td`, {
+                              colSpan: 4,
+                              className: `px-4 py-6 text-center text-slate-400`,
+                              children: `Click the scan button above to detect broken links in articles.`,
+                            }),
+                          })
+                        : y
+                          ? (0, g.jsx)(`tr`, {
+                              children: (0, g.jsxs)(`td`, {
+                                colSpan: 4,
+                                className: `px-4 py-8 text-center text-slate-500`,
+                                children: [
+                                  (0, g.jsx)(l, {
+                                    className: `mx-auto h-5 w-5 animate-spin text-slate-400 mb-2`,
+                                  }),
+                                  `Parsing content database...`,
+                                ],
+                              }),
+                            })
+                          : x.length === 0
+                            ? (0, g.jsx)(`tr`, {
+                                children: (0, g.jsxs)(`td`, {
+                                  colSpan: 4,
+                                  className: `px-4 py-6 text-center text-emerald-600 font-semibold flex items-center justify-center gap-1.5`,
+                                  children: [
+                                    (0, g.jsx)(m, { className: `h-4 w-4` }),
+                                    ` Perfect SEO Health! No broken links found.`,
+                                  ],
+                                }),
+                              })
+                            : x.map((e) =>
+                                (0, g.jsxs)(
+                                  `tr`,
+                                  {
+                                    className: `hover:bg-slate-50/50`,
+                                    children: [
+                                      (0, g.jsxs)(`td`, {
+                                        className: `px-4 py-3`,
+                                        children: [
+                                          (0, g.jsx)(`p`, {
+                                            className: `font-semibold text-slate-900 max-w-[160px] truncate`,
+                                            title: e.articleTitle,
+                                            children: e.articleTitle,
+                                          }),
+                                          (0, g.jsxs)(`p`, {
+                                            className: `text-[10px] text-slate-400 font-mono`,
+                                            children: [`ID: `, e.articleId],
+                                          }),
+                                        ],
+                                      }),
+                                      (0, g.jsx)(`td`, {
+                                        className: `px-4 py-3 font-mono text-[11px] text-red-600 max-w-[150px] truncate`,
+                                        title: e.brokenUrl,
+                                        children: e.brokenUrl,
+                                      }),
+                                      (0, g.jsx)(`td`, {
+                                        className: `px-4 py-3`,
+                                        children: e.suggestedFix
+                                          ? (0, g.jsx)(`span`, {
+                                              className: `font-mono text-[11px] text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded`,
+                                              title: e.suggestedFix,
+                                              children: e.suggestedFix,
+                                            })
+                                          : (0, g.jsx)(`span`, {
+                                              className: `text-[11px] text-slate-400 italic`,
+                                              children: `None found`,
+                                            }),
+                                      }),
+                                      (0, g.jsx)(`td`, {
+                                        className: `px-4 py-3 text-right`,
+                                        children: e.suggestedFix
+                                          ? (0, g.jsx)(`button`, {
+                                              onClick: () => A(e),
+                                              disabled: T === e.id,
+                                              className: `rounded bg-slate-950 px-2.5 py-1 text-[10px] font-bold text-white hover:bg-slate-800 disabled:opacity-50`,
+                                              children: T === e.id ? `Fixing...` : `Auto-Fix`,
+                                            })
+                                          : (0, g.jsx)(`span`, {
+                                              className: `text-[10px] text-slate-400 italic`,
+                                              children: `No suggestion`,
+                                            }),
+                                      }),
+                                    ],
+                                  },
+                                  e.id,
+                                ),
+                              ),
+                  }),
+                ],
+              }),
+            }),
+          ],
+        }),
+      ],
+    }),
+  });
+}
+export { _ as RedirectsAndLinksTab, _ as default };

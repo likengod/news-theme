@@ -6,7 +6,10 @@ export const Route = createFileRoute("/privacy-policy")({
   head: () => ({
     meta: [
       { title: "Privacy Policy — News Theme" },
-      { name: "description", content: "How News Theme collects, uses and protects your personal information." },
+      {
+        name: "description",
+        content: "How News Theme collects, uses and protects your personal information.",
+      },
       { property: "og:title", content: "Privacy Policy — News Theme" },
       { property: "og:url", content: "https://gorillatechsolution.com/privacy-policy" },
     ],
@@ -21,7 +24,7 @@ export const Route = createFileRoute("/privacy-policy")({
 
 function PrivacyPage() {
   const page = Route.useLoaderData();
-  
+
   return (
     <PolicyLayout
       title={page?.title || ""}
@@ -32,7 +35,12 @@ function PrivacyPage() {
               heading: s.heading,
               body: <div dangerouslySetInnerHTML={{ __html: s.body }} />,
             }))
-          : [{ heading: page?.title || "", body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} /> }]
+          : [
+              {
+                heading: page?.title || "",
+                body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} />,
+              },
+            ]
       }
     />
   );

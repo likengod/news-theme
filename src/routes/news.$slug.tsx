@@ -40,10 +40,7 @@ function ArticleError({ error, reset }: { error: Error; reset: () => void }) {
           >
             Try again
           </button>
-          <Link
-            to="/"
-            className="rounded-md border border-input px-4 py-2 text-sm font-medium"
-          >
+          <Link to="/" className="rounded-md border border-input px-4 py-2 text-sm font-medium">
             Go home
           </Link>
         </div>
@@ -87,10 +84,7 @@ export const Route = createFileRoute("/news/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData || !loaderData.data) {
       return {
-        meta: [
-          { title: "Article Not Found – News Theme" },
-          { name: "robots", content: "noindex" },
-        ],
+        meta: [{ title: "Article Not Found – News Theme" }, { name: "robots", content: "noindex" }],
       };
     }
 
@@ -208,7 +202,7 @@ function ArticlePage() {
       <ContentProtectionGuard />
       <ReadingProgress />
       <Header />
- 
+
       <main className="mx-auto max-w-6xl px-4 pt-2 pb-8">
         <ArticleHeader
           title={data.title}
@@ -217,7 +211,7 @@ function ArticlePage() {
           views={data.views}
           category={data.category}
         />
- 
+
         <div className="grid grid-cols-1 gap-10 pt-8 lg:grid-cols-[minmax(0,1fr)_300px]">
           <article className="relative">
             <ArticleHero
@@ -254,11 +248,14 @@ function ArticlePage() {
                   <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
                     <Lock className="h-6 w-6" />
                   </div>
-                  <h3 className="mt-4 text-base font-bold text-slate-900 dark:text-white">Premium Content Lock</h3>
+                  <h3 className="mt-4 text-base font-bold text-slate-900 dark:text-white">
+                    Premium Content Lock
+                  </h3>
                   <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                    This report is restricted to Premium readers. Only Administrators, Editors, and Authors are authorized to access this content.
+                    This report is restricted to Premium readers. Only Administrators, Editors, and
+                    Authors are authorized to access this content.
                   </p>
-                  
+
                   {!userRole ? (
                     <div className="mt-6">
                       <Link
@@ -280,21 +277,26 @@ function ArticlePage() {
                       </div>
                       <div className="flex items-center justify-center gap-2 text-xs text-amber-700 dark:text-amber-400">
                         <AlertCircle className="h-4 w-4" />
-                        <span>Logged in as role: <strong className="uppercase">{userRole}</strong> (Unauthorized)</span>
+                        <span>
+                          Logged in as role: <strong className="uppercase">{userRole}</strong>{" "}
+                          (Unauthorized)
+                        </span>
                       </div>
                     </div>
                   )}
                 </div>
               )}
- 
-              {isAuthorized && <ArticleFooter slug={slug} author={data.author} articleTitle={data.title} />}
+
+              {isAuthorized && (
+                <ArticleFooter slug={slug} author={data.author} articleTitle={data.title} />
+              )}
             </div>
           </article>
- 
+
           <ArticleSidebar />
         </div>
       </main>
- 
+
       <Footer />
       <Suspense fallback={null}>
         <PopupAd />

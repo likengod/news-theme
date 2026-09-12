@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
 
 function hashPassword(password) {
   const salt = "northeast_timeline_salt_2026";
@@ -9,19 +9,19 @@ function hashPassword(password) {
 
 async function run() {
   try {
-    const configPath = path.resolve('db-config.json');
+    const configPath = path.resolve("db-config.json");
     if (!fs.existsSync(configPath)) {
-      console.log('db-config.json not found');
+      console.log("db-config.json not found");
       return;
     }
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    const mysql = require('c:\\Users\\gorillatech\\Music\\TodayTripura\\node_modules\\mysql2\\promise');
+    const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    const mysql = require("c:\\Users\\gorillatech\\Music\\TodayTripura\\node_modules\\mysql2\\promise");
     const conn = await mysql.createConnection({
       host: config.host,
       port: Number(config.port) || 3306,
       user: config.user,
       password: config.password,
-      database: config.database
+      database: config.database,
     });
 
     const email = "reader14_994@demo.com";
@@ -31,7 +31,7 @@ async function run() {
       `SELECT u.* FROM users u
        LEFT JOIN profiles p ON u.id = p.id
        WHERE u.email = ? OR u.display_name = ? OR p.phone = ?`,
-      [email, email, email]
+      [email, email, email],
     );
     if (users.length === 0) {
       console.error("Login test failed: user not found");
@@ -49,7 +49,7 @@ async function run() {
 
     await conn.end();
   } catch (err) {
-    console.error('Error:', err);
+    console.error("Error:", err);
   }
 }
 

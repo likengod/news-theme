@@ -31,7 +31,12 @@ const GROUPS: { title: string; fields: FieldDef[] }[] = [
         ],
       },
       { key: "tagline", label: "Tagline", placeholder: "Breaking News · Finance · Markets" },
-      { key: "metaDescription", label: "SEO Meta Description", textarea: true, placeholder: "Independent newsroom..." },
+      {
+        key: "metaDescription",
+        label: "SEO Meta Description",
+        textarea: true,
+        placeholder: "Independent newsroom...",
+      },
     ],
   },
   {
@@ -39,7 +44,12 @@ const GROUPS: { title: string; fields: FieldDef[] }[] = [
     fields: [
       { key: "contactEmail", label: "Contact Email", placeholder: "hello@newstimeline.com" },
       { key: "contactPhone", label: "Contact Phone", placeholder: "+91 99999 99999" },
-      { key: "address", label: "Office Address", textarea: true, placeholder: "Agartala, Tripura..." },
+      {
+        key: "address",
+        label: "Office Address",
+        textarea: true,
+        placeholder: "Agartala, Tripura...",
+      },
     ],
   },
 
@@ -61,11 +71,12 @@ export function GeneralSettingsForm() {
     return s;
   });
   const [saved, setSaved] = useState(false);
-  
-  const update = (k: keyof SiteSettings, v: any) => setSettings((s) => ({
-    ...s,
-    [k]: k === "copyright" && typeof v === "string" ? cleanCopyright(v) : v,
-  }));
+
+  const update = (k: keyof SiteSettings, v: any) =>
+    setSettings((s) => ({
+      ...s,
+      [k]: k === "copyright" && typeof v === "string" ? cleanCopyright(v) : v,
+    }));
 
   const handleSave = async () => {
     try {
@@ -80,14 +91,19 @@ export function GeneralSettingsForm() {
       setTimeout(() => setSaved(false), 2000);
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Failed to save settings. Payload might be too large if logos are big.");
+      toast.error(
+        err.message || "Failed to save settings. Payload might be too large if logos are big.",
+      );
     }
   };
 
   return (
     <div className="space-y-6">
       {GROUPS.map((grp) => (
-        <section key={grp.title} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section
+          key={grp.title}
+          className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+        >
           <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-700 border-b border-slate-100 pb-2">
             {grp.title}
           </h2>
@@ -141,22 +157,32 @@ export function GeneralSettingsForm() {
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                     Logo Text & Two-Tone Colors
                   </h3>
-                  <span className="text-[11px] text-slate-400">Customize each word and its color independently</span>
+                  <span className="text-[11px] text-slate-400">
+                    Customize each word and its color independently
+                  </span>
                 </div>
 
                 {/* Live Preview */}
                 <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50/90 p-5 text-center shadow-inner">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 block mb-2">Live Header Preview</span>
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 block mb-2">
+                    Live Header Preview
+                  </span>
                   <div
                     className="text-3xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-wide inline-block"
-                    style={{ fontFamily: '"Inter", system-ui, sans-serif', letterSpacing: "0.05em" }}
+                    style={{
+                      fontFamily: '"Inter", system-ui, sans-serif',
+                      letterSpacing: "0.05em",
+                    }}
                   >
                     <span style={{ color: settings.logoColorPrimary || "#000000" }}>
-                      {settings.logoTextPrimary !== undefined && settings.logoTextPrimary !== "" ? settings.logoTextPrimary : "NEWS"}
-                    </span>
-                    {" "}
+                      {settings.logoTextPrimary !== undefined && settings.logoTextPrimary !== ""
+                        ? settings.logoTextPrimary
+                        : "NEWS"}
+                    </span>{" "}
                     <span style={{ color: settings.logoColorSecondary || "#dc2626" }}>
-                      {settings.logoTextSecondary !== undefined && settings.logoTextSecondary !== "" ? settings.logoTextSecondary : "THEME"}
+                      {settings.logoTextSecondary !== undefined && settings.logoTextSecondary !== ""
+                        ? settings.logoTextSecondary
+                        : "THEME"}
                     </span>
                   </div>
                 </div>
@@ -165,7 +191,9 @@ export function GeneralSettingsForm() {
                   {/* Part 1 */}
                   <div className="rounded-lg border border-slate-200 bg-white p-3.5 space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-slate-700">Part 1 Text (e.g. News)</label>
+                      <label className="text-xs font-bold text-slate-700">
+                        Part 1 Text (e.g. News)
+                      </label>
                       <span className="text-[10px] text-slate-400">First Word</span>
                     </div>
                     <input
@@ -181,11 +209,17 @@ export function GeneralSettingsForm() {
                       className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
                     />
                     <div>
-                      <label className="text-[11px] font-semibold text-slate-500 block mb-1">Part 1 Text Color</label>
+                      <label className="text-[11px] font-semibold text-slate-500 block mb-1">
+                        Part 1 Text Color
+                      </label>
                       <div className="flex items-center gap-2">
                         <input
                           type="color"
-                          value={settings.logoColorPrimary && settings.logoColorPrimary.startsWith("#") ? settings.logoColorPrimary : "#000000"}
+                          value={
+                            settings.logoColorPrimary && settings.logoColorPrimary.startsWith("#")
+                              ? settings.logoColorPrimary
+                              : "#000000"
+                          }
                           onChange={(e) => update("logoColorPrimary", e.target.value)}
                           className="h-8 w-10 cursor-pointer rounded border border-slate-200 p-0.5"
                         />
@@ -211,7 +245,9 @@ export function GeneralSettingsForm() {
                   {/* Part 2 */}
                   <div className="rounded-lg border border-slate-200 bg-white p-3.5 space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-slate-700">Part 2 Text (e.g. Theme)</label>
+                      <label className="text-xs font-bold text-slate-700">
+                        Part 2 Text (e.g. Theme)
+                      </label>
                       <span className="text-[10px] text-slate-400">Second Word</span>
                     </div>
                     <input
@@ -227,11 +263,18 @@ export function GeneralSettingsForm() {
                       className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
                     />
                     <div>
-                      <label className="text-[11px] font-semibold text-slate-500 block mb-1">Part 2 Text Color</label>
+                      <label className="text-[11px] font-semibold text-slate-500 block mb-1">
+                        Part 2 Text Color
+                      </label>
                       <div className="flex items-center gap-2">
                         <input
                           type="color"
-                          value={settings.logoColorSecondary && settings.logoColorSecondary.startsWith("#") ? settings.logoColorSecondary : "#dc2626"}
+                          value={
+                            settings.logoColorSecondary &&
+                            settings.logoColorSecondary.startsWith("#")
+                              ? settings.logoColorSecondary
+                              : "#dc2626"
+                          }
                           onChange={(e) => update("logoColorSecondary", e.target.value)}
                           className="h-8 w-10 cursor-pointer rounded border border-slate-200 p-0.5"
                         />
@@ -261,21 +304,56 @@ export function GeneralSettingsForm() {
                   Logo Images & Favicon
                 </h3>
                 <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-                  <LogoUploader compact label="Site logo (Day)" value={settings.logoLight} usage="site-logo" recommendedSize="320×80 px" onChange={(v) => update("logoLight", v)} />
-                  <LogoUploader compact label="Site logo (Night)" value={settings.logoDark} usage="site-logo" dark recommendedSize="320×80 px" onChange={(v) => update("logoDark", v)} />
-                  <LogoUploader compact label="Footer logo (Day)" value={settings.footerLogoLight} usage="site-logo" recommendedSize="320×80 px" onChange={(v) => update("footerLogoLight", v)} />
-                  <LogoUploader compact label="Footer logo (Night)" value={settings.footerLogoDark} usage="site-logo" dark recommendedSize="320×80 px" onChange={(v) => update("footerLogoDark", v)} />
-                  <LogoUploader compact label="Favicon" value={settings.favicon} usage="site-favicon" recommendedSize="64×64 px" onChange={(v) => update("favicon", v)} />
+                  <LogoUploader
+                    compact
+                    label="Site logo (Day)"
+                    value={settings.logoLight}
+                    usage="site-logo"
+                    recommendedSize="320×80 px"
+                    onChange={(v) => update("logoLight", v)}
+                  />
+                  <LogoUploader
+                    compact
+                    label="Site logo (Night)"
+                    value={settings.logoDark}
+                    usage="site-logo"
+                    dark
+                    recommendedSize="320×80 px"
+                    onChange={(v) => update("logoDark", v)}
+                  />
+                  <LogoUploader
+                    compact
+                    label="Footer logo (Day)"
+                    value={settings.footerLogoLight}
+                    usage="site-logo"
+                    recommendedSize="320×80 px"
+                    onChange={(v) => update("footerLogoLight", v)}
+                  />
+                  <LogoUploader
+                    compact
+                    label="Footer logo (Night)"
+                    value={settings.footerLogoDark}
+                    usage="site-logo"
+                    dark
+                    recommendedSize="320×80 px"
+                    onChange={(v) => update("footerLogoDark", v)}
+                  />
+                  <LogoUploader
+                    compact
+                    label="Favicon"
+                    value={settings.favicon}
+                    usage="site-favicon"
+                    recommendedSize="64×64 px"
+                    onChange={(v) => update("favicon", v)}
+                  />
                 </div>
               </div>
             </>
           )}
         </section>
       ))}
-
-            
-
-      {/* Save Button */}      <div className="sticky bottom-4 flex justify-end">
+      {/* Save Button */}{" "}
+      <div className="sticky bottom-4 flex justify-end">
         <button
           onClick={handleSave}
           className={`inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-colors ${saved ? "bg-emerald-600" : "bg-slate-900 hover:bg-slate-800"}`}
@@ -287,4 +365,3 @@ export function GeneralSettingsForm() {
     </div>
   );
 }
-

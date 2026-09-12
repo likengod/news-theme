@@ -40,7 +40,9 @@ export function FontSettingsTab() {
   const [search, setSearch] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showCatalog, setShowCatalog] = useState(false);
-  const [previewText, setPreviewText] = useState("The quick brown fox jumps over the lazy dog. 0123456789");
+  const [previewText, setPreviewText] = useState(
+    "The quick brown fox jumps over the lazy dog. 0123456789",
+  );
   const [dirty, setDirty] = useState(false);
 
   /* Sync from external updates */
@@ -51,15 +53,12 @@ export function FontSettingsTab() {
   }, []);
 
   /* Persist changes */
-  const save = useCallback(
-    (next: FontConfiguration) => {
-      setConfig(next);
-      saveFontConfig(next);
-      setDirty(false);
-      toast.success("Font settings saved");
-    },
-    []
-  );
+  const save = useCallback((next: FontConfiguration) => {
+    setConfig(next);
+    saveFontConfig(next);
+    setDirty(false);
+    toast.success("Font settings saved");
+  }, []);
 
   /* Helpers */
   const updateConfig = (next: FontConfiguration) => {
@@ -102,7 +101,12 @@ export function FontSettingsTab() {
     toast.success(`"${font.name}" removed`);
   };
 
-  const handleAddGoogleFont = (catalogEntry: { name: string; family: string; weights: string[]; category: string }) => {
+  const handleAddGoogleFont = (catalogEntry: {
+    name: string;
+    family: string;
+    weights: string[];
+    category: string;
+  }) => {
     if (config.fonts.some((f) => f.family === catalogEntry.family)) {
       toast.error(`"${catalogEntry.name}" is already in your font library`);
       return;
@@ -162,7 +166,9 @@ export function FontSettingsTab() {
 
   const handleUploadFont = (file: File) => {
     if (file.size > MAX_UPLOAD_BYTES) {
-      toast.error(`Font file too large (max ${MAX_UPLOAD_BYTES / 1024}KB). Got ${Math.round(file.size / 1024)}KB.`);
+      toast.error(
+        `Font file too large (max ${MAX_UPLOAD_BYTES / 1024}KB). Got ${Math.round(file.size / 1024)}KB.`,
+      );
       return;
     }
     const validExts = [".woff2", ".woff", ".ttf", ".otf"];
@@ -214,31 +220,37 @@ export function FontSettingsTab() {
     const googleFonts = config.fonts.filter((f) => f.source === "google" && !f.isSystem);
     if (googleFonts.length === 0) return;
     const url = buildGoogleFontsUrl(googleFonts);
-    const existing = document.querySelector('link[data-font-preview]');
+    const existing = document.querySelector("link[data-font-preview]");
     if (existing) existing.remove();
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = url;
     link.setAttribute("data-font-preview", "true");
     document.head.appendChild(link);
-    return () => { link.remove(); };
+    return () => {
+      link.remove();
+    };
   }, [config.fonts]);
 
   useEffect(() => {
     const uploadedFonts = config.fonts.filter((f) => f.source === "upload" && f.fileDataUrl);
     if (uploadedFonts.length === 0) return;
     const css = buildFontFaceCss(uploadedFonts);
-    const existing = document.querySelector('style[data-font-face-preview]');
+    const existing = document.querySelector("style[data-font-face-preview]");
     if (existing) existing.remove();
     const style = document.createElement("style");
     style.setAttribute("data-font-face-preview", "true");
     style.textContent = css;
     document.head.appendChild(style);
-    return () => { style.remove(); };
+    return () => {
+      style.remove();
+    };
   }, [config.fonts]);
 
   const filteredFonts = config.fonts.filter(
-    (f) => f.name.toLowerCase().includes(search.toLowerCase()) || f.family.toLowerCase().includes(search.toLowerCase())
+    (f) =>
+      f.name.toLowerCase().includes(search.toLowerCase()) ||
+      f.family.toLowerCase().includes(search.toLowerCase()),
   );
 
   const defaultFontEntry = config.fonts.find((f) => f.isDefault);
@@ -246,7 +258,10 @@ export function FontSettingsTab() {
   return (
     <div className="space-y-6">
       {/* ─── Font Library ─── */}
-      <Card title="Font Library" subtitle="Manage all fonts available on your website. System fonts cannot be deleted.">
+      <Card
+        title="Font Library"
+        subtitle="Manage all fonts available on your website. System fonts cannot be deleted."
+      >
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -277,7 +292,10 @@ export function FontSettingsTab() {
         <p className="text-xs text-slate-500 mb-3">
           {config.fonts.length} font{config.fonts.length !== 1 ? "s" : ""} registered
           {defaultFontEntry && (
-            <> · Default: <strong className="text-slate-900">{defaultFontEntry.name}</strong></>
+            <>
+              {" "}
+              · Default: <strong className="text-slate-900">{defaultFontEntry.name}</strong>
+            </>
           )}
         </p>
 
@@ -318,7 +336,10 @@ export function FontSettingsTab() {
       </Card>
 
       {/* ─── Section Font Mapping ─── */}
-      <Card title="Section Font Mapping" subtitle="Assign different fonts to different sections of your website.">
+      <Card
+        title="Section Font Mapping"
+        subtitle="Assign different fonts to different sections of your website."
+      >
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {FONT_SECTIONS.map((section) => {
             const currentFontId = config.sectionMapping[section.key];
@@ -353,7 +374,10 @@ export function FontSettingsTab() {
       </Card>
 
       {/* ─── Live Preview ─── */}
-      <Card title="Live Font Preview" subtitle="See how your font selections look across different sections.">
+      <Card
+        title="Live Font Preview"
+        subtitle="See how your font selections look across different sections."
+      >
         <div className="mb-4">
           <label className="block text-xs font-medium text-slate-600 mb-1">Preview Text</label>
           <input
@@ -370,10 +394,7 @@ export function FontSettingsTab() {
             const family = font ? `"${font.family}", sans-serif` : "sans-serif";
             const isHeadline = section.key === "headlines";
             return (
-              <div
-                key={section.key}
-                className="rounded-lg border border-slate-200 bg-slate-50 p-4"
-              >
+              <div key={section.key} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <span className="inline-block rounded bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider mb-2">
                   {section.label}
                 </span>
@@ -398,7 +419,10 @@ export function FontSettingsTab() {
       </Card>
 
       {/* ─── Frontend/Backend Usage Reference ─── */}
-      <Card title="Font Usage Map" subtitle="Where each font section applies across frontend and backend.">
+      <Card
+        title="Font Usage Map"
+        subtitle="Where each font section applies across frontend and backend."
+      >
         <div className="overflow-hidden rounded-md border border-slate-200">
           <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
             <thead className="bg-slate-50 font-semibold text-slate-700">
@@ -424,7 +448,9 @@ export function FontSettingsTab() {
                       </span>
                     </td>
                     <td className="px-4 py-2.5">{section.description}</td>
-                    <td className="px-4 py-2.5 font-mono text-[11px] text-slate-500">{section.cssVar}</td>
+                    <td className="px-4 py-2.5 font-mono text-[11px] text-slate-500">
+                      {section.cssVar}
+                    </td>
                   </tr>
                 );
               })}
@@ -442,10 +468,7 @@ export function FontSettingsTab() {
         />
       )}
       {showAddModal && (
-        <CustomFontModal
-          onAdd={handleCustomGoogleFont}
-          onClose={() => setShowAddModal(false)}
-        />
+        <CustomFontModal onAdd={handleCustomGoogleFont} onClose={() => setShowAddModal(false)} />
       )}
     </div>
   );
@@ -556,10 +579,15 @@ function FontSelect({
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:border-slate-300 transition"
       >
-        <span className="truncate" style={selected ? { fontFamily: `"${selected.family}", sans-serif` } : undefined}>
+        <span
+          className="truncate"
+          style={selected ? { fontFamily: `"${selected.family}", sans-serif` } : undefined}
+        >
           {selected?.name ?? "Select a font..."}
         </span>
-        <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          className={`h-4 w-4 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && (
         <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-md border border-slate-200 bg-white shadow-lg">
@@ -574,7 +602,10 @@ function FontSelect({
                 f.id === value ? "bg-slate-100 text-slate-900" : "text-slate-600"
               }`}
             >
-              <span className="flex-1 truncate text-left" style={{ fontFamily: `"${f.family}", sans-serif` }}>
+              <span
+                className="flex-1 truncate text-left"
+                style={{ fontFamily: `"${f.family}", sans-serif` }}
+              >
                 {f.name}
               </span>
               {f.id === value && <Check className="h-4 w-4 text-slate-900" />}
@@ -636,7 +667,10 @@ function GoogleFontsCatalog({
   const alreadyAdded = new Set(fonts.map((f) => f.family.toLowerCase()));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      onClick={onClose}
+    >
       <div
         className="mx-4 w-full max-w-xl rounded-xl border border-slate-200 bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
@@ -644,7 +678,9 @@ function GoogleFontsCatalog({
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
           <div>
             <h3 className="text-lg font-bold text-slate-900">Google Fonts Catalog</h3>
-            <p className="text-xs text-slate-500">Select from popular Google Fonts to add to your library</p>
+            <p className="text-xs text-slate-500">
+              Select from popular Google Fonts to add to your library
+            </p>
           </div>
           <button onClick={onClose} className="rounded-md p-1 hover:bg-slate-100 transition">
             <X className="h-5 w-5 text-slate-500" />
@@ -691,7 +727,9 @@ function GoogleFontsCatalog({
                   <div
                     key={f.family}
                     className={`flex items-center justify-between rounded-lg border px-4 py-3 transition ${
-                      exists ? "border-slate-100 bg-slate-50 opacity-60" : "border-slate-200 hover:border-slate-300 bg-white"
+                      exists
+                        ? "border-slate-100 bg-slate-50 opacity-60"
+                        : "border-slate-200 hover:border-slate-300 bg-white"
                     }`}
                   >
                     <div className="flex-1 min-w-0">
@@ -744,7 +782,10 @@ function CustomFontModal({
   const [weights, setWeights] = useState("400, 500, 600, 700");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      onClick={onClose}
+    >
       <div
         className="mx-4 w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
@@ -775,7 +816,9 @@ function CustomFontModal({
             </p>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Weights (comma-separated)</label>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Weights (comma-separated)
+            </label>
             <input
               type="text"
               value={weights}
@@ -788,7 +831,12 @@ function CustomFontModal({
             <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
             <p className="text-xs text-amber-800">
               If the font name is incorrect, it won't load. Verify the exact name at{" "}
-              <a href="https://fonts.google.com" target="_blank" rel="noopener noreferrer" className="underline font-medium">
+              <a
+                href="https://fonts.google.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-medium"
+              >
                 fonts.google.com
               </a>
             </p>

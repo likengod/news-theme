@@ -27,10 +27,12 @@ import { query } from "./db.server";
 
 // ─── Server Functions (MySQL Journalist Ranks Persistence) ──────────────────
 
-export const getJournalistRanksServer = createServerFn({ method: "GET" })
-  .handler(async (): Promise<JournalistRank[]> => {
+export const getJournalistRanksServer = createServerFn({ method: "GET" }).handler(
+  async (): Promise<JournalistRank[]> => {
     try {
-      const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'journalist_ranks_config'");
+      const rows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'journalist_ranks_config'",
+      );
       if (rows.length > 0 && rows[0].value) {
         const parsed = JSON.parse(rows[0].value) as JournalistRank[];
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -39,7 +41,8 @@ export const getJournalistRanksServer = createServerFn({ method: "GET" })
       }
     } catch {}
     return DEFAULT_RANKS;
-  });
+  },
+);
 
 export const saveJournalistRanksServer = createServerFn({ method: "POST" })
   .middleware([requireAuth])
@@ -49,7 +52,7 @@ export const saveJournalistRanksServer = createServerFn({ method: "POST" })
     await query(
       `INSERT INTO site_settings (setting_key, value) VALUES ('journalist_ranks_config', ?)
        ON DUPLICATE KEY UPDATE value = ?`,
-      [json, json]
+      [json, json],
     );
     return { success: true };
   });

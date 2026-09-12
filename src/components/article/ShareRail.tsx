@@ -42,11 +42,36 @@ export function ShareRail({ url, title, orientation = "horizontal" }: Props) {
   }, [url, handleShareClick]);
 
   const items: { label: string; href: string; Icon: any; color: string }[] = [
-    { label: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${enc}`, Icon: FaFacebookF, color: "#1877F2" },
-    { label: "Twitter", href: `https://twitter.com/intent/tweet?url=${enc}&text=${encT}`, Icon: FaTwitter, color: "#1DA1F2" },
-    { label: "LinkedIn", href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc}`, Icon: FaLinkedinIn, color: "#0A66C2" },
-    { label: "WhatsApp", href: `https://api.whatsapp.com/send?text=${encT}%20${enc}`, Icon: FaWhatsapp, color: "#25D366" },
-    { label: "Telegram", href: `https://t.me/share/url?url=${enc}&text=${encT}`, Icon: FaTelegramPlane, color: "#26A5E4" },
+    {
+      label: "Facebook",
+      href: `https://www.facebook.com/sharer/sharer.php?u=${enc}`,
+      Icon: FaFacebookF,
+      color: "#1877F2",
+    },
+    {
+      label: "Twitter",
+      href: `https://twitter.com/intent/tweet?url=${enc}&text=${encT}`,
+      Icon: FaTwitter,
+      color: "#1DA1F2",
+    },
+    {
+      label: "LinkedIn",
+      href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc}`,
+      Icon: FaLinkedinIn,
+      color: "#0A66C2",
+    },
+    {
+      label: "WhatsApp",
+      href: `https://api.whatsapp.com/send?text=${encT}%20${enc}`,
+      Icon: FaWhatsapp,
+      color: "#25D366",
+    },
+    {
+      label: "Telegram",
+      href: `https://t.me/share/url?url=${enc}&text=${encT}`,
+      Icon: FaTelegramPlane,
+      color: "#26A5E4",
+    },
   ];
 
   return (

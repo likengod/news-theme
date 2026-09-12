@@ -1,6 +1,14 @@
 import { useState, type ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ShieldCheck, ChevronDown, FileText, MessageSquare, Mail, Phone, MapPin } from "lucide-react";
+import {
+  ShieldCheck,
+  ChevronDown,
+  FileText,
+  MessageSquare,
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 
@@ -32,7 +40,10 @@ const POLICIES = [
 ];
 
 function slug(s: string) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
 export function PolicyLayout({
@@ -128,16 +139,25 @@ export function PolicyLayout({
             </button>
             {connectOpen && (
               <div className="mt-1 space-y-2 rounded-xl bg-card/40 p-3 text-sm">
-                <a href={`mailto:${contactEmail}`} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted">
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted"
+                >
                   <Mail className="h-4 w-4 text-muted-foreground" /> {contactEmail}
                 </a>
-                <a href="tel:+911234567890" className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted">
+                <a
+                  href="tel:+911234567890"
+                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted"
+                >
                   <Phone className="h-4 w-4 text-muted-foreground" /> +91 12345 67890
                 </a>
                 <p className="flex items-start gap-2 rounded-lg px-2 py-1.5 text-foreground/80">
                   <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" /> Guwahati, Assam, India
                 </p>
-                <Link to="/contact" className="block rounded-lg px-2 py-1.5 font-semibold underline">
+                <Link
+                  to="/contact"
+                  className="block rounded-lg px-2 py-1.5 font-semibold underline"
+                >
                   Visit Contact Page →
                 </Link>
               </div>
@@ -151,7 +171,10 @@ export function PolicyLayout({
                 <span className="grid h-12 w-12 place-items-center rounded-xl bg-foreground text-background">
                   <ShieldCheck className="h-6 w-6" />
                 </span>
-                <h1 className="headline text-3xl md:text-4xl" style={{ WebkitLineClamp: "unset" as never }}>
+                <h1
+                  className="headline text-3xl md:text-4xl"
+                  style={{ WebkitLineClamp: "unset" as never }}
+                >
                   {title}
                 </h1>
               </div>
@@ -159,7 +182,9 @@ export function PolicyLayout({
                 {eyebrow === "Policy" ? "Narrative Sync" : eyebrow} · {lastUpdated}
               </p>
               {intro && (
-                <p className="mt-4 max-w-3xl text-[15px] leading-relaxed text-muted-foreground">{intro}</p>
+                <p className="mt-4 max-w-3xl text-[15px] leading-relaxed text-muted-foreground">
+                  {intro}
+                </p>
               )}
               <div className="mt-6 h-px w-full bg-border" />
             </header>
@@ -176,7 +201,10 @@ export function PolicyLayout({
             <div className="mt-10 space-y-10">
               {sections.map((s) => (
                 <section key={s.heading} id={slug(s.heading)} className="scroll-mt-24">
-                  <h2 className="headline text-2xl md:text-[28px]" style={{ WebkitLineClamp: "unset" as never }}>
+                  <h2
+                    className="headline text-2xl md:text-[28px]"
+                    style={{ WebkitLineClamp: "unset" as never }}
+                  >
                     {s.heading}
                   </h2>
                   <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-foreground/90">
@@ -186,7 +214,10 @@ export function PolicyLayout({
               ))}
 
               <section id="contact" className="scroll-mt-24 border-t border-border pt-8">
-                <h2 className="headline text-2xl md:text-[28px]" style={{ WebkitLineClamp: "unset" as never }}>
+                <h2
+                  className="headline text-2xl md:text-[28px]"
+                  style={{ WebkitLineClamp: "unset" as never }}
+                >
                   Contact Us
                 </h2>
                 <p className="mt-3 text-[15px] leading-relaxed">

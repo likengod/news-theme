@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, Settings, Wallet, User as UserIcon, LayoutDashboard, Star, Moon, Sun } from "lucide-react";
+import {
+  LogOut,
+  Settings,
+  Wallet,
+  User as UserIcon,
+  LayoutDashboard,
+  Star,
+  Moon,
+  Sun,
+} from "lucide-react";
 import { toast } from "sonner";
 import { authClient as supabase } from "@/lib/auth-client";
 import { getCurrentUserRole } from "@/lib/auth.functions";
@@ -27,12 +36,14 @@ function displayNameOf(u: User): string {
 }
 
 function initialsOf(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase())
-    .join("") || "U";
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase())
+      .join("") || "U"
+  );
 }
 
 function getPoints(userId: string): number {
@@ -71,7 +82,13 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
       }
     });
     const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED" && event !== "INITIAL_SESSION") return;
+      if (
+        event !== "SIGNED_IN" &&
+        event !== "SIGNED_OUT" &&
+        event !== "USER_UPDATED" &&
+        event !== "INITIAL_SESSION"
+      )
+        return;
       setUser(session?.user ?? null);
       if (session?.user) {
         setPoints(getPoints(session.user.id));
@@ -101,7 +118,9 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
     if (variant === "mobile") {
       return (
         <div className="flex flex-col gap-2">
-          <Link to="/auth" className="hover:text-foreground">Sign in</Link>
+          <Link to="/auth" className="hover:text-foreground">
+            Sign in
+          </Link>
         </div>
       );
     }
@@ -124,7 +143,11 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer">
-            {isDark ? <Sun className="mr-2 h-4 w-4 text-amber-500" /> : <Moon className="mr-2 h-4 w-4 text-slate-700" />}
+            {isDark ? (
+              <Sun className="mr-2 h-4 w-4 text-amber-500" />
+            ) : (
+              <Moon className="mr-2 h-4 w-4 text-slate-700" />
+            )}
             <span>{isDark ? "Day Mode" : "Night Mode"}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -152,18 +175,30 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
         </div>
         {isEarningUser && (
           <>
-            <Link to="/earn-points" className="hover:text-foreground">Wallet</Link>
-            <Link to="/earn-points" className="hover:text-foreground">Earn Points</Link>
-            <Link to="/profile" className="hover:text-foreground">My profile</Link>
+            <Link to="/earn-points" className="hover:text-foreground">
+              Wallet
+            </Link>
+            <Link to="/earn-points" className="hover:text-foreground">
+              Earn Points
+            </Link>
+            <Link to="/profile" className="hover:text-foreground">
+              My profile
+            </Link>
           </>
         )}
         {isStaff && (
           <>
-            <Link to="/admin" className="hover:text-foreground">Admin panel</Link>
-            <Link to="/admin/settings" className="hover:text-foreground">Settings</Link>
+            <Link to="/admin" className="hover:text-foreground">
+              Admin panel
+            </Link>
+            <Link to="/admin/settings" className="hover:text-foreground">
+              Settings
+            </Link>
           </>
         )}
-        <button type="button" onClick={handleSignOut} className="text-left hover:text-foreground">Sign out</button>
+        <button type="button" onClick={handleSignOut} className="text-left hover:text-foreground">
+          Sign out
+        </button>
       </div>
     );
   }
@@ -187,23 +222,36 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="flex flex-col">
           <span className="text-sm font-semibold text-foreground">{name}</span>
-          {user.email && <span className="text-xs font-normal text-muted-foreground">{user.email}</span>}
+          {user.email && (
+            <span className="text-xs font-normal text-muted-foreground">{user.email}</span>
+          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
         {/* Earning Users Only: Wallet & Earn Points & Profile */}
         {isEarningUser && (
           <>
-            <DropdownMenuItem onSelect={() => navigate({ to: "/earn-points" })} className="cursor-pointer">
+            <DropdownMenuItem
+              onSelect={() => navigate({ to: "/earn-points" })}
+              className="cursor-pointer"
+            >
               <Wallet className="mr-2 h-4 w-4 text-emerald-600" />
               <span className="flex-1">Wallet</span>
-              <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">₹{points}</span>
+              <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                ₹{points}
+              </span>
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => navigate({ to: "/earn-points" })} className="cursor-pointer">
+            <DropdownMenuItem
+              onSelect={() => navigate({ to: "/earn-points" })}
+              className="cursor-pointer"
+            >
               <Star className="mr-2 h-4 w-4 text-amber-500" />
               <span className="flex-1">Earn Points</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => navigate({ to: "/profile" })} className="cursor-pointer">
+            <DropdownMenuItem
+              onSelect={() => navigate({ to: "/profile" })}
+              className="cursor-pointer"
+            >
               <UserIcon className="mr-2 h-4 w-4" />
               My profile
             </DropdownMenuItem>
@@ -212,7 +260,10 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
 
         {/* Admins & Staff Only: Admin Panel */}
         {isStaff && (
-          <DropdownMenuItem onSelect={() => navigate({ to: "/admin" })} className="cursor-pointer font-semibold">
+          <DropdownMenuItem
+            onSelect={() => navigate({ to: "/admin" })}
+            className="cursor-pointer font-semibold"
+          >
             <LayoutDashboard className="mr-2 h-4 w-4 text-slate-700" />
             Admin Panel
           </DropdownMenuItem>
@@ -220,12 +271,19 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
 
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer">
-          {isDark ? <Sun className="mr-2 h-4 w-4 text-amber-500" /> : <Moon className="mr-2 h-4 w-4 text-slate-700" />}
+          {isDark ? (
+            <Sun className="mr-2 h-4 w-4 text-amber-500" />
+          ) : (
+            <Moon className="mr-2 h-4 w-4 text-slate-700" />
+          )}
           <span>{isDark ? "Day Mode" : "Night Mode"}</span>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-700">
+        <DropdownMenuItem
+          onClick={handleSignOut}
+          className="cursor-pointer text-red-600 focus:text-red-700"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           Sign out
         </DropdownMenuItem>

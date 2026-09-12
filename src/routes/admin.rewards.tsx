@@ -44,9 +44,15 @@ function RewardsPage() {
 
   useEffect(() => {
     // Sync from MySQL server on mount
-    getRewardsServer().then((r) => setGroups(r)).catch(() => {});
-    getJournalistRanksServer().then((r) => setRanksList(r)).catch(() => {});
-    getPendingClaimsServer().then((c) => setClaims(c)).catch(() => {});
+    getRewardsServer()
+      .then((r) => setGroups(r))
+      .catch(() => {});
+    getJournalistRanksServer()
+      .then((r) => setRanksList(r))
+      .catch(() => {});
+    getPendingClaimsServer()
+      .then((c) => setClaims(c))
+      .catch(() => {});
   }, []);
 
   const persist = (next: RewardGroup[]) => {
@@ -67,17 +73,13 @@ function RewardsPage() {
   const handleApproveClaim = (claim: PendingClaim) => {
     updateClaimStatus(claim.userId, claim.id, "approved");
     toast.success(`Claim approved! Awarded +${claim.points} pts to user in MySQL`);
-    setClaims((prev) =>
-      prev.map((c) => (c.id === claim.id ? { ...c, status: "approved" } : c))
-    );
+    setClaims((prev) => prev.map((c) => (c.id === claim.id ? { ...c, status: "approved" } : c)));
   };
 
   const handleRejectClaim = (claim: PendingClaim) => {
     updateClaimStatus(claim.userId, claim.id, "rejected");
     toast.success("Claim rejected");
-    setClaims((prev) =>
-      prev.map((c) => (c.id === claim.id ? { ...c, status: "rejected" } : c))
-    );
+    setClaims((prev) => prev.map((c) => (c.id === claim.id ? { ...c, status: "rejected" } : c)));
   };
 
   const current = groups.find((g) => g.roleId === active) ?? groups[0];
@@ -131,7 +133,8 @@ function RewardsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Rewards & Points Rules</h1>
           <p className="text-sm text-slate-500">
-            Define earning rules per user role, journalist rank scales, and review social proof claims.
+            Define earning rules per user role, journalist rank scales, and review social proof
+            claims.
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-1.5 text-xs font-bold text-amber-800">
@@ -200,7 +203,10 @@ function RewardsPage() {
 
       {/* Recurring Task Modal */}
       {recEdit && (
-        <Modal title={recIsNew ? "Add Recurring Task" : "Edit Recurring Task"} onClose={() => setRecEdit(null)}>
+        <Modal
+          title={recIsNew ? "Add Recurring Task" : "Edit Recurring Task"}
+          onClose={() => setRecEdit(null)}
+        >
           <div>
             <label className="mb-1 block text-xs font-semibold text-slate-600">Task Title</label>
             <input
@@ -237,7 +243,10 @@ function RewardsPage() {
 
       {/* One-Time Task Modal */}
       {oneEdit && (
-        <Modal title={oneIsNew ? "Add One-Time Task" : "Edit One-Time Task"} onClose={() => setOneEdit(null)}>
+        <Modal
+          title={oneIsNew ? "Add One-Time Task" : "Edit One-Time Task"}
+          onClose={() => setOneEdit(null)}
+        >
           <div>
             <label className="mb-1 block text-xs font-semibold text-slate-600">Task Title</label>
             <input
@@ -249,7 +258,9 @@ function RewardsPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600">Points Awarded</label>
+            <label className="mb-1 block text-xs font-semibold text-slate-600">
+              Points Awarded
+            </label>
             <input
               type="number"
               value={oneEdit.points}

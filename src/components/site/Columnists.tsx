@@ -1,5 +1,17 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Play, ChevronLeft, ChevronRight, X, Share2, Copy, Check, Send, Eye, ExternalLink, Sparkles } from "lucide-react";
+import {
+  Play,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Share2,
+  Copy,
+  Check,
+  Send,
+  Eye,
+  ExternalLink,
+  Sparkles,
+} from "lucide-react";
 import { FaWhatsapp, FaFacebookF, FaTwitter } from "react-icons/fa6";
 import { grid, top, lead, viewsFor, formatViews } from "@/lib/news-data";
 import { Views } from "./Views";
@@ -23,56 +35,64 @@ const watchItems: WatchItem[] = [
     duration: "1:08",
     img: grid[0].img,
     kicker: null,
-    embedSrc: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
+    embedSrc:
+      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
   },
   {
     title: "Iran's Leaders Are in No Hurry to Get a Peace Deal",
     duration: "1:16",
     img: top[0].img,
     kicker: null,
-    embedSrc: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
+    embedSrc:
+      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
   },
   {
     title: "A Heartless Supreme Court Decision",
     duration: "2:12",
     img: grid[1].img,
     kicker: "Opinion",
-    embedSrc: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
+    embedSrc:
+      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
   },
   {
     title: "Apple's Sweeping Price Hikes Hit iPads and Macs",
     duration: "1:21",
     img: grid[2].img,
     kicker: null,
-    embedSrc: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
+    embedSrc:
+      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
   },
   {
     title: "How the 1994 World Cup Changed the Business of Football Forever",
     duration: "1:39",
     img: lead.img,
     kicker: null,
-    embedSrc: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
+    embedSrc:
+      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
   },
   {
     title: "Tesla's New Factory Sparks Environmental Concerns",
     duration: "2:45",
     img: top[1].img,
     kicker: "Tech",
-    embedSrc: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
+    embedSrc:
+      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
   },
   {
     title: "The Rise of AI in Modern Healthcare",
     duration: "1:55",
     img: grid[0].img,
     kicker: "Health",
-    embedSrc: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
+    embedSrc:
+      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
   },
   {
     title: "Global Supply Chain Disruptions Continue to Plague Retailers",
     duration: "3:10",
     img: grid[1].img,
     kicker: "Business",
-    embedSrc: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
+    embedSrc:
+      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
   },
 ];
 
@@ -340,9 +360,15 @@ function ReelViewerModal({
               className="flex flex-col items-center gap-2 hover:opacity-80 transition hover:scale-110"
             >
               <div className="flex items-center justify-center text-white/80">
-                {copied ? <Check className="h-8 w-8 text-green-400" /> : <Copy className="h-8 w-8" />}
+                {copied ? (
+                  <Check className="h-8 w-8 text-green-400" />
+                ) : (
+                  <Copy className="h-8 w-8" />
+                )}
               </div>
-              <span className="text-[11px] text-white/80 font-medium">{copied ? "Copied" : "Copy"}</span>
+              <span className="text-[11px] text-white/80 font-medium">
+                {copied ? "Copied" : "Copy"}
+              </span>
             </button>
           </div>
         </div>
@@ -376,11 +402,7 @@ export function Columnists() {
   }, [adCtx?.adConfig?.slots]);
 
   const displayItems = useMemo(() => {
-    return injectReelAds(
-      watchItems,
-      reelAds,
-      isMobile ? { firstAfter: 1, interval: 2 } : 3
-    );
+    return injectReelAds(watchItems, reelAds, isMobile ? { firstAfter: 1, interval: 2 } : 3);
   }, [reelAds, isMobile]);
 
   const scroll = (direction: "left" | "right") => {
@@ -411,7 +433,7 @@ export function Columnists() {
         </Link>
       </div>
 
-      <div 
+      <div
         ref={scrollRef}
         className="mt-0 md:mt-6 flex overflow-x-auto gap-2 pb-3 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:gap-4 md:pb-3"
       >
@@ -420,7 +442,9 @@ export function Columnists() {
             const ad = item.ad;
             const adImg = ad.imagePortrait || ad.imageLandscape || ad.image;
             const adHref = ad.href || "#";
-            const isGenericLabel = !ad.label || /^(sponsored|sponsor|ad|ads|advertisement|sponsored ad)$/i.test(ad.label.trim());
+            const isGenericLabel =
+              !ad.label ||
+              /^(sponsored|sponsor|ad|ads|advertisement|sponsored ad)$/i.test(ad.label.trim());
             return (
               <div
                 key={`reel-ad-${index}`}
@@ -503,7 +527,10 @@ export function Columnists() {
                   <span className="text-xs font-semibold text-white drop-shadow">{v.duration}</span>
                 </div>
               </div>
-              <Views count={viewsFor(v.title)} className="mt-1.5 text-[11px] text-muted-foreground" />
+              <Views
+                count={viewsFor(v.title)}
+                className="mt-1.5 text-[11px] text-muted-foreground"
+              />
             </div>
           );
         })}

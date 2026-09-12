@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Check, X, XCircle } from "lucide-react";
 
-export function LicensePricingModal({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) {
+export function LicensePricingModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [isIndia, setIsIndia] = useState(false);
 
   useEffect(() => {
@@ -34,7 +28,8 @@ export function LicensePricingModal({
         <div className="mb-10 text-center">
           <h2 className="mb-3 text-3xl font-extrabold text-slate-900">Choose Your Plan</h2>
           <p className="mx-auto max-w-2xl text-slate-600 leading-relaxed">
-            We rely on your support to fund ongoing website development, deliver timely bug fixes, and keep our team running smoothly so we can provide you with the best features.
+            We rely on your support to fund ongoing website development, deliver timely bug fixes,
+            and keep our team running smoothly so we can provide you with the best features.
           </p>
         </div>
 
@@ -48,14 +43,18 @@ export function LicensePricingModal({
                   <div className="flex items-baseline text-4xl font-extrabold text-slate-900">
                     ₹499 <span className="ml-1 text-base font-medium text-slate-500">/mo</span>
                   </div>
-                  <p className="text-xs font-semibold text-emerald-600 mt-1">Drops to ₹189/mo after 7 months</p>
+                  <p className="text-xs font-semibold text-emerald-600 mt-1">
+                    Drops to ₹189/mo after 7 months
+                  </p>
                 </div>
               ) : (
                 <div>
                   <div className="flex items-baseline text-4xl font-extrabold text-slate-900">
                     $10 <span className="ml-1 text-base font-medium text-slate-500">/mo</span>
                   </div>
-                  <p className="text-xs font-semibold text-emerald-600 mt-1">Drops to $5/mo after 6 months</p>
+                  <p className="text-xs font-semibold text-emerald-600 mt-1">
+                    Drops to $5/mo after 6 months
+                  </p>
                 </div>
               )}
             </div>
@@ -114,14 +113,18 @@ export function LicensePricingModal({
                   <div className="flex items-baseline text-4xl font-extrabold text-slate-900">
                     ₹7259 <span className="ml-1 text-base font-medium text-slate-500">/mo</span>
                   </div>
-                  <p className="text-xs font-semibold text-emerald-600 mt-1">Drops to ₹4958/mo after 4 months</p>
+                  <p className="text-xs font-semibold text-emerald-600 mt-1">
+                    Drops to ₹4958/mo after 4 months
+                  </p>
                 </div>
               ) : (
                 <div>
                   <div className="flex items-baseline text-4xl font-extrabold text-slate-900">
                     $98 <span className="ml-1 text-base font-medium text-slate-500">/mo</span>
                   </div>
-                  <p className="text-xs font-semibold text-emerald-600 mt-1">Drops to $55/mo after 6 months</p>
+                  <p className="text-xs font-semibold text-emerald-600 mt-1">
+                    Drops to $55/mo after 6 months
+                  </p>
                 </div>
               )}
             </div>
@@ -143,7 +146,9 @@ export function LicensePricingModal({
               </li>
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 shrink-0 text-emerald-500" />
-                <span className="text-slate-700">Gorilla Tech Solution Some Premium App Access</span>
+                <span className="text-slate-700">
+                  Gorilla Tech Solution Some Premium App Access
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 shrink-0 text-emerald-500" />
@@ -191,16 +196,22 @@ export function LicensePricingModal({
               {isIndia ? (
                 <div>
                   <div className="flex items-baseline text-4xl font-extrabold text-white">
-                    ₹3,00,000 <span className="ml-1 text-base font-medium text-slate-400">one time</span>
+                    ₹3,00,000{" "}
+                    <span className="ml-1 text-base font-medium text-slate-400">one time</span>
                   </div>
-                  <p className="text-xs font-semibold text-emerald-400 mt-1">Then ₹16,666/mo after 1 year</p>
+                  <p className="text-xs font-semibold text-emerald-400 mt-1">
+                    Then ₹16,666/mo after 1 year
+                  </p>
                 </div>
               ) : (
                 <div>
                   <div className="flex items-baseline text-4xl font-extrabold text-white">
-                    $3,599 <span className="ml-1 text-base font-medium text-slate-400">one time</span>
+                    $3,599{" "}
+                    <span className="ml-1 text-base font-medium text-slate-400">one time</span>
                   </div>
-                  <p className="text-xs font-semibold text-emerald-400 mt-1">Then $199/mo after 1 year</p>
+                  <p className="text-xs font-semibold text-emerald-400 mt-1">
+                    Then $199/mo after 1 year
+                  </p>
                 </div>
               )}
             </div>
@@ -222,7 +233,9 @@ export function LicensePricingModal({
               </li>
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 shrink-0 text-emerald-400" />
-                <span className="text-slate-300">Gorilla Tech Solution Some Premium App Access</span>
+                <span className="text-slate-300">
+                  Gorilla Tech Solution Some Premium App Access
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 shrink-0 text-emerald-400" />

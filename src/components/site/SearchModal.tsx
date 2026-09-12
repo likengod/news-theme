@@ -13,8 +13,16 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
   const [mounted, setMounted] = useState(false);
   const [q, setQ] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([
-    "Infrastructure", "Trade", "Governance", "Healthcare", "Economy",
-    "Finance", "Space", "Tech", "Sports", "Culture"
+    "Infrastructure",
+    "Trade",
+    "Governance",
+    "Healthcare",
+    "Economy",
+    "Finance",
+    "Space",
+    "Tech",
+    "Sports",
+    "Culture",
   ]);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -30,13 +38,15 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     window.dispatchEvent(new CustomEvent("nt:search-modal-state", { detail: { open: true } }));
 
     // Fetch dynamic top 10 latest tags
-    getTopTags().then((tags) => {
-      if (tags && tags.length > 0) {
-        setSuggestions(tags.slice(0, 10));
-      }
-    }).catch((err) => {
-      console.error("[SearchModal] Failed to load top tags:", err);
-    });
+    getTopTags()
+      .then((tags) => {
+        if (tags && tags.length > 0) {
+          setSuggestions(tags.slice(0, 10));
+        }
+      })
+      .catch((err) => {
+        console.error("[SearchModal] Failed to load top tags:", err);
+      });
 
     const focusTimer = setTimeout(() => inputRef.current?.focus(), 50);
     const onKey = (e: KeyboardEvent) => {
@@ -69,7 +79,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
   if (!open || !mounted) return null;
 
   return createPortal(
-    <div 
+    <div
       className="fixed inset-0 z-[999999] h-screen w-screen flex flex-col items-center justify-center bg-white text-black px-4 transition-all duration-200 animate-in fade-in"
       role="dialog"
       aria-modal="true"
@@ -107,9 +117,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
 
         {/* Suggestions Line */}
         <div className="mt-4">
-          <p className="text-[10px] font-serif italic text-[#888888] mb-1.5">
-            Suggestions
-          </p>
+          <p className="text-[10px] font-serif italic text-[#888888] mb-1.5">Suggestions</p>
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px] font-semibold text-[#111111]">
             {suggestions.map((s, i) => (
               <span key={s} className="flex items-center gap-2.5">
@@ -129,7 +137,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 
@@ -143,7 +151,9 @@ export function SearchBox({ className }: { className?: string }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open search"
-        className={className || "shrink-0 rounded-full p-2 text-foreground transition-colors hover:bg-muted"}
+        className={
+          className || "shrink-0 rounded-full p-2 text-foreground transition-colors hover:bg-muted"
+        }
       >
         <Search className="h-5 w-5" />
       </button>

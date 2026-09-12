@@ -1,5 +1,8 @@
 export function MarketChart() {
-  const pts = [60, 58, 55, 50, 46, 44, 40, 35, 30, 28, 25, 22, 20, 18, 22, 28, 32, 35, 40, 45, 52, 56, 58, 55, 50, 48];
+  const pts = [
+    60, 58, 55, 50, 46, 44, 40, 35, 30, 28, 25, 22, 20, 18, 22, 28, 32, 35, 40, 45, 52, 56, 58, 55,
+    50, 48,
+  ];
   const w = 600;
   const h = 140;
   const max = Math.max(...pts);
@@ -13,10 +16,11 @@ export function MarketChart() {
     <div className="border border-border bg-card p-4 text-left">
       <div className="flex items-baseline justify-between">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">S&amp;P 500 (^GSPC)</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+            S&amp;P 500 (^GSPC)
+          </p>
           <p className="mt-1 font-mono text-2xl font-bold text-foreground">
-            5,693.31{" "}
-            <span className="text-base font-semibold text-[#dc2626]">-18.89 (-0.33%)</span>
+            5,693.31 <span className="text-base font-semibold text-[#dc2626]">-18.89 (-0.33%)</span>
           </p>
         </div>
         <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">

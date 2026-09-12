@@ -67,7 +67,7 @@ export function BackupRestoreTab() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      
+
       toast.success("Backup downloaded successfully!");
     } catch (e: any) {
       toast.error(e.message || "Failed to generate backup");
@@ -82,7 +82,11 @@ export function BackupRestoreTab() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!confirm("WARNING: Restoring a backup will overwrite ALL current website data and media. Are you absolutely sure?")) {
+    if (
+      !confirm(
+        "WARNING: Restoring a backup will overwrite ALL current website data and media. Are you absolutely sure?",
+      )
+    ) {
       if (fileRef.current) fileRef.current.value = "";
       return;
     }
@@ -91,7 +95,7 @@ export function BackupRestoreTab() {
       setRestoreLoading(true);
       setProgress(0);
       setProgressText("Reading ZIP file...");
-      
+
       const zip = new JSZip();
       const unzipped = await zip.loadAsync(file);
 
@@ -99,10 +103,10 @@ export function BackupRestoreTab() {
       setProgressText("Restoring database...");
       const dbFile = unzipped.file("database.json");
       if (!dbFile) throw new Error("Invalid backup: missing database.json");
-      
+
       const dbJsonStr = await dbFile.async("string");
       const dbData = JSON.parse(dbJsonStr);
-      
+
       await restoreBackup({ data: { backup: { version: "1.0", data: dbData } } });
 
       // 2. Extract and restore media library metadata
@@ -134,7 +138,9 @@ export function BackupRestoreTab() {
           System Backup & Restore
         </h2>
         <p className="text-sm text-slate-600 mb-6">
-          Download a complete ZIP snapshot of your website. This includes your database (articles, settings, users, comments, categories, tags, pages) and all images uploaded to the File Manager.
+          Download a complete ZIP snapshot of your website. This includes your database (articles,
+          settings, users, comments, categories, tags, pages) and all images uploaded to the File
+          Manager.
         </p>
 
         <div className="flex flex-col gap-6">
@@ -144,23 +150,31 @@ export function BackupRestoreTab() {
               disabled={backupLoading || restoreLoading}
               className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50 transition"
             >
-              {backupLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileArchive className="h-4 w-4" />}
+              {backupLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileArchive className="h-4 w-4" />
+              )}
               Download Full Backup (ZIP)
             </button>
-            
-            <input 
-              type="file" 
-              accept=".zip" 
-              className="hidden" 
-              ref={fileRef} 
-              onChange={handleRestoreBackup} 
+
+            <input
+              type="file"
+              accept=".zip"
+              className="hidden"
+              ref={fileRef}
+              onChange={handleRestoreBackup}
             />
             <button
               onClick={() => fileRef.current?.click()}
               disabled={backupLoading || restoreLoading}
               className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition"
             >
-              {restoreLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {restoreLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4" />
+              )}
               Restore from ZIP
             </button>
           </div>
@@ -168,7 +182,7 @@ export function BackupRestoreTab() {
           {/* Progress Animation Bar */}
           {(backupLoading || restoreLoading) && (
             <div className="w-full max-w-md bg-slate-100 rounded-full h-2.5 overflow-hidden relative">
-              <div 
+              <div
                 className="bg-emerald-500 h-2.5 rounded-full transition-all duration-300 ease-out"
                 style={{ width: `${progress}%` }}
               ></div>

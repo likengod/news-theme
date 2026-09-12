@@ -6,7 +6,11 @@ export const Route = createFileRoute("/editorial-policy")({
   head: () => ({
     meta: [
       { title: "Editorial Policy — News Theme" },
-      { name: "description", content: "Our standards for sourcing, verification, corrections and editorial independence." },
+      {
+        name: "description",
+        content:
+          "Our standards for sourcing, verification, corrections and editorial independence.",
+      },
       { property: "og:url", content: "https://gorillatechsolution.com/editorial-policy" },
     ],
     links: [{ rel: "canonical", href: "https://gorillatechsolution.com/editorial-policy" }],
@@ -20,7 +24,7 @@ export const Route = createFileRoute("/editorial-policy")({
 
 function EditorialPage() {
   const page = Route.useLoaderData();
-  
+
   return (
     <PolicyLayout
       title={page?.title || ""}
@@ -31,7 +35,12 @@ function EditorialPage() {
               heading: s.heading,
               body: <div dangerouslySetInnerHTML={{ __html: s.body }} />,
             }))
-          : [{ heading: page?.title || "", body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} /> }]
+          : [
+              {
+                heading: page?.title || "",
+                body: <div dangerouslySetInnerHTML={{ __html: page?.body || "" }} />,
+              },
+            ]
       }
     />
   );

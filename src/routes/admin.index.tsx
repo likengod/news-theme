@@ -1,12 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Newspaper,
-  Eye,
-  MessageSquare,
-  Users,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
+import { Newspaper, Eye, MessageSquare, Users, TrendingUp, TrendingDown } from "lucide-react";
 import { getAdminDashboardStats } from "@/lib/articles.functions";
 
 export const Route = createFileRoute("/admin/")({
@@ -17,20 +10,42 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function Dashboard() {
-  const {
-    totalArticles,
-    totalViews,
-    totalUsers,
-    totalComments,
-    recentArticles,
-    categoryStats,
-  } = Route.useLoaderData();
+  const { totalArticles, totalViews, totalUsers, totalComments, recentArticles, categoryStats } =
+    Route.useLoaderData();
 
   const stats = [
-    { label: "Total Articles", value: totalArticles.toLocaleString(), delta: "+1.2%", up: true, icon: Newspaper, tint: "bg-blue-50 text-blue-600" },
-    { label: "Total Views", value: totalViews.toLocaleString(), delta: "+8.4%", up: true, icon: Eye, tint: "bg-emerald-50 text-emerald-600" },
-    { label: "Comments", value: totalComments.toLocaleString(), delta: "0%", up: true, icon: MessageSquare, tint: "bg-amber-50 text-amber-600" },
-    { label: "Users", value: totalUsers.toLocaleString(), delta: "+0.5%", up: true, icon: Users, tint: "bg-violet-50 text-violet-600" },
+    {
+      label: "Total Articles",
+      value: totalArticles.toLocaleString(),
+      delta: "+1.2%",
+      up: true,
+      icon: Newspaper,
+      tint: "bg-blue-50 text-blue-600",
+    },
+    {
+      label: "Total Views",
+      value: totalViews.toLocaleString(),
+      delta: "+8.4%",
+      up: true,
+      icon: Eye,
+      tint: "bg-emerald-50 text-emerald-600",
+    },
+    {
+      label: "Comments",
+      value: totalComments.toLocaleString(),
+      delta: "0%",
+      up: true,
+      icon: MessageSquare,
+      tint: "bg-amber-50 text-amber-600",
+    },
+    {
+      label: "Users",
+      value: totalUsers.toLocaleString(),
+      delta: "+0.5%",
+      up: true,
+      icon: Users,
+      tint: "bg-violet-50 text-violet-600",
+    },
   ];
 
   const totalCatArticles = categoryStats.reduce((s: number, c: any) => s + c.count, 0) || 1;
@@ -50,10 +65,7 @@ function Dashboard() {
           const Icon = s.icon;
           const TrendIcon = s.up ? TrendingUp : TrendingDown;
           return (
-            <div
-              key={s.label}
-              className="rounded-lg border border-slate-200 bg-white p-5"
-            >
+            <div key={s.label} className="rounded-lg border border-slate-200 bg-white p-5">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
@@ -83,7 +95,10 @@ function Dashboard() {
         <div className="rounded-lg border border-slate-200 bg-white lg:col-span-2">
           <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
             <h2 className="font-semibold">Recent Articles</h2>
-            <a href="/admin/articles" className="text-xs font-medium text-slate-600 hover:text-slate-900">
+            <a
+              href="/admin/articles"
+              className="text-xs font-medium text-slate-600 hover:text-slate-900"
+            >
               View all →
             </a>
           </div>
@@ -96,11 +111,7 @@ function Dashboard() {
               recentArticles.map((a: any, i: number) => (
                 <li key={i} className="flex items-center gap-4 px-5 py-3">
                   {a.featuredImage ? (
-                    <img
-                      src={a.featuredImage}
-                      alt=""
-                      className="h-12 w-16 rounded object-cover"
-                    />
+                    <img src={a.featuredImage} alt="" className="h-12 w-16 rounded object-cover" />
                   ) : (
                     <div className="h-12 w-16 rounded bg-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0">
                       <Newspaper className="h-5 w-5" />
@@ -142,13 +153,12 @@ function Dashboard() {
                     <li key={i} className="px-5 py-3">
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-medium">{c.name}</span>
-                        <span className="text-slate-500">{pct}% ({c.count})</span>
+                        <span className="text-slate-500">
+                          {pct}% ({c.count})
+                        </span>
                       </div>
                       <div className="mt-2 h-1.5 w-full overflow-hidden rounded bg-slate-100">
-                        <div
-                          className="h-full bg-slate-900"
-                          style={{ width: `${pct}%` }}
-                        />
+                        <div className="h-full bg-slate-900" style={{ width: `${pct}%` }} />
                       </div>
                     </li>
                   );

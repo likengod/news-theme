@@ -5,7 +5,15 @@ import coverImg from "@/assets/news-oil.webp";
 import slide1 from "@/assets/news-fed.webp";
 import slide2 from "@/assets/news-tech.webp";
 import slide3 from "@/assets/news-crypto.webp";
-import { loadAds, loadAdRotation, loadAdSlotMode, loadAdSlotScript, loadSettings, type AdSlideItem, type AdSlotMode } from "@/lib/site-content";
+import {
+  loadAds,
+  loadAdRotation,
+  loadAdSlotMode,
+  loadAdSlotScript,
+  loadSettings,
+  type AdSlideItem,
+  type AdSlotMode,
+} from "@/lib/site-content";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
 import { ScriptAdRenderer } from "./ScriptAdRenderer";
 
@@ -13,18 +21,28 @@ import { getArticleImage } from "@/lib/news-data";
 import { Link } from "@tanstack/react-router";
 
 const FALLBACK_SLIDES = [coverImg, slide1, slide2, slide3, pensionImg, artImg].map(
-  (src) => ({ id: src, image: src, href: "#" } as AdSlideItem),
+  (src) => ({ id: src, image: src, href: "#" }) as AdSlideItem,
 );
 
 import { useAdSettings } from "./AdSettingsContext";
 
-export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; usedIds?: Set<number> }) {
+export function MarketsMagazine({
+  articles = [],
+  usedIds,
+}: {
+  articles?: any[];
+  usedIds?: Set<number>;
+}) {
   const cfg = useHomepageConfig();
   const ctx = useAdSettings();
 
-  const initialSlides = ctx?.adConfig ? (ctx.adConfig.slots["home2"] || []) : loadAds("home2");
-  const initialMode = ctx?.adConfig ? (ctx.adConfig.modes["home2"] || "image") : loadAdSlotMode("home2");
-  const initialScript = ctx?.adConfig ? (ctx.adConfig.scripts["home2"] || "") : loadAdSlotScript("home2");
+  const initialSlides = ctx?.adConfig ? ctx.adConfig.slots["home2"] || [] : loadAds("home2");
+  const initialMode = ctx?.adConfig
+    ? ctx.adConfig.modes["home2"] || "image"
+    : loadAdSlotMode("home2");
+  const initialScript = ctx?.adConfig
+    ? ctx.adConfig.scripts["home2"] || ""
+    : loadAdSlotScript("home2");
 
   const [slides, setSlides] = useState<AdSlideItem[]>(() => {
     return initialSlides.length > 0 ? initialSlides : FALLBACK_SLIDES;
@@ -87,8 +105,9 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
   // Filter articles based on selected category (defaulting to "Markets" if not configured)
   const localUsed = new Set<number>(usedIds || []);
   const configuredCategory = cfg.marketsMagazine.category;
-  const magazineCategory = (!configuredCategory || configuredCategory === "Markets") ? "Auto (Latest)" : configuredCategory;
-  
+  const magazineCategory =
+    !configuredCategory || configuredCategory === "Markets" ? "Auto (Latest)" : configuredCategory;
+
   let dbMagazineArticles = articles.filter((a) => {
     if (localUsed.has(a.id)) return false;
     if (!magazineCategory || magazineCategory === "Auto (Latest)") return true;
@@ -97,7 +116,9 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
 
   // If not enough articles found for this category, fill with other available articles
   if (dbMagazineArticles.length < 4) {
-    const filler = articles.filter((a) => !localUsed.has(a.id) && !dbMagazineArticles.some((d) => d.id === a.id));
+    const filler = articles.filter(
+      (a) => !localUsed.has(a.id) && !dbMagazineArticles.some((d) => d.id === a.id),
+    );
     dbMagazineArticles = [...dbMagazineArticles, ...filler];
   }
   if (dbMagazineArticles.length < 4) {
@@ -116,33 +137,34 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
   const activeGradient = settings.festiveCategoryTitleGradient || settings.topBarTextGradient;
   const FESTIVE_GRADIENT_MAP: Record<string, string> = {
     "indian-flag": "linear-gradient(to right, #FF9933, #000080, #138808)",
-    "diwali": "linear-gradient(to right, #FF8008, #FFC837, #FF007F, #7F00FF)",
-    "sunset": "linear-gradient(to right, #F5576C, #F093FB)",
-    "neon": "linear-gradient(to right, #FF007F, #7F00FF, #00F0FF)",
-    "ocean": "linear-gradient(to right, #00c6ff, #0072ff)",
-    "forest": "linear-gradient(to right, #11998e, #38ef7d)",
+    diwali: "linear-gradient(to right, #FF8008, #FFC837, #FF007F, #7F00FF)",
+    sunset: "linear-gradient(to right, #F5576C, #F093FB)",
+    neon: "linear-gradient(to right, #FF007F, #7F00FF, #00F0FF)",
+    ocean: "linear-gradient(to right, #00c6ff, #0072ff)",
+    forest: "linear-gradient(to right, #11998e, #38ef7d)",
   };
 
-  const badgeStyle = activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
-    ? {
-        backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
-        backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-      }
-    : {
-        backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
-        color: settings.festiveCategoryBadgeTextColor || "#ffffff",
-      };
+  const badgeStyle =
+    activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
+      ? {
+          backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
+          backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+        }
+      : {
+          backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
+          color: settings.festiveCategoryBadgeTextColor || "#ffffff",
+        };
 
-  const badgeTitle = settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText
-    ? settings.topBarWeatherCustomText
-    : cfg.marketsMagazine.title;
+  const badgeTitle =
+    settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText
+      ? settings.topBarWeatherCustomText
+      : cfg.marketsMagazine.title;
 
   return (
     <section className="border border-border bg-background px-6 py-8 font-sans md:px-9">
-
       <div className="mb-5 inline-block">
         <span
           key={showCustomText ? "custom" : "default"}
@@ -154,7 +176,13 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-[354px_minmax(340px,1fr)_406px]">
-        <Link to="/news/$slug" params={{ slug: leadArt?.slug || "gen-z-traders-go-for-broke-in-pursuit-of-a-new-american-dream" }} className="group block">
+        <Link
+          to="/news/$slug"
+          params={{
+            slug: leadArt?.slug || "gen-z-traders-go-for-broke-in-pursuit-of-a-new-american-dream",
+          }}
+          className="group block"
+        >
           <figure>
             <img
               src={leadArt ? getArticleImage(leadArt.featuredImage, 0) : artImg}
@@ -170,15 +198,25 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
           </figure>
         </Link>
 
-        <Link to="/news/$slug" params={{ slug: leadArt?.slug || "gen-z-traders-go-for-broke-in-pursuit-of-a-new-american-dream" }} className="group block pt-0.5">
+        <Link
+          to="/news/$slug"
+          params={{
+            slug: leadArt?.slug || "gen-z-traders-go-for-broke-in-pursuit-of-a-new-american-dream",
+          }}
+          className="group block pt-0.5"
+        >
           <p className="headline max-w-[500px] text-[26px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline md:text-[28px] line-clamp-2">
-            {leadArt ? leadArt.title : "Gen-Z Traders Go for Broke in Pursuit of a New American Dream"}
+            {leadArt
+              ? leadArt.title
+              : "Gen-Z Traders Go for Broke in Pursuit of a New American Dream"}
           </p>
           <p className="mt-2.5 max-w-[440px] text-[15px] leading-relaxed text-muted-foreground line-clamp-6">
-            {leadArt ? (leadArt.excerpt || leadArt.content?.replace(/<[^>]*>/g, '').slice(0, 300) + "...") : "Lottery-like meme stocks and options can seem like a shortcut to beat high home prices, stubborn inflation and the looming threat of AI to entry-level jobs. A new generation of retail traders is piling into zero-day options, leveraged ETFs and viral tickers, betting that a single windfall can leapfrog them past a housing market that feels permanently out of reach and a labor market reshaped overnight."}
+            {leadArt
+              ? leadArt.excerpt || leadArt.content?.replace(/<[^>]*>/g, "").slice(0, 300) + "..."
+              : "Lottery-like meme stocks and options can seem like a shortcut to beat high home prices, stubborn inflation and the looming threat of AI to entry-level jobs. A new generation of retail traders is piling into zero-day options, leveraged ETFs and viral tickers, betting that a single windfall can leapfrog them past a housing market that feels permanently out of reach and a labor market reshaped overnight."}
           </p>
           <p className="mt-1.5 font-sans text-[14px] leading-tight text-foreground">
-            By {leadArt ? (leadArt.author || "Newsroom Staff") : "Justina Lee and Lu Wang"}
+            By {leadArt ? leadArt.author || "Newsroom Staff" : "Justina Lee and Lu Wang"}
           </p>
         </Link>
 
@@ -194,18 +232,32 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
                 href={s.href || "#"}
                 aria-hidden={i !== slideIdx}
                 className="absolute inset-0 block transition-opacity duration-300"
-                style={{ opacity: i === slideIdx ? 1 : 0, pointerEvents: i === slideIdx ? "auto" : "none" }}
+                style={{
+                  opacity: i === slideIdx ? 1 : 0,
+                  pointerEvents: i === slideIdx ? "auto" : "none",
+                }}
               >
-                <img src={s.image} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                <img
+                  src={s.image}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
               </a>
             ))
           )}
         </aside>
-
       </div>
 
       <div className="mt-3 grid gap-8 border-t border-border pt-3 lg:grid-cols-[minmax(585px,1.62fr)_minmax(240px,0.7fr)_minmax(300px,0.86fr)]">
-        <Link to="/news/$slug" params={{ slug: p1?.slug || "a-600-billion-experiment-kicks-off-at-the-biggest-us-pension-fund" }} className="group block">
+        <Link
+          to="/news/$slug"
+          params={{
+            slug: p1?.slug || "a-600-billion-experiment-kicks-off-at-the-biggest-us-pension-fund",
+          }}
+          className="group block"
+        >
           <div className="grid gap-4 md:grid-cols-[194px_1fr]">
             <img
               src={p1 ? getArticleImage(p1.featuredImage, 1) : pensionImg}
@@ -219,32 +271,47 @@ export function MarketsMagazine({ articles = [], usedIds }: { articles?: any[]; 
                 {p1 ? p1.title : "Market Insights and Analysis"}
               </p>
               <p className="mt-2 max-w-[430px] text-[14px] leading-relaxed text-muted-foreground line-clamp-4">
-                {p1 ? (p1.excerpt || p1.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "Latest developments and analytical perspectives on regional and global market trends."}
+                {p1
+                  ? p1.excerpt || p1.content?.replace(/<[^>]*>/g, "").slice(0, 150) + "..."
+                  : "Latest developments and analytical perspectives on regional and global market trends."}
               </p>
             </div>
           </div>
         </Link>
 
-        <Link to="/news/$slug" params={{ slug: p2?.slug || "market-update-report" }} className="group block">
-          <p className="font-sans text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">{p2 ? p2.category : "Analysis"}</p>
+        <Link
+          to="/news/$slug"
+          params={{ slug: p2?.slug || "market-update-report" }}
+          className="group block"
+        >
+          <p className="font-sans text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {p2 ? p2.category : "Analysis"}
+          </p>
           <p className="headline mt-1 text-[17px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline line-clamp-3">
             {p2 ? p2.title : "Economic Trends and Growth Outlook"}
           </p>
           <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground line-clamp-3">
-            {p2 ? (p2.excerpt || p2.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "Key factors driving market momentum and policy adjustments across sectors."}
+            {p2
+              ? p2.excerpt || p2.content?.replace(/<[^>]*>/g, "").slice(0, 150) + "..."
+              : "Key factors driving market momentum and policy adjustments across sectors."}
           </p>
         </Link>
 
-        <Link to="/news/$slug" params={{ slug: p3?.slug || "global-markets-review" }} className="group block">
+        <Link
+          to="/news/$slug"
+          params={{ slug: p3?.slug || "global-markets-review" }}
+          className="group block"
+        >
           <p className="headline text-[17px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline line-clamp-2">
             {p3 ? p3.title : "Global Financial Markets Review"}
           </p>
           <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground line-clamp-5">
-            {p3 ? (p3.excerpt || p3.content?.replace(/<[^>]*>/g, '').slice(0, 150) + "...") : "Examining market infrastructure, cross-border flows, and financial technology innovation."}
+            {p3
+              ? p3.excerpt || p3.content?.replace(/<[^>]*>/g, "").slice(0, 150) + "..."
+              : "Examining market infrastructure, cross-border flows, and financial technology innovation."}
           </p>
         </Link>
       </div>
     </section>
   );
 }
-

@@ -32,7 +32,10 @@ export function JournalistRanksEditor({ ranks, onChangeField, onSave }: Props) {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {ranks.map((r) => (
-          <div key={r.id} className="rounded-lg border border-slate-200 bg-slate-50/50 p-4 space-y-3">
+          <div
+            key={r.id}
+            className="rounded-lg border border-slate-200 bg-slate-50/50 p-4 space-y-3"
+          >
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-slate-900">{r.name} Rank</span>
               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800 uppercase">
@@ -51,7 +54,9 @@ export function JournalistRanksEditor({ ranks, onChangeField, onSave }: Props) {
             </div>
 
             <div>
-              <label className="mb-1 block text-xs text-slate-500">Points / Published Article</label>
+              <label className="mb-1 block text-xs text-slate-500">
+                Points / Published Article
+              </label>
               <input
                 type="number"
                 value={r.pointsPerNews}

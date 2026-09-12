@@ -20,7 +20,7 @@ export const generateBackupServer = createServerFn({ method: "GET" })
       return {
         timestamp: new Date().toISOString(),
         version: "1.0",
-        data: backupData
+        data: backupData,
       };
     } finally {
       conn.release();
@@ -34,23 +34,23 @@ export const restoreBackupServer = createServerFn({ method: "POST" })
     const conn = await db();
     try {
       await conn.query("SET FOREIGN_KEY_CHECKS = 0");
-      
+
       const tablesInBackup = Object.keys(data.backup.data);
-      
+
       for (const tableName of tablesInBackup) {
         const rows = data.backup.data[tableName];
-        
+
         await conn.query(`TRUNCATE TABLE ${tableName}`);
-        
+
         if (rows.length > 0) {
           const columns = Object.keys(rows[0]);
-          const values = rows.map(row => columns.map(col => row[col]));
-          
+          const values = rows.map((row) => columns.map((col) => row[col]));
+
           const sql = `INSERT INTO ${tableName} (${columns.join(", ")}) VALUES ?`;
           await conn.query(sql, [values]);
         }
       }
-      
+
       await conn.query("SET FOREIGN_KEY_CHECKS = 1");
       return { success: true };
     } catch (e) {
@@ -60,4 +60,3 @@ export const restoreBackupServer = createServerFn({ method: "POST" })
       conn.release();
     }
   });
-

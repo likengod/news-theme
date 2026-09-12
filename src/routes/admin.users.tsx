@@ -83,7 +83,9 @@ function UsersPage() {
 
   // Load all users for export
   useEffect(() => {
-    getAllFn().then(res => setAllUsers(res)).catch(console.error);
+    getAllFn()
+      .then((res) => setAllUsers(res))
+      .catch(console.error);
   }, [rows]);
 
   const handleImport = async (data: any[]) => {
@@ -100,7 +102,7 @@ function UsersPage() {
 
   const handleToggleSelect = (userId: string) => {
     setSelectedIds((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId],
     );
   };
 
@@ -117,7 +119,12 @@ function UsersPage() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-    if (!confirm(`Are you sure you want to permanently delete ${selectedIds.length} selected user(s)?`)) return;
+    if (
+      !confirm(
+        `Are you sure you want to permanently delete ${selectedIds.length} selected user(s)?`,
+      )
+    )
+      return;
     try {
       const res = await bulkDelFn({ data: { userIds: selectedIds } });
       toast.success(`Successfully deleted ${res.deletedCount} user(s)`);
@@ -254,11 +261,7 @@ function UsersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <CsvImportExport
-            data={allUsers}
-            filename="users"
-            onImport={handleImport}
-          />
+          <CsvImportExport data={allUsers} filename="users" onImport={handleImport} />
           <div className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">
             <Users className="h-4 w-4" /> Total Users: {total}
           </div>
@@ -314,7 +317,8 @@ function UsersPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-slate-200 pt-4">
           <p className="text-xs text-slate-500">
-            Showing page <strong>{page}</strong> of <strong>{totalPages}</strong> ({total} total users)
+            Showing page <strong>{page}</strong> of <strong>{totalPages}</strong> ({total} total
+            users)
           </p>
           <div className="flex items-center gap-2">
             <button

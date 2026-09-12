@@ -34,7 +34,9 @@ export function CategoryTable({ categories, onEdit, onDelete }: Props) {
                 </div>
               </td>
               <td className="px-5 py-3 font-mono text-xs text-slate-500">{c.slug}</td>
-              <td className="px-5 py-3 text-xs text-slate-600 max-w-xs truncate">{c.description || "—"}</td>
+              <td className="px-5 py-3 text-xs text-slate-600 max-w-xs truncate">
+                {c.description || "—"}
+              </td>
               <td className="px-5 py-3 text-right font-bold text-slate-700">{c.count || 0}</td>
               <td className="px-5 py-3 text-right">
                 <div className="inline-flex gap-1.5">

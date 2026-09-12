@@ -19,7 +19,18 @@ export const tickers = [
   { sym: "BSE SMALLCAP", val: "53,890.90", chg: "+0.28%", up: true },
 ];
 
-export const sections = ["Northeast", "Breaking", "Global", "Politics", "Business", "Crime", "Tech", "Sports", "Opinion", "Others"];
+export const sections = [
+  "Northeast",
+  "Breaking",
+  "Global",
+  "Politics",
+  "Business",
+  "Crime",
+  "Tech",
+  "Sports",
+  "Opinion",
+  "Others",
+];
 
 export const lead = {
   kicker: "Breaking · Federal Reserve",
@@ -32,21 +43,75 @@ export const lead = {
 };
 
 export const top = [
-  { kicker: "Wall Street", title: "Goldman, JPMorgan Beat as Trading Desks Rake in Record Quarter", time: "34 min ago", img: wsImg, views: 42118 },
-  { kicker: "Energy", title: "Brent Slides Below $74 as OPEC+ Eyes Earlier Supply Return", time: "1 hr ago", img: oilImg, views: 28940 },
-  { kicker: "Crypto", title: "Bitcoin Tags Fresh High as Spot ETF Inflows Cross $50B Mark", time: "2 hr ago", img: cryptoImg, views: 91207 },
+  {
+    kicker: "Wall Street",
+    title: "Goldman, JPMorgan Beat as Trading Desks Rake in Record Quarter",
+    time: "34 min ago",
+    img: wsImg,
+    views: 42118,
+  },
+  {
+    kicker: "Energy",
+    title: "Brent Slides Below $74 as OPEC+ Eyes Earlier Supply Return",
+    time: "1 hr ago",
+    img: oilImg,
+    views: 28940,
+  },
+  {
+    kicker: "Crypto",
+    title: "Bitcoin Tags Fresh High as Spot ETF Inflows Cross $50B Mark",
+    time: "2 hr ago",
+    img: cryptoImg,
+    views: 91207,
+  },
 ];
 
 export const grid = [
-  { kicker: "Technology", title: "Nvidia's Blackwell Surge Pushes Hyperscaler Capex to $320B", excerpt: "Demand for AI accelerators is reshaping the data-center supply chain heading into 2026.", img: techImg, author: "Priya Anand", views: 61204 },
-  { kicker: "Trade", title: "Pacific Container Rates Whipsaw on Tariff Truce Speculation", excerpt: "Shippers are racing to front-load Q1 orders before policy clarity arrives from Washington.", img: tradeImg, author: "Diego Ruiz", views: 17880 },
-  { kicker: "Policy", title: "ECB Holds, but Lagarde Opens Door to a Spring Move", excerpt: "Frankfurt's dovish pivot lifted European banks while euro weakness extended a third week.", img: fedImg, author: "Sofia Albrecht", views: 23541 },
+  {
+    kicker: "Technology",
+    title: "Nvidia's Blackwell Surge Pushes Hyperscaler Capex to $320B",
+    excerpt:
+      "Demand for AI accelerators is reshaping the data-center supply chain heading into 2026.",
+    img: techImg,
+    author: "Priya Anand",
+    views: 61204,
+  },
+  {
+    kicker: "Trade",
+    title: "Pacific Container Rates Whipsaw on Tariff Truce Speculation",
+    excerpt:
+      "Shippers are racing to front-load Q1 orders before policy clarity arrives from Washington.",
+    img: tradeImg,
+    author: "Diego Ruiz",
+    views: 17880,
+  },
+  {
+    kicker: "Policy",
+    title: "ECB Holds, but Lagarde Opens Door to a Spring Move",
+    excerpt:
+      "Frankfurt's dovish pivot lifted European banks while euro weakness extended a third week.",
+    img: fedImg,
+    author: "Sofia Albrecht",
+    views: 23541,
+  },
 ];
 
 export const opinion = [
-  { author: "Ellis Quan", role: "Markets Editor", title: "The 'Soft Landing' Trade Is Now the Most Crowded Bet on the Street." },
-  { author: "Rina Okafor", role: "Chief Economist", title: "Why a Hotter Yen Would Actually Be Bullish for Global Risk." },
-  { author: "Jonas Vega", role: "Tech Columnist", title: "The OpenAI Compute Bubble Has One Very Real Bottleneck: Power." },
+  {
+    author: "Ellis Quan",
+    role: "Markets Editor",
+    title: "The 'Soft Landing' Trade Is Now the Most Crowded Bet on the Street.",
+  },
+  {
+    author: "Rina Okafor",
+    role: "Chief Economist",
+    title: "Why a Hotter Yen Would Actually Be Bullish for Global Risk.",
+  },
+  {
+    author: "Jonas Vega",
+    role: "Tech Columnist",
+    title: "The OpenAI Compute Bubble Has One Very Real Bottleneck: Power.",
+  },
 ];
 
 export const mostRead: { title: string; views: number }[] = [
@@ -70,7 +135,6 @@ export function viewsFor(seed: string): number {
   const n = Math.abs(h) % 480_000;
   return 1_200 + n;
 }
-
 
 /** Canonical article shape used across components. */
 export interface Article {
@@ -103,4 +167,3 @@ export function getArticleImage(img?: string, index?: number): string {
   }
   return img;
 }
-

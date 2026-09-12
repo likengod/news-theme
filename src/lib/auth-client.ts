@@ -37,11 +37,19 @@ export const authClient = {
         notify("SIGNED_IN", res.session);
         return { data: res, error: null };
       } catch (err: any) {
-        return { data: { session: null, user: null }, error: { message: err.message || "Sign in failed" } };
+        return {
+          data: { session: null, user: null },
+          error: { message: err.message || "Sign in failed" },
+        };
       }
     },
 
-    async signUp(credentials: { email: string; password?: string; turnstileToken?: string; options?: { data?: { display_name?: string } } }) {
+    async signUp(credentials: {
+      email: string;
+      password?: string;
+      turnstileToken?: string;
+      options?: { data?: { display_name?: string } };
+    }) {
       try {
         const res = await signUpServer({
           data: {
@@ -57,7 +65,10 @@ export const authClient = {
         notify("SIGNED_IN", res.session);
         return { data: res, error: null };
       } catch (err: any) {
-        return { data: { session: null, user: null }, error: { message: err.message || "Sign up failed" } };
+        return {
+          data: { session: null, user: null },
+          error: { message: err.message || "Sign up failed" },
+        };
       }
     },
 
@@ -90,7 +101,7 @@ export const authClient = {
 
         const local = JSON.parse(raw);
         if (!local?.access_token) return { data: { session: null }, error: null };
-        
+
         // Cache session validation for 3 minutes to speed up navigation
         const now = Date.now();
         if (local.validatedAt && now - local.validatedAt < 3 * 60 * 1000) {
@@ -102,7 +113,7 @@ export const authClient = {
           localStorage.removeItem(SESSION_KEY);
           return { data: { session: null }, error: null };
         }
-        
+
         res.session.validatedAt = now;
         localStorage.setItem(SESSION_KEY, JSON.stringify(res.session));
         return { data: { session: res.session }, error: null };

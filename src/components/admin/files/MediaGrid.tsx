@@ -1,5 +1,15 @@
 import { useState } from "react";
-import { Copy, Trash2, ExternalLink, Image as ImageIcon, Video, FileText, Edit2, LayoutGrid, List } from "lucide-react";
+import {
+  Copy,
+  Trash2,
+  ExternalLink,
+  Image as ImageIcon,
+  Video,
+  FileText,
+  Edit2,
+  LayoutGrid,
+  List,
+} from "lucide-react";
 import { toast } from "sonner";
 import { EditMediaModal } from "./EditMediaModal";
 
@@ -25,13 +35,7 @@ function SafeImage({ src, alt, className, ...props }: any) {
     );
   }
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      onError={() => setError(true)}
-      {...props}
-    />
+    <img src={src} alt={alt} className={className} onError={() => setError(true)} {...props} />
   );
 }
 
@@ -76,7 +80,9 @@ export function MediaGrid({ items, onDelete, onEdit }: Props) {
                 key={t}
                 onClick={() => setFilter(t)}
                 className={`rounded-md px-3 py-1.5 text-xs font-semibold capitalize transition ${
-                  filter === t ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  filter === t
+                    ? "bg-slate-900 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
                 {t}s
@@ -87,7 +93,9 @@ export function MediaGrid({ items, onDelete, onEdit }: Props) {
             <button
               onClick={() => setViewMode("grid")}
               className={`rounded-md p-1.5 transition ${
-                viewMode === "grid" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                viewMode === "grid"
+                  ? "bg-slate-900 text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
               title="Grid View"
             >
@@ -96,7 +104,9 @@ export function MediaGrid({ items, onDelete, onEdit }: Props) {
             <button
               onClick={() => setViewMode("list")}
               className={`rounded-md p-1.5 transition ${
-                viewMode === "list" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                viewMode === "list"
+                  ? "bg-slate-900 text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
               title="List View"
             >
@@ -110,7 +120,10 @@ export function MediaGrid({ items, onDelete, onEdit }: Props) {
       {viewMode === "grid" ? (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {filtered.map((m) => (
-            <div key={m.id || m.url} className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
+            <div
+              key={m.id || m.url}
+              className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md"
+            >
               <div className="aspect-video w-full bg-slate-100 overflow-hidden relative grid place-items-center">
                 {(m.url && m.url.match(/\.(mp4|webm)$/i)) || m.type === "video" ? (
                   <div className="flex flex-col items-center justify-center text-slate-500">
@@ -133,7 +146,10 @@ export function MediaGrid({ items, onDelete, onEdit }: Props) {
               </div>
 
               <div className="p-3">
-                <p className="truncate text-xs font-semibold text-slate-900" title={m.name || m.url}>
+                <p
+                  className="truncate text-xs font-semibold text-slate-900"
+                  title={m.name || m.url}
+                >
                   {m.name || m.url.split("/").pop()}
                 </p>
                 <div className="mt-2 flex items-center justify-between">
@@ -190,12 +206,19 @@ export function MediaGrid({ items, onDelete, onEdit }: Props) {
                       ) : (m.url && m.url.match(/\.(pdf|doc|docx)$/i)) || m.type === "document" ? (
                         <FileText className="h-5 w-5 text-slate-400" />
                       ) : (
-                        <SafeImage src={m.url || ""} alt={m.name} className="h-full w-full object-cover" />
+                        <SafeImage
+                          src={m.url || ""}
+                          alt={m.name}
+                          className="h-full w-full object-cover"
+                        />
                       )}
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-slate-900 max-w-xs truncate" title={m.name || m.url}>
+                    <p
+                      className="font-semibold text-slate-900 max-w-xs truncate"
+                      title={m.name || m.url}
+                    >
                       {m.name || m.url.split("/").pop()}
                     </p>
                     <p className="text-xs text-slate-500 truncate max-w-xs" title={m.altText}>
@@ -247,11 +270,7 @@ export function MediaGrid({ items, onDelete, onEdit }: Props) {
       )}
 
       {editingItem && onEdit && (
-        <EditMediaModal
-          item={editingItem}
-          onClose={() => setEditingItem(null)}
-          onSave={onEdit}
-        />
+        <EditMediaModal item={editingItem} onClose={() => setEditingItem(null)} onSave={onEdit} />
       )}
     </div>
   );

@@ -7,7 +7,6 @@ import { ChevronDown, Home, Search, X } from "lucide-react";
 
 const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
 
-
 import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
 
 const otherCategories = ["Entertainment", "Health", "Education", "Jobs", "Travel", "Lifestyle"];
@@ -15,7 +14,7 @@ const otherCategories = ["Entertainment", "Health", "Education", "Jobs", "Travel
 export function Masthead() {
   const s = useSiteSettings();
   const dbCats = useCategories();
-  
+
   let navItems = sections;
   let dropdownItems = otherCategories;
 
@@ -42,40 +41,61 @@ export function Masthead() {
       }
     }
   }
-  
+
   const hasLogo = !!(s.logoLight || s.logoDark);
-  const showLogo = hasLogo;
-  const showText = !hasLogo;
-  
+  const mode = s.logoDisplayMode || (hasLogo ? "logo_only" : "text_only");
+
+  const showLogo = hasLogo && (mode === "logo_only" || mode === "both");
+  const showText = !hasLogo || mode === "text_only" || mode === "both";
+
   return (
     <>
       <header className="border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-5 text-center md:py-6">
           <Link to="/" className="block">
             {showLogo && s.logoLight && (
-              <img src={s.logoLight} alt={s.logoText || "Logo"} className={`mx-auto h-16 object-contain ${s.logoDark ? "dark:hidden" : ""} ${showText ? "mb-2" : ""}`} />
+              <img
+                src={s.logoLight}
+                alt={s.logoText || "Logo"}
+                className={`mx-auto h-16 object-contain ${s.logoDark ? "dark:hidden" : ""} ${showText ? "mb-2" : ""}`}
+              />
             )}
             {showLogo && s.logoDark && (
-              <img src={s.logoDark} alt={s.logoText || "Logo"} className={`mx-auto h-16 object-contain ${s.logoLight ? "hidden dark:block" : ""} ${showText ? "mb-2" : ""}`} />
+              <img
+                src={s.logoDark}
+                alt={s.logoText || "Logo"}
+                className={`mx-auto h-16 object-contain ${s.logoLight ? "hidden dark:block" : ""} ${showText ? "mb-2" : ""}`}
+              />
             )}
             {showText && (
               <h1
                 className="leading-none text-3xl sm:text-5xl md:text-6xl lg:text-7xl uppercase"
-                style={{ fontFamily: '"Inter", system-ui, sans-serif', fontWeight: 800, letterSpacing: "0.05em" }}
+                style={{
+                  fontFamily: '"Inter", system-ui, sans-serif',
+                  fontWeight: 800,
+                  letterSpacing: "0.05em",
+                }}
               >
                 <span
                   style={s.logoColorPrimary ? { color: s.logoColorPrimary } : undefined}
-                  className={!s.logoColorPrimary || s.logoColorPrimary === "#000000" ? "text-foreground dark:text-white" : ""}
+                  className={
+                    !s.logoColorPrimary || s.logoColorPrimary === "#000000"
+                      ? "text-foreground dark:text-white"
+                      : ""
+                  }
                 >
                   {s.logoTextPrimary !== undefined && s.logoTextPrimary !== ""
                     ? s.logoTextPrimary
-                    : (s.logoText ? s.logoText.split(" ")[0] : "NEWS")}
-                </span>
-                {" "}
+                    : s.logoText
+                      ? s.logoText.split(" ")[0]
+                      : "NEWS"}
+                </span>{" "}
                 <span style={{ color: s.logoColorSecondary || "#dc2626" }}>
                   {s.logoTextSecondary !== undefined && s.logoTextSecondary !== ""
                     ? s.logoTextSecondary
-                    : (s.logoText && s.logoText.split(" ").length > 1 ? s.logoText.split(" ").slice(1).join(" ") : "THEME")}
+                    : s.logoText && s.logoText.split(" ").length > 1
+                      ? s.logoText.split(" ").slice(1).join(" ")
+                      : "THEME"}
                 </span>
               </h1>
             )}
@@ -137,7 +157,7 @@ export function Masthead() {
                 >
                   {s}
                 </Link>
-              )
+              ),
             )}
           </div>
         </div>
@@ -147,6 +167,3 @@ export function Masthead() {
 }
 
 export { SearchBox } from "./SearchModal";
-
-
-

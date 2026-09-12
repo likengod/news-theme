@@ -2,15 +2,15 @@ import { useMemo, useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Save, FileText, ExternalLink, ShieldCheck, Crown, Sparkles, Loader2 } from "lucide-react";
-import { 
-  loadPages, 
-  savePages, 
-  getCustomPagesServer, 
-  saveCustomPageServer, 
+import {
+  loadPages,
+  savePages,
+  getCustomPagesServer,
+  saveCustomPageServer,
   type PageContent,
   loadSettings,
   saveSiteSettingsServer,
-  type SiteSettings
+  type SiteSettings,
 } from "@/lib/site-content";
 import { Card, Field, type FieldDef } from "@/components/admin/settings/SettingsHelpers";
 import SectionEditorItem from "@/components/admin/pages/SectionEditorItem";
@@ -26,18 +26,53 @@ const subscriptionFields: FieldDef[] = [
   { key: "subscriptionPriceINRYearly", label: "INR Yearly Price (₹)" },
   { key: "subscriptionPriceUSDMonthly", label: "USD Monthly Price ($)" },
   { key: "subscriptionPriceUSDYearly", label: "USD Yearly Price ($)" },
-  { key: "subscriptionFeatures", label: "Subscription Features", textarea: true, hint: "One feature per line" },
+  {
+    key: "subscriptionFeatures",
+    label: "Subscription Features",
+    textarea: true,
+    hint: "One feature per line",
+  },
 ];
 
 const workWithUsFields: FieldDef[] = [
-  { key: "workWithUsHeroTitle", label: "Hero Title", textarea: true, hint: "Use newlines for breaks" },
+  {
+    key: "workWithUsHeroTitle",
+    label: "Hero Title",
+    textarea: true,
+    hint: "Use newlines for breaks",
+  },
   { key: "workWithUsHeroIntro", label: "Hero Intro text", textarea: true },
   { key: "workWithUsIdCardReq", label: "ID Card Requirement Text", textarea: true },
-  { key: "workWithUsRules", label: "Journalist Rules", textarea: true, hint: "Format: 'Bold Prefix: Description'" },
-  { key: "workWithUsGamification", label: "Gamification Cards", textarea: true, hint: "Format: 'Title: Description' per line" },
-  { key: "workWithUsBadges", label: "Badge Benefits", textarea: true, hint: "Format: 'Rank: Benefit 1 | Benefit 2 | Benefit 3' per line" },
-  { key: "workWithUsTiers", label: "Career Tiers", textarea: true, hint: "Format: 'Tier Name (Requirement): Description' per line" },
-  { key: "workWithUsFaqs", label: "FAQs", textarea: true, hint: "Format: 'Question: Answer' per line" },
+  {
+    key: "workWithUsRules",
+    label: "Journalist Rules",
+    textarea: true,
+    hint: "Format: 'Bold Prefix: Description'",
+  },
+  {
+    key: "workWithUsGamification",
+    label: "Gamification Cards",
+    textarea: true,
+    hint: "Format: 'Title: Description' per line",
+  },
+  {
+    key: "workWithUsBadges",
+    label: "Badge Benefits",
+    textarea: true,
+    hint: "Format: 'Rank: Benefit 1 | Benefit 2 | Benefit 3' per line",
+  },
+  {
+    key: "workWithUsTiers",
+    label: "Career Tiers",
+    textarea: true,
+    hint: "Format: 'Tier Name (Requirement): Description' per line",
+  },
+  {
+    key: "workWithUsFaqs",
+    label: "FAQs",
+    textarea: true,
+    hint: "Format: 'Question: Answer' per line",
+  },
 ];
 
 function PagesPage() {
@@ -57,9 +92,7 @@ function PagesPage() {
   );
 
   const update = <K extends keyof PageContent>(k: K, v: PageContent[K]) =>
-    setPages((prev) =>
-      prev.map((p) => (p.slug === activeSlug ? { ...p, [k]: v } : p)),
-    );
+    setPages((prev) => prev.map((p) => (p.slug === activeSlug ? { ...p, [k]: v } : p)));
 
   const updateSetting = <K extends keyof SiteSettings>(k: K, v: SiteSettings[K]) =>
     setSettings((prev) => ({ ...prev, [k]: v }));
@@ -67,7 +100,9 @@ function PagesPage() {
   const onSave = async () => {
     if (activeSlug === "subscription" || activeSlug === "work-with-us") {
       await saveSiteSettingsServer({ data: settings }).catch(() => {});
-      toast.success(`${activeSlug === "subscription" ? "Subscription" : "Work With Us"} settings saved!`);
+      toast.success(
+        `${activeSlug === "subscription" ? "Subscription" : "Work With Us"} settings saved!`,
+      );
     } else {
       savePages(pages);
       await saveCustomPageServer({ data: active }).catch(() => {});
@@ -115,7 +150,7 @@ function PagesPage() {
                 </li>
               );
             })}
-            
+
             <li className="my-2 border-t border-slate-100"></li>
 
             <li>
@@ -152,9 +187,15 @@ function PagesPage() {
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
-                {isSubscription ? "Subscription Settings" : isWorkWithUs ? "Work With Us Settings" : active?.title}
+                {isSubscription
+                  ? "Subscription Settings"
+                  : isWorkWithUs
+                    ? "Work With Us Settings"
+                    : active?.title}
               </h2>
-              <p className="text-xs text-slate-400">Slug: /{isSettingsPage ? activeSlug : active?.slug}</p>
+              <p className="text-xs text-slate-400">
+                Slug: /{isSettingsPage ? activeSlug : active?.slug}
+              </p>
             </div>
             <div className="flex gap-2">
               <a
@@ -195,7 +236,9 @@ function PagesPage() {
           ) : active ? (
             <div className="space-y-8">
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Page Subtitle / Intro</label>
+                <label className="mb-1 block text-xs font-bold text-slate-600">
+                  Page Subtitle / Intro
+                </label>
                 <input
                   type="text"
                   value={active.intro || ""}
@@ -206,7 +249,8 @@ function PagesPage() {
 
               {activeSlug === "contact" ? (
                 <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                  <strong>Note:</strong> The Contact Us page relies on a hardcoded layout with a contact form. Only the subtitle/intro above can be updated here.
+                  <strong>Note:</strong> The Contact Us page relies on a hardcoded layout with a
+                  contact form. Only the subtitle/intro above can be updated here.
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -214,7 +258,10 @@ function PagesPage() {
                     <label className="block text-sm font-bold text-slate-800">Page Sections</label>
                     <button
                       onClick={() => {
-                        const newSections = [...(active.sections || []), { heading: "New Section", body: "" }];
+                        const newSections = [
+                          ...(active.sections || []),
+                          { heading: "New Section", body: "" },
+                        ];
                         update("sections", newSections);
                       }}
                       className="text-xs font-bold text-blue-600 hover:text-blue-700"
@@ -222,9 +269,11 @@ function PagesPage() {
                       + Add Section
                     </button>
                   </div>
-                  
+
                   {(active.sections || []).length === 0 && (
-                    <div className="text-sm text-slate-500 italic">No sections added. Click "+ Add Section" to add content.</div>
+                    <div className="text-sm text-slate-500 italic">
+                      No sections added. Click "+ Add Section" to add content.
+                    </div>
                   )}
 
                   {(active.sections || []).map((sec, idx) => (

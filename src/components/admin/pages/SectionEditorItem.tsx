@@ -1,18 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { generateSectionHtmlServer } from "@/lib/ai.functions";
-import { 
-  Sparkles, 
-  Loader2, 
-  Bold, 
-  Italic, 
-  List, 
-  Link as LinkIcon, 
-  Code, 
-  Eye, 
-  Type, 
+import {
+  Sparkles,
+  Loader2,
+  Bold,
+  Italic,
+  List,
+  Link as LinkIcon,
+  Code,
+  Eye,
+  Type,
   Trash2,
-  HelpCircle
+  HelpCircle,
 } from "lucide-react";
 
 export function htmlToNormalText(html?: string): string {
@@ -42,12 +42,15 @@ export function normalTextToHtml(text?: string): string {
   if (/^<[a-z][\s\S]*>$/i.test(trimmed) && trimmed.includes("</")) {
     return trimmed;
   }
-  
+
   const blocks = trimmed.split(/\n\s*\n/);
   const htmlBlocks = blocks.map((block) => {
-    const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+    const lines = block
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
     if (lines.length === 0) return "";
-    
+
     // Check if it is a bullet list
     const isList = lines.every((l) => l.startsWith("•") || l.startsWith("-") || l.startsWith("* "));
     if (isList) {
@@ -56,21 +59,27 @@ export function normalTextToHtml(text?: string): string {
           let itemText = l.replace(/^[•\-\*]\s*/, "");
           itemText = itemText.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
           itemText = itemText.replace(/\*(.*?)\*/g, "<i>$1</i>");
-          itemText = itemText.replace(/\[(.*?)\]\((.*?)\)/g, '<a class="underline text-blue-600" href="$2">$1</a>');
+          itemText = itemText.replace(
+            /\[(.*?)\]\((.*?)\)/g,
+            '<a class="underline text-blue-600" href="$2">$1</a>',
+          );
           return `<li>${itemText}</li>`;
         })
         .join("");
       return `<ul class="list-disc space-y-1.5 pl-5">${items}</ul>`;
     }
-    
+
     // Regular paragraph
     let para = lines.join(" ");
     para = para.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
     para = para.replace(/\*(.*?)\*/g, "<i>$1</i>");
-    para = para.replace(/\[(.*?)\]\((.*?)\)/g, '<a class="underline text-blue-600" href="$2">$1</a>');
+    para = para.replace(
+      /\[(.*?)\]\((.*?)\)/g,
+      '<a class="underline text-blue-600" href="$2">$1</a>',
+    );
     return `<p>${para}</p>`;
   });
-  
+
   return htmlBlocks.filter(Boolean).join("\n");
 }
 
@@ -313,7 +322,8 @@ export function SectionEditorItem({ sec, idx, activeSections, update }: any) {
               className="w-full rounded-lg border border-slate-300 p-3.5 text-sm text-slate-800 leading-relaxed focus:border-slate-900 focus:ring-1 focus:ring-slate-900 focus:outline-none"
             />
             <p className="mt-1 text-[11px] text-slate-400">
-              💡 <strong>Normal Text Mode:</strong> Write naturally. Paragraphs and bullet points are automatically formatted for the website.
+              💡 <strong>Normal Text Mode:</strong> Write naturally. Paragraphs and bullet points
+              are automatically formatted for the website.
             </p>
           </div>
         ) : mode === "html" ? (
@@ -331,10 +341,14 @@ export function SectionEditorItem({ sec, idx, activeSections, update }: any) {
           </div>
         ) : (
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-5 min-h-[160px]">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Live Page Preview:</span>
-            <div 
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+              Live Page Preview:
+            </span>
+            <div
               className="prose prose-sm max-w-none text-slate-700 [&>p]:mb-3 [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:space-y-1 [&_a]:text-blue-600 [&_a]:underline"
-              dangerouslySetInnerHTML={{ __html: rawHtml || "<p class='text-slate-400 italic'>No content to preview.</p>" }} 
+              dangerouslySetInnerHTML={{
+                __html: rawHtml || "<p class='text-slate-400 italic'>No content to preview.</p>",
+              }}
             />
           </div>
         )}
@@ -348,15 +362,21 @@ export function SectionEditorItem({ sec, idx, activeSections, update }: any) {
               <h3 className="text-lg font-bold flex items-center gap-2 text-indigo-900">
                 <Sparkles className="h-5 w-5 text-indigo-600" /> AI Content Assistant
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-slate-400 hover:text-slate-600 text-xl font-bold p-1"
+              >
                 &times;
               </button>
             </div>
-            
+
             <div className="space-y-4 overflow-y-auto flex-1 pr-1">
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                 <label className="mb-1 block text-sm font-bold text-slate-700">Instructions</label>
-                <p className="mb-3 text-xs text-slate-500">Describe what you want to say in simple words. AI will write clear, professional content.</p>
+                <p className="mb-3 text-xs text-slate-500">
+                  Describe what you want to say in simple words. AI will write clear, professional
+                  content.
+                </p>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -376,7 +396,13 @@ export function SectionEditorItem({ sec, idx, activeSections, update }: any) {
                     disabled={isGenerating}
                     className="h-10 px-5 rounded-lg bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shrink-0"
                   >
-                    {isGenerating ? <><Loader2 className="h-4 w-4 animate-spin" /> Generating...</> : "Generate"}
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" /> Generating...
+                      </>
+                    ) : (
+                      "Generate"
+                    )}
                   </button>
                 </div>
               </div>
@@ -384,12 +410,14 @@ export function SectionEditorItem({ sec, idx, activeSections, update }: any) {
               {generatedHtml && (
                 <div className="mt-4 pt-2 border-t border-slate-200 space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="block text-sm font-bold text-slate-700">Generated Preview:</label>
+                    <label className="block text-sm font-bold text-slate-700">
+                      Generated Preview:
+                    </label>
                     <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
                       Ready to apply
                     </span>
                   </div>
-                  <div 
+                  <div
                     className="rounded-xl border border-slate-200 p-4 text-sm text-slate-700 bg-slate-50 max-h-52 overflow-y-auto [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-5"
                     dangerouslySetInnerHTML={{ __html: generatedHtml }}
                   />

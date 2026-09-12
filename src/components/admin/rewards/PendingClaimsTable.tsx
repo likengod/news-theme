@@ -43,8 +43,8 @@ export function PendingClaimsTable({ claims, onApprove, onReject }: Props) {
                     c.status === "approved"
                       ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                       : c.status === "rejected"
-                      ? "bg-red-50 text-red-700 border border-red-200"
-                      : "bg-amber-50 text-amber-800 border border-amber-200"
+                        ? "bg-red-50 text-red-700 border border-red-200"
+                        : "bg-amber-50 text-amber-800 border border-amber-200"
                   }`}
                 >
                   {c.status}

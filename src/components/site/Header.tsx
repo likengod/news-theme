@@ -19,7 +19,8 @@ export function Header({
 }: HeaderProps) {
   const cfg = useHomepageConfig();
   const isTickerVisible = showTicker !== undefined ? showTicker : (cfg.showTicker ?? true);
-  const isBreakingVisible = showBreakingBar !== undefined ? showBreakingBar : (cfg.showBreakingBar ?? true);
+  const isBreakingVisible =
+    showBreakingBar !== undefined ? showBreakingBar : (cfg.showBreakingBar ?? true);
 
   return (
     <>

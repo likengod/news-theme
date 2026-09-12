@@ -18,8 +18,18 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
       <ul className="space-y-5">
         {activeOpinionItems.map((o: any, i: number) => (
           <li key={`${o.title}-${i}`}>
-            <Link to="/news/$slug" params={{ slug: o.slug || "sample" }} className="group flex gap-3">
-              <img src={o.img} alt="" loading="lazy" decoding="async" className="h-14 w-14 shrink-0 object-cover" />
+            <Link
+              to="/news/$slug"
+              params={{ slug: o.slug || "sample" }}
+              className="group flex gap-3"
+            >
+              <img
+                src={o.img}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="h-14 w-14 shrink-0 object-cover"
+              />
               <div>
                 <p className="font-serif text-sm font-bold leading-snug text-foreground group-hover:underline line-clamp-2">
                   {o.title}
@@ -47,8 +57,18 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
         <ul className="mt-4 space-y-4">
           {activePopularItems.map((p: any, i: number) => (
             <li key={`${p.title}-${i}`}>
-              <Link to="/news/$slug" params={{ slug: p.slug || "sample" }} className="group flex gap-3">
-                <img src={p.img} alt="" loading="lazy" decoding="async" className="h-14 w-14 shrink-0 object-cover" />
+              <Link
+                to="/news/$slug"
+                params={{ slug: p.slug || "sample" }}
+                className="group flex gap-3"
+              >
+                <img
+                  src={p.img}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-14 w-14 shrink-0 object-cover"
+                />
                 <div>
                   <p className="font-serif text-sm font-bold leading-snug text-foreground group-hover:underline line-clamp-2">
                     {p.title}
@@ -70,16 +90,64 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
           Tags
         </div>
         <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-2">
-          {(tags.length > 0 
+          {(tags.length > 0
             ? tags.slice(0, 25).map((t: any, i: number) => {
-                const presetSizes = ["text-sm", "text-lg font-bold", "text-sm", "text-sm", "text-sm", "text-2xl font-bold", "text-lg", "text-2xl font-bold", "text-lg", "text-xl font-bold", "text-sm", "text-lg font-bold", "text-sm", "text-base", "text-lg", "text-sm", "text-base font-bold", "text-sm", "text-lg", "text-base", "text-sm", "text-xl font-bold"];
+                const presetSizes = [
+                  "text-sm",
+                  "text-lg font-bold",
+                  "text-sm",
+                  "text-sm",
+                  "text-sm",
+                  "text-2xl font-bold",
+                  "text-lg",
+                  "text-2xl font-bold",
+                  "text-lg",
+                  "text-xl font-bold",
+                  "text-sm",
+                  "text-lg font-bold",
+                  "text-sm",
+                  "text-base",
+                  "text-lg",
+                  "text-sm",
+                  "text-base font-bold",
+                  "text-sm",
+                  "text-lg",
+                  "text-base",
+                  "text-sm",
+                  "text-xl font-bold",
+                ];
                 return { t: t.name, size: presetSizes[i % presetSizes.length] };
               })
             : [
-                { t: "Author", size: "text-sm" }, { t: "Blog", size: "text-lg font-bold" }, { t: "History", size: "text-sm" }, { t: "Lifestyle", size: "text-sm" }, { t: "Music", size: "text-sm" }, { t: "Politics", size: "text-2xl font-bold" }, { t: "Travel", size: "text-lg" }, { t: "WordPress", size: "text-2xl font-bold" }, { t: "World", size: "text-lg" }, { t: "Markets", size: "text-xl font-bold" }, { t: "Crypto", size: "text-sm" }, { t: "Tech", size: "text-lg font-bold" }, { t: "Business", size: "text-sm" }, { t: "Startups", size: "text-base" }, { t: "Opinion", size: "text-lg" }, { t: "Sports", size: "text-sm" }, { t: "Health", size: "text-base font-bold" }, { t: "Science", size: "text-sm" }, { t: "Climate", size: "text-lg" }, { t: "Culture", size: "text-base" }, { t: "Film", size: "text-sm" }, { t: "Food", size: "text-xl font-bold" },
+                { t: "Author", size: "text-sm" },
+                { t: "Blog", size: "text-lg font-bold" },
+                { t: "History", size: "text-sm" },
+                { t: "Lifestyle", size: "text-sm" },
+                { t: "Music", size: "text-sm" },
+                { t: "Politics", size: "text-2xl font-bold" },
+                { t: "Travel", size: "text-lg" },
+                { t: "WordPress", size: "text-2xl font-bold" },
+                { t: "World", size: "text-lg" },
+                { t: "Markets", size: "text-xl font-bold" },
+                { t: "Crypto", size: "text-sm" },
+                { t: "Tech", size: "text-lg font-bold" },
+                { t: "Business", size: "text-sm" },
+                { t: "Startups", size: "text-base" },
+                { t: "Opinion", size: "text-lg" },
+                { t: "Sports", size: "text-sm" },
+                { t: "Health", size: "text-base font-bold" },
+                { t: "Science", size: "text-sm" },
+                { t: "Climate", size: "text-lg" },
+                { t: "Culture", size: "text-base" },
+                { t: "Film", size: "text-sm" },
+                { t: "Food", size: "text-xl font-bold" },
               ]
           ).map((tag: any) => (
-            <a key={tag.t} href={`/search?q=${encodeURIComponent(tag.t)}`} className={`${tag.size} font-serif text-foreground hover:underline capitalize`}>
+            <a
+              key={tag.t}
+              href={`/search?q=${encodeURIComponent(tag.t)}`}
+              className={`${tag.size} font-serif text-foreground hover:underline capitalize`}
+            >
               {tag.t}
             </a>
           ))}
@@ -91,7 +159,10 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
           Follow
         </div>
         <div className="mt-4 flex flex-nowrap items-center justify-center">
-          <SocialIcons only={["facebook", "twitter", "youtube", "whatsapp", "telegram"]} size="md" />
+          <SocialIcons
+            only={["facebook", "twitter", "youtube", "whatsapp", "telegram"]}
+            size="md"
+          />
         </div>
       </div>
     </aside>

@@ -29,18 +29,22 @@ export type JournalistListRow = {
 };
 
 async function assertAdmin(userId: string) {
-  const roles = await query("SELECT role FROM user_roles WHERE user_id = ? AND role = 'admin'", [userId]);
+  const roles = await query("SELECT role FROM user_roles WHERE user_id = ? AND role = 'admin'", [
+    userId,
+  ]);
   if (roles.length === 0) throw new Error("Forbidden: admin role required");
 }
 
 async function generateJournalistId(): Promise<string> {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   for (let i = 0; i < 50; i++) {
-    const candidate = 
+    const candidate =
       letters[Math.floor(Math.random() * 26)] +
       letters[Math.floor(Math.random() * 26)] +
       letters[Math.floor(Math.random() * 26)] +
-      Math.floor(Math.random() * 10000).toString().padStart(4, "0") +
+      Math.floor(Math.random() * 10000)
+        .toString()
+        .padStart(4, "0") +
       letters[Math.floor(Math.random() * 26)];
     const check = await query("SELECT id FROM profiles WHERE journalist_id = ?", [candidate]);
     if (check.length === 0) return candidate;
@@ -58,17 +62,14 @@ export const listJournalists = createServerFn({ method: "GET" })
     if (ids.length === 0) return [];
 
     const placeholders = ids.map(() => "?").join(",");
-    const profiles = await query(
-      `SELECT * FROM profiles WHERE id IN (${placeholders})`,
-      ids
-    );
+    const profiles = await query(`SELECT * FROM profiles WHERE id IN (${placeholders})`, ids);
 
     // Fetch actual published articles count from MySQL database
     const stats = await query(
       `SELECT journalistId, COUNT(*) as count 
        FROM articles 
        WHERE status = 'Published' AND journalistId IS NOT NULL 
-       GROUP BY journalistId`
+       GROUP BY journalistId`,
     );
     const countMap = new Map<string, number>();
     for (const r of stats) {
@@ -153,12 +154,13 @@ export const lookupJournalist = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<JournalistLookup> => {
     const q = data.publicUserId;
     const isNumeric = /^\d{10}$/.test(q);
-    
+
     let profiles;
     if (isNumeric) {
       profiles = await query("SELECT * FROM profiles WHERE public_user_id = ?", [q]);
     } else {
-      profiles = await query("SELECT * FROM profiles WHERE journalist_id = ?", [q.toUpperCase()]);
+      const cleanQ = q.toUpperCase().replace(/-/g, "");
+      profiles = await query("SELECT * FROM profiles WHERE REPLACE(journalist_id, '-', '') = ?", [cleanQ]);
     }
 
     if (profiles.length === 0) return { found: false };
@@ -166,7 +168,12 @@ export const lookupJournalist = createServerFn({ method: "POST" })
 
     const roles = await query("SELECT role FROM user_roles WHERE user_id = ?", [p.id]);
     const rank: Record<string, number> = {
-      admin: 5, editor: 4, author: 3, journalist: 3, premium: 2, reader: 1,
+      admin: 5,
+      editor: 4,
+      author: 3,
+      journalist: 3,
+      premium: 2,
+      reader: 1,
     };
     const best =
       roles
@@ -216,23 +223,37 @@ export const searchJournalists = createServerFn({ method: "POST" })
 
     const q = data.query;
     const isNumeric = /^\d+$/.test(q);
-    
+
     let profiles;
     if (isNumeric) {
-      profiles = await query("SELECT id, display_name, public_user_id FROM profiles WHERE public_user_id LIKE ? LIMIT 12", [`${q}%`]);
+      profiles = await query(
+        "SELECT id, display_name, public_user_id FROM profiles WHERE public_user_id LIKE ? LIMIT 12",
+        [`${q}%`],
+      );
     } else {
-      profiles = await query("SELECT id, display_name, public_user_id FROM profiles WHERE display_name LIKE ? LIMIT 12", [`%${q}%`]);
+      profiles = await query(
+        "SELECT id, display_name, public_user_id FROM profiles WHERE display_name LIKE ? LIMIT 12",
+        [`%${q}%`],
+      );
     }
 
     if (profiles.length === 0) return [];
 
     const ids = profiles.map((p: any) => p.id);
     const placeholders = ids.map(() => "?").join(",");
-    const roles = await query(`SELECT user_id, role FROM user_roles WHERE user_id IN (${placeholders})`, ids);
+    const roles = await query(
+      `SELECT user_id, role FROM user_roles WHERE user_id IN (${placeholders})`,
+      ids,
+    );
 
     const bestRole = new Map<string, string>();
     const rank: Record<string, number> = {
-      admin: 5, editor: 4, author: 3, journalist: 3, premium: 2, reader: 1,
+      admin: 5,
+      editor: 4,
+      author: 3,
+      journalist: 3,
+      premium: 2,
+      reader: 1,
     };
     roles.forEach((r: any) => {
       const cur = bestRole.get(r.user_id);
@@ -268,13 +289,19 @@ export const awardJournalistPoints = createServerFn({ method: "POST" })
     if (!/^\d{10}$/.test(publicUserId)) throw new Error("Invalid 10-digit User ID");
     if (!Number.isFinite(points) || points === 0) throw new Error("Enter a non-zero point amount");
     if (Math.abs(points) > 100000) throw new Error("Amount too large (max ±100000)");
-    const reason = String(data?.reason ?? "").trim().slice(0, 200) || null;
+    const reason =
+      String(data?.reason ?? "")
+        .trim()
+        .slice(0, 200) || null;
     return { publicUserId, points, reason };
   })
   .handler(async ({ data, context }): Promise<AwardResult> => {
     await assertAdmin(context.userId);
 
-    const profiles = await query("SELECT id, display_name, public_user_id, points FROM profiles WHERE public_user_id = ?", [data.publicUserId]);
+    const profiles = await query(
+      "SELECT id, display_name, public_user_id, points FROM profiles WHERE public_user_id = ?",
+      [data.publicUserId],
+    );
     if (profiles.length === 0) throw new Error("Journalist not found");
     const p = profiles[0];
 
@@ -316,7 +343,9 @@ function cleanText(v: unknown, max = 200): string | null {
 export const upsertJournalist = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((data: JournalistUpsertInput) => {
-    const email = String(data?.email ?? "").trim().toLowerCase();
+    const email = String(data?.email ?? "")
+      .trim()
+      .toLowerCase();
     const displayName = String(data?.displayName ?? "").trim();
     if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error("Valid email required");
     if (!displayName) throw new Error("Name is required");
@@ -337,14 +366,12 @@ export const upsertJournalist = createServerFn({ method: "POST" })
       country: cleanText(data.country, 80),
       pinCode: cleanText(data.pinCode, 20),
       avatarUrl: cleanText(data.avatarUrl, 500),
-      articlesPublished:
-        Number.isFinite(data.articlesPublished)
-          ? Math.max(0, Math.floor(Number(data.articlesPublished)))
-          : undefined,
-      points:
-        Number.isFinite(data.points)
-          ? Math.max(0, Math.floor(Number(data.points)))
-          : undefined,
+      articlesPublished: Number.isFinite(data.articlesPublished)
+        ? Math.max(0, Math.floor(Number(data.articlesPublished)))
+        : undefined,
+      points: Number.isFinite(data.points)
+        ? Math.max(0, Math.floor(Number(data.points)))
+        : undefined,
       active: typeof data.active === "boolean" ? data.active : undefined,
     };
   })
@@ -363,21 +390,27 @@ export const upsertJournalist = createServerFn({ method: "POST" })
 
       await query(
         "INSERT INTO users (id, email, password_hash, salt, display_name) VALUES (?, ?, ?, ?, ?)",
-        [userId, data.email, passHash, salt, data.displayName]
+        [userId, data.email, passHash, salt, data.displayName],
       );
 
       // Journalist role
-      await query(
-        "INSERT INTO user_roles (id, user_id, role) VALUES (?, ?, ?)",
-        [crypto.randomUUID(), userId, "journalist"]
-      );
+      await query("INSERT INTO user_roles (id, user_id, role) VALUES (?, ?, ?)", [
+        crypto.randomUUID(),
+        userId,
+        "journalist",
+      ]);
 
       // Public User ID
       let publicUserId = "";
       for (let i = 0; i < 50; i++) {
-        publicUserId = (1 + Math.floor(Math.random() * 9)).toString() +
-          Math.floor(Math.random() * 1000000000).toString().padStart(9, "0");
-        const existing = await query("SELECT id FROM profiles WHERE public_user_id = ?", [publicUserId]);
+        publicUserId =
+          (1 + Math.floor(Math.random() * 9)).toString() +
+          Math.floor(Math.random() * 1000000000)
+            .toString()
+            .padStart(9, "0");
+        const existing = await query("SELECT id FROM profiles WHERE public_user_id = ?", [
+          publicUserId,
+        ]);
         if (existing.length === 0) break;
       }
       if (!publicUserId) publicUserId = crypto.randomBytes(5).toString("hex");
@@ -404,15 +437,20 @@ export const upsertJournalist = createServerFn({ method: "POST" })
           data.pinCode,
           data.avatarUrl,
           data.articlesPublished || 0,
-          data.points || 0
-        ]
+          data.points || 0,
+        ],
       );
     } else {
       // Update existing
       if (data.password) {
         const salt = crypto.randomBytes(16).toString("hex");
         const passHash = hashPassword(data.password, salt);
-        await query("UPDATE users SET password_hash = ?, salt = ?, email = ? WHERE id = ?", [passHash, salt, data.email, userId]);
+        await query("UPDATE users SET password_hash = ?, salt = ?, email = ? WHERE id = ?", [
+          passHash,
+          salt,
+          data.email,
+          userId,
+        ]);
       } else {
         await query("UPDATE users SET email = ? WHERE id = ?", [data.email, userId]);
       }
@@ -430,13 +468,19 @@ export const upsertJournalist = createServerFn({ method: "POST" })
         pin_code: data.pinCode,
       };
       if (data.avatarUrl !== null) patch.avatar_url = data.avatarUrl;
-      if (typeof data.articlesPublished === "number") patch.articles_published = data.articlesPublished;
+      if (typeof data.articlesPublished === "number")
+        patch.articles_published = data.articlesPublished;
       if (typeof data.points === "number") patch.points = data.points;
       if (typeof data.active === "boolean") patch.active = data.active ? 1 : 0;
 
       const keys = Object.keys(patch);
-      const setClause = keys.map(k => `${k.replace(/([A-Z])/g, "_$1").toLowerCase()} = ?`).join(", ");
-      await query(`UPDATE profiles SET ${setClause} WHERE id = ?`, [...keys.map(k => patch[k]), userId]);
+      const setClause = keys
+        .map((k) => `${k.replace(/([A-Z])/g, "_$1").toLowerCase()} = ?`)
+        .join(", ");
+      await query(`UPDATE profiles SET ${setClause} WHERE id = ?`, [
+        ...keys.map((k) => patch[k]),
+        userId,
+      ]);
 
       // Ensure a journalist_id exists
       const profs = await query("SELECT journalist_id FROM profiles WHERE id = ?", [userId]);

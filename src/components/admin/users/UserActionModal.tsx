@@ -53,7 +53,9 @@ export function UserActionModal({
         <div className="space-y-4">
           {kind === "points" && (
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-600">Reward Points</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-600">
+                Reward Points
+              </label>
               <input
                 type="number"
                 value={points}
@@ -65,7 +67,9 @@ export function UserActionModal({
 
           {kind === "password" && (
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-600">New Password</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-600">
+                New Password
+              </label>
               <div className="relative">
                 <input
                   type={showPass ? "text" : "password"}
@@ -88,7 +92,9 @@ export function UserActionModal({
           {kind === "details" && (
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-600">Display Name</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">
+                  Display Name
+                </label>
                 <input
                   type="text"
                   value={displayName}
@@ -98,7 +104,9 @@ export function UserActionModal({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-600">Avatar Image URL</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">
+                  Avatar Image URL
+                </label>
                 <input
                   type="url"
                   value={avatarUrl}

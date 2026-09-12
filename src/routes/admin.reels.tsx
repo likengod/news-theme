@@ -58,7 +58,11 @@ function ReelsEditor() {
     setNewUrl("");
   };
 
-  const removeUrl = (u: string) => update("urls", cfg.urls.filter((x) => x !== u));
+  const removeUrl = (u: string) =>
+    update(
+      "urls",
+      cfg.urls.filter((x) => x !== u),
+    );
 
   const onSave = () => {
     saveReelsConfig(cfg);
@@ -129,8 +133,8 @@ function ReelsEditor() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Reels & Shorts</h1>
           <p className="text-sm text-slate-500">
-            Pick a source (YouTube or Facebook), then choose how to fill the section:
-            paste URLs manually, auto-fetch the latest via API, or both.
+            Pick a source (YouTube or Facebook), then choose how to fill the section: paste URLs
+            manually, auto-fetch the latest via API, or both.
           </p>
         </div>
         <div className="flex gap-2">
@@ -155,7 +159,9 @@ function ReelsEditor() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-slate-900">Show section on homepage</p>
-            <p className="text-[11px] text-slate-500">Toggle off to hide the reels row site-wide.</p>
+            <p className="text-[11px] text-slate-500">
+              Toggle off to hide the reels row site-wide.
+            </p>
           </div>
           <label className="inline-flex cursor-pointer items-center gap-2">
             <input
@@ -193,7 +199,12 @@ function ReelsEditor() {
         <p className="mb-3 text-sm font-semibold text-slate-900">2. How should reels load?</p>
         <div className="flex flex-col gap-3 sm:flex-row">
           {modeBtn("manual", LinkIcon, "Manual URLs", "Paste each reel link — no API needed.")}
-          {modeBtn("auto", KeyRound, "Auto from API", "Latest reels pulled from your channel/page.")}
+          {modeBtn(
+            "auto",
+            KeyRound,
+            "Auto from API",
+            "Latest reels pulled from your channel/page.",
+          )}
           {modeBtn("both", Layers, "Both", "Pinned manual reels first, then latest from API.")}
         </div>
       </div>
@@ -228,12 +239,14 @@ function ReelsEditor() {
                   className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
                 />
                 <span className="mt-1 block text-[11px] text-slate-500">
-                  Create at console.cloud.google.com → APIs & Services → Credentials.
-                  Enable "YouTube Data API v3" and restrict the key to your site's domain.
+                  Create at console.cloud.google.com → APIs & Services → Credentials. Enable
+                  "YouTube Data API v3" and restrict the key to your site's domain.
                 </span>
               </label>
               <label>
-                <span className="mb-1 block text-[11px] font-medium text-slate-500">Channel ID</span>
+                <span className="mb-1 block text-[11px] font-medium text-slate-500">
+                  Channel ID
+                </span>
                 <input
                   type="text"
                   value={cfg.youtube.channelId}
@@ -277,8 +290,8 @@ function ReelsEditor() {
                   className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
                 />
                 <span className="mt-1 block text-[11px] text-slate-500">
-                  Generate a long-lived Page access token in Meta Business Suite / Graph API Explorer.
-                  Needs the <code>pages_read_engagement</code> permission.
+                  Generate a long-lived Page access token in Meta Business Suite / Graph API
+                  Explorer. Needs the <code>pages_read_engagement</code> permission.
                 </span>
               </label>
               <label>
@@ -318,7 +331,9 @@ function ReelsEditor() {
       {showManual && (
         <div className="rounded-lg border border-slate-200 bg-white p-4">
           <p className="mb-3 text-sm font-semibold text-slate-900">
-            {cfg.provider === "youtube" ? "Manual YouTube Shorts URLs" : "Manual Facebook Reel URLs"}
+            {cfg.provider === "youtube"
+              ? "Manual YouTube Shorts URLs"
+              : "Manual Facebook Reel URLs"}
           </p>
 
           <div className="flex gap-2">

@@ -1,1 +1,138 @@
-var e={enabled:!0,provider:`youtube`,mode:`manual`,title:`Reels & Shorts`,urls:[],youtube:{apiKey:``,channelId:``,maxResults:8},facebook:{accessToken:``,pageId:``,maxResults:8}},t=`nt:reels-config:v2`,n=`nt:reels-updated`;function r(){if(typeof window>`u`)return e;try{let n=localStorage.getItem(t);if(!n)return e;let r=JSON.parse(n);return{...e,...r,urls:Array.isArray(r.urls)?r.urls.filter(e=>typeof e==`string`):[],youtube:{...e.youtube,...r.youtube??{}},facebook:{...e.facebook,...r.facebook??{}}}}catch{return e}}function i(e){localStorage.setItem(t,JSON.stringify(e)),window.dispatchEvent(new Event(n))}function a(e){if(typeof window>`u`)return()=>{};let t=()=>e();return window.addEventListener(n,t),window.addEventListener(`storage`,t),()=>{window.removeEventListener(n,t),window.removeEventListener(`storage`,t)}}function o(e){try{let t=new URL(e.trim());return t.hostname===`youtu.be`?t.pathname.slice(1)||null:t.pathname.startsWith(`/shorts/`)||t.pathname.startsWith(`/embed/`)?t.pathname.split(`/`)[2]||null:t.pathname===`/watch`?t.searchParams.get(`v`):null}catch{return null}}function s(e,t){if(e===`youtube`){let e=o(t);return e?`https://www.youtube-nocookie.com/embed/${e}?rel=0&modestbranding=1&playsinline=1&autoplay=1`:null}let n=t.trim();return/^https?:\/\/(www\.)?facebook\.com\//i.test(n)?`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(n)}&show_text=false&autoplay=1`:null}async function c(e){if(!e.apiKey||!e.channelId)return[];let t=new URLSearchParams({key:e.apiKey,channelId:e.channelId,part:`snippet`,order:`date`,type:`video`,videoDuration:`short`,maxResults:String(Math.max(1,Math.min(25,e.maxResults||8)))}),n=await fetch(`https://www.googleapis.com/youtube/v3/search?${t}`);if(!n.ok)throw Error(`YouTube API ${n.status}`);return((await n.json()).items??[]).filter(e=>e.id.videoId).map(e=>{let t=e.id.videoId;return{url:`https://www.youtube.com/shorts/${t}`,embedSrc:`https://www.youtube-nocookie.com/embed/${t}?rel=0&modestbranding=1&playsinline=1&autoplay=1`,thumbnail:e.snippet.thumbnails?.medium?.url,title:e.snippet.title,source:`auto`}})}async function l(e){if(!e.accessToken||!e.pageId)return[];let t=new URLSearchParams({access_token:e.accessToken,fields:`id,title,description,permalink_url,picture`,limit:String(Math.max(1,Math.min(25,e.maxResults||8)))}),n=await fetch(`https://graph.facebook.com/v20.0/${encodeURIComponent(e.pageId)}/video_reels?${t}`);if(!n.ok)throw Error(`Facebook Graph ${n.status}`);return((await n.json()).data??[]).map(e=>{let t=e.permalink_url?.startsWith(`http`)?e.permalink_url:`https://www.facebook.com${e.permalink_url??`/reel/${e.id}`}`;return{url:t,embedSrc:`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(t)}&show_text=false&autoplay=1`,thumbnail:e.picture,title:e.title,source:`auto`}})}async function u(e){let t=e.urls.flatMap(t=>{let n=s(e.provider,t),r=e.provider===`youtube`?o(t):null,i=r?`https://i.ytimg.com/vi/${r}/hqdefault.jpg`:void 0;return n?[{url:t,embedSrc:n,thumbnail:i,source:`manual`}]:[]}),n=[];if(e.mode!==`manual`)try{n=e.provider===`youtube`?await c(e.youtube):await l(e.facebook)}catch(e){console.warn(`[reels] auto fetch failed:`,e)}if(e.mode===`manual`)return t;if(e.mode===`auto`)return n;let r=new Set(t.map(e=>e.url));return[...t,...n.filter(e=>!r.has(e.url))]}export{r as a,s as c,u as i,l as n,a as o,c as r,i as s,e as t};
+var e = {
+    enabled: !0,
+    provider: `youtube`,
+    mode: `manual`,
+    title: `Reels & Shorts`,
+    urls: [],
+    youtube: { apiKey: ``, channelId: ``, maxResults: 8 },
+    facebook: { accessToken: ``, pageId: ``, maxResults: 8 },
+  },
+  t = `nt:reels-config:v2`,
+  n = `nt:reels-updated`;
+function r() {
+  if (typeof window > `u`) return e;
+  try {
+    let n = localStorage.getItem(t);
+    if (!n) return e;
+    let r = JSON.parse(n);
+    return {
+      ...e,
+      ...r,
+      urls: Array.isArray(r.urls) ? r.urls.filter((e) => typeof e == `string`) : [],
+      youtube: { ...e.youtube, ...(r.youtube ?? {}) },
+      facebook: { ...e.facebook, ...(r.facebook ?? {}) },
+    };
+  } catch {
+    return e;
+  }
+}
+function i(e) {
+  (localStorage.setItem(t, JSON.stringify(e)), window.dispatchEvent(new Event(n)));
+}
+function a(e) {
+  if (typeof window > `u`) return () => {};
+  let t = () => e();
+  return (
+    window.addEventListener(n, t),
+    window.addEventListener(`storage`, t),
+    () => {
+      (window.removeEventListener(n, t), window.removeEventListener(`storage`, t));
+    }
+  );
+}
+function o(e) {
+  try {
+    let t = new URL(e.trim());
+    return t.hostname === `youtu.be`
+      ? t.pathname.slice(1) || null
+      : t.pathname.startsWith(`/shorts/`) || t.pathname.startsWith(`/embed/`)
+        ? t.pathname.split(`/`)[2] || null
+        : t.pathname === `/watch`
+          ? t.searchParams.get(`v`)
+          : null;
+  } catch {
+    return null;
+  }
+}
+function s(e, t) {
+  if (e === `youtube`) {
+    let e = o(t);
+    return e
+      ? `https://www.youtube-nocookie.com/embed/${e}?rel=0&modestbranding=1&playsinline=1&autoplay=1`
+      : null;
+  }
+  let n = t.trim();
+  return /^https?:\/\/(www\.)?facebook\.com\//i.test(n)
+    ? `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(n)}&show_text=false&autoplay=1`
+    : null;
+}
+async function c(e) {
+  if (!e.apiKey || !e.channelId) return [];
+  let t = new URLSearchParams({
+      key: e.apiKey,
+      channelId: e.channelId,
+      part: `snippet`,
+      order: `date`,
+      type: `video`,
+      videoDuration: `short`,
+      maxResults: String(Math.max(1, Math.min(25, e.maxResults || 8))),
+    }),
+    n = await fetch(`https://www.googleapis.com/youtube/v3/search?${t}`);
+  if (!n.ok) throw Error(`YouTube API ${n.status}`);
+  return ((await n.json()).items ?? [])
+    .filter((e) => e.id.videoId)
+    .map((e) => {
+      let t = e.id.videoId;
+      return {
+        url: `https://www.youtube.com/shorts/${t}`,
+        embedSrc: `https://www.youtube-nocookie.com/embed/${t}?rel=0&modestbranding=1&playsinline=1&autoplay=1`,
+        thumbnail: e.snippet.thumbnails?.medium?.url,
+        title: e.snippet.title,
+        source: `auto`,
+      };
+    });
+}
+async function l(e) {
+  if (!e.accessToken || !e.pageId) return [];
+  let t = new URLSearchParams({
+      access_token: e.accessToken,
+      fields: `id,title,description,permalink_url,picture`,
+      limit: String(Math.max(1, Math.min(25, e.maxResults || 8))),
+    }),
+    n = await fetch(
+      `https://graph.facebook.com/v20.0/${encodeURIComponent(e.pageId)}/video_reels?${t}`,
+    );
+  if (!n.ok) throw Error(`Facebook Graph ${n.status}`);
+  return ((await n.json()).data ?? []).map((e) => {
+    let t = e.permalink_url?.startsWith(`http`)
+      ? e.permalink_url
+      : `https://www.facebook.com${e.permalink_url ?? `/reel/${e.id}`}`;
+    return {
+      url: t,
+      embedSrc: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(t)}&show_text=false&autoplay=1`,
+      thumbnail: e.picture,
+      title: e.title,
+      source: `auto`,
+    };
+  });
+}
+async function u(e) {
+  let t = e.urls.flatMap((t) => {
+      let n = s(e.provider, t),
+        r = e.provider === `youtube` ? o(t) : null,
+        i = r ? `https://i.ytimg.com/vi/${r}/hqdefault.jpg` : void 0;
+      return n ? [{ url: t, embedSrc: n, thumbnail: i, source: `manual` }] : [];
+    }),
+    n = [];
+  if (e.mode !== `manual`)
+    try {
+      n = e.provider === `youtube` ? await c(e.youtube) : await l(e.facebook);
+    } catch (e) {
+      console.warn(`[reels] auto fetch failed:`, e);
+    }
+  if (e.mode === `manual`) return t;
+  if (e.mode === `auto`) return n;
+  let r = new Set(t.map((e) => e.url));
+  return [...t, ...n.filter((e) => !r.has(e.url))];
+}
+export { r as a, s as c, u as i, l as n, a as o, c as r, i as s, e as t };

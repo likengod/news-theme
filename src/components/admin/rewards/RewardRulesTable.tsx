@@ -26,7 +26,9 @@ export function RewardRulesTable({
       <section className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-5 py-3">
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Recurring Reward Tasks</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+              Recurring Reward Tasks
+            </h3>
             <p className="text-[11px] text-slate-500">Daily or per-action rewards for users</p>
           </div>
           <button
@@ -84,7 +86,9 @@ export function RewardRulesTable({
       <section className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-5 py-3">
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">One-Time Bonus Tasks</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+              One-Time Bonus Tasks
+            </h3>
             <p className="text-[11px] text-slate-500">Signup and social follow bonus points</p>
           </div>
           <button

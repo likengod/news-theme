@@ -22,21 +22,23 @@ const ReelsSection = lazy(() =>
 const MarketsMagazine = lazy(() =>
   import("@/components/site/MarketsMagazine").then((m) => ({ default: m.MarketsMagazine })),
 );
-const Footer = lazy(() =>
-  import("@/components/site/Footer").then((m) => ({ default: m.Footer })),
-);
+const Footer = lazy(() => import("@/components/site/Footer").then((m) => ({ default: m.Footer })));
 
 const SITE_URL = "https://gorillatechsolution.com";
 const HOME_IMG = `${SITE_URL}${heroMarkets}`;
 const HOME_TITLE = "News Theme – Breaking News | Finance | Business | Market";
-const HOME_DESC = "Breaking news, market intelligence, and sharp business analysis from News Theme.";
+const HOME_DESC =
+  "Breaking news, market intelligence, and sharp business analysis from News Theme.";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
     try {
       const [articles, tags] = await Promise.all([
         getHomepageArticles({ data: 50 }).catch((err) => {
-          console.warn("[Homepage Loader] getHomepageArticles fallback to empty:", err?.message || err);
+          console.warn(
+            "[Homepage Loader] getHomepageArticles fallback to empty:",
+            err?.message || err,
+          );
           return [];
         }),
         getTags().catch((err) => {
@@ -44,7 +46,10 @@ export const Route = createFileRoute("/")({
           return [];
         }),
       ]);
-      return { articles: Array.isArray(articles) ? articles : [], tags: Array.isArray(tags) ? tags : [] };
+      return {
+        articles: Array.isArray(articles) ? articles : [],
+        tags: Array.isArray(tags) ? tags : [],
+      };
     } catch (err) {
       console.error("[Homepage Loader] Top-level error, rendering fallback:", err);
       return { articles: [], tags: [] };
@@ -67,9 +72,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:description", content: HOME_DESC },
       { name: "twitter:image", content: HOME_IMG },
     ],
-    links: [
-      { rel: "canonical", href: SITE_URL },
-    ],
+    links: [{ rel: "canonical", href: SITE_URL }],
   }),
   component: Home,
 });

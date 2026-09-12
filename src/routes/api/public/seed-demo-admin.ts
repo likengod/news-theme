@@ -19,18 +19,22 @@ export const Route = createFileRoute("/api/public/seed-demo-admin")({
             userId = crypto.randomUUID();
             await query(
               "INSERT INTO users (id, email, password_hash, display_name) VALUES (?, ?, ?, ?)",
-              [userId, email, passHash, name]
+              [userId, email, passHash, name],
             );
           } else {
             userId = users[0].id;
-            await query("UPDATE users SET password_hash = ?, salt = NULL WHERE id = ?", [passHash, userId]);
+            await query("UPDATE users SET password_hash = ?, salt = NULL WHERE id = ?", [
+              passHash,
+              userId,
+            ]);
           }
 
           // Ensure role
-          await query(
-            "INSERT IGNORE INTO user_roles (id, user_id, role) VALUES (?, ?, ?)",
-            [crypto.randomUUID(), userId, "admin"]
-          );
+          await query("INSERT IGNORE INTO user_roles (id, user_id, role) VALUES (?, ?, ?)", [
+            crypto.randomUUID(),
+            userId,
+            "admin",
+          ]);
 
           // Ensure profile
           const profs = await query("SELECT id FROM profiles WHERE id = ?", [userId]);
@@ -38,7 +42,7 @@ export const Route = createFileRoute("/api/public/seed-demo-admin")({
             const publicUserId = "1000000000";
             await query(
               "INSERT INTO profiles (id, public_user_id, display_name, email, active) VALUES (?, ?, ?, ?, ?)",
-              [userId, publicUserId, name, email, true]
+              [userId, publicUserId, name, email, true],
             );
           }
 

@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Upload, Image as ImageIcon, X, Trash2, FolderOpen, Search, Plus, ChevronDown } from "lucide-react";
+import {
+  Upload,
+  Image as ImageIcon,
+  X,
+  Trash2,
+  FolderOpen,
+  Search,
+  Plus,
+  ChevronDown,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   mediaLibrary,
@@ -101,7 +110,11 @@ export function MediaField({
       }
     >
       {value ? (
-        <img src={value} alt={label ?? "preview"} className="max-h-full max-w-full object-contain p-2" />
+        <img
+          src={value}
+          alt={label ?? "preview"}
+          className="max-h-full max-w-full object-contain p-2"
+        />
       ) : (
         <div className="text-center text-slate-400">
           <ImageIcon className="mx-auto h-5 w-5" />
@@ -144,7 +157,9 @@ export function MediaField({
                 <Upload className="h-3.5 w-3.5" />
                 <div>
                   <div className="font-medium">Upload image</div>
-                  <div className="text-[10px] text-slate-500">From your device — saved to file manager</div>
+                  <div className="text-[10px] text-slate-500">
+                    From your device — saved to file manager
+                  </div>
                 </div>
               </button>
               <button
@@ -311,7 +326,11 @@ export function LibraryPicker({
                   className="group overflow-hidden rounded-md border border-slate-200 bg-slate-50 text-left hover:border-slate-900 hover:shadow-sm"
                 >
                   <div className="grid h-24 place-items-center bg-white">
-                    <img src={m.dataUrl} alt={m.name} className="max-h-full max-w-full object-contain" />
+                    <img
+                      src={m.dataUrl}
+                      alt={m.name}
+                      className="max-h-full max-w-full object-contain"
+                    />
                   </div>
                   <div className="border-t border-slate-200 px-2 py-1">
                     <div className="truncate text-[11px] font-medium text-slate-700">{m.name}</div>

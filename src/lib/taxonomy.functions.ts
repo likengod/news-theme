@@ -11,6 +11,7 @@ export type CategoryRow = {
   metaTitle: string;
   metaDescription: string;
   showInHeader: boolean;
+  sortOrder: number;
   count?: number; // count of articles in category
 };
 
@@ -38,7 +39,7 @@ export const getCategories = createServerFn({ method: "GET" })
         sql += " WHERE c.name LIKE ? OR c.description LIKE ?";
         params.push(q, q);
       }
-      sql += " GROUP BY c.id ORDER BY c.name ASC";
+      sql += " GROUP BY c.id ORDER BY c.sort_order ASC, c.name ASC";
 
       const rows = await query(sql, params);
       if (!Array.isArray(rows)) return [];
@@ -50,6 +51,7 @@ export const getCategories = createServerFn({ method: "GET" })
         metaTitle: r.meta_title || "",
         metaDescription: r.meta_description || "",
         showInHeader: Boolean(r.show_in_header),
+        sortOrder: Number(r.sort_order || 0),
         count: Number(r.count || 0),
       }));
     } catch (err: any) {
@@ -64,20 +66,38 @@ export const saveCategory = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<CategoryRow> => {
     const c = data;
     const slug = c.slug || slugify(c.name);
+    const sortOrder = c.sortOrder || 0;
 
-    if (c.id && c.id < 1000000) { // check if valid id and not temporary client timestamp
+    if (c.id && c.id < 1000000) {
       await query(
         `UPDATE categories 
-         SET name = ?, slug = ?, description = ?, meta_title = ?, meta_description = ?, show_in_header = ? 
+         SET name = ?, slug = ?, description = ?, meta_title = ?, meta_description = ?, show_in_header = ?, sort_order = ?
          WHERE id = ?`,
-        [c.name, slug, c.description || "", c.metaTitle || "", c.metaDescription || "", c.showInHeader ? 1 : 0, c.id]
+        [
+          c.name,
+          slug,
+          c.description || "",
+          c.metaTitle || "",
+          c.metaDescription || "",
+          c.showInHeader ? 1 : 0,
+          sortOrder,
+          c.id,
+        ],
       );
       return { ...c, slug };
     } else {
       const res = await query(
-        `INSERT INTO categories (name, slug, description, meta_title, meta_description) 
-         VALUES (?, ?, ?, ?, ?)`,
-        [c.name, slug, c.description || "", c.metaTitle || "", c.metaDescription || "", c.showInHeader ? 1 : 0]
+        `INSERT INTO categories (name, slug, description, meta_title, meta_description, show_in_header, sort_order) 
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          c.name,
+          slug,
+          c.description || "",
+          c.metaTitle || "",
+          c.metaDescription || "",
+          c.showInHeader ? 1 : 0,
+          sortOrder,
+        ],
       );
       return { ...c, slug, id: res.insertId };
     }
@@ -99,18 +119,39 @@ export const importCategories = createServerFn({ method: "POST" })
     for (const c of cats) {
       if (!c.name) continue;
       const finalSlug = c.slug || slugify(c.name);
-      const existing = await query("SELECT id FROM categories WHERE id = ? OR slug = ?", [c.id || 0, finalSlug]);
-      
+      const sortOrder = c.sortOrder || 0;
+      const existing = await query("SELECT id FROM categories WHERE id = ? OR slug = ?", [
+        c.id || 0,
+        finalSlug,
+      ]);
+
       if (existing.length > 0) {
         const idToUpdate = existing[0].id;
         await query(
-          `UPDATE categories SET name = ?, slug = ?, description = ?, meta_title = ?, meta_description = ?, show_in_header = ? WHERE id = ?`,
-          [c.name, finalSlug, c.description || "", c.metaTitle || "", c.metaDescription || "", idToUpdate]
+          `UPDATE categories SET name = ?, slug = ?, description = ?, meta_title = ?, meta_description = ?, show_in_header = ?, sort_order = ? WHERE id = ?`,
+          [
+            c.name,
+            finalSlug,
+            c.description || "",
+            c.metaTitle || "",
+            c.metaDescription || "",
+            c.showInHeader ? 1 : 0,
+            sortOrder,
+            idToUpdate,
+          ],
         );
       } else {
         await query(
-          `INSERT INTO categories (name, slug, description, meta_title, meta_description, show_in_header) VALUES (?, ?, ?, ?, ?, ?)`,
-          [c.name, finalSlug, c.description || "", c.metaTitle || "", c.metaDescription || ""]
+          `INSERT INTO categories (name, slug, description, meta_title, meta_description, show_in_header, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [
+            c.name,
+            finalSlug,
+            c.description || "",
+            c.metaTitle || "",
+            c.metaDescription || "",
+            c.showInHeader ? 1 : 0,
+            sortOrder,
+          ],
         );
       }
     }
@@ -119,43 +160,44 @@ export const importCategories = createServerFn({ method: "POST" })
 
 // --- Tag Functions ---
 
-export const getTags = createServerFn({ method: "GET" })
-  .handler(async (): Promise<TagRow[]> => {
-    try {
-      const tags = await query("SELECT * FROM tags ORDER BY name ASC");
-      if (!Array.isArray(tags)) return [];
-      
-      let articles: any[] = [];
-      try {
-        articles = await query("SELECT tags FROM articles WHERE status = 'Published' AND tags IS NOT NULL");
-      } catch {
-        articles = [];
-      }
-      
-      // Count tags
-      const counts = new Map<string, number>();
-      if (Array.isArray(articles)) {
-        articles.forEach((a: any) => {
-          if (typeof a?.tags === "string") {
-            const list = a.tags.split(",").map((t: string) => t.trim().toLowerCase());
-            list.forEach((t: string) => {
-              counts.set(t, (counts.get(t) || 0) + 1);
-            });
-          }
-        });
-      }
+export const getTags = createServerFn({ method: "GET" }).handler(async (): Promise<TagRow[]> => {
+  try {
+    const tags = await query("SELECT * FROM tags ORDER BY name ASC");
+    if (!Array.isArray(tags)) return [];
 
-      return tags.map((r: any) => ({
-        id: r.id,
-        name: r.name,
-        slug: r.slug,
-        count: counts.get(r.name?.toLowerCase?.() || "") || 0,
-      }));
-    } catch (err: any) {
-      console.warn("[getTags] Query warning:", err?.message || err);
-      return [];
+    let articles: any[] = [];
+    try {
+      articles = await query(
+        "SELECT tags FROM articles WHERE status = 'Published' AND tags IS NOT NULL",
+      );
+    } catch {
+      articles = [];
     }
-  });
+
+    // Count tags
+    const counts = new Map<string, number>();
+    if (Array.isArray(articles)) {
+      articles.forEach((a: any) => {
+        if (typeof a?.tags === "string") {
+          const list = a.tags.split(",").map((t: string) => t.trim().toLowerCase());
+          list.forEach((t: string) => {
+            counts.set(t, (counts.get(t) || 0) + 1);
+          });
+        }
+      });
+    }
+
+    return tags.map((r: any) => ({
+      id: r.id,
+      name: r.name,
+      slug: r.slug,
+      count: counts.get(r.name?.toLowerCase?.() || "") || 0,
+    }));
+  } catch (err: any) {
+    console.warn("[getTags] Query warning:", err?.message || err);
+    return [];
+  }
+});
 
 export const saveTag = createServerFn({ method: "POST" })
   .middleware([requireAuth])
@@ -189,19 +231,20 @@ export const importTags = createServerFn({ method: "POST" })
     for (const t of tags) {
       if (!t.name) continue;
       const finalSlug = t.slug || slugify(t.name);
-      const existing = await query("SELECT id FROM tags WHERE id = ? OR slug = ?", [t.id || 0, finalSlug]);
-      
+      const existing = await query("SELECT id FROM tags WHERE id = ? OR slug = ?", [
+        t.id || 0,
+        finalSlug,
+      ]);
+
       if (existing.length > 0) {
         const idToUpdate = existing[0].id;
-        await query(
-          "UPDATE tags SET name = ?, slug = ? WHERE id = ?",
-          [t.name, finalSlug, idToUpdate]
-        );
+        await query("UPDATE tags SET name = ?, slug = ? WHERE id = ?", [
+          t.name,
+          finalSlug,
+          idToUpdate,
+        ]);
       } else {
-        await query(
-          "INSERT INTO tags (name, slug) VALUES (?, ?)",
-          [t.name, finalSlug]
-        );
+        await query("INSERT INTO tags (name, slug) VALUES (?, ?)", [t.name, finalSlug]);
       }
     }
     return { success: true };
@@ -211,7 +254,7 @@ export const getCategoryData = createServerFn({ method: "GET" })
   .validator((data: any) => data)
   .handler(async ({ data }) => {
     try {
-      const slug = typeof data === "string" ? data : (data?.slug || "");
+      const slug = typeof data === "string" ? data : data?.slug || "";
       const page = typeof data === "object" && Number(data?.page) > 0 ? Number(data.page) : 1;
       const limit = typeof data === "object" && Number(data?.limit) > 0 ? Number(data.limit) : 10;
       const offset = (page - 1) * limit;
@@ -223,16 +266,16 @@ export const getCategoryData = createServerFn({ method: "GET" })
       const [countRes, articles, latestRows] = await Promise.all([
         query(
           "SELECT COUNT(*) as total FROM articles WHERE category = ? AND status = 'Published' AND date <= NOW()",
-          [cat.name]
+          [cat.name],
         ),
         query(
           "SELECT * FROM articles WHERE category = ? AND status = 'Published' AND date <= NOW() ORDER BY date DESC, id DESC LIMIT ? OFFSET ?",
-          [cat.name, limit, offset]
+          [cat.name, limit, offset],
         ),
         query(
           "SELECT * FROM articles WHERE category = ? AND status = 'Published' AND date <= NOW() ORDER BY date DESC, id DESC LIMIT 5",
-          [cat.name]
-        )
+          [cat.name],
+        ),
       ]);
 
       const total = Number(countRes?.[0]?.total || 0);
@@ -246,13 +289,22 @@ export const getCategoryData = createServerFn({ method: "GET" })
       const featured = (page === 1 ? mapped.slice(0, 3) : []).map((a: any) => ({
         title: a.title,
         excerpt: a.excerpt,
-        date: new Date(a.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+        date: new Date(a.date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
         img: a.featuredImage,
         tags: a.tags ? a.tags.split(",").map((t: string) => t.trim()) : [cat.name],
         slug: a.slug,
         views: a.views,
         author: a.author || "Newsroom",
-        kickers: a.tags ? a.tags.split(",").map((t: string) => t.trim()).slice(0, 2) : [cat.name],
+        kickers: a.tags
+          ? a.tags
+              .split(",")
+              .map((t: string) => t.trim())
+              .slice(0, 2)
+          : [cat.name],
       }));
 
       const listSource = page === 1 ? mapped.slice(3) : mapped;
@@ -260,7 +312,11 @@ export const getCategoryData = createServerFn({ method: "GET" })
       const list = listSource.map((a: any) => ({
         title: a.title,
         excerpt: a.excerpt,
-        date: new Date(a.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+        date: new Date(a.date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
         img: a.featuredImage,
         tags: a.tags ? a.tags.split(",").map((t: string) => t.trim()) : [cat.name],
         slug: a.slug,
@@ -270,7 +326,11 @@ export const getCategoryData = createServerFn({ method: "GET" })
 
       const latest = (Array.isArray(latestRows) ? latestRows : []).map((a: any) => ({
         title: a.title,
-        date: new Date(a.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+        date: new Date(a.date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
         img: a.featuredImage,
         slug: a.slug,
       }));
@@ -288,7 +348,7 @@ export const getCategoryData = createServerFn({ method: "GET" })
         latest,
         total,
         totalPages,
-        page
+        page,
       };
     } catch (err: any) {
       console.warn("[getCategoryData] Query warning:", err?.message || err);
@@ -296,35 +356,56 @@ export const getCategoryData = createServerFn({ method: "GET" })
     }
   });
 
-export const getTopTags = createServerFn({ method: "GET" })
-  .handler(async (): Promise<string[]> => {
-    try {
-      const rows = await query(
-        "SELECT tags FROM articles WHERE status = 'Published' AND tags IS NOT NULL AND tags != '' ORDER BY date DESC LIMIT 60"
-      );
-      const set = new Set<string>();
-      for (const r of rows) {
-        if (!r.tags) continue;
-        const parts = r.tags.split(",").map((t: string) => t.trim()).filter(Boolean);
-        for (const p of parts) {
-          // Capitalize first letter cleanly
-          const formatted = p.charAt(0).toUpperCase() + p.slice(1);
-          set.add(formatted);
-          if (set.size >= 10) break;
-        }
+export const getTopTags = createServerFn({ method: "GET" }).handler(async (): Promise<string[]> => {
+  try {
+    const rows = await query(
+      "SELECT tags FROM articles WHERE status = 'Published' AND tags IS NOT NULL AND tags != '' ORDER BY date DESC LIMIT 60",
+    );
+    const set = new Set<string>();
+    for (const r of rows) {
+      if (!r.tags) continue;
+      const parts = r.tags
+        .split(",")
+        .map((t: string) => t.trim())
+        .filter(Boolean);
+      for (const p of parts) {
+        // Capitalize first letter cleanly
+        const formatted = p.charAt(0).toUpperCase() + p.slice(1);
+        set.add(formatted);
         if (set.size >= 10) break;
       }
-      const fallback = ["Infrastructure", "Trade", "Governance", "Healthcare", "Economy", "Finance", "Space", "Tech", "Sports", "Culture"];
-      for (const f of fallback) {
-        if (set.size >= 10) break;
-        set.add(f);
-      }
-      return Array.from(set).slice(0, 10);
-    } catch (err) {
-      console.error("[MySQL] Error fetching top tags:", err);
-      return ["Infrastructure", "Trade", "Governance", "Healthcare", "Economy", "Finance", "Space", "Tech", "Sports", "Culture"];
+      if (set.size >= 10) break;
     }
-  });
-
-
-
+    const fallback = [
+      "Infrastructure",
+      "Trade",
+      "Governance",
+      "Healthcare",
+      "Economy",
+      "Finance",
+      "Space",
+      "Tech",
+      "Sports",
+      "Culture",
+    ];
+    for (const f of fallback) {
+      if (set.size >= 10) break;
+      set.add(f);
+    }
+    return Array.from(set).slice(0, 10);
+  } catch (err) {
+    console.error("[MySQL] Error fetching top tags:", err);
+    return [
+      "Infrastructure",
+      "Trade",
+      "Governance",
+      "Healthcare",
+      "Economy",
+      "Finance",
+      "Space",
+      "Tech",
+      "Sports",
+      "Culture",
+    ];
+  }
+});

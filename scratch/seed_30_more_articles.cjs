@@ -1,33 +1,48 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 async function run() {
   try {
-    const configPath = path.resolve('db-config.json');
+    const configPath = path.resolve("db-config.json");
     if (!fs.existsSync(configPath)) {
-      console.log('db-config.json not found');
+      console.log("db-config.json not found");
       return;
     }
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    const mysql = require('c:\\Users\\gorillatech\\Music\\TodayTripura\\node_modules\\mysql2\\promise');
+    const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    const mysql = require("c:\\Users\\gorillatech\\Music\\TodayTripura\\node_modules\\mysql2\\promise");
     const conn = await mysql.createConnection({
       host: config.host,
       port: Number(config.port) || 3306,
       user: config.user,
       password: config.password,
-      database: config.database
+      database: config.database,
     });
 
     // 1. Verify/Insert categories first
     const categories = [
-      { name: "World", slug: "world", desc: "International news, global developments, and global affairs." },
-      { name: "Politics", slug: "politics", desc: "Political updates, legislative bills, and governance news." },
-      { name: "Culture", slug: "culture", desc: "Folk music, classical heritage, historical folklore, and arts." }
+      {
+        name: "World",
+        slug: "world",
+        desc: "International news, global developments, and global affairs.",
+      },
+      {
+        name: "Politics",
+        slug: "politics",
+        desc: "Political updates, legislative bills, and governance news.",
+      },
+      {
+        name: "Culture",
+        slug: "culture",
+        desc: "Folk music, classical heritage, historical folklore, and arts.",
+      },
     ];
 
     console.log("Checking categories in database...");
     for (const cat of categories) {
-      const [rows] = await conn.query("SELECT id FROM categories WHERE name = ? OR slug = ?", [cat.name, cat.slug]);
+      const [rows] = await conn.query("SELECT id FROM categories WHERE name = ? OR slug = ?", [
+        cat.name,
+        cat.slug,
+      ]);
       if (rows.length === 0) {
         console.log(`Inserting missing category: ${cat.name}`);
         await conn.query(
@@ -37,8 +52,8 @@ async function run() {
             cat.slug,
             cat.desc,
             `${cat.name} News & Updates | Northeast Timeline`,
-            `Get the latest reports, expert analysis and breaking news on ${cat.name.toLowerCase()} at Northeast Timeline.`
-          ]
+            `Get the latest reports, expert analysis and breaking news on ${cat.name.toLowerCase()} at Northeast Timeline.`,
+          ],
         );
       }
     }
@@ -57,14 +72,14 @@ async function run() {
       "Nations Collaborate on Smart Warning Systems for Natural Disasters",
       "Joint Space Mission Transmits First High-Res Images of Outer Asteroids",
       "International Treaty Targets Maritime Waste Reduction Guidelines",
-      "Global Cultural Exchange Program Celebrates Indigenous Folk Music"
+      "Global Cultural Exchange Program Celebrates Indigenous Folk Music",
     ];
     for (let i = 0; i < 10; i++) {
       articles.push({
         title: worldTitles[i],
         category: "World",
         excerpt: `A global updates report analyzing the direct impacts of ${worldTitles[i].toLowerCase()}.`,
-        content: `<p>Global policy experts and regional governments have collaborated to address ${worldTitles[i].toLowerCase()}. The newly aligned framework provides structural guidelines to support this transition.</p><p>Economists expect this to stimulate cross-border collaboration while ensuring regulatory compliance and environmental sustainability.</p>`
+        content: `<p>Global policy experts and regional governments have collaborated to address ${worldTitles[i].toLowerCase()}. The newly aligned framework provides structural guidelines to support this transition.</p><p>Economists expect this to stimulate cross-border collaboration while ensuring regulatory compliance and environmental sustainability.</p>`,
       });
     }
 
@@ -79,14 +94,14 @@ async function run() {
       "Municipal Councils Launch Transparency Portals for Project Expenditures",
       "National Commission Proposes Reform to Electoral Campaign Rules",
       "New Public Pension Reform Signed into Law After Months of Debate",
-      "Bipartisan Alliance Introduces Bill Targeting Rural Broadband Subsidies"
+      "Bipartisan Alliance Introduces Bill Targeting Rural Broadband Subsidies",
     ];
     for (let i = 0; i < 10; i++) {
       articles.push({
         title: politicsTitles[i],
         category: "Politics",
         excerpt: `A political brief detailing the background and implementation schedule for ${politicsTitles[i].toLowerCase()}.`,
-        content: `<p>A new bill addressing ${politicsTitles[i].toLowerCase()} was recently introduced, generating intensive debate across committees. Advocates highlight the efficiency gains, while critics urge caution regarding budgetary impacts.</p><p>Implementation is set to proceed in phases, with local councils managing the rollout under federal supervision.</p>`
+        content: `<p>A new bill addressing ${politicsTitles[i].toLowerCase()} was recently introduced, generating intensive debate across committees. Advocates highlight the efficiency gains, while critics urge caution regarding budgetary impacts.</p><p>Implementation is set to proceed in phases, with local councils managing the rollout under federal supervision.</p>`,
       });
     }
 
@@ -101,37 +116,58 @@ async function run() {
       "Folk Dance Ensemble Schedules National Tour of Historic Theaters",
       "New Archaeological Discovery Sheds Light on Ancient Pottery Methods",
       "Classical Music Academy Launches Free Mentorship for Talented Youth",
-      "Community Heritage Project Preserves Historic Landmarks in Agartala"
+      "Community Heritage Project Preserves Historic Landmarks in Agartala",
     ];
     for (let i = 0; i < 10; i++) {
       articles.push({
         title: cultureTitles[i],
         category: "Culture",
         excerpt: `A cultural feature exploring the historical relevance and community efforts behind ${cultureTitles[i].toLowerCase()}.`,
-        content: `<p>Heritage preservation groups and local academies have announced resources targeting ${cultureTitles[i].toLowerCase()}. Community members are actively participating in workshops to keep these historical traditions alive.</p><p>Organizers express optimism that these initiatives will foster greater appreciation for local heritage among younger generations.</p>`
+        content: `<p>Heritage preservation groups and local academies have announced resources targeting ${cultureTitles[i].toLowerCase()}. Community members are actively participating in workshops to keep these historical traditions alive.</p><p>Organizers express optimism that these initiatives will foster greater appreciation for local heritage among younger generations.</p>`,
       });
     }
 
     // 3. Insert articles into DB
     console.log(`Seeding 30 more articles into DB...`);
     let insertedCount = 0;
-    
+
     for (let i = 0; i < articles.length; i++) {
       const art = articles[i];
-      const baseSlug = art.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      
+      const baseSlug = art.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
       // Make slug unique by appending a random suffix
       const slug = `${baseSlug}-${Math.floor(1000 + Math.random() * 9000)}`;
 
       // Stagger dates in the past (up to 30 days) to populate the timeline naturally
       const date = new Date(Date.now() - (i % 30) * 24 * 60 * 60 * 1000);
-      const formattedDate = date.toISOString().slice(0, 19).replace('T', ' ');
+      const formattedDate = date.toISOString().slice(0, 19).replace("T", " ");
 
       const fields = [
-        "title", "slug", "category", "city", "state", "country", "author", "views",
-        "status", "date", "excerpt", "content", "featuredImage", "ogImage",
-        "metaTitle", "metaDescription", "tags", "featured", "newsType",
-        "journalistId", "journalistName", "access_level"
+        "title",
+        "slug",
+        "category",
+        "city",
+        "state",
+        "country",
+        "author",
+        "views",
+        "status",
+        "date",
+        "excerpt",
+        "content",
+        "featuredImage",
+        "ogImage",
+        "metaTitle",
+        "metaDescription",
+        "tags",
+        "featured",
+        "newsType",
+        "journalistId",
+        "journalistName",
+        "access_level",
       ];
 
       const values = [
@@ -156,7 +192,7 @@ async function run() {
         "Standard",
         "", // journalistId
         "Newsroom Reporter",
-        "Free" // access_level
+        "Free", // access_level
       ];
 
       const colNames = fields.join(", ");

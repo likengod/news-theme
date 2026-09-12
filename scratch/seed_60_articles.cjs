@@ -1,36 +1,63 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 async function run() {
   try {
-    const configPath = path.resolve('db-config.json');
+    const configPath = path.resolve("db-config.json");
     if (!fs.existsSync(configPath)) {
-      console.log('db-config.json not found');
+      console.log("db-config.json not found");
       return;
     }
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    const mysql = require('c:\\Users\\gorillatech\\Music\\TodayTripura\\node_modules\\mysql2\\promise');
+    const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    const mysql = require("c:\\Users\\gorillatech\\Music\\TodayTripura\\node_modules\\mysql2\\promise");
     const conn = await mysql.createConnection({
       host: config.host,
       port: Number(config.port) || 3306,
       user: config.user,
       password: config.password,
-      database: config.database
+      database: config.database,
     });
 
     // 1. Verify/Insert categories first
     const categories = [
-      { name: "Global", slug: "global", desc: "International news, global conflicts, treaties, and foreign affairs reports." },
-      { name: "Health", slug: "health", desc: "Latest research, medicine developments, wellness guides, and healthcare policy updates." },
-      { name: "Jobs", slug: "jobs", desc: "Employment trends, career insights, hiring markets, and workplace environment analysis." },
-      { name: "Education", slug: "education", desc: "Schooling policy, academic updates, university breakthroughs, and literacy drives." },
-      { name: "Entertainment", slug: "entertainment", desc: "Cinematic releases, pop culture updates, musical shows, and performing arts reports." },
-      { name: "Travel", slug: "travel", desc: "Tourism guides, heritage sites, coastal journeys, and eco-friendly excursions." }
+      {
+        name: "Global",
+        slug: "global",
+        desc: "International news, global conflicts, treaties, and foreign affairs reports.",
+      },
+      {
+        name: "Health",
+        slug: "health",
+        desc: "Latest research, medicine developments, wellness guides, and healthcare policy updates.",
+      },
+      {
+        name: "Jobs",
+        slug: "jobs",
+        desc: "Employment trends, career insights, hiring markets, and workplace environment analysis.",
+      },
+      {
+        name: "Education",
+        slug: "education",
+        desc: "Schooling policy, academic updates, university breakthroughs, and literacy drives.",
+      },
+      {
+        name: "Entertainment",
+        slug: "entertainment",
+        desc: "Cinematic releases, pop culture updates, musical shows, and performing arts reports.",
+      },
+      {
+        name: "Travel",
+        slug: "travel",
+        desc: "Tourism guides, heritage sites, coastal journeys, and eco-friendly excursions.",
+      },
     ];
 
     console.log("Checking categories in database...");
     for (const cat of categories) {
-      const [rows] = await conn.query("SELECT id FROM categories WHERE name = ? OR slug = ?", [cat.name, cat.slug]);
+      const [rows] = await conn.query("SELECT id FROM categories WHERE name = ? OR slug = ?", [
+        cat.name,
+        cat.slug,
+      ]);
       if (rows.length === 0) {
         console.log(`Inserting missing category: ${cat.name}`);
         await conn.query(
@@ -40,8 +67,8 @@ async function run() {
             cat.slug,
             cat.desc,
             `${cat.name} News & Updates | Northeast Timeline`,
-            `Get the latest reports, expert analysis and breaking news on ${cat.name.toLowerCase()} at Northeast Timeline.`
-          ]
+            `Get the latest reports, expert analysis and breaking news on ${cat.name.toLowerCase()} at Northeast Timeline.`,
+          ],
         );
       }
     }
@@ -60,14 +87,14 @@ async function run() {
       "Global Trade Corridors Evolve to Leverage Modern Maritime Routes",
       "UN High Commissioner Urges Cooperation on Global Food Reserve Security",
       "Major Economies Announce Unified Standards for Smart Grid Tech",
-      "Global Environmental Pact Signed by Over Eighty Nations in Geneva"
+      "Global Environmental Pact Signed by Over Eighty Nations in Geneva",
     ];
     for (let i = 0; i < 10; i++) {
       articles.push({
         title: globalTitles[i],
         category: "Global",
         excerpt: `An in-depth report on ${globalTitles[i].toLowerCase()} and its long-term impact on international policies.`,
-        content: `<p>International delegates and industry leaders aligned on key milestones during the latest summit addressing ${globalTitles[i].toLowerCase()}. The resulting policy framework establishes a timeline for implementing these updates globally.</p><p>Economic advisors suggest that these measures will stabilize regional supply chains while promoting sustainable practices across both developed and emerging markets.</p>`
+        content: `<p>International delegates and industry leaders aligned on key milestones during the latest summit addressing ${globalTitles[i].toLowerCase()}. The resulting policy framework establishes a timeline for implementing these updates globally.</p><p>Economic advisors suggest that these measures will stabilize regional supply chains while promoting sustainable practices across both developed and emerging markets.</p>`,
       });
     }
 
@@ -82,14 +109,14 @@ async function run() {
       "Research Identifies Key Cellular Pathways Linked to Immune Strength",
       "Digital Health Apps Reshaping Doctor-Patient Consultations Worldwide",
       "New Pediatric Care Standards Adopted by Medical Centers Nationwide",
-      "Scientists Design Synthetic Molecule Targeting Seasonal Influenza Viruses"
+      "Scientists Design Synthetic Molecule Targeting Seasonal Influenza Viruses",
     ];
     for (let i = 0; i < 10; i++) {
       articles.push({
         title: healthTitles[i],
         category: "Health",
         excerpt: `A medical news report on ${healthTitles[i].toLowerCase()} and its clinical significance for patient care.`,
-        content: `<p>Healthcare researchers have released findings from their latest study on ${healthTitles[i].toLowerCase()}. The evidence points to improved clinical outcomes under the updated protocols.</p><p>Medical practitioners are encouraging patients to consult with specialists to understand how these updates might influence their personalized health plans.</p>`
+        content: `<p>Healthcare researchers have released findings from their latest study on ${healthTitles[i].toLowerCase()}. The evidence points to improved clinical outcomes under the updated protocols.</p><p>Medical practitioners are encouraging patients to consult with specialists to understand how these updates might influence their personalized health plans.</p>`,
       });
     }
 
@@ -104,14 +131,14 @@ async function run() {
       "Modern Apprenticeships Gain Traction Among Recent Engineering Graduates",
       "Remote Job Listings See Resurgence in Software Development Verticals",
       "Creative Industry Leaders Align on New Standards for Freelance Work",
-      "Government Job Fair Registers Record Participation from Skilled Youth"
+      "Government Job Fair Registers Record Participation from Skilled Youth",
     ];
     for (let i = 0; i < 10; i++) {
       articles.push({
         title: jobsTitles[i],
         category: "Jobs",
         excerpt: `A workplace report covering ${jobsTitles[i].toLowerCase()} and what it means for job seekers and hiring teams.`,
-        content: `<p>Industry analyst forecasts indicate a shifting dynamic in employment markets regarding ${jobsTitles[i].toLowerCase()}. Both startups and established corporations are adapting hiring strategies to secure top-tier talent.</p><p>Career mentors advise applicants to acquire relevant skills to stay competitive as roles become more specialized.</p>`
+        content: `<p>Industry analyst forecasts indicate a shifting dynamic in employment markets regarding ${jobsTitles[i].toLowerCase()}. Both startups and established corporations are adapting hiring strategies to secure top-tier talent.</p><p>Career mentors advise applicants to acquire relevant skills to stay competitive as roles become more specialized.</p>`,
       });
     }
 
@@ -126,14 +153,14 @@ async function run() {
       "Research Highlights Positive Outcomes of Project-Based Learning Formats",
       "New Literacy Campaign Targets Adult Education in Rural Districts",
       "Higher Education Institutes Expand Financial Aid for First-Gen Students",
-      "Innovative STEM Programs Empower Students in Underrepresented Schools"
+      "Innovative STEM Programs Empower Students in Underrepresented Schools",
     ];
     for (let i = 0; i < 10; i++) {
       articles.push({
         title: eduTitles[i],
         category: "Education",
         excerpt: `A detailed report about ${eduTitles[i].toLowerCase()} and its impact on modern academic curriculums.`,
-        content: `<p>Educational boards and researchers have collaborated on a major rollout covering ${eduTitles[i].toLowerCase()}. Results from pilot classrooms indicate a significant boost in student engagement and retention metrics.</p><p>Administrators plan to implement these strategies across more school districts in the upcoming academic calendar.</p>`
+        content: `<p>Educational boards and researchers have collaborated on a major rollout covering ${eduTitles[i].toLowerCase()}. Results from pilot classrooms indicate a significant boost in student engagement and retention metrics.</p><p>Administrators plan to implement these strategies across more school districts in the upcoming academic calendar.</p>`,
       });
     }
 
@@ -148,14 +175,14 @@ async function run() {
       "Gaming Industry Experts Predict Surge in Open-World Strategy Titles",
       "Documentary Series Wins High Praise for Environmental Conservation Focus",
       "Renowned Museum Hosts Interactive Retrospective of Modern Sculptures",
-      "Major Studios Form Consortium to Support Eco-Friendly Movie Sets"
+      "Major Studios Form Consortium to Support Eco-Friendly Movie Sets",
     ];
     for (let i = 0; i < 10; i++) {
       articles.push({
         title: entTitles[i],
         category: "Entertainment",
         excerpt: `A culture feature about ${entTitles[i].toLowerCase()} and what it means for audiences worldwide.`,
-        content: `<p>Critics and creators are buzzing following the major announcement of ${entTitles[i].toLowerCase()}. The project is expected to set new trends in the creative landscape.</p><p>Promoters have scheduled early previews and interactive sessions to build community engagement ahead of the global launch.</p>`
+        content: `<p>Critics and creators are buzzing following the major announcement of ${entTitles[i].toLowerCase()}. The project is expected to set new trends in the creative landscape.</p><p>Promoters have scheduled early previews and interactive sessions to build community engagement ahead of the global launch.</p>`,
       });
     }
 
@@ -170,37 +197,58 @@ async function run() {
       "Adventure Travel Outfitter Launches Polar Expedition Itineraries",
       "Local Culinary Trails Attract Gastronomy Enthusiasts Worldwide",
       "Travel Planning Apps Leverage Smart Mapping for Custom Road Trips",
-      "Historic Landmark Preservation Project Welcomes First Tourist Batch"
+      "Historic Landmark Preservation Project Welcomes First Tourist Batch",
     ];
     for (let i = 0; i < 10; i++) {
       articles.push({
         title: travelTitles[i],
         category: "Travel",
         excerpt: `A travel feature exploring ${travelTitles[i].toLowerCase()} and unique options for global travelers.`,
-        content: `<p>Regional travel bureaus are reporting a surge in visitor interest focusing on ${travelTitles[i].toLowerCase()}. Enhanced infrastructure and local hospitality projects have made these destinations more accessible.</p><p>Seasoned travelers suggest booking reservations well in advance to enjoy local experiences without long delays.</p>`
+        content: `<p>Regional travel bureaus are reporting a surge in visitor interest focusing on ${travelTitles[i].toLowerCase()}. Enhanced infrastructure and local hospitality projects have made these destinations more accessible.</p><p>Seasoned travelers suggest booking reservations well in advance to enjoy local experiences without long delays.</p>`,
       });
     }
 
     // 3. Insert articles into DB
     console.log(`Seeding 60 articles into DB...`);
     let insertedCount = 0;
-    
+
     for (let i = 0; i < articles.length; i++) {
       const art = articles[i];
-      const baseSlug = art.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      
+      const baseSlug = art.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
       // Make slug unique by appending a random suffix
       const slug = `${baseSlug}-${Math.floor(1000 + Math.random() * 9000)}`;
 
       // Stagger dates in the past (up to 30 days) to populate the timeline naturally
       const date = new Date(Date.now() - (i % 30) * 24 * 60 * 60 * 1000);
-      const formattedDate = date.toISOString().slice(0, 19).replace('T', ' ');
+      const formattedDate = date.toISOString().slice(0, 19).replace("T", " ");
 
       const fields = [
-        "title", "slug", "category", "city", "state", "country", "author", "views",
-        "status", "date", "excerpt", "content", "featuredImage", "ogImage",
-        "metaTitle", "metaDescription", "tags", "featured", "newsType",
-        "journalistId", "journalistName", "access_level"
+        "title",
+        "slug",
+        "category",
+        "city",
+        "state",
+        "country",
+        "author",
+        "views",
+        "status",
+        "date",
+        "excerpt",
+        "content",
+        "featuredImage",
+        "ogImage",
+        "metaTitle",
+        "metaDescription",
+        "tags",
+        "featured",
+        "newsType",
+        "journalistId",
+        "journalistName",
+        "access_level",
       ];
 
       const values = [
@@ -225,7 +273,7 @@ async function run() {
         "Standard",
         "", // journalistId
         "Newsroom Reporter",
-        "Free" // access_level
+        "Free", // access_level
       ];
 
       const colNames = fields.join(", ");

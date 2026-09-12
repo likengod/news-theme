@@ -4,7 +4,15 @@ import { type SiteSettings } from "@/lib/site-content";
 import { type MediaUsage } from "@/lib/media-library";
 import { MediaField } from "@/components/admin/MediaField";
 
-export function Card({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+export function Card({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5">
       <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">{title}</h2>
@@ -70,11 +78,11 @@ export function IntegrationField({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showValue, setShowValue] = useState(false);
-  
+
   const savedValue = s[f.key] as string;
   const isConfigured = !!savedValue && savedValue.trim().length > 0 && savedValue !== "#";
-  
-  const [localValue, setLocalValue] = useState(savedValue === "#" ? "" : (savedValue || ""));
+
+  const [localValue, setLocalValue] = useState(savedValue === "#" ? "" : savedValue || "");
 
   const handleSave = () => {
     update(f.key, localValue as never);
@@ -101,18 +109,23 @@ export function IntegrationField({
                 <XCircle className="h-3 w-3" /> Not Configured
               </span>
             )}
-            
+
             {f.guideUrl && (
               <>
                 <span className="text-slate-300">•</span>
-                <a href={f.guideUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-[11px] text-blue-600 hover:underline">
+                <a
+                  href={f.guideUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1 text-[11px] text-blue-600 hover:underline"
+                >
                   Setup Guide <ExternalLink className="h-2.5 w-2.5" />
                 </a>
               </>
             )}
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2 shrink-0">
           {!isEditing && (
             <button
@@ -153,12 +166,16 @@ export function IntegrationField({
                     onClick={() => setShowValue(!showValue)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   >
-                    {showValue ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    {showValue ? (
+                      <EyeOff className="h-3.5 w-3.5" />
+                    ) : (
+                      <Eye className="h-3.5 w-3.5" />
+                    )}
                   </button>
                 </div>
               )}
             </div>
-            
+
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={handleCancel}

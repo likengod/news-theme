@@ -3,7 +3,14 @@ import { Views } from "./Views";
 import type { Item } from "@/lib/mock-news-data";
 import { Link } from "@tanstack/react-router";
 
-const AUTHORS = ["Claire Bennett", "Lucas Hayes", "Maya Chen", "Daniel Cole", "Priya Raman", "Noah Whitfield"];
+const AUTHORS = [
+  "Claire Bennett",
+  "Lucas Hayes",
+  "Maya Chen",
+  "Daniel Cole",
+  "Priya Raman",
+  "Noah Whitfield",
+];
 function authorFor(seed?: string) {
   if (!seed) return AUTHORS[0];
   let h = 0;
@@ -21,9 +28,20 @@ export function MinRead({ seed, kicker }: { seed?: string; kicker?: string }) {
   );
 }
 
-export function HeadlineArticle({ item, dense = false }: { item: Item & { slug?: string }; dense?: boolean }) {
+export function HeadlineArticle({
+  item,
+  dense = false,
+}: {
+  item: Item & { slug?: string };
+  dense?: boolean;
+}) {
   return (
-    <Link to="/news/$slug" params={{ slug: item.slug || "sample" }} className="group block" suppressHydrationWarning>
+    <Link
+      to="/news/$slug"
+      params={{ slug: item.slug || "sample" }}
+      className="group block"
+      suppressHydrationWarning
+    >
       {item.img && (
         <div className="mb-3 overflow-hidden">
           <img
@@ -34,11 +52,16 @@ export function HeadlineArticle({ item, dense = false }: { item: Item & { slug?:
           />
         </div>
       )}
-      <h3 className={`headline text-foreground group-hover:underline ${dense ? "text-lg" : "text-xl"}`} suppressHydrationWarning>
+      <h3
+        className={`headline text-foreground group-hover:underline ${dense ? "text-lg" : "text-xl"}`}
+        suppressHydrationWarning
+      >
         {item.title}
       </h3>
       {item.excerpt && (
-        <p className="mt-2 line-clamp-2 text-sm leading-snug text-muted-foreground">{item.excerpt}</p>
+        <p className="mt-2 line-clamp-2 text-sm leading-snug text-muted-foreground">
+          {item.excerpt}
+        </p>
       )}
       <MinRead seed={item.title} kicker={item.kicker} />
     </Link>

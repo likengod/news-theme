@@ -29,7 +29,10 @@ export function HeroSectionEditor({ config, onUpdate }: Props) {
                   onUpdate("heroFeatured", { ...config.heroFeatured, showMultiple: c })
                 }
               />
-              <Label htmlFor="show-multiple" className="text-xs font-semibold text-slate-700 cursor-pointer">
+              <Label
+                htmlFor="show-multiple"
+                className="text-xs font-semibold text-slate-700 cursor-pointer"
+              >
                 Show multiple images with auto-slide
               </Label>
             </div>
@@ -47,7 +50,10 @@ export function HeroSectionEditor({ config, onUpdate }: Props) {
                       onUpdate("heroFeatured", { ...config.heroFeatured, autoSlide: c })
                     }
                   />
-                  <Label htmlFor="auto-slide" className="text-xs font-semibold text-slate-700 cursor-pointer">
+                  <Label
+                    htmlFor="auto-slide"
+                    className="text-xs font-semibold text-slate-700 cursor-pointer"
+                  >
                     Enable animation
                   </Label>
                 </div>
@@ -101,7 +107,7 @@ export function HeroSectionEditor({ config, onUpdate }: Props) {
         showCategory
         onChange={(v: SectionStyle) => onUpdate("heroTopStories", v)}
       />
-            <SectionCard
+      <SectionCard
         label="Culture & Music row"
         hint="Culture section under the main hero grid"
         value={config.heroCultureMusic}
@@ -125,4 +131,3 @@ export function HeroSectionEditor({ config, onUpdate }: Props) {
     </div>
   );
 }
-
