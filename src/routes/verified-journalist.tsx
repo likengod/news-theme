@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { lookupJournalist, type JournalistLookup } from "@/lib/journalist.functions";
 import { loadAuthorized, type AuthorizedSettings } from "@/lib/authorized-settings";
+import { loadSettings } from "@/lib/site-content";
 import { Footer } from "@/components/site/Footer";
 
 export const Route = createFileRoute("/verified-journalist")({
@@ -57,6 +58,11 @@ function VerifiedPage() {
   const [result, setResult] = useState<JournalistLookup | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [settings, setSettings] = useState(() => loadSettings());
+
+  useEffect(() => {
+    setSettings(loadSettings());
+  }, []);
 
   const doLookup = async (searchId: string) => {
     const target = searchId.trim();
@@ -163,26 +169,35 @@ function VerifiedPage() {
                 This ID does not belong to us. Please double-check the number, or contact our office
                 to confirm the reporter's credentials.
               </p>
-              <a
-                href="mailto:trust@northeasttimeline.com"
-                className="mt-3 inline-block text-sm font-semibold text-amber-900 underline"
-              >
-                trust@northeasttimeline.com
-              </a>
+              {settings.contactEmail && (
+                <a
+                  href={`mailto:${settings.contactEmail}`}
+                  className="mt-3 inline-block text-sm font-semibold text-amber-900 underline"
+                >
+                  {settings.contactEmail}
+                </a>
+              )}
             </div>
           )}
 
-          {result && result.found && <PressCard data={result} />}
+          {result && result.found && <PressCard data={result} settings={settings} />}
         </div>
       </section>
 
       <section className="mx-auto max-w-3xl px-5 pb-16">
         <p className="text-center text-xs text-slate-500">
-          Spotted a fake byline? Email{" "}
-          <a className="underline" href="mailto:trust@northeasttimeline.com">
-            trust@northeasttimeline.com
-          </a>{" "}
-          — we investigate within 48 hours.
+          Spotted a fake byline?
+          {settings.contactEmail ? (
+            <>
+              {" "}Email{" "}
+              <a className="underline" href={`mailto:${settings.contactEmail}`}>
+                {settings.contactEmail}
+              </a>{" "}
+              — we investigate within 48 hours.
+            </>
+          ) : (
+            " Please contact our office immediately to report it."
+          )}
         </p>
       </section>
       <Footer />
@@ -190,15 +205,16 @@ function VerifiedPage() {
   );
 }
 
-function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> }) {
+function PressCard({ data, settings }: { data: Extract<JournalistLookup, { found: true }>; settings?: ReturnType<typeof loadSettings> }) {
   const [auth, setAuth] = useState<AuthorizedSettings>(loadAuthorized());
   useEffect(() => {
     setAuth(loadAuthorized());
   }, []);
 
+  const siteName = settings?.siteName || "News Theme";
   const inactive = !data.active;
   const roleLabel = ROLE_LABEL[data.role] ?? "Journalist";
-  const name = (data.displayName ?? "News Theme Reporter").toUpperCase();
+  const name = (data.displayName ?? `${siteName} Reporter`).toUpperCase();
   const isSuspended = !data.active;
   const defaultValid = new Date(
     new Date(data.memberSince).getTime() + 3 * 365 * 24 * 60 * 60 * 1000,
@@ -214,7 +230,7 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
             {data.displayName ?? "This account"} is not an accredited journalist
           </p>
           <p className="mt-1 text-sm text-slate-600">
-            The account exists on News Theme (role: <span className="font-medium">{roleLabel}</span>
+            The account exists on {siteName} (role: <span className="font-medium">{roleLabel}</span>
             ) but is not authorised to publish under a verified byline.
           </p>
         </div>
@@ -225,7 +241,7 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
   // Press-card design — CR-80 standard (2.13″ × 3.39″ scaled ×1.6 → 326 × 520 px)
   const journalistId = data.journalistId ?? `NT-${data.publicUserId}`;
   const origin =
-    typeof window !== "undefined" ? window.location.origin : "https://northeasttimeline.com";
+    typeof window !== "undefined" ? window.location.origin : (settings?.siteUrl || "https://example.com");
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${origin}/verified-journalist?id=${journalistId}`)}`;
 
   return (
@@ -261,10 +277,16 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
           <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#34c759]/40 bg-[#34c759]/20 backdrop-blur-sm">
             <BadgeCheck className="h-4.5 w-4.5 text-[#34c759]" />
           </div>
-          <p className="text-[10px] font-extrabold leading-tight tracking-wide text-white">
-            <span className="text-red-300">NORTHEAST</span>
-            <br />
-            TIMELINE
+          <p className="text-[10px] font-extrabold leading-tight tracking-wide text-white uppercase">
+            {siteName.split(" ").length > 1 ? (
+              <>
+                <span className="text-red-300">{siteName.split(" ")[0]}</span>
+                <br />
+                <span>{siteName.split(" ").slice(1).join(" ")}</span>
+              </>
+            ) : (
+              <span className="text-red-300">{siteName}</span>
+            )}
           </p>
         </div>
 
@@ -506,12 +528,12 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
               <p className="text-[10px] font-bold text-slate-900">Website:</p>
               <p
                 className={`mt-0.5 truncate text-slate-600 ${
-                  (auth.officeWebsite || "northeasttimeline.com").length > 22
+                  (auth.officeWebsite || (settings?.siteUrl || "example.com")).length > 22
                     ? "text-[8.5px]"
                     : "text-[10px]"
                 }`}
               >
-                {auth.officeWebsite || "northeasttimeline.com"}
+                {auth.officeWebsite || (settings?.siteUrl ? settings.siteUrl.replace(/^https?:\/\//, "") : "example.com")}
               </p>
             </div>
             <div className="mx-1 self-stretch border-l border-dashed border-red-300" />
@@ -554,7 +576,7 @@ function PressCard({ data }: { data: Extract<JournalistLookup, { found: true }> 
         {(() => {
           const noteText =
             auth.cardNote ||
-            "This card certifies that the bearer is an authorized journalist of News Theme. If found, please return to the above address.";
+            `This card certifies that the bearer is an authorized journalist of ${siteName}. If found, please return to the above address.`;
           const disclaimerText =
             auth.cardDisclaimer || "Tampering or misuse of this card is a punishable offense.";
           const totalLength = noteText.length + disclaimerText.length;
