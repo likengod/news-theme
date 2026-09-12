@@ -178,20 +178,10 @@ function AdvertisementsPage() {
   const planType = (s.licenseType || "").toLowerCase();
   const roleType = (s.licenseRole || "").toLowerCase();
   const keyType = (s.licenseKey || "").toUpperCase();
-  const isVIP = roleType === "vip" || roleType === "admin";
-  const isEnterprise =
-    isVIP ||
-    planType.includes("enterprise") ||
-    planType.includes("demo") ||
-    keyType.includes("ENT") ||
-    keyType.includes("DEMO");
-  const isPremium = isEnterprise || planType.includes("premium");
-  const isEnterprisePlus =
-    isVIP ||
-    planType.includes("enterprise+") ||
-    planType.includes("enterprise plus") ||
-    keyType.includes("ENT_PLUS") ||
-    keyType.includes("DEMO");
+  
+  const isPremium = planType.includes("premium") || planType.includes("enterprise") || roleType === "admin";
+  const isEnterprise = planType.includes("enterprise") || roleType === "admin";
+  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus") || roleType === "admin";
 
   const [tab, setTab] = useState<Tab>("home1");
   const [ads, setAds] = useState<AdSlideItem[]>([]);
@@ -392,10 +382,11 @@ function AdvertisementsPage() {
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-px">
         <div className="flex flex-wrap items-center gap-1.5">
           {SLOTS.map((s) => {
+            if ((s.key === "featured_slide" || s.key === "reel_ads") && !isEnterprisePlus) {
+              return null;
+            }
             const isActive = tab === s.key;
-            const isLocked =
-              ((s.key === "popup" || s.key === "leaderboard") && !isPremium) ||
-              ((s.key === "featured_slide" || s.key === "reel_ads") && !isEnterprisePlus);
+            const isLocked = (s.key === "popup" || s.key === "leaderboard") && !isPremium;
             const count = slotCounts[s.key] || 0;
             return (
               <button
