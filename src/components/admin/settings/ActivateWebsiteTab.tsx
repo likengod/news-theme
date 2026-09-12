@@ -210,8 +210,8 @@ export function ActivateWebsiteTab({
 
             <div className="rounded-lg bg-slate-50 p-3 border border-slate-100">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">License Key</span>
-              <div className="mt-1 font-mono text-xs font-bold text-slate-700 truncate" title={s.licenseKey}>
-                {s.licenseKey}
+              <div className="mt-1 font-mono text-xs font-bold text-slate-700 truncate" title="Hidden for security">
+                {s.licenseKey ? `••••••••••••••••${s.licenseKey.slice(-4)}` : "Hidden"}
               </div>
             </div>
           </div>
