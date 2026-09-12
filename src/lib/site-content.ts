@@ -1737,13 +1737,17 @@ export const deleteAdStaticFilesServer = createServerFn({ method: "POST" })
     let deletedCount = 0;
 
     for (const url of urls) {
-      if (!url || typeof url !== "string" || !url.startsWith("/uploads/ads/")) continue;
+      // Allow backwards compatibility deletion for old 'ads' path
+      if (!url || typeof url !== "string" || !(url.startsWith("/uploads/ads/") || url.startsWith("/uploads/promos/"))) continue;
 
-      const filename = url.replace("/uploads/ads/", "");
+      const filename = url.replace("/uploads/ads/", "").replace("/uploads/promos/", "");
       // Prevent directory traversal
       if (filename.includes("/") || filename.includes("..")) continue;
 
       const targetDirs = [
+        path.join(cwd, "public", "uploads", "promos"),
+        path.join(cwd, "dist", "client", "uploads", "promos"),
+        path.join(cwd, "uploads", "promos"),
         path.join(cwd, "public", "uploads", "ads"),
         path.join(cwd, "dist", "client", "uploads", "ads"),
         path.join(cwd, "uploads", "ads"),

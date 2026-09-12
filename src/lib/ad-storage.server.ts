@@ -50,12 +50,12 @@ export function persistBase64Image(dataUrl: string, prefix = "ad"): string {
 
   const buffer = Buffer.from(base64Data, "base64");
 
-  // Save to both public/uploads/ads and dist/client/uploads/ads (if dist exists)
+  // Save to both public/uploads/promos and dist/client/uploads/promos (if dist exists)
   const cwd = process.cwd();
   const targetDirs = [
-    path.join(cwd, "public", "uploads", "ads"),
-    path.join(cwd, "dist", "client", "uploads", "ads"),
-    path.join(cwd, "uploads", "ads"),
+    path.join(cwd, "public", "uploads", "promos"),
+    path.join(cwd, "dist", "client", "uploads", "promos"),
+    path.join(cwd, "uploads", "promos"),
   ];
 
   for (const dir of targetDirs) {
@@ -70,7 +70,7 @@ export function persistBase64Image(dataUrl: string, prefix = "ad"): string {
     }
   }
 
-  return `/uploads/ads/${filename}`;
+  return `/uploads/promos/${filename}`;
 }
 
 /**

@@ -336,7 +336,7 @@ function AdvertisementsPage() {
     const item = trash.find((t) => t.id === id);
     if (item) {
       const urlsToDelete = [item.image, item.imagePortrait, item.imageLandscape].filter(
-        (url): url is string => !!url && typeof url === "string" && url.startsWith("/uploads/ads/"),
+        (url): url is string => !!url && typeof url === "string" && (url.startsWith("/uploads/ads/") || url.startsWith("/uploads/promos/")),
       );
       if (urlsToDelete.length > 0) {
         try {

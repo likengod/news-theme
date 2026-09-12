@@ -132,7 +132,7 @@ export function HeroMain({ activeLeads, cfg }: any) {
     if (showMultiple) {
       if (featuredAdMode === "script" && featuredAdScript) {
         carouselItems.push(
-          <CarouselItem key={`sponsor-script-${index}`}>
+          <CarouselItem key={`slide-script-${index}`}>
             <div className="relative flex aspect-[16/10] w-full items-center justify-center bg-slate-50 overflow-hidden">
               {/* SPONSORED Tag */}
               <div className="absolute top-3 left-3 z-20 pointer-events-none">
@@ -148,22 +148,22 @@ export function HeroMain({ activeLeads, cfg }: any) {
         const ad = featuredAds[index % featuredAds.length];
         const adImg = ad.imageLandscape || ad.image;
         carouselItems.push(
-          <CarouselItem key={`sponsor-${index}`}>
+          <CarouselItem key={`slide-ext-${index}`}>
             <a
               href={ad.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group/sponsor block w-full"
+              className="group/slide-ext block w-full"
             >
               <div className="relative overflow-hidden">
                 <img
                   src={adImg}
-                  alt={ad.label || "Advertisement"}
+                  alt={ad.label || "Featured Content"}
                   loading="lazy"
                   decoding="async"
                   width={800}
                   height={500}
-                  className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover/sponsor:scale-102"
+                  className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover/slide-ext:scale-102"
                 />
                 {/* SPONSORED Tag */}
                 <div className="absolute top-3 left-3 z-20 pointer-events-none">
