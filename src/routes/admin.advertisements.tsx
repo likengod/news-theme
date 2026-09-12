@@ -81,7 +81,7 @@ export const Route = createFileRoute("/admin/advertisements")({
 });
 
 function uid() {
-  return `ad-${Math.random().toString(36).slice(2, 9)}`;
+  return `prm-${Math.random().toString(36).slice(2, 9)}`;
 }
 
 type SlotMeta = {

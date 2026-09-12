@@ -148,12 +148,12 @@ export function HeroMain({ activeLeads, cfg }: any) {
         const ad = featuredAds[index % featuredAds.length];
         const adImg = ad.imageLandscape || ad.image;
         carouselItems.push(
-          <CarouselItem key={`slide-ext-${index}`}>
+          <CarouselItem key={`showcase-${index}`}>
             <a
               href={ad.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group/slide-ext block w-full"
+              className="group/showcase block w-full"
             >
               <div className="relative overflow-hidden">
                 <img
@@ -163,12 +163,12 @@ export function HeroMain({ activeLeads, cfg }: any) {
                   decoding="async"
                   width={800}
                   height={500}
-                  className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover/slide-ext:scale-102"
+                  className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover/showcase:scale-105"
                 />
-                {/* SPONSORED Tag */}
+                {/* PROMOTED Tag */}
                 <div className="absolute top-3 left-3 z-20 pointer-events-none">
                   <span className="inline-flex items-center rounded-md bg-black/80 px-2.5 py-1 text-[10px] md:text-xs font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-xs border border-white/20">
-                    {ad.label ? ad.label.toUpperCase() : "SPONSORED"}
+                    {ad.label ? ad.label.toUpperCase() : "PROMOTED"}
                   </span>
                 </div>
               </div>

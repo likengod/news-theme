@@ -45,7 +45,10 @@ export function persistBase64Image(dataUrl: string, prefix = "ad"): string {
 
   // Create deterministic hash so identical image isn't duplicated
   const hash = crypto.createHash("md5").update(base64Data).digest("hex").slice(0, 12);
-  const safePrefix = prefix.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 30);
+  const safePrefix = prefix
+    .replace(/[^a-zA-Z0-9_-]/g, "_")
+    .replace(/ads?/gi, "prm")
+    .slice(0, 30);
   const filename = `${safePrefix}_${hash}${ext}`;
 
   const buffer = Buffer.from(base64Data, "base64");
