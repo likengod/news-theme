@@ -142,8 +142,8 @@ export function TopBar() {
       >
         <div className="flex-1 min-w-0">
           <span className="truncate">
-            <span className="hidden sm:inline">{today}</span>
-            <span className="sm:hidden">{todayShort}</span>
+            <span className="hidden sm:inline">{mounted ? today : ""}</span>
+            <span className="sm:hidden">{mounted ? todayShort : ""}</span>
           </span>
         </div>
 

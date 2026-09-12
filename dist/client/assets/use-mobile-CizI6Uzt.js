@@ -1,0 +1,2 @@
+import{s as e}from"./jsx-runtime-CF8L0Gwd.js";import{t}from"./react-YNiYR47K.js";var n=e(t()),r=768;function i(){let[e,t]=n.useState(!1);return n.useEffect(()=>{let e=window.matchMedia(`(max-width: ${r-1}px)`),n=()=>{t(window.innerWidth<r)};return e.addEventListener(`change`,n),window.addEventListener(`resize`,n),t(window.innerWidth<r),()=>{e.removeEventListener(`change`,n),window.removeEventListener(`resize`,n)}},[]),!!e}export{i as t};
+//# sourceMappingURL=use-mobile-CizI6Uzt.js.map
