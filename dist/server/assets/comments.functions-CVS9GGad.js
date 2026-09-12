@@ -122,3 +122,5 @@ var postArticleComment = createServerFn({ method: "POST" }).validator((data) => 
 });
 //#endregion
 export { deleteComment_createServerFn_handler, getAdminComments_createServerFn_handler, getArticleComments_createServerFn_handler, postArticleComment_createServerFn_handler, updateCommentStatus_createServerFn_handler };
+
+//# sourceMappingURL=comments.functions-CVS9GGad.js.map

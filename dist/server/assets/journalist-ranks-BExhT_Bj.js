@@ -65,3 +65,5 @@ var saveJournalistRanksServer = createServerFn({ method: "POST" }).middleware([r
 });
 //#endregion
 export { getJournalistRanksServer_createServerFn_handler, saveJournalistRanksServer_createServerFn_handler };
+
+//# sourceMappingURL=journalist-ranks-BExhT_Bj.js.map

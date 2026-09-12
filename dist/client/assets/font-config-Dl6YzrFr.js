@@ -8,3 +8,4 @@ import{n as e,t}from"./createServerFn-Ciss0-sp.js";import{t as n}from"./auth-mid
 
 `)}function h(e,t){return t.find(t=>t.id===e)}function g(e){let t=[];for(let n of r){let r=e.sectionMapping[n.key],i=`"Noto Serif Bengali", "SolaimanLipi", "Kalpurush", Georgia, serif`;if(r){let t=h(r,e.fonts);t&&(i=`"${t.family}", "Noto Serif Bengali", "SolaimanLipi", "Kalpurush", Georgia, serif`)}t.push(`  ${n.cssVar}: ${i};`)}return`:root {\n${t.join(`
 `)}\n}`}function _(){return`font-${Date.now()}-${Math.random().toString(36).slice(2,7)}`}export{p as a,_ as c,d,f,m as i,h as l,r as n,g as o,i as r,o as s,u as t,c as u};
+//# sourceMappingURL=font-config-Dl6YzrFr.js.map

@@ -31,3 +31,5 @@ var requireAuth = createMiddleware({ type: "function" }).server(async ({ next })
 });
 //#endregion
 export { requireAuth as t };
+
+//# sourceMappingURL=auth-middleware-Dn9IHvGB.js.map

@@ -88,3 +88,5 @@ function RelatedNews({ currentSlug }) {
 }
 //#endregion
 export { RelatedNews, RelatedNews as default };
+
+//# sourceMappingURL=RelatedNews-D6mfpm1F.js.map

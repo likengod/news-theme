@@ -14,6 +14,27 @@ export type MediaItemDef = {
   type?: "image" | "video" | "document";
 };
 
+function SafeImage({ src, alt, className, ...props }: any) {
+  const [error, setError] = useState(false);
+  if (error || !src) {
+    return (
+      <div className="flex flex-col items-center justify-center text-slate-400 h-full w-full bg-slate-100">
+        <ImageIcon className="h-6 w-6 mb-1 opacity-50" />
+        <span className="text-[9px] font-semibold opacity-50">Not Found</span>
+      </div>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setError(true)}
+      {...props}
+    />
+  );
+}
+
 type Props = {
   items: MediaItemDef[];
   onDelete?: (id: string) => void;
@@ -102,7 +123,7 @@ export function MediaGrid({ items, onDelete, onEdit }: Props) {
                     <span className="text-[10px] font-semibold">Document</span>
                   </div>
                 ) : (
-                  <img
+                  <SafeImage
                     src={m.url || ""}
                     alt={m.name}
                     loading="lazy"
@@ -169,7 +190,7 @@ export function MediaGrid({ items, onDelete, onEdit }: Props) {
                       ) : (m.url && m.url.match(/\.(pdf|doc|docx)$/i)) || m.type === "document" ? (
                         <FileText className="h-5 w-5 text-slate-400" />
                       ) : (
-                        <img src={m.url || ""} alt={m.name} className="h-full w-full object-cover" />
+                        <SafeImage src={m.url || ""} alt={m.name} className="h-full w-full object-cover" />
                       )}
                     </div>
                   </td>

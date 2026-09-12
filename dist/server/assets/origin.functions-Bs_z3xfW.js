@@ -13,3 +13,5 @@ var getRequestOrigin = createServerFn({ method: "GET" }).handler(getRequestOrigi
 });
 //#endregion
 export { getRequestOrigin_createServerFn_handler };
+
+//# sourceMappingURL=origin.functions-Bs_z3xfW.js.map

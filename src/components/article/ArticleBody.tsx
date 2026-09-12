@@ -6,12 +6,19 @@ type Props = {
 };
 
 export const ArticleBody = memo(function ArticleBody({ paragraphs, midImage }: Props) {
-  // If the content is HTML, render it directly
-  if (paragraphs.length === 1 && (paragraphs[0].startsWith("<") || paragraphs[0].includes("<p>"))) {
+  const hasHtml = paragraphs.some(p => p.includes("<"));
+  const purifyConfig = { ADD_ATTR: ['style', 'class', 'target'] };
+
+  if (hasHtml || paragraphs.length === 1) {
+    let fullContent = paragraphs.join("\n");
+    if (!hasHtml) {
+      // If it's pure text, replace newlines with <br> so it doesn't clump together
+      fullContent = fullContent.replace(/\n/g, "<br/>");
+    }
     return (
       <div 
-        className="prose-article space-y-4 md:space-y-5 text-[15px] md:text-lg leading-relaxed md:leading-[1.85] text-foreground/90"
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(paragraphs[0]) }}
+        className="prose-article space-y-4 md:space-y-5 text-[15px] md:text-lg leading-relaxed md:leading-[1.85] text-foreground/90 whitespace-pre-wrap"
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(fullContent, purifyConfig) }}
       />
     );
   }
@@ -23,12 +30,11 @@ export const ArticleBody = memo(function ArticleBody({ paragraphs, midImage }: P
   return (
     <div className="prose-article space-y-4 md:space-y-5 text-[15px] md:text-lg leading-relaxed md:leading-[1.85] text-foreground/90">
       {first && (
-        <p>
-          {first}
-        </p>
+        <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(first, purifyConfig) }} />
       )}
+      
       {beforeMid.map((p, i) => (
-        <p key={`b-${i}`}>{p}</p>
+        <p key={`b-${i}`} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(p, purifyConfig) }} />
       ))}
 
       {midImage && (
@@ -38,7 +44,7 @@ export const ArticleBody = memo(function ArticleBody({ paragraphs, midImage }: P
             alt=""
             loading="lazy"
             decoding="async"
-            className="aspect-[16/9] w-full object-cover"
+            className="aspect-[16/9] w-full object-cover rounded-lg"
           />
           {(midImage.caption || midImage.credit) && (
             <figcaption className="mt-3 border-b border-border pb-3 text-xs leading-relaxed text-muted-foreground">
@@ -51,7 +57,7 @@ export const ArticleBody = memo(function ArticleBody({ paragraphs, midImage }: P
       )}
 
       {afterMid.map((p, i) => (
-        <p key={`a-${i}`}>{p}</p>
+        <p key={`a-${i}`} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(p, purifyConfig) }} />
       ))}
     </div>
   );

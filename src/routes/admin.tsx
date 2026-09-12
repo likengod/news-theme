@@ -44,6 +44,21 @@ export const Route = createFileRoute("/admin")({
     const { data } = await supabase.auth.getSession();
     if (!data.session?.user) throw redirect({ to: "/auth" });
     
+    let isCached = false;
+    if (typeof window !== "undefined") {
+      const cachedTime = sessionStorage.getItem("admin_auth_check_time");
+      const cachedResult = sessionStorage.getItem("admin_auth_result");
+      if (cachedTime && cachedResult === "allowed") {
+        if (Date.now() - parseInt(cachedTime) < 3 * 60 * 1000) {
+          isCached = true;
+        }
+      }
+    }
+    
+    if (isCached) {
+      return { user: data.session.user };
+    }
+
     // Validate session token and check role permissions — run both DB queries in parallel
     try {
       const [res, roleRes] = await Promise.all([
@@ -52,19 +67,25 @@ export const Route = createFileRoute("/admin")({
       ]);
 
       if (!res.user) {
-        // Token is invalid/expired in MySQL database; sign out and redirect to login
+        if (typeof window !== "undefined") sessionStorage.removeItem("admin_auth_result");
         await supabase.auth.signOut();
         throw redirect({ to: "/auth" });
       }
 
-      // Ensure user has a role authorized to access the admin panel
       const allowedRoles = ["admin", "editor"];
       if (!roleRes.role || !allowedRoles.includes(roleRes.role)) {
-        // Logged-in user is not authorized; redirect to home page
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("admin_auth_result", "denied");
+          sessionStorage.setItem("admin_auth_check_time", Date.now().toString());
+        }
         throw redirect({ to: "/" });
       }
+      
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("admin_auth_result", "allowed");
+        sessionStorage.setItem("admin_auth_check_time", Date.now().toString());
+      }
     } catch (e: any) {
-      // If redirect already thrown, propagate it
       if (e?.headers || e?.to) throw e;
       await supabase.auth.signOut();
       throw redirect({ to: "/auth" });
@@ -186,7 +207,7 @@ function AdminLayout() {
     return () => {
       mounted = false;
     };
-  }, [pathname]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">

@@ -148,3 +148,5 @@ async function loadReels(cfg) {
 }
 //#endregion
 export { loadReelsConfig as a, toEmbedSrc as c, loadReels as i, fetchFacebookReels as n, onReelsConfigChange as o, fetchYouTubeShorts as r, saveReelsConfig as s, defaultReelsConfig as t };
+
+//# sourceMappingURL=reels-config-4dsZmhVB.js.map

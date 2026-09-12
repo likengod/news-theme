@@ -124,3 +124,5 @@ function getJournalistStats(rows) {
 }
 //#endregion
 export { getJournalistStats as n, blankRow as t };
+
+//# sourceMappingURL=articles-store-Dl5HoC3x.js.map

@@ -23,3 +23,5 @@ function useIsMobile() {
 }
 //#endregion
 export { useIsMobile as t };
+
+//# sourceMappingURL=use-mobile-ZPBRhHdE.js.map

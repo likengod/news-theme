@@ -205,3 +205,5 @@ function JournalistProfileModal({ viewTarget, setViewTarget, handleToggleBan }) 
 }
 //#endregion
 export { JournalistProfileModal };
+
+//# sourceMappingURL=JournalistProfileModal-C6sd40dk.js.map

@@ -37,6 +37,7 @@ import {
   loadTrash,
   restoreFromTrash,
   purgeFromTrash,
+  deleteAdStaticFilesServer,
   processExpiredAds,
   loadAdRotation,
   saveAdRotation,
@@ -195,6 +196,8 @@ function AdvertisementsPage() {
   const [showDemoGuide, setShowDemoGuide] = useState<boolean>(false);
   const [previewScriptId, setPreviewScriptId] = useState<string | null>(null);
   const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
   const tableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -218,8 +221,22 @@ function AdvertisementsPage() {
         setPopupConfig(loadPopupConfig());
       }
       setPreviewSlotScript(false);
+      setPage(1);
     }
   }, [tab]);
+
+  const filteredAds = useMemo(() => {
+    if (!searchQuery.trim()) return ads;
+    const q = searchQuery.toLowerCase();
+    return ads.filter(ad => 
+      (ad.label && ad.label.toLowerCase().includes(q)) || 
+      (ad.href && ad.href.toLowerCase().includes(q))
+    );
+  }, [ads, searchQuery]);
+
+  const ITEMS_PER_PAGE = 10;
+  const paginatedAds = filteredAds.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  const totalPages = Math.max(1, Math.ceil(filteredAds.length / ITEMS_PER_PAGE));
 
   const isTrash = tab === "trash";
   const slot = (isTrash ? "home1" : tab) as AdSlot;
@@ -318,7 +335,19 @@ function AdvertisementsPage() {
     toast.success("Restored ad slide");
   };
 
-  const onPurge = (id: string) => {
+  const onPurge = async (id: string) => {
+    const item = trash.find((t) => t.id === id);
+    if (item) {
+      const urlsToDelete = [item.image, item.imagePortrait, item.imageLandscape]
+        .filter((url): url is string => !!url && typeof url === "string" && url.startsWith("/uploads/ads/"));
+      if (urlsToDelete.length > 0) {
+        try {
+          await deleteAdStaticFilesServer({ data: urlsToDelete });
+        } catch (err) {
+          console.error("Failed to delete static files:", err);
+        }
+      }
+    }
     purgeFromTrash(id);
     setTrash(loadTrash());
     toast.success("Permanently deleted");
@@ -385,10 +414,33 @@ function AdvertisementsPage() {
               </button>
             );
           })}
+          
+          <button
+            onClick={() => setTab("trash")}
+            className={`group flex items-center gap-2 rounded-t-lg border-b-2 px-4 py-2.5 text-sm font-semibold transition-all ${
+              tab === "trash"
+                ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                : "border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
+          >
+            <div className="flex items-center gap-1.5">
+              <Trash2 className="h-4 w-4" />
+              <span>Trash</span>
+            </div>
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${
+                tab === "trash"
+                  ? "bg-slate-700 text-slate-200"
+                  : "bg-slate-200 text-slate-600 group-hover:bg-slate-300"
+              }`}
+            >
+              {trash.length}
+            </span>
+          </button>
         </div>
         {!isTrash && (
           <div className="flex items-center gap-6">
-            <div className="flex items-center space-x-2 border-r border-slate-200 pr-6">
+            <div className="flex items-center space-x-2">
               <Label htmlFor="mode-switch" className="text-xs font-semibold text-slate-600 cursor-pointer">
                 Google Ads
               </Label>
@@ -405,14 +457,6 @@ function AdvertisementsPage() {
                 Custom Ads
               </Label>
             </div>
-
-            <button
-              type="button"
-              onClick={() => setIsTrash(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-red-600"
-            >
-              <Trash2 className="h-4 w-4" /> Trash ({trash.length})
-            </button>
           </div>
         )}
       </div>
@@ -467,15 +511,15 @@ function AdvertisementsPage() {
                     )}
                   </div>
                   <div className="text-xs">
-                    <div className="font-semibold text-slate-900 max-w-md truncate">
-                      {ad.type === "script" ? "3rd Party Script Ad" : ad.image || "(no image set)"}
+                    <div className="font-semibold text-slate-900 truncate w-48 sm:w-64 md:w-96">
+                      {ad.type === "script" ? "3rd Party Script Ad" : ad.image ? ad.image.split('/').pop() : "(no image set)"}
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-slate-500">
                       <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5">
                         <FolderOpen className="h-3 w-3" />
                         {SLOTS.find(s => s.key === ad.slot)?.label || ad.slot}
                       </span>
-                      <span>ï¿½</span>
+                      <span>&bull;</span>
                       <span className="inline-flex items-center gap-1 text-red-500">
                         <Clock className="h-3 w-3" />
                         Deleted
@@ -727,6 +771,28 @@ function AdvertisementsPage() {
                     {!isEnterprise && <Lock className="h-3.5 w-3.5 ml-1 text-slate-400" />}
                   </div>
                 )}
+                {ads.length > 0 && (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search ads by name..."
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setPage(1); // Reset page on search
+                      }}
+                      className="w-48 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800 focus:border-slate-500 focus:outline-none transition shadow-2xs"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={handleAddAd}
@@ -757,14 +823,15 @@ function AdvertisementsPage() {
             </div>
           ) : (
             <div ref={tableRef} className="space-y-4">
-              {ads.map((ad, i) => {
+              {paginatedAds.map((ad, indexOnPage) => {
+                const i = (page - 1) * ITEMS_PER_PAGE + indexOnPage;
                 const isJustAdded = ad.id === newlyAddedId;
                 const isFeatured = !!ad.isFeatured;
 
                 return (
                   <div
                     key={ad.id}
-                    className={`rounded-xl border bg-white p-4 shadow-xs transition-colors ${
+                    className={`rounded-xl border bg-white p-3 shadow-xs transition-colors ${
                       isFeatured
                         ? "border-amber-300 ring-1 ring-amber-300 bg-amber-50/15"
                         : isJustAdded
@@ -781,15 +848,18 @@ function AdvertisementsPage() {
                         >
                           #{i + 1}
                         </span>
-                        {isFeatured ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 border border-amber-300 px-2.5 py-0.5 text-[11px] font-bold text-amber-900">
-                            <Star className="h-3 w-3 fill-amber-500 text-amber-600" /> FEATURED (SHOWS FIRST)
-                          </span>
-                        ) : (
-                          <span className="text-xs font-bold text-slate-800">
-                            Banner Ad Slide
+                        {isFeatured && (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 border border-amber-300 px-2 py-0.5 text-[10px] font-bold text-amber-900">
+                            <Star className="h-3 w-3 fill-amber-500 text-amber-600" /> FEATURED
                           </span>
                         )}
+                        <input
+                          type="text"
+                          value={ad.label || ""}
+                          onChange={(e) => update(ad.id, { label: e.target.value })}
+                          placeholder="Ad Name (e.g. Summer Promo)"
+                          className="w-48 rounded bg-transparent px-2 py-1 text-xs font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-slate-300 transition"
+                        />
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2.5">
@@ -915,6 +985,33 @@ function AdvertisementsPage() {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {!isTrash && totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+              <p className="text-xs text-slate-500 font-medium">
+                Showing {((page - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(page * ITEMS_PER_PAGE, filteredAds.length)} of {filteredAds.length} ads
+              </p>
+              <div className="flex gap-2">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  className="rounded border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  Previous
+                </button>
+                <div className="flex items-center justify-center min-w-8 text-xs font-bold text-slate-900">
+                  {page} / {totalPages}
+                </div>
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  className="rounded border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
 

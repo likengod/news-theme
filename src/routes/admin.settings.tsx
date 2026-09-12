@@ -29,6 +29,7 @@ import {
   saveRedirectRulesServer,
   scanBrokenLinksServer,
   fixBrokenLinkServer,
+  clearAllCachesServer,
   type SiteSettings,
   type RedirectRule,
   type BrokenLinkItem
@@ -337,6 +338,40 @@ function SettingsPage() {
                 </div>
               </>
             )}
+          </Card>
+
+          <Card
+            title="Manual Cleanup & Optimization"
+            subtitle="Instantly clear temporary files, purge unused CSS, and reset server caches to improve speed."
+          >
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <h4 className="text-sm font-semibold text-amber-900 mb-1">Clean Website Cache</h4>
+              <p className="text-xs text-amber-700 mb-4">
+                Click this button if your recent changes aren't appearing or if the website feels sluggish. It will remove temporary files, unused cache data, and unused CSS to speed up the website.
+              </p>
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await clearAllCachesServer();
+                    for (let i = localStorage.length - 1; i >= 0; i--) {
+                      const key = localStorage.key(i);
+                      if (key && (key.startsWith('nt:') || key.startsWith('nt_'))) {
+                        if (key !== 'nt_media_library_v1') { // Keep media library to avoid redownloads
+                          localStorage.removeItem(key);
+                        }
+                      }
+                    }
+                    toast.success(res.message || "Website cache successfully cleared!");
+                    setTimeout(() => window.location.reload(), 1500);
+                  } catch(e) {
+                    toast.error("Failed to clear website cache.");
+                  }
+                }}
+                className="inline-flex items-center gap-2 rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-amber-700 transition"
+              >
+                <RefreshCw className="h-4 w-4" /> Clean & Speed Up Website
+              </button>
+            </div>
           </Card>
         </div>
       )}

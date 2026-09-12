@@ -57,7 +57,7 @@ function renderErrorPage() {
 //#region src/server.ts
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./assets/server-CPy63VVi.js").then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./assets/server-CXb531ip.js").then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
 async function normalizeCatastrophicSsrResponse(response) {
@@ -84,3 +84,5 @@ var server_default = { async fetch(request, env, ctx) {
 } };
 //#endregion
 export { server_default as default, renderErrorPage as t };
+
+//# sourceMappingURL=server.js.map

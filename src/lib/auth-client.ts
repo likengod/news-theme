@@ -90,12 +90,21 @@ export const authClient = {
 
         const local = JSON.parse(raw);
         if (!local?.access_token) return { data: { session: null }, error: null };
+        
+        // Cache session validation for 3 minutes to speed up navigation
+        const now = Date.now();
+        if (local.validatedAt && now - local.validatedAt < 3 * 60 * 1000) {
+          return { data: { session: local }, error: null };
+        }
 
         const res = await getSessionServer({ data: local.access_token });
         if (!res.session) {
           localStorage.removeItem(SESSION_KEY);
           return { data: { session: null }, error: null };
         }
+        
+        res.session.validatedAt = now;
+        localStorage.setItem(SESSION_KEY, JSON.stringify(res.session));
         return { data: { session: res.session }, error: null };
       } catch (err: any) {
         return { data: { session: null }, error: null };

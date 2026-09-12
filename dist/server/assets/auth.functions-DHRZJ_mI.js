@@ -295,3 +295,5 @@ var requestCurrentUserAccountDeletion = createServerFn({ method: "POST" }).middl
 });
 //#endregion
 export { changeMyPassword_createServerFn_handler, getCurrentUserProfile_createServerFn_handler, getCurrentUserRole_createServerFn_handler, getProfileServer_createServerFn_handler, getSessionServer_createServerFn_handler, getUserServer_createServerFn_handler, requestCurrentUserAccountDeletion_createServerFn_handler, signInServer_createServerFn_handler, signOutServer_createServerFn_handler, signUpServer_createServerFn_handler, updateCurrentUserProfile_createServerFn_handler };
+
+//# sourceMappingURL=auth.functions-DHRZJ_mI.js.map

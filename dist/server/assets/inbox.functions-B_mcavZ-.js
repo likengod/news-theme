@@ -192,3 +192,5 @@ var adminDeleteInboxRequest = createServerFn({ method: "POST" }).validator((data
 });
 //#endregion
 export { adminApproveAccountDeletion_createServerFn_handler, adminDeleteInboxRequest_createServerFn_handler, adminGetInboxRequests_createServerFn_handler, adminGetInboxSummary_createServerFn_handler, adminUpdateInboxStatus_createServerFn_handler, submitContactMessage_createServerFn_handler, submitDeleteAccountRequest_createServerFn_handler, submitWithdrawRequest_createServerFn_handler, submitWorkWithUs_createServerFn_handler };
+
+//# sourceMappingURL=inbox.functions-B_mcavZ-.js.map

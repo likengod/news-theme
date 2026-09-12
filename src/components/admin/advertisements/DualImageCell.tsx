@@ -262,13 +262,13 @@ export function DualImageCell({
   if (slot === "home1" || slot === "ad3") {
     const portraitValOnly = ad.imagePortrait || (ad.orientation === "portrait" ? ad.image : (!ad.imageLandscape ? ad.image : ""));
     return (
-      <div className="flex justify-center py-4 w-full bg-slate-50/50 rounded-xl border border-slate-100">
+      <div className="flex justify-start">
         <SingleSlotImagePicker
           label="Portrait"
           badgeColor="bg-indigo-600"
           value={portraitValOnly || ""}
-          aspectClass="w-40 sm:w-48 aspect-[3/4]"
-          emptyText="Click to upload"
+          aspectClass="w-16 sm:w-20 aspect-[3/4]"
+          emptyText="Upload"
           recSize="600 × 800 px"
           onChange={(url) => {
             onUpdate(ad.id, {
@@ -286,13 +286,13 @@ export function DualImageCell({
   if (slot === "home2") {
     const landscapeValOnly = ad.imageLandscape || (ad.orientation === "landscape" ? ad.image : (!ad.imagePortrait ? ad.image : ""));
     return (
-      <div className="flex justify-center py-4 w-full bg-slate-50/50 rounded-xl border border-slate-100">
+      <div className="flex justify-start">
         <SingleSlotImagePicker
           label="Landscape"
           badgeColor="bg-emerald-600"
           value={landscapeValOnly || ""}
-          aspectClass="w-56 sm:w-72 aspect-[2/1]"
-          emptyText="Click to upload"
+          aspectClass="w-24 sm:w-32 aspect-[2/1]"
+          emptyText="Upload"
           recSize="406 × 196 px"
           onChange={(url) => {
             onUpdate(ad.id, {
@@ -309,13 +309,13 @@ export function DualImageCell({
 
   if (slot === "reel_ads") {
     return (
-      <div className="flex justify-center py-4 w-full bg-slate-50/50 rounded-xl border border-slate-100">
+      <div className="flex justify-start">
         <SingleSlotImagePicker
           label="Vertical Reel Ad"
           badgeColor="bg-purple-600"
           value={portraitVal || ad.image || ""}
-          aspectClass="w-32 sm:w-40 aspect-[9/16]"
-          emptyText="Click to upload"
+          aspectClass="w-14 sm:w-16 aspect-[9/16]"
+          emptyText="Upload"
           recSize="1080 × 1920 px"
           onChange={(url) => {
             onUpdate(ad.id, {
@@ -331,13 +331,13 @@ export function DualImageCell({
 
   if (slot === "leaderboard") {
     return (
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-4 w-full bg-slate-50/50 rounded-xl border border-slate-100">
+      <div className="flex flex-col sm:flex-row items-center justify-start gap-4">
         <SingleSlotImagePicker
           label="Mobile View"
           badgeColor="bg-blue-600"
           value={portraitVal}
-          aspectClass="w-40 aspect-[6/1]"
-          emptyText="Click to upload"
+          aspectClass="w-24 aspect-[6/1]"
+          emptyText="Upload"
           recSize="320 × 50 px, etc."
           onChange={(url) => {
             onUpdate(ad.id, {
@@ -350,7 +350,7 @@ export function DualImageCell({
           label="Desktop View"
           badgeColor="bg-emerald-600"
           value={landscapeVal}
-          aspectClass="w-24 h-10"
+          aspectClass="w-24 h-6"
           emptyText="+ Desktop"
           recSize="728 × 90 px, etc."
           onChange={(url) => {
@@ -388,12 +388,12 @@ export function DualImageCell({
 
   // Popup & other slots: Portrait + Landscape
   return (
-    <div className="flex items-center gap-3 py-1">
+    <div className="flex items-center justify-start gap-4">
       <SingleSlotImagePicker
         label="Portrait"
         badgeColor="bg-indigo-600"
         value={portraitVal}
-        aspectClass="w-14 h-18"
+        aspectClass="w-10 sm:w-12 aspect-[3/4]"
         emptyText="+ Portrait"
         recSize="600 × 800 px (Mobile)"
         onChange={(url) => {
@@ -408,7 +408,7 @@ export function DualImageCell({
         label="Landscape"
         badgeColor="bg-emerald-600"
         value={landscapeVal}
-        aspectClass="w-22 h-14"
+        aspectClass="w-16 sm:w-20 aspect-[16/9]"
         emptyText="+ Landscape"
         recSize="1200 × 675 px (Desktop)"
         onChange={(url) => {

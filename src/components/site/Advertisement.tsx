@@ -147,6 +147,7 @@ export default function Advertisement({
   const isScriptAd = slotMode === "script" || currentItem?.type === "script" || !!currentItem?.scriptCode;
 
   if (!canSeeAds) return null;
+  if (items.length === 0 && !isScriptAd) return null;
 
   return (
     <aside ref={rootRef} aria-label="Advertisement" className="w-full">
@@ -171,15 +172,10 @@ export default function Advertisement({
           className="group block border border-border bg-muted/30"
         >
           <div className="relative w-full overflow-hidden" style={{ aspectRatio }}>
-            {items.length === 0 ? (
-              <div className="absolute inset-0 grid place-items-center text-xs uppercase tracking-widest text-muted-foreground">
-                Your Ad Here
-              </div>
-            ) : (
-              items.map((s, i) => (
-                <div
-                  key={i}
-                  className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+            {items.map((s, i) => (
+              <div
+                key={i}
+                className="absolute inset-0 transition-opacity duration-700 ease-in-out"
                   style={{ opacity: i === index ? 1 : 0 }}
                   aria-hidden={i !== index}
                 >
@@ -208,8 +204,7 @@ export default function Advertisement({
                   ) : null}
                 </div>
               ))
-            )}
-
+            }
             {items.length > 1 && (
               <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
                 {items.map((_, i) => (

@@ -209,3 +209,5 @@ var saveFontConfigServer = createServerFn({ method: "POST" }).middleware([requir
 });
 //#endregion
 export { getFontConfigServer_createServerFn_handler, saveFontConfigServer_createServerFn_handler };
+
+//# sourceMappingURL=font-config-Bs_r5KPZ.js.map

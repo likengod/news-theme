@@ -34,3 +34,5 @@ function saveAuthorized(v) {
 }
 //#endregion
 export { loadAuthorized as n, saveAuthorized as r, DEFAULT_AUTHORIZED as t };
+
+//# sourceMappingURL=authorized-settings-C6PPe013.js.map

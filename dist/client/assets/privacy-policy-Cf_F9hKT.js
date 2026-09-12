@@ -1,0 +1,2 @@
+import{t as e}from"./jsx-runtime-CF8L0Gwd.js";import{t}from"./PolicyLayout-DdWrXRc-.js";import{h as n}from"./index-Doy3nk55.js";var r=e();function i(){let e=n.useLoaderData();return(0,r.jsx)(t,{title:e?.title||``,intro:e?.intro||``,sections:e?.sections&&e.sections.length>0?e.sections.map(e=>({heading:e.heading,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e.body}})})):[{heading:e?.title||``,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e?.body||``}})}]})}export{i as component};
+//# sourceMappingURL=privacy-policy-Cf_F9hKT.js.map

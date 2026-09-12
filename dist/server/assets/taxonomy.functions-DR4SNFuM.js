@@ -351,3 +351,5 @@ var getTopTags = createServerFn({ method: "GET" }).handler(getTopTags_createServ
 });
 //#endregion
 export { deleteCategory_createServerFn_handler, deleteTag_createServerFn_handler, getCategories_createServerFn_handler, getCategoryData_createServerFn_handler, getTags_createServerFn_handler, getTopTags_createServerFn_handler, importCategories_createServerFn_handler, importTags_createServerFn_handler, saveCategory_createServerFn_handler, saveTag_createServerFn_handler };
+
+//# sourceMappingURL=taxonomy.functions-DR4SNFuM.js.map

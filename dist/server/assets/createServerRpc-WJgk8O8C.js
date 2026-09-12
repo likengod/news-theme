@@ -10,3 +10,5 @@ var createServerRpc = (serverFnMeta, splitImportFn) => {
 };
 //#endregion
 export { createServerRpc as t };
+
+//# sourceMappingURL=createServerRpc-WJgk8O8C.js.map

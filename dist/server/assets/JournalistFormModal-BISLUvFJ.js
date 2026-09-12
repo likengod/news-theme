@@ -203,3 +203,5 @@ function JournalistFormModal({ form, setForm, saving, submitForm }) {
 }
 //#endregion
 export { JournalistFormModal };
+
+//# sourceMappingURL=JournalistFormModal-BISLUvFJ.js.map

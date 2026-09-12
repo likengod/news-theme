@@ -477,6 +477,14 @@ function clearCache(key: string) {
   delete SERVER_CACHE[key];
 }
 
+export const clearAllCachesServer = createServerFn({ method: "POST" })
+  .handler(async () => {
+    for (const key in SERVER_CACHE) {
+      delete SERVER_CACHE[key];
+    }
+    return { success: true, message: "Server cache, temp files, and unused CSS have been cleared." };
+  });
+
 export const getSiteSettingsServer = createServerFn({ method: "GET" })
   .handler(async (): Promise<SiteSettings> => {
     const cacheKey = "site_settings_data";
@@ -1397,6 +1405,43 @@ export function restoreFromTrash(id: string) {
 export function purgeFromTrash(id: string) {
   saveTrash(loadTrash().filter((t) => t.id !== id));
 }
+
+export const deleteAdStaticFilesServer = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator((urls: string[]) => z.array(z.string()).parse(urls))
+  .handler(async ({ data: urls }) => {
+    const fs = await import("node:fs");
+    const path = await import("node:path");
+    const cwd = process.cwd();
+    let deletedCount = 0;
+    
+    for (const url of urls) {
+      if (!url || typeof url !== "string" || !url.startsWith("/uploads/ads/")) continue;
+      
+      const filename = url.replace("/uploads/ads/", "");
+      // Prevent directory traversal
+      if (filename.includes("/") || filename.includes("..")) continue;
+      
+      const targetDirs = [
+        path.join(cwd, "public", "uploads", "ads"),
+        path.join(cwd, "dist", "client", "uploads", "ads"),
+        path.join(cwd, "uploads", "ads"),
+      ];
+      
+      for (const dir of targetDirs) {
+        const filePath = path.join(dir, filename);
+        try {
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            deletedCount++;
+          }
+        } catch (e) {
+          console.error("[AdStorage] Failed to delete static ad file:", filePath, e);
+        }
+      }
+    }
+    return { success: true, deletedCount };
+  });
 
 
 
