@@ -113,8 +113,8 @@ function UpdatesPage() {
         }, 3000);
       } else {
         toast.info("System core is already up to date");
+        await refresh();
       }
-      await refresh();
     } catch (err: any) {
       toast.error("Update failed: " + err.message);
     } finally {
@@ -152,8 +152,8 @@ function UpdatesPage() {
         }, 3000);
       } else {
         toast.error("Build failed — check log below");
+        await refresh();
       }
-      await refresh();
     } catch (err: any) {
       toast.error("Build error: " + err.message);
     } finally {
