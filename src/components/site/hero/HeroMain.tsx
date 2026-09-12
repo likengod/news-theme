@@ -155,7 +155,7 @@ export function HeroMain({ activeLeads, cfg }: any) {
               rel="noopener noreferrer"
               className="group/showcase block w-full"
             >
-              <div className="relative overflow-hidden">
+              <div className="relative overflow-hidden bg-amber-500 min-h-[200px]">
                 <img
                   src={adImg}
                   alt={ad.label || "Featured Content"}
