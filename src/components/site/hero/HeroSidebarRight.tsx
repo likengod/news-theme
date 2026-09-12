@@ -17,10 +17,10 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
       </h3>
       <ul className="space-y-5">
         {activeOpinionItems.map((o: any, i: number) => (
-          <li key={`${o.title}-${i}`}>
+          <li key={`${o?.title || "opinion"}-${i}`}>
             <Link
               to="/news/$slug"
-              params={{ slug: o.slug || "sample" }}
+              params={{ slug: o?.slug || "sample" }}
               className="group flex gap-3"
             >
               <img
@@ -56,10 +56,10 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
         </h3>
         <ul className="mt-4 space-y-4">
           {activePopularItems.map((p: any, i: number) => (
-            <li key={`${p.title}-${i}`}>
+            <li key={`${p?.title || "popular"}-${i}`}>
               <Link
                 to="/news/$slug"
-                params={{ slug: p.slug || "sample" }}
+                params={{ slug: p?.slug || "sample" }}
                 className="group flex gap-3"
               >
                 <img

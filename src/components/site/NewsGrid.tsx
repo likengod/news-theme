@@ -182,7 +182,7 @@ export const NewsGrid = React.memo(function NewsGrid({
               </h3>
               <Link
                 to="/news/$slug"
-                params={{ slug: col.slug || "sample" }}
+                params={{ slug: col?.slug || "sample" }}
                 className="group block"
               >
                 <div className="relative overflow-hidden">
@@ -209,10 +209,10 @@ export const NewsGrid = React.memo(function NewsGrid({
               </Link>
               <ul className="mt-3 space-y-3 border-t border-border pt-3">
                 {col.items.map((item, idx) => (
-                  <li key={`${item.slug || "item"}-${idx}`}>
+                  <li key={`${item?.slug || "item"}-${idx}`}>
                     <Link
                       to="/news/$slug"
-                      params={{ slug: item.slug || "sample" }}
+                      params={{ slug: item?.slug || "sample" }}
                       className="block line-clamp-2 overflow-hidden font-serif text-[15px] font-semibold leading-snug text-primary hover:underline"
                     >
                       {item.title}

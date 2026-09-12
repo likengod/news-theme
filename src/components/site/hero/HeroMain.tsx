@@ -69,6 +69,8 @@ export function HeroMain({ activeLeads, cfg }: any) {
 
   const carouselItems: React.ReactNode[] = [];
   leads.forEach((featured: any, index: number) => {
+    if (!featured) return;
+    
     // 1. Push the news article
     carouselItems.push(
       <CarouselItem key={`news-${index}`}>

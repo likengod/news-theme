@@ -19,7 +19,7 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
         {activeBottomItems[0] && (
           <Link
             to="/news/$slug"
-            params={{ slug: activeBottomItems[0].slug || "sample" }}
+            params={{ slug: activeBottomItems[0]?.slug || "sample" }}
             className="group block"
           >
             {activeBottomItems[0].img && (
@@ -46,7 +46,7 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
         {activeBottomItems[1] && (
           <Link
             to="/news/$slug"
-            params={{ slug: activeBottomItems[1].slug || "sample" }}
+            params={{ slug: activeBottomItems[1]?.slug || "sample" }}
             className="group block border-t border-border pt-6 md:border-t-0 md:pt-0"
           >
             {activeBottomItems[1].img && (
@@ -72,14 +72,17 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
 
         {activeBottomItems.length > 2 && (
           <div className="divide-y divide-border border-t border-border pt-6 md:border-t-0 md:pt-0">
-            {activeBottomItems.slice(2, 5).map((item: any, idx: number) => (
-              <div
-                key={`${item.title}-${idx}`}
-                className={idx === 0 ? "pb-5" : idx === 1 ? "py-5" : "pt-5"}
-              >
-                <HeadlineArticle item={item} dense />
-              </div>
-            ))}
+            {activeBottomItems.slice(2, 5).map((item: any, idx: number) => {
+              if (!item) return null;
+              return (
+                <div
+                  key={`${item.title || "item"}-${idx}`}
+                  className={idx === 0 ? "pb-5" : idx === 1 ? "py-5" : "pt-5"}
+                >
+                  <HeadlineArticle item={item} dense />
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

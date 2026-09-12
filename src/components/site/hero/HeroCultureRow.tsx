@@ -17,9 +17,9 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {activeCultureItems.map((c: any, i: number) => (
           <Link
-            key={`${c.title}-${i}`}
+            key={`${c?.title || "culture"}-${i}`}
             to="/news/$slug"
-            params={{ slug: c.slug || "sample" }}
+            params={{ slug: c?.slug || "sample" }}
             className="group block"
           >
             <div className="relative overflow-hidden">

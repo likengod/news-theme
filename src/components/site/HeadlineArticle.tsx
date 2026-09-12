@@ -35,6 +35,7 @@ export function HeadlineArticle({
   item: Item & { slug?: string };
   dense?: boolean;
 }) {
+  if (!item) return null;
   return (
     <Link
       to="/news/$slug"
