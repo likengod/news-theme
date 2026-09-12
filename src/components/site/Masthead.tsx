@@ -19,8 +19,14 @@ export function Masthead() {
   let dropdownItems = otherCategories;
 
   if (dbCats.length > 0) {
-    const explicitHeaderCats = dbCats.filter((c: any) => c.showInHeader).map((c: any) => c.name);
-    const dropdownCats = dbCats.filter((c: any) => !c.showInHeader).map((c: any) => c.name);
+    const explicitHeaderCats = dbCats
+      .filter((c: any) => c.showInHeader)
+      .sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0))
+      .map((c: any) => c.name);
+    const dropdownCats = dbCats
+      .filter((c: any) => !c.showInHeader)
+      .sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0))
+      .map((c: any) => c.name);
 
     if (explicitHeaderCats.length > 0) {
       navItems = explicitHeaderCats;
@@ -31,13 +37,15 @@ export function Masthead() {
         dropdownItems = [];
       }
     } else {
-      const allCatNames = dbCats.map((c: any) => c.name);
-      if (allCatNames.length <= 9) {
+      const allCatNames = [...dbCats]
+        .sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0))
+        .map((c: any) => c.name);
+      if (allCatNames.length <= 11) {
         navItems = allCatNames;
         dropdownItems = [];
       } else {
-        navItems = [...allCatNames.slice(0, 8), "Others"];
-        dropdownItems = allCatNames.slice(8);
+        navItems = [...allCatNames.slice(0, 10), "Others"];
+        dropdownItems = allCatNames.slice(10);
       }
     }
   }

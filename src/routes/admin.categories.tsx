@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import {
   getCategories,
@@ -12,6 +12,7 @@ import {
 } from "@/lib/taxonomy.functions";
 import { slugify } from "@/lib/news-data";
 import { CategoryTable } from "@/components/admin/categories/CategoryTable";
+import { ReorderModal } from "@/components/admin/categories/ReorderModal";
 import { CsvImportExport } from "@/components/admin/CsvImportExport";
 
 export const Route = createFileRoute("/admin/categories")({
@@ -33,6 +34,7 @@ function CategoriesPage() {
   const [editing, setEditing] = useState<Cat | null>(null);
   const [page, setPage] = useState(1);
   const [q, setQ] = useState("");
+  const [reordering, setReordering] = useState(false);
   const PAGE_SIZE = 15;
 
   const loadCategories = async () => {
@@ -93,6 +95,18 @@ function CategoriesPage() {
     }
   };
 
+  const handleSaveReorder = async (orderedCats: Cat[]) => {
+    try {
+      // Run sequentially or in parallel? Parallel is fine for ~10 items
+      await Promise.all(orderedCats.map(c => saveCatFn({ data: c })));
+      toast.success("Category order saved successfully");
+      setReordering(false);
+      loadCategories();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save category order");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -110,6 +124,14 @@ function CategoriesPage() {
         </div>
         <div className="flex items-center gap-2">
           <CsvImportExport data={allCats} filename="categories" onImport={handleImport} />
+          {allCats.filter(c => c.showInHeader).length > 0 && (
+            <button
+              onClick={() => setReordering(true)}
+              className="inline-flex items-center gap-2 rounded-md bg-white border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-xs"
+            >
+              <GripVertical className="h-4 w-4 text-slate-400" /> Reorder Header
+            </button>
+          )}
           <button
             onClick={() =>
               setEditing({
@@ -264,6 +286,14 @@ function CategoriesPage() {
             </div>
           </div>
         </div>
+      )}
+      {/* Reorder Modal */}
+      {reordering && (
+        <ReorderModal
+          categories={allCats}
+          onClose={() => setReordering(false)}
+          onSave={handleSaveReorder}
+        />
       )}
     </div>
   );

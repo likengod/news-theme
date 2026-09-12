@@ -179,9 +179,9 @@ function AdvertisementsPage() {
   const roleType = (s.licenseRole || "").toLowerCase();
   const keyType = (s.licenseKey || "").toUpperCase();
   
-  const isPremium = planType.includes("premium") || planType.includes("enterprise") || roleType === "admin";
-  const isEnterprise = planType.includes("enterprise") || roleType === "admin";
-  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus") || roleType === "admin";
+  const isPremium = planType.includes("premium") || planType.includes("enterprise");
+  const isEnterprise = planType.includes("enterprise");
+  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
 
   const [tab, setTab] = useState<Tab>("home1");
   const [ads, setAds] = useState<AdSlideItem[]>([]);

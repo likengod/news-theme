@@ -43,7 +43,7 @@ export function TopBar() {
   const dbCats = useCategories();
   const allItems =
     dbCats.length > 0
-      ? dbCats.map((c: any) => c.name)
+      ? [...dbCats].sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((c: any) => c.name)
       : sections.filter((s) => s !== "Others").concat(otherCategories);
 
   useEffect(() => {
