@@ -192,37 +192,50 @@ function UpdatesPage() {
           <span>System Core Update</span>
         </div>
 
-        <div className="flex items-center gap-3">
-          {updatesAvailable ? (
+          <div className="flex items-center gap-3">
+            {updatesAvailable ? (
+              <button
+                onClick={handlePullAndUpdate}
+                disabled={pulling || building}
+                className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700 active:bg-red-800 disabled:opacity-60 cursor-pointer"
+              >
+                {pulling ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-white" />
+                ) : (
+                  <Zap className="h-4 w-4 fill-white text-white" />
+                )}
+                <span>
+                  {pulling ? "Updating System..." : `Update to ${latestVersion}`}
+                </span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-500 border border-slate-200">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                <span>Updated ({currentVersion})</span>
+              </div>
+            )}
+
             <button
-              onClick={handlePullAndUpdate}
+              onClick={handleBuild}
               disabled={pulling || building}
-              className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700 active:bg-red-800 disabled:opacity-60 cursor-pointer"
+              className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800 active:bg-slate-950 disabled:opacity-60 cursor-pointer"
             >
-              {pulling || building ? (
+              {building ? (
                 <Loader2 className="h-4 w-4 animate-spin text-white" />
               ) : (
-                <Zap className="h-4 w-4 fill-white text-white" />
+                <Hammer className="h-4 w-4 text-white" />
               )}
-              <span>
-                {pulling || building ? "Updating System..." : `Update to ${latestVersion}`}
-              </span>
+              <span>{building ? "Building..." : "Build Production"}</span>
             </button>
-          ) : (
-            <div className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-500 border border-slate-200">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-              <span>Updated ({currentVersion})</span>
-            </div>
-          )}
 
-          <button
-            onClick={refresh}
-            disabled={loading}
-            className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white p-2 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          </button>
-        </div>
+            <button
+              onClick={refresh}
+              disabled={loading}
+              className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white p-2 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            </button>
+          </div>
       </div>
 
       {/* Build Terminal Output */}
