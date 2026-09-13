@@ -145,7 +145,7 @@ export function ActivateWebsiteTab({
   const handleDeactivate = async () => {
     if (!window.confirm("Are you sure you want to change or deactivate your license? This will restrict your website features.")) return;
     
-    setInputValue("");
+    setInputValue(s.licenseKey || "");
     const updatedSettings = {
       ...s,
       licenseKey: "",
@@ -191,6 +191,13 @@ export function ActivateWebsiteTab({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setIsPricingModalOpen(true)}
+                className="shrink-0 flex items-center justify-center gap-2 rounded-lg bg-[#34c759] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#2eaa4c]"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Buy License
+              </button>
               <button
                 onClick={handleDeactivate}
                 className="shrink-0 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:border-rose-200"
