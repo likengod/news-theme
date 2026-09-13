@@ -4,8 +4,8 @@ import { useHomepageConfig } from "@/hooks/use-homepage-config";
 
 export function LiveVideo() {
   const { liveVideo } = useHomepageConfig();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [muted, setMuted] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // If live stream is toggled off in admin settings, do not render
