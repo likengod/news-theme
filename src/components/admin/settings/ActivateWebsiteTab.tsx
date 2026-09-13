@@ -191,18 +191,26 @@ export function ActivateWebsiteTab({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => setIsPricingModalOpen(true)}
-                className="shrink-0 flex items-center justify-center gap-2 rounded-lg bg-[#34c759] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#2eaa4c]"
-              >
-                <ShoppingCart className="h-4 w-4" />
-                Buy License
-              </button>
+              {s.licenseType !== "Enterprise+" && (
+                <button
+                  onClick={() => setIsPricingModalOpen(true)}
+                  className="shrink-0 flex items-center justify-center gap-2 rounded-lg bg-[#34c759] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#2eaa4c]"
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  Upgrade License
+                </button>
+              )}
+              {s.licenseType === "Enterprise+" && (
+                <span className="shrink-0 flex items-center justify-center gap-2 rounded-lg bg-emerald-100 px-4 py-2 text-xs font-semibold text-emerald-800 border border-emerald-200">
+                  <ShieldCheck className="h-4 w-4" />
+                  Fully Upgraded
+                </span>
+              )}
               <button
                 onClick={handleDeactivate}
-                className="shrink-0 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:border-rose-200"
+                className="shrink-0 text-xs font-medium text-slate-400 hover:text-slate-600 underline underline-offset-2 transition"
               >
-                Change / Deactivate License
+                Enter new key
               </button>
             </div>
           </div>
