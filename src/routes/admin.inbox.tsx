@@ -17,6 +17,7 @@ import {
   Filter,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import {
   adminGetInboxRequests,
   adminGetInboxSummary,
@@ -85,7 +86,12 @@ const STATUS_STYLES: Record<string, string> = {
 // ─── Page Component ───────────────────────────────────────────────────────────
 
 function AdminInboxPage() {
+  const s = useSiteSettings();
+  const planType = (s.licenseType || "").toLowerCase();
+  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
+
   const [requests, setRequests] = useState<InboxRequest[]>([]);
+  const visibleRequests = requests.filter((req) => isEnterprisePlus || req.type !== "withdraw");
   const [summary, setSummary] = useState<SummaryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState("all");
@@ -145,6 +151,7 @@ function AdminInboxPage() {
 
   const countFor = (type: string, status?: string) => {
     return summary
+      .filter((r) => isEnterprisePlus || r.type !== "withdraw")
       .filter((r) => (type === "all" || r.type === type) && (!status || r.status === status))
       .reduce((acc, r) => acc + Number(r.count), 0);
   };
@@ -237,7 +244,9 @@ function AdminInboxPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {Object.entries(TYPE_META).map(([type, meta]) => {
+        {Object.entries(TYPE_META)
+          .filter(([type]) => isEnterprisePlus || type !== "withdraw")
+          .map(([type, meta]) => {
           const Icon = meta.icon;
           const pending = countFor(type, "Pending");
           const total = countFor(type);
@@ -290,7 +299,9 @@ function AdminInboxPage() {
         </span>
 
         <div className="flex gap-1">
-          {["all", "contact", "work_with_us", "withdraw", "delete_account"].map((t) => (
+          {["all", "contact", "work_with_us", "withdraw", "delete_account"]
+            .filter((t) => isEnterprisePlus || t !== "withdraw")
+            .map((t) => (
             <button
               key={t}
               onClick={() => setFilterType(t)}
@@ -325,7 +336,7 @@ function AdminInboxPage() {
             <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
             Loading requests…
           </div>
-        ) : requests.length === 0 ? (
+        ) : visibleRequests.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-slate-400">
             <Inbox className="mb-3 h-10 w-10 opacity-30" />
             <p className="text-sm font-medium">No requests found</p>
@@ -339,10 +350,10 @@ function AdminInboxPage() {
                 <input
                   type="checkbox"
                   className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer"
-                  checked={requests.length > 0 && selected.size === requests.length}
+                  checked={visibleRequests.length > 0 && selected.size === visibleRequests.length}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setSelected(new Set(requests.map((r) => r.id)));
+                      setSelected(new Set(visibleRequests.map((r) => r.id)));
                     } else {
                       setSelected(new Set());
                     }
@@ -361,7 +372,7 @@ function AdminInboxPage() {
               )}
             </div>
             <ul className="divide-y divide-slate-100">
-              {requests.map((req) => {
+              {visibleRequests.map((req) => {
                 const meta = TYPE_META[req.type] ?? TYPE_META.contact;
                 const Icon = meta.icon;
                 const isExpanded = expandedId === req.id;
