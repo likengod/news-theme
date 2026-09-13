@@ -215,18 +215,6 @@ function UpdatesPage() {
               </div>
             )}
 
-            <button
-              onClick={handleBuild}
-              disabled={pulling || building}
-              className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800 active:bg-slate-950 disabled:opacity-60 cursor-pointer"
-            >
-              {building ? (
-                <Loader2 className="h-4 w-4 animate-spin text-white" />
-              ) : (
-                <Hammer className="h-4 w-4 text-white" />
-              )}
-              <span>{building ? "Building..." : "Build Production"}</span>
-            </button>
 
             <button
               onClick={refresh}
@@ -267,7 +255,7 @@ function UpdatesPage() {
             <Rocket className="mb-2 h-8 w-8 opacity-30" />
             <p className="text-sm font-semibold">No deployments recorded</p>
             <p className="text-xs">
-              Click "Update Now" or "Build Production Bundle" to create a record.
+              Click "Update Now" to create a record.
             </p>
           </div>
         ) : (
