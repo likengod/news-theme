@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { authClient as supabase } from "@/lib/auth-client";
 import { getCurrentUserRole } from "@/lib/auth.functions";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { useTheme } from "@/lib/theme";
 
 type User = { id: string; email?: string; user_metadata?: Record<string, unknown> };
@@ -57,6 +58,10 @@ function getPoints(userId: string): number {
 }
 
 export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile" }) {
+  const s = useSiteSettings();
+  const planType = (s.licenseType || "").toLowerCase();
+  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
+
   const [user, setUser] = useState<User | null>(null);
   const [points, setPoints] = useState<number>(0);
   const [role, setRole] = useState<string | null>(null);
@@ -170,17 +175,21 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
           </span>
           <div className="flex flex-col text-xs">
             <span className="font-semibold">{name}</span>
-            {isEarningUser && <span className="text-muted-foreground">Wallet: ₹{points}</span>}
+            {isEarningUser && isEnterprisePlus && <span className="text-muted-foreground">Wallet: ₹{points}</span>}
           </div>
         </div>
         {isEarningUser && (
           <>
-            <Link to="/earn-points" className="hover:text-foreground">
-              Wallet
-            </Link>
-            <Link to="/earn-points" className="hover:text-foreground">
-              Earn Points
-            </Link>
+            {isEnterprisePlus && (
+              <>
+                <Link to="/earn-points" className="hover:text-foreground">
+                  Wallet
+                </Link>
+                <Link to="/earn-points" className="hover:text-foreground">
+                  Earn Points
+                </Link>
+              </>
+            )}
             <Link to="/profile" className="hover:text-foreground">
               My profile
             </Link>
@@ -231,23 +240,27 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
         {/* Earning Users Only: Wallet & Earn Points & Profile */}
         {isEarningUser && (
           <>
-            <DropdownMenuItem
-              onSelect={() => navigate({ to: "/earn-points" })}
-              className="cursor-pointer"
-            >
-              <Wallet className="mr-2 h-4 w-4 text-emerald-600" />
-              <span className="flex-1">Wallet</span>
-              <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                ₹{points}
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => navigate({ to: "/earn-points" })}
-              className="cursor-pointer"
-            >
-              <Star className="mr-2 h-4 w-4 text-amber-500" />
-              <span className="flex-1">Earn Points</span>
-            </DropdownMenuItem>
+            {isEnterprisePlus && (
+              <>
+                <DropdownMenuItem
+                  onSelect={() => navigate({ to: "/earn-points" })}
+                  className="cursor-pointer"
+                >
+                  <Wallet className="mr-2 h-4 w-4 text-emerald-600" />
+                  <span className="flex-1">Wallet</span>
+                  <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                    ₹{points}
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => navigate({ to: "/earn-points" })}
+                  className="cursor-pointer"
+                >
+                  <Star className="mr-2 h-4 w-4 text-amber-500" />
+                  <span className="flex-1">Earn Points</span>
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuItem
               onSelect={() => navigate({ to: "/profile" })}
               className="cursor-pointer"

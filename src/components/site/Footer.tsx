@@ -16,9 +16,8 @@ export function Footer() {
     ? s.builtByUrl
     : `https://${s.builtByUrl || "GorillaTechsolution.com"}`;
 
-  const isPremium =
-    ["Enterprise", "Enterprise+", "Premium"].includes(s.licenseType || "") ||
-    s.licenseRole === "VIP";
+  const planType = (s.licenseType || "").toLowerCase();
+  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
 
   const quickLinks: { label: string; to?: string }[][] = [
     [
@@ -45,7 +44,7 @@ export function Footer() {
       { label: t("footer.subscription"), to: "/subscription" },
       { label: t("footer.workWithUs"), to: "/work-with-us" },
       { label: t("footer.archive"), to: "/archive" },
-    ].concat(isPremium ? [{ label: t("footer.earnPoints"), to: "/earn-points" }] : []),
+    ].concat(isEnterprisePlus ? [{ label: t("footer.earnPoints"), to: "/earn-points" }] : []),
   ];
 
   const footerLight = s.footerLogoLight || s.logoLight;
