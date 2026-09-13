@@ -133,9 +133,8 @@ function saveState(userId: string, state: State) {
 
 function EarnPointsPage() {
   const settings = useSiteSettings();
-  const isPremium =
-    ["Enterprise", "Enterprise+", "Premium"].includes(settings.licenseType || "") ||
-    settings.licenseRole === "VIP";
+  const planType = (settings.licenseType || "").toLowerCase();
+  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
 
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -153,7 +152,7 @@ function EarnPointsPage() {
 
   useEffect(() => {
     // Only load if premium
-    if (!isPremium) return;
+    if (!isEnterprisePlus) return;
 
     // Read rewards from admin config
     const groups = loadRewards();
@@ -278,7 +277,7 @@ function EarnPointsPage() {
     return { text: "", ok: true };
   };
 
-  if (!isPremium) {
+  if (!isEnterprisePlus) {
     return (
       <div className="min-h-screen bg-background text-foreground flex flex-col">
         <Header showTicker={false} showBreakingBar={false} />
@@ -287,10 +286,10 @@ function EarnPointsPage() {
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
               <Lock className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h1 className="mt-6 text-xl font-bold text-card-foreground">Feature Locked</h1>
+            <h1 className="mt-6 text-xl font-bold text-card-foreground">Enterprise+ Feature</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              The Wallet and Rewards system is exclusively available on Premium, Enterprise, and
-              Enterprise+ licenses. Please upgrade your license to unlock this feature.
+              The Wallet and Rewards system is exclusively available on the Enterprise+ plan.
+              Please ask the site administrator to upgrade their license to unlock this feature.
             </p>
             <Link
               to="/"
