@@ -14,6 +14,7 @@ import { SectionCard } from "@/components/admin/homepage/SectionCard";
 import { HeroSectionEditor } from "@/components/admin/homepage/HeroSectionEditor";
 import { NewsGridEditor } from "@/components/admin/homepage/NewsGridEditor";
 import { LiveVideoEditor } from "@/components/admin/homepage/LiveVideoEditor";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 
 export const Route = createFileRoute("/admin/homepage")({
   ssr: false,
@@ -51,6 +52,10 @@ function Group({
 }
 
 function HomepageEditorPage() {
+  const s = useSiteSettings();
+  const planType = (s.licenseType || "").toLowerCase();
+  const isEnterprise = planType.includes("enterprise");
+
   const [cfg, setCfg] = useState<HomepageConfig>(defaultHomepageConfig);
   const [dirty, setDirty] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -129,18 +134,26 @@ function HomepageEditorPage() {
         defaultOpen={true}
       >
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
+          <div className={`flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-xs ${!isEnterprise ? "opacity-60" : ""}`}>
             <div>
-              <h3 className="text-sm font-semibold text-slate-800">Stock Market Ticker Bar</h3>
+              <h3 className="text-sm font-semibold text-slate-800">
+                Stock Market Ticker Bar
+                {!isEnterprise && (
+                  <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-800">
+                    Enterprise
+                  </span>
+                )}
+              </h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 Displays live indices (NIFTY 50, SENSEX, GOLD, SILVER, CRUDE OIL) under the header.
               </p>
             </div>
-            <label className="relative inline-flex cursor-pointer items-center ml-3 shrink-0">
+            <label className={`relative inline-flex items-center ml-3 shrink-0 ${isEnterprise ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
               <input
                 type="checkbox"
-                checked={cfg.showTicker ?? true}
-                onChange={(e) => update("showTicker", e.target.checked)}
+                checked={isEnterprise ? (cfg.showTicker ?? false) : false}
+                onChange={(e) => isEnterprise && update("showTicker", e.target.checked)}
+                disabled={!isEnterprise}
                 className="peer sr-only"
                 aria-label="Toggle Stock Market Ticker Bar"
               />

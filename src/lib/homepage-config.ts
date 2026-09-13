@@ -58,7 +58,7 @@ export const defaultHomepageConfig: HomepageConfig = {
   },
   watch: { title: "Watch", fontSize: 16, color: "#1A1110" },
   marketsMagazine: { title: "Markets Magazine", fontSize: 16, color: "#1A1110" },
-  showTicker: true,
+  showTicker: false,
   showBreakingBar: true,
   liveVideo: {
     enabled: true,
