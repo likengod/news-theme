@@ -1,7 +1,8 @@
 import { useMemo, useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Gift, Award } from "lucide-react";
+import { Gift, Award, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { useSiteSettings } from "@/lib/site-content";
 import {
   loadRewards,
   saveRewards,
@@ -37,6 +38,9 @@ export const Route = createFileRoute("/admin/rewards")({
 });
 
 function RewardsPage() {
+  const s = useSiteSettings();
+  const isEnterprise = (s.licenseType || "").toLowerCase().includes("enterprise");
+
   const [groups, setGroups] = useState<RewardGroup[]>(() => loadRewards());
   const [active, setActive] = useState<string>("all");
   const [ranksList, setRanksList] = useState<JournalistRank[]>(() => loadRanks());
@@ -54,6 +58,20 @@ function RewardsPage() {
       .then((c) => setClaims(c))
       .catch(() => {});
   }, []);
+
+  if (!isEnterprise) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 mb-4">
+          <Lock className="h-8 w-8 text-slate-400" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Enterprise Feature</h2>
+        <p className="text-slate-500 max-w-md">
+          The Rewards & Points Engine requires an Enterprise or Enterprise+ license. Please upgrade your license to unlock this feature.
+        </p>
+      </div>
+    );
+  }
 
   const persist = (next: RewardGroup[]) => {
     setGroups(next);
