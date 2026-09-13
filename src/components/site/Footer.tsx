@@ -60,7 +60,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="grid gap-8 md:grid-cols-3">
           {/* Brand */}
-          <div>
+          <div className="flex flex-col items-center text-center md:items-start md:text-left">
             {showLogo && footerLight && (
               <img
                 src={footerLight}
@@ -112,7 +112,7 @@ export function Footer() {
                 "News Theme is an independent newsroom covering breaking news, finance, business and markets across Northeast India and beyond. Trusted, verified and editorially independent journalism."}
             </p>
             <SocialIcons
-              className="mt-4"
+              className="mt-4 justify-center md:justify-start"
               size="md"
               links={{
                 facebook: s.facebook,
@@ -129,13 +129,13 @@ export function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div className="md:text-center">
+          <div className="text-center md:text-center">
             <h5 className="text-sm font-bold uppercase tracking-widest text-foreground">
               {t("footer.quickLinks")}
             </h5>
             <div className="mt-3 space-y-2 text-sm text-muted-foreground">
               {quickLinks.map((row, i) => (
-                <div key={i} className="flex flex-wrap gap-x-5 gap-y-2 md:justify-center">
+                <div key={i} className="flex flex-wrap gap-x-5 gap-y-2 justify-center md:justify-center">
                   {row.map((l) =>
                     l.to ? (
                       <Link
@@ -157,12 +157,12 @@ export function Footer() {
           </div>
 
           {/* Connect */}
-          <div className="md:text-right">
+          <div className="text-center md:text-right">
             <h5 className="text-sm font-bold uppercase tracking-widest text-foreground">
               {t("footer.connectWithUs")}
             </h5>
             <ul className="mt-3 space-y-2.5 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2 md:justify-end">
+              <li className="flex items-start justify-center gap-2 md:justify-end">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>
                   Agartala, Tripura (W) India
@@ -170,13 +170,13 @@ export function Footer() {
                   Pin: 799006
                 </span>
               </li>
-              <li className="flex items-center gap-2 md:justify-end">
+              <li className="flex items-center justify-center gap-2 md:justify-end">
                 <Phone className="h-4 w-4 shrink-0" />
                 <a href="tel:+919999999999" className="hover:text-foreground hover:underline">
                   +91 99999 99999
                 </a>
               </li>
-              <li className="flex items-center gap-2 md:justify-end">
+              <li className="flex items-center justify-center gap-2 md:justify-end">
                 <Mail className="h-4 w-4 shrink-0" />
                 <a
                   href="mailto:hello@northeasttimeline.com"
@@ -191,9 +191,9 @@ export function Footer() {
 
         {/* Bottom Card Container */}
         <div className="mt-6 flex flex-col items-center justify-between gap-3 rounded-xl border border-border/80 bg-muted/40 px-5 py-3 text-xs text-muted-foreground shadow-xs md:flex-row">
-          <p className="font-medium">{copyright}</p>
+          <p className="font-medium text-center md:text-left">{copyright}</p>
 
-          <p className="flex flex-wrap items-center gap-1.5">
+          <p className="flex flex-wrap items-center justify-center gap-1.5 md:justify-end">
             <span>{t("footer.builtBy")}:</span>
             <a
               id="gorilla-tech-partner-tag"
