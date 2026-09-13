@@ -105,6 +105,14 @@ export function SingleSlotImagePicker({
 
   const handleDeviceUpload = async (f?: File | null) => {
     if (!f) return;
+    
+    // Enforce 500KB limit for advertisement uploads
+    if (f.size > 500 * 1024) {
+      toast.error("Image file must be under 500KB. Please compress it before uploading.");
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
+    
     try {
       const webpFile = await convertFileToWebp(f);
       const isConverted = webpFile !== f;
