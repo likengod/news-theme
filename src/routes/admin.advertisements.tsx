@@ -277,6 +277,10 @@ function AdvertisementsPage() {
   };
 
   const handleAddAd = () => {
+    if (!isEnterprise && ads.length >= 1) {
+      toast.error("You must have an Enterprise license to add multiple ads in a single slot.");
+      return;
+    }
     const newId = uid();
     setAds((prev) => [
       ...prev,
@@ -859,7 +863,13 @@ function AdvertisementsPage() {
                 <button
                   type="button"
                   onClick={handleAddAd}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition hover:bg-emerald-500 active:scale-98"
+                  disabled={!isEnterprise && ads.length >= 1}
+                  title={!isEnterprise && ads.length >= 1 ? "Enterprise license required for multiple ads" : ""}
+                  className={`inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition ${
+                    !isEnterprise && ads.length >= 1
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-emerald-500 active:scale-98"
+                  }`}
                 >
                   <Plus className="h-3.5 w-3.5" /> Add ad
                 </button>
