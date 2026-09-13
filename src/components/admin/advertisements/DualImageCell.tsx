@@ -387,7 +387,7 @@ export function DualImageCell({
     );
   }
 
-  if (slot === "featured_slide") {
+  if (slot === "hero_showcase") {
     return (
       <div className="flex items-center gap-3 py-1">
         <SingleSlotImagePicker

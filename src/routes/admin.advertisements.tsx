@@ -135,7 +135,7 @@ const SLOTS: SlotMeta[] = [
     shownOn: "Header or top of pages",
   },
   {
-    key: "featured_slide",
+    key: "hero_showcase",
     label: "Featured Ads",
     orientation: "Landscape",
     ratio: "16:9",
@@ -382,7 +382,7 @@ function AdvertisementsPage() {
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-px">
         <div className="flex flex-wrap items-center gap-1.5">
           {SLOTS.map((s) => {
-            if ((s.key === "featured_slide" || s.key === "reel_ads") && !isEnterprisePlus) {
+            if ((s.key === "hero_showcase" || s.key === "reel_ads") && !isEnterprisePlus) {
               return null;
             }
             const isActive = tab === s.key;
@@ -473,7 +473,7 @@ function AdvertisementsPage() {
 
       {/* Main Tab Content */}
       {((tab === "popup" || tab === "leaderboard") && !isPremium) ||
-      ((tab === "featured_slide" || tab === "reel_ads") && !isEnterprisePlus) ? (
+      ((tab === "hero_showcase" || tab === "reel_ads") && !isEnterprisePlus) ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
             <Lock className="h-8 w-8 text-slate-400" />
@@ -481,13 +481,13 @@ function AdvertisementsPage() {
           <h3 className="mt-4 text-base font-semibold text-slate-800">Premium Feature Locked</h3>
           <p className="mt-1 max-w-sm text-sm text-slate-500">
             The{" "}
-            {tab === "featured_slide" || tab === "reel_ads"
+            {tab === "hero_showcase" || tab === "reel_ads"
               ? SLOTS.find((s) => s.key === tab)?.label
               : tab === "popup"
                 ? "Popup"
                 : "Leaderboard"}{" "}
             advertisement slot is exclusively available on{" "}
-            {tab === "featured_slide" || tab === "reel_ads" ? "Enterprise+" : "Premium"} licenses.
+            {tab === "hero_showcase" || tab === "reel_ads" ? "Enterprise+" : "Premium"} licenses.
             Please upgrade your license to unlock this slot.
           </p>
           <button

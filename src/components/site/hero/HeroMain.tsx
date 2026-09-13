@@ -17,19 +17,19 @@ import { ScriptAdRenderer } from "@/components/site/ScriptAdRenderer";
 
 export function HeroMain({ activeLeads, cfg }: any) {
   const ctx = useAdSettings();
-  const [featuredAds, setFeaturedAds] = React.useState(ctx?.adConfig?.slots?.featured_slide || []);
+  const [featuredAds, setFeaturedAds] = React.useState(ctx?.adConfig?.slots?.hero_showcase || []);
   const [featuredAdMode, setFeaturedAdMode] = React.useState(
-    ctx?.adConfig?.modes?.featured_slide || "image",
+    ctx?.adConfig?.modes?.hero_showcase || "image",
   );
   const [featuredAdScript, setFeaturedAdScript] = React.useState(
-    ctx?.adConfig?.scripts?.featured_slide || "",
+    ctx?.adConfig?.scripts?.hero_showcase || "",
   );
 
   React.useEffect(() => {
     const sync = () => {
-      setFeaturedAds(loadAds("featured_slide"));
-      setFeaturedAdMode(loadAdSlotMode("featured_slide"));
-      setFeaturedAdScript(loadAdSlotScript("featured_slide"));
+      setFeaturedAds(loadAds("hero_showcase"));
+      setFeaturedAdMode(loadAdSlotMode("hero_showcase"));
+      setFeaturedAdScript(loadAdSlotScript("hero_showcase"));
     };
     sync();
     window.addEventListener("nt:ads-updated", sync);

@@ -714,7 +714,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         let parsed = JSON.parse(rows[0].value) as AdConfiguration;
         if (parsed?.slots) {
           parsed.slots.reel_ads = parsed.slots.reel_ads || [];
-          parsed.slots.featured_slide = parsed.slots.featured_slide || [];
+          parsed.slots.hero_showcase = parsed.slots.hero_showcase || [];
         }
         if (parsed?.modes) {
           parsed.modes.reel_ads = parsed.modes.reel_ads || "image";
@@ -754,7 +754,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         ad3: defaultAdSlidesAd3,
         popup: defaultAdSlidesPopup,
         leaderboard: defaultAdSlidesLeaderboard,
-        featured_slide: defaultAdSlidesHome2,
+        hero_showcase: defaultAdSlidesHome2,
         reel_ads: [],
       },
       modes: {
@@ -763,7 +763,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         ad3: "image",
         popup: "image",
         leaderboard: "image",
-        featured_slide: "image",
+        hero_showcase: "image",
         reel_ads: "image",
       },
       scripts: {
@@ -772,7 +772,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         ad3: "",
         popup: "",
         leaderboard: "",
-        featured_slide: "",
+        hero_showcase: "",
         reel_ads: "",
       },
       rotations: {
@@ -781,7 +781,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         ad3: 5,
         popup: 6,
         leaderboard: 5,
-        featured_slide: 5,
+        hero_showcase: 5,
         reel_ads: 5,
       },
       popupConfig: defaultPopupConfig,
@@ -1174,7 +1174,7 @@ export type AdSlot =
   | "ad3"
   | "popup"
   | "leaderboard"
-  | "featured_slide"
+  | "hero_showcase"
   | "reel_ads";
 export type AdSlotMode = "image" | "script";
 
@@ -1187,7 +1187,7 @@ const DEFAULT_SLOT_MODE: Record<AdSlot, AdSlotMode> = {
   ad3: "image",
   popup: "image",
   leaderboard: "image",
-  featured_slide: "image",
+  hero_showcase: "image",
   reel_ads: "image",
 };
 
@@ -1247,7 +1247,7 @@ const ADS_KEYS: Record<AdSlot, string> = {
   ad3: "nt:ads:v2:ad3",
   popup: "nt:ads:v2:popup",
   leaderboard: "nt:ads:v2:leaderboard",
-  featured_slide: "nt:ads:v2:featured_slide",
+  hero_showcase: "nt:ads:v2:hero_showcase",
   reel_ads: "nt:ads:v2:reel_ads",
 };
 
@@ -1261,7 +1261,7 @@ const DEFAULT_ROTATION: Record<AdSlot, number> = {
   ad3: 5,
   popup: 6,
   leaderboard: 5,
-  featured_slide: 5,
+  hero_showcase: 5,
   reel_ads: 5,
 };
 
@@ -1428,7 +1428,7 @@ const DEFAULTS: Record<AdSlot, AdSlideItem[]> = {
   ad3: defaultAdSlidesAd3,
   popup: defaultAdSlidesPopup,
   leaderboard: defaultAdSlidesLeaderboard,
-  featured_slide: [],
+  hero_showcase: [],
   reel_ads: [],
 };
 
@@ -1474,7 +1474,7 @@ export function safeSetItem(key: string, value: string): boolean {
 
     // 4. If still overflowing, prune other slot caches
     try {
-      const adSlots: AdSlot[] = ["leaderboard", "popup", "ad3", "home2", "home1", "featured_slide"];
+      const adSlots: AdSlot[] = ["leaderboard", "popup", "ad3", "home2", "home1", "hero_showcase"];
       for (const slot of adSlots) {
         const slotKey = ADS_KEYS[slot];
         if (slotKey && slotKey !== key && localStorage.getItem(slotKey)) {
@@ -1626,7 +1626,7 @@ export function cleanCloggedStorage() {
         "ad3",
         "popup",
         "leaderboard",
-        "featured_slide",
+        "hero_showcase",
       ];
       for (const slot of adSlots) {
         const slotKey = ADS_KEYS[slot];
@@ -1839,7 +1839,7 @@ export function syncAdConfigurationToServer() {
       ad3: loadAds("ad3"),
       popup: loadAds("popup"),
       leaderboard: loadAds("leaderboard"),
-      featured_slide: loadAds("featured_slide"),
+      hero_showcase: loadAds("hero_showcase"),
       reel_ads: loadAds("reel_ads"),
     },
     modes: {
@@ -1848,7 +1848,7 @@ export function syncAdConfigurationToServer() {
       ad3: loadAdSlotMode("ad3"),
       popup: loadAdSlotMode("popup"),
       leaderboard: loadAdSlotMode("leaderboard"),
-      featured_slide: loadAdSlotMode("featured_slide"),
+      hero_showcase: loadAdSlotMode("hero_showcase"),
       reel_ads: loadAdSlotMode("reel_ads"),
     },
     scripts: {
@@ -1857,7 +1857,7 @@ export function syncAdConfigurationToServer() {
       ad3: loadAdSlotScript("ad3"),
       popup: loadAdSlotScript("popup"),
       leaderboard: loadAdSlotScript("leaderboard"),
-      featured_slide: loadAdSlotScript("featured_slide"),
+      hero_showcase: loadAdSlotScript("hero_showcase"),
       reel_ads: loadAdSlotScript("reel_ads"),
     },
     rotations: {
@@ -1866,7 +1866,7 @@ export function syncAdConfigurationToServer() {
       ad3: loadAdRotation("ad3"),
       popup: loadAdRotation("popup"),
       leaderboard: loadAdRotation("leaderboard"),
-      featured_slide: loadAdRotation("featured_slide"),
+      hero_showcase: loadAdRotation("hero_showcase"),
       reel_ads: loadAdRotation("reel_ads"),
     },
     popupConfig: loadPopupConfig(),
