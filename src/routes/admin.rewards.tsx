@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Gift, Award, Lock } from "lucide-react";
 import { toast } from "sonner";
-import { useSiteSettings } from "@/lib/site-content";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import {
   loadRewards,
   saveRewards,
