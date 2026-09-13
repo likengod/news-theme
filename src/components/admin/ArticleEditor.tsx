@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Pencil,
   Trash2,
@@ -134,8 +134,7 @@ export default function ArticleEditor({
   onSave: (r: Row) => void;
 }) {
   const s = useSiteSettings();
-  const isEnterprise =
-    ["Enterprise", "Enterprise+"].includes(s.licenseType || "") || s.licenseRole === "VIP";
+  const isEnterprise = (s.licenseType || "").toLowerCase().includes("enterprise");
 
   // Normalize initial data to handle null database values
   const normalizedInitial = {

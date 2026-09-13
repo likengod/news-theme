@@ -140,18 +140,8 @@ function SettingsPage() {
   const roleType = (s.licenseRole || "").toLowerCase();
   const keyType = (s.licenseKey || "").toUpperCase();
   const isVIP = roleType === "vip" || roleType === "admin";
-  const isEnterprise =
-    isVIP ||
-    planType.includes("enterprise") ||
-    planType.includes("demo") ||
-    keyType.includes("ENT") ||
-    keyType.includes("DEMO");
-  const isEnterprisePlus =
-    isVIP ||
-    planType.includes("enterprise+") ||
-    planType.includes("enterprise plus") ||
-    keyType.includes("ENT_PLUS") ||
-    keyType.includes("DEMO");
+  const isEnterprise = planType.includes("enterprise");
+  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
   const isPremium = isEnterprise || planType.includes("premium");
 
   useEffect(() => {
