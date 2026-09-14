@@ -140,6 +140,17 @@ export type SiteSettings = {
   eventButtonEnabled: boolean;
   eventFormEnabled: boolean;
   eventImageUrl: string;
+  eventGreeting: string;
+  eventSection1Divider: string;
+  eventPrizesTitle: string;
+  eventCriteriaTitle: string;
+  eventCriteria: string;
+  eventGuidelinesTitle: string;
+  eventGuidelinesText: string;
+  eventGuidelinesBadge: string;
+  eventSection2Divider: string;
+  eventFormTitle: string;
+  eventFormSubtitle: string;
 
   // Software License
   licenseKey?: string;
@@ -250,6 +261,19 @@ export const defaultSettings: SiteSettings = {
   eventButtonEnabled: true,
   eventFormEnabled: true,
   eventImageUrl: "",
+  eventGreeting: "॥ শারদীয়া দুর্গোৎসব বিশেষ প্রতিযোগিতা ॥",
+  eventSection1Divider: "॥ প্রতিযোগী সম্মান ও মূল্যায়ন ॥",
+  eventPrizesTitle: "পুরস্কার ও সম্মাননা",
+  eventCriteriaTitle: "মূল্যায়নের মূল ভিত্তি",
+  eventCriteria:
+    "ঐতিহ্য ও নান্দনিক মণ্ডপসজ্জা\nস্বকীয় প্রতিমা নির্মাণ ও শৈল্পিক ভাব\nপরিবেশবান্ধব উপাদান ও পরিচ্ছন্নতা\nশৃঙ্খলা, দর্শনার্থী নিরাপত্তা ও আলোকসজ্জা",
+  eventGuidelinesTitle: "অংশগ্রহণকারী নির্দেশিকা",
+  eventGuidelinesText:
+    "ত্রিপুরার যে কোনো নিবন্ধিত বা সর্বজনীন পূজা কমিটি ও ক্লাব এই শারদ সম্মান প্রতিযোগিতায় অংশগ্রহণ করতে পারবে। নিচে থাকা ফর্মটি পূরণ করে আপনার ক্লাবের অন্তর্ভুক্তি নিশ্চিত করুন।",
+  eventGuidelinesBadge: "অংশগ্রহণ সম্পূর্ণ বিনামূল্যে",
+  eventSection2Divider: "॥ শারদ সম্মান আবেদন পত্র ॥",
+  eventFormTitle: "ইভেন্ট নিবন্ধন ফরম (Event Registration)",
+  eventFormSubtitle: "শারদ সম্মানের জন্য আপনার ক্লাব বা পূজোর বিস্তারিত তথ্য প্রদান করুন",
 
   googleSiteVerification: "",
   bingSiteVerification: "",

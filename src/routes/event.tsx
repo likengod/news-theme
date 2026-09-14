@@ -111,6 +111,28 @@ function EventPage() {
   const isButtonEnabled = s.eventButtonEnabled !== false;
   const isFormEnabled = s.eventFormEnabled !== false;
 
+  const eventGreeting = s.eventGreeting || "॥ শারদীয়া দুর্গোৎসব বিশেষ প্রতিযোগিতা ॥";
+  const eventSection1Divider = s.eventSection1Divider || "॥ প্রতিযোগী সম্মান ও মূল্যায়ন ॥";
+  const eventPrizesTitle = s.eventPrizesTitle || "পুরস্কার ও সম্মাননা";
+  const eventCriteriaTitle = s.eventCriteriaTitle || "মূল্যায়নের মূল ভিত্তি";
+  const rawCriteria =
+    s.eventCriteria ||
+    "ঐতিহ্য ও নান্দনিক মণ্ডপসজ্জা\nস্বকীয় প্রতিমা নির্মাণ ও শৈল্পিক ভাব\nপরিবেশবান্ধব উপাদান ও পরিচ্ছন্নতা\nশৃঙ্খলা, দর্শনার্থী নিরাপত্তা ও আলোকসজ্জা";
+  const criteriaList = rawCriteria
+    .split("\n")
+    .map((c) => c.trim())
+    .filter(Boolean);
+
+  const eventGuidelinesTitle = s.eventGuidelinesTitle || "অংশগ্রহণকারী নির্দেশিকা";
+  const eventGuidelinesText =
+    s.eventGuidelinesText ||
+    "ত্রিপুরার যে কোনো নিবন্ধিত বা সর্বজনীন পূজা কমিটি ও ক্লাব এই শারদ সম্মান প্রতিযোগিতায় অংশগ্রহণ করতে পারবে। নিচে থাকা ফর্মটি পূরণ করে আপনার ক্লাবের অন্তর্ভুক্তি নিশ্চিত করুন।";
+  const eventGuidelinesBadge = s.eventGuidelinesBadge || "অংশগ্রহণ সম্পূর্ণ বিনামূল্যে";
+  const eventSection2Divider = s.eventSection2Divider || "॥ শারদ সম্মান আবেদন পত্র ॥";
+  const eventFormTitle = s.eventFormTitle || "ইভেন্ট নিবন্ধন ফরম (Event Registration)";
+  const eventFormSubtitle =
+    s.eventFormSubtitle || "শারদ সম্মানের জন্য আপনার ক্লাব বা পূজোর বিস্তারিত তথ্য প্রদান করুন";
+
   const rawPrizes =
     s.eventPrizes ||
     "১ম স্থান: ৫০,০০০ টাকা ও বিশেষ শারদ স্মারক\n২য় স্থান: ৩০,০০০ টাকা ও রৌপ্য স্মারক\n৩য় স্থান: ২০,০০০ টাকা ও সম্মাননা পত্র\nবিশেষ বিভাগ: সেরা আলোকসজ্জা, সেরা প্রতিমা ও সেরা শৃঙ্খলা পুরস্কার";
@@ -180,7 +202,7 @@ function EventPage() {
           {/* Festive Sacred Salutation */}
           <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-red-500/15 to-amber-500/10 px-4 py-1.5 text-xs sm:text-sm font-serif font-bold text-amber-900 dark:text-amber-200 mb-4 tracking-wide shadow-xs">
             <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-            <span>॥ শারদীয়া দুর্গোৎসব বিশেষ প্রতিযোগিতা ॥</span>
+            <span>{eventGreeting}</span>
             <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
           </div>
 
@@ -226,7 +248,7 @@ function EventPage() {
         </section>
 
         {/* ─── Decorative Alpana Divider ─── */}
-        <FestiveDivider title="॥ প্রতিযোগী সম্মান ও মূল্যায়ন ॥" />
+        <FestiveDivider title={eventSection1Divider} />
 
         {/* ─── Highlights & Criteria Showcase (Seamless Columns, No Card Boxes) ─── */}
         <section className="py-4">
@@ -237,7 +259,7 @@ function EventPage() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-700 dark:bg-red-950/70 dark:text-red-300 border border-red-300/60 dark:border-red-800/60">
                   <Trophy className="h-4 w-4" />
                 </div>
-                <span>পুরস্কার ও সম্মাননা</span>
+                <span>{eventPrizesTitle}</span>
               </div>
               <ul className="space-y-2.5 text-xs sm:text-sm text-stone-700 dark:text-stone-300">
                 {prizeList.map((prize, idx) => (
@@ -255,25 +277,15 @@ function EventPage() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300/60 dark:border-amber-800/60">
                   <Award className="h-4 w-4" />
                 </div>
-                <span>মূল্যায়নের মূল ভিত্তি</span>
+                <span>{eventCriteriaTitle}</span>
               </div>
               <ul className="space-y-2.5 text-xs sm:text-sm text-stone-700 dark:text-stone-300">
-                <li className="flex items-start gap-2 leading-relaxed">
-                  <span className="text-amber-500 font-bold text-sm leading-none mt-0.5">✦</span>
-                  <span>ঐতিহ্য ও নান্দনিক মণ্ডপসজ্জা</span>
-                </li>
-                <li className="flex items-start gap-2 leading-relaxed">
-                  <span className="text-amber-500 font-bold text-sm leading-none mt-0.5">✦</span>
-                  <span>স্বকীয় প্রতিমা নির্মাণ ও শৈল্পিক ভাব</span>
-                </li>
-                <li className="flex items-start gap-2 leading-relaxed">
-                  <span className="text-amber-500 font-bold text-sm leading-none mt-0.5">✦</span>
-                  <span>পরিবেশবান্ধব উপাদান ও পরিচ্ছন্নতা</span>
-                </li>
-                <li className="flex items-start gap-2 leading-relaxed">
-                  <span className="text-amber-500 font-bold text-sm leading-none mt-0.5">✦</span>
-                  <span>শৃঙ্খলা, দর্শনার্থী নিরাপত্তা ও আলোকসজ্জা</span>
-                </li>
+                {criteriaList.map((criterion, idx) => (
+                  <li key={idx} className="flex items-start gap-2 leading-relaxed">
+                    <span className="text-amber-500 font-bold text-sm leading-none mt-0.5">✦</span>
+                    <span>{criterion}</span>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -283,22 +295,23 @@ function EventPage() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300/60 dark:border-amber-800/60">
                   <Users className="h-4 w-4" />
                 </div>
-                <span>অংশগ্রহণকারী নির্দেশিকা</span>
+                <span>{eventGuidelinesTitle}</span>
               </div>
               <p className="text-xs sm:text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
-                ত্রিপুরার যে কোনো নিবন্ধিত বা সর্বজনীন পূজা কমিটি ও ক্লাব এই শারদ সম্মান প্রতিযোগিতায়
-                অংশগ্রহণ করতে পারবে। নিচে থাকা ফর্মটি পূরণ করে আপনার ক্লাবের অন্তর্ভুক্তি নিশ্চিত করুন।
+                {eventGuidelinesText}
               </p>
-              <div className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-300/80 px-3.5 py-1.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800/60 dark:text-emerald-300">
-                <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <span>অংশগ্রহণ সম্পূর্ণ বিনামূল্যে</span>
-              </div>
+              {eventGuidelinesBadge && (
+                <div className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-300/80 px-3.5 py-1.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800/60 dark:text-emerald-300">
+                  <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span>{eventGuidelinesBadge}</span>
+                </div>
+              )}
             </div>
           </div>
         </section>
 
         {/* ─── Decorative Alpana Divider ─── */}
-        <FestiveDivider title="॥ শারদ সম্মান আবেদন পত্র ॥" />
+        <FestiveDivider title={eventSection2Divider} />
 
         {/* ─── Festive Registration Form (Seamless, No Card Effect) ─── */}
         <section id="register" className="relative scroll-mt-10 my-10 max-w-2xl mx-auto px-2">
@@ -308,10 +321,10 @@ function EventPage() {
               <Flame className="h-5 w-5" />
             </div>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-red-800 dark:text-red-400">
-              ইভেন্ট নিবন্ধন ফরম (Event Registration)
+              {eventFormTitle}
             </h2>
             <p className="mt-1 text-xs sm:text-sm text-stone-600 dark:text-stone-300">
-              শারদ সম্মানের জন্য আপনার ক্লাব বা পূজোর বিস্তারিত তথ্য প্রদান করুন
+              {eventFormSubtitle}
             </p>
           </div>
 
