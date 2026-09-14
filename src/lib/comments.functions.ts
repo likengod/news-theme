@@ -156,6 +156,7 @@ export const getArticleComments = createServerFn({ method: "GET" })
       email: r.user_email,
       body: r.body,
       status: r.status,
+      parentId: r.parent_id ?? null,
       date: new Date(r.created_at).toLocaleDateString(),
     }));
   });
@@ -169,6 +170,7 @@ export const postArticleComment = createServerFn({ method: "POST" })
       name: string;
       email: string;
       body: string;
+      parentId?: number | null;
     }) => data,
   )
   .handler(async ({ data }) => {
@@ -214,10 +216,10 @@ export const postArticleComment = createServerFn({ method: "POST" })
       }
     }
 
-    // 2. Insert into the database as "Approved" (auto-approved since it passed the validation checks)
+    // 2. Insert into the database as "Approved"
     await query(
-      "INSERT INTO comments (article_slug, article_title, user_name, user_email, body, status) VALUES (?, ?, ?, ?, ?, ?)",
-      [data.articleSlug, data.articleTitle, data.name, data.email, data.body, "Approved"],
+      "INSERT INTO comments (article_slug, article_title, user_name, user_email, body, status, parent_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [data.articleSlug, data.articleTitle, data.name, data.email, data.body, "Approved", data.parentId ?? null],
     );
 
     return { success: true };

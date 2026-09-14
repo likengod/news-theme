@@ -320,9 +320,14 @@ export async function initializeDatabase(customAdmin?: {
         user_email VARCHAR(255) NOT NULL,
         body TEXT NOT NULL,
         status VARCHAR(50) DEFAULT 'Pending',
+        parent_id INT DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    // Add parent_id column if it doesn't exist yet (migration for existing tables)
+    try {
+      await query(`ALTER TABLE comments ADD COLUMN parent_id INT DEFAULT NULL`);
+    } catch { /* column already exists */ }
 
     // 9. Create inbox_requests table
     await query(`
