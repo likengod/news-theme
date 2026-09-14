@@ -1,4 +1,4 @@
-﻿import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "./auth-middleware";
 import { getSiteSettingsServer } from "./site-content";
 
@@ -26,7 +26,7 @@ Updated HTML Content:`;
     if (settings.geminiApiKey) {
       try {
         const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiApiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${settings.geminiApiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -164,7 +164,7 @@ Output exactly and ONLY a JSON object (without markdown \`\`\`json blocks) with 
     if (settings.geminiApiKey) {
       try {
         const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiApiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${settings.geminiApiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
