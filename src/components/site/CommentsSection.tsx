@@ -170,21 +170,21 @@ export function CommentsSection({
     replyToName?: string,
   ) => isReply ? (
     /* ── Reply form: compact, inline, minimal space ── */
-    <form onSubmit={onSubmit} className="mt-2 ml-3 pl-2.5 border-l-2 border-indigo-500/40">
+    <form onSubmit={onSubmit} className="mt-2 ml-3 pl-2.5 border-l-2 border-sky-400">
       {/* Header: who is replying */}
-      <div className="flex items-center gap-1.5 mb-1.5 text-xs text-indigo-700">
-        <Reply className="h-3 w-3 text-indigo-600" />
-        <span className="text-[11px]">Replying to <strong className="font-semibold text-indigo-950">{replyToName}</strong></span>
+      <div className="flex items-center gap-1.5 mb-1.5 text-xs text-sky-700">
+        <Reply className="h-3 w-3 text-sky-500" />
+        <span className="text-[11px]">Replying to <strong className="font-semibold text-sky-950">{replyToName}</strong></span>
         {userDisplayName && (
           <>
-            <span className="text-indigo-400">·</span>
-            <span className="text-[11px] text-indigo-700">as <strong className="font-semibold text-indigo-950">{userDisplayName}</strong></span>
+            <span className="text-sky-400">·</span>
+            <span className="text-[11px] text-sky-700">as <strong className="font-semibold text-sky-950">{userDisplayName}</strong></span>
           </>
         )}
       </div>
       {/* Textarea with feather pen icon */}
-      <div className="flex gap-2 items-start bg-indigo-50/40 border border-indigo-100 rounded-lg p-2">
-        <div className="flex items-center justify-center shrink-0 mt-0.5 text-indigo-600">
+      <div className="flex gap-2 items-start bg-sky-50/50 border border-sky-100 rounded-lg p-2">
+        <div className="flex items-center justify-center shrink-0 mt-0.5 text-sky-500">
           <Feather className="h-3.5 w-3.5" />
         </div>
         <div className="flex-1">
@@ -198,21 +198,21 @@ export function CommentsSection({
             autoFocus
             className="w-full resize-none border-0 bg-transparent p-0 text-xs text-[#141414] placeholder:text-muted-foreground/60 focus:outline-none transition-colors"
           />
-          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-indigo-100">
+          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-sky-100">
             <span className="text-[10px] text-muted-foreground">
               {dr.length}/500 {dr.length < 15 && dr.length > 0 && <span className="text-amber-600 font-medium">(min 15)</span>}
             </span>
             <div className="flex items-center gap-1.5">
               {onCancel && (
                 <button type="button" onClick={onCancel}
-                  className="text-[11px] text-muted-foreground hover:text-indigo-700 transition-colors px-2 py-0.5 font-medium">
+                  className="text-[11px] text-muted-foreground hover:text-sky-700 transition-colors px-2 py-0.5 font-medium">
                   Cancel
                 </button>
               )}
               <button
                 type="submit"
                 disabled={sub || dr.trim().length < 15}
-                className="inline-flex items-center gap-1 rounded-full bg-indigo-600 px-3 py-1 text-[11px] font-semibold text-white hover:bg-indigo-700 disabled:opacity-30 transition-opacity"
+                className="inline-flex items-center gap-1 rounded-full bg-sky-500 px-3 py-1 text-[11px] font-semibold text-white hover:bg-sky-600 disabled:opacity-30 transition-opacity"
               >
                 {sub && <Loader2 className="h-3 w-3 animate-spin text-white" />}
                 Reply
@@ -316,9 +316,9 @@ export function CommentsSection({
                       setReplyingTo(isReplyingThis ? null : { id: c.id, name: c.user });
                       setReplyDraft("");
                     }}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors py-0.5"
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-500 hover:text-sky-600 transition-colors py-0.5"
                   >
-                    <Reply className="h-3 w-3 text-indigo-600" />
+                    <Reply className="h-3 w-3 text-sky-500" />
                     <span>{isReplyingThis ? "Cancel" : "Reply"}</span>
                   </button>
                 </div>
