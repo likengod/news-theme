@@ -98,6 +98,48 @@ export const deleteAllCommentsFn = createServerFn({ method: "POST" })
     return { success: true, remaining: count };
   });
 
+// Admin only: Get ALL comments for CSV export
+export const getAllCommentsFn = createServerFn({ method: "GET" })
+  .middleware([requireAuth])
+  .handler(async (): Promise<CommentRow[]> => {
+    const rows = await query(
+      `SELECT c.id, c.article_slug, c.article_title, u.display_name AS user_name, u.email, c.body, c.status, c.created_at
+       FROM comments c
+       LEFT JOIN users u ON u.id = c.user_id
+       ORDER BY c.created_at DESC`,
+      [],
+    );
+    return rows.map((r: any) => ({
+      id: r.id,
+      articleSlug: r.article_slug,
+      articleTitle: r.article_title,
+      user: r.user_name || "",
+      email: r.email || "",
+      body: r.body,
+      status: r.status,
+      date: new Date(r.created_at).toLocaleDateString(),
+    }));
+  });
+
+// Admin only: Import comments from CSV
+export const importCommentsFn = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator((data: CommentRow[]) => data)
+  .handler(async ({ data: rows }) => {
+    let inserted = 0;
+    for (const row of rows) {
+      if (!row.body || !row.articleSlug) continue;
+      const status = ["Pending", "Approved", "Spam"].includes(row.status) ? row.status : "Pending";
+      await query(
+        `INSERT INTO comments (article_slug, article_title, body, status, created_at)
+         VALUES (?, ?, ?, ?, NOW())`,
+        [row.articleSlug || "", row.articleTitle || "", row.body, status],
+      );
+      inserted++;
+    }
+    return { success: true, inserted };
+  });
+
 // Public: Get approved comments for an article
 export const getArticleComments = createServerFn({ method: "GET" })
   .validator((slug: string) => slug)

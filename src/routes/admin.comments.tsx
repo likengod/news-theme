@@ -8,10 +8,13 @@ import {
   updateCommentStatus,
   deleteComment,
   deleteAllCommentsFn,
+  getAllCommentsFn,
+  importCommentsFn,
   generateDummyCommentsFn,
   type CommentRow,
 } from "@/lib/comments.functions";
 import { CommentTable } from "@/components/admin/comments/CommentTable";
+import { CsvImportExport } from "@/components/admin/CsvImportExport";
 
 export const Route = createFileRoute("/admin/comments")({
   component: CommentsPage,
@@ -26,8 +29,20 @@ function CommentsPage() {
   const updateStatusFn = useServerFn(updateCommentStatus);
   const deleteCommentFn = useServerFn(deleteComment);
   const deleteAllFn = useServerFn(deleteAllCommentsFn);
+  const getAllFn = useServerFn(getAllCommentsFn);
+  const importFn = useServerFn(importCommentsFn);
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
   const [deletingAll, setDeletingAll] = useState(false);
+
+  const handleImport = async (data: CommentRow[]) => {
+    try {
+      const res = await importFn({ data });
+      toast.success(`Successfully imported ${res.inserted} comment${res.inserted !== 1 ? "s" : ""}!`);
+      loadComments();
+    } catch (err: any) {
+      toast.error(err.message || "Import failed");
+    }
+  };
 
   const [rows, setRows] = useState<C[]>([]);
   const [loading, setLoading] = useState(true);
@@ -128,6 +143,12 @@ function CommentsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <CsvImportExport
+            data={rows}
+            getData={getAllFn}
+            filename="comments"
+            onImport={handleImport}
+          />
           <button
             onClick={() => setShowAiModal(true)}
             className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
