@@ -46,6 +46,91 @@ export const Route = createFileRoute("/event")({
   component: EventPage,
 });
 
+/** Traditional Bengali / Durga Puja Trishul & Third-Eye (ত্রিনয়ন) Festive Motif */
+function DurgaMotif({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Central Trishul Spear */}
+      <path
+        d="M32 6V58M32 6L28 14M32 6L36 14"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      {/* Outer Curved Trishul Prongs */}
+      <path
+        d="M18 16C18 28 32 34 32 34C32 34 46 28 46 16"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M18 16L14 20M46 16L50 20"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      {/* Trishul Base Ring */}
+      <circle cx="32" cy="34" r="3" stroke="currentColor" strokeWidth="2" />
+      {/* Third Eye (ত্রিনয়ন) */}
+      <ellipse cx="32" cy="45" rx="8" ry="4.5" stroke="currentColor" strokeWidth="2" />
+      <circle cx="32" cy="45" r="2.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Traditional Alpana / Decorative Corner Ornament */
+function FestiveCorner({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 40 40"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M3 37V12C3 7.02944 7.02944 3 12 3H37"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M8 37V16C8 11.5817 11.5817 8 16 8H37"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeDasharray="3 3"
+        opacity="0.8"
+      />
+      <circle cx="13" cy="13" r="3" fill="currentColor" />
+      <circle cx="23" cy="8" r="1.5" fill="currentColor" />
+      <circle cx="8" cy="23" r="1.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Symmetrical Festive Alpana / Flourish Divider */
+function FestiveDivider({ title = "॥ শুভ শারদীয়া ॥" }: { title?: string }) {
+  return (
+    <div className="flex items-center justify-center gap-3 py-8" aria-hidden="true">
+      <div className="h-[1px] flex-1 max-w-[140px] bg-gradient-to-r from-transparent via-amber-400 to-amber-600 dark:via-amber-500 dark:to-amber-400" />
+      <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300 font-serif font-bold text-xs sm:text-sm tracking-wider">
+        <span className="text-red-600 dark:text-red-400">✦</span>
+        <span>{title}</span>
+        <span className="text-red-600 dark:text-red-400">✦</span>
+      </div>
+      <div className="h-[1px] flex-1 max-w-[140px] bg-gradient-to-l from-transparent via-amber-400 to-amber-600 dark:via-amber-500 dark:to-amber-400" />
+    </div>
+  );
+}
+
 function EventPage() {
   const s = useSiteSettings();
 
@@ -138,312 +223,340 @@ function EventPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF9] text-[#141414] dark:bg-[#0c0c0e] dark:text-[#ededed]">
+    <div className="min-h-screen bg-gradient-to-b from-[#FFFDF9] via-[#FFF9F0] to-[#FFFDF9] text-[#1a1a1a] dark:from-[#0d0c0a] dark:via-[#16120b] dark:to-[#0d0c0a] dark:text-[#f3f3f3]">
       <Header />
 
-      <main className="mx-auto max-w-5xl px-4 py-8 md:py-12">
-        {/* ─── Festive Durga Puja Hero Section ─── */}
-        <section className="relative overflow-hidden rounded-2xl border-2 border-[#E5A93C]/40 bg-gradient-to-b from-[#FFF5E6] via-[#FFF9F0] to-[#FFFDF9] p-6 text-center shadow-lg dark:from-[#241708] dark:via-[#1a1208] dark:to-[#0c0c0e] dark:border-[#92400e]/50 md:p-12">
-          {/* Festive corner decorations */}
-          <div className="pointer-events-none absolute -left-6 -top-6 h-28 w-28 rounded-full bg-amber-400/20 blur-2xl dark:bg-amber-600/10" />
-          <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-red-500/20 blur-2xl dark:bg-red-700/10" />
+      <main className="mx-auto max-w-5xl px-4 py-8 md:py-14">
+        {/* ─── Seamless Festive Hero Section (No Card Box) ─── */}
+        <section className="relative text-center py-6 md:py-10">
+          {/* Ambient Festive Aura & Warm Golden Glow */}
+          <div
+            className="pointer-events-none absolute left-1/2 -top-12 -translate-x-1/2 w-full max-w-3xl h-80 bg-gradient-to-b from-amber-400/20 via-red-500/10 to-transparent blur-3xl -z-10 dark:from-amber-600/15 dark:via-red-900/10"
+            aria-hidden="true"
+          />
 
-          {/* Festive Top Badges */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-600/30 bg-amber-500/10 px-3.5 py-1 text-xs font-bold text-amber-800 dark:text-amber-300 dark:border-amber-500/30 mb-4">
-            <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-            <span>শুভ শারদীয়া দুর্গোৎসব প্রতিযোগিতা</span>
+          {/* Trishul & Third-Eye Sacred Emblem */}
+          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-b from-amber-100 to-amber-200 text-red-700 shadow-md border-2 border-amber-400/80 dark:from-[#2e1d09] dark:to-[#1a1005] dark:text-amber-400 dark:border-amber-600/60">
+            <DurgaMotif className="h-11 w-11 drop-shadow-sm" />
           </div>
 
-          <h1 className="font-serif text-3xl font-extrabold tracking-tight text-[#991b1b] dark:text-[#f87171] sm:text-4xl md:text-5xl">
+          {/* Festive Sacred Salutation */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-red-500/15 to-amber-500/10 px-4 py-1.5 text-xs sm:text-sm font-serif font-bold text-amber-900 dark:text-amber-200 mb-4 tracking-wide shadow-xs">
+            <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+            <span>॥ শারদীয়া দুর্গোৎসব বিশেষ প্রতিযোগিতা ॥</span>
+            <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+          </div>
+
+          {/* Grand Festive Headline */}
+          <h1 className="font-serif text-3xl font-black tracking-tight text-red-800 dark:text-red-400 sm:text-5xl md:text-6xl drop-shadow-xs">
             {eventTitle}
           </h1>
 
-          <p className="mx-auto mt-2 max-w-2xl text-sm font-medium text-amber-900/90 dark:text-amber-200/90 sm:text-base">
+          {/* Festive Subtitle */}
+          <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base font-semibold text-amber-900 dark:text-amber-200">
             {eventSubtitle}
           </p>
 
-          <p className="mx-auto mt-4 max-w-3xl text-xs sm:text-sm leading-relaxed text-[#44403c] dark:text-[#d6d3d1]">
+          {/* Event Narrative */}
+          <p className="mx-auto mt-4 max-w-3xl text-xs sm:text-sm leading-relaxed text-stone-700 dark:text-stone-300">
             {eventDesc}
           </p>
 
-          {/* Key Event Badges */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-[#78350f] dark:text-[#fde68a]">
-            <div className="flex items-center gap-1.5 rounded-lg bg-amber-100/70 dark:bg-amber-950/50 px-3 py-1.5 border border-amber-300/60 dark:border-amber-800/60">
-              <Calendar className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          {/* Date & Location Badges */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs font-semibold">
+            <div className="flex items-center gap-2 rounded-full bg-amber-50 border border-amber-300/80 px-4 py-2 text-amber-950 dark:bg-[#20180b] dark:border-amber-700/60 dark:text-amber-200 shadow-xs">
+              <Calendar className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
               <span>{eventDate}</span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-red-100/70 dark:bg-red-950/50 px-3 py-1.5 border border-red-300/60 dark:border-red-800/60">
-              <MapPin className="h-4 w-4 text-red-600 dark:text-red-400" />
+            <div className="flex items-center gap-2 rounded-full bg-red-50 border border-red-300/80 px-4 py-2 text-red-950 dark:bg-[#230f0f] dark:border-red-800/60 dark:text-red-200 shadow-xs">
+              <MapPin className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
               <span>{eventLocation}</span>
             </div>
           </div>
 
-          {/* Quick CTA to Form if button enabled */}
+          {/* Festive CTA Button */}
           {isButtonEnabled && isFormEnabled && (
-            <div className="mt-6">
+            <div className="mt-8">
               <a
                 href="#register"
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#b91c1c] to-[#c2410c] px-6 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-md hover:from-[#991b1b] hover:to-[#9a3412] hover:shadow-lg transition-all"
+                className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-red-700 via-crimson-600 to-amber-600 px-8 py-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-red-700/25 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-red-600/30 border border-amber-300/40"
               >
-                <Flame className="h-4 w-4" />
+                <Flame className="h-4 w-4 text-amber-200 transition-transform group-hover:rotate-12" />
                 <span>{buttonText}</span>
               </a>
             </div>
           )}
         </section>
 
-        {/* ─── Highlights & Award Categories Grid ─── */}
-        <section className="mt-8 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {/* Card 1: Prizes */}
-          <div className="rounded-xl border border-amber-200/80 bg-white dark:bg-[#141417] dark:border-zinc-800 p-5 shadow-xs">
-            <div className="flex items-center gap-2 text-[#991b1b] dark:text-[#f87171] mb-2 font-bold text-sm">
-              <Trophy className="h-4 w-4" />
-              <span>পুরস্কার ও সম্মাননা</span>
+        {/* ─── Decorative Alpana Divider ─── */}
+        <FestiveDivider title="॥ প্রতিযোগী সম্মান ও মূল্যায়ন ॥" />
+
+        {/* ─── Highlights & Criteria Showcase (Seamless Columns, No Card Boxes) ─── */}
+        <section className="py-4">
+          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-amber-300/40 dark:divide-amber-800/40">
+            {/* Column 1: Prizes */}
+            <div className="pt-6 md:pt-0 md:px-6 first:pl-0">
+              <div className="flex items-center gap-2.5 text-red-800 dark:text-red-400 mb-3 font-serif font-bold text-base">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-700 dark:bg-red-950/70 dark:text-red-300 border border-red-300/60 dark:border-red-800/60">
+                  <Trophy className="h-4 w-4" />
+                </div>
+                <span>পুরস্কার ও সম্মাননা</span>
+              </div>
+              <ul className="space-y-2.5 text-xs sm:text-sm text-stone-700 dark:text-stone-300">
+                {prizeList.map((prize, idx) => (
+                  <li key={idx} className="flex items-start gap-2 leading-relaxed">
+                    <span className="text-amber-500 font-bold text-sm leading-none mt-0.5">✦</span>
+                    <span>{prize}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="space-y-1.5 text-xs text-[#57534e] dark:text-[#a8a29e]">
-              {prizeList.map((prize, idx) => (
-                <li key={idx} className="flex items-start gap-1.5 leading-snug">
-                  <span className="text-amber-500 font-bold">•</span>
-                  <span>{prize}</span>
+
+            {/* Column 2: Criteria */}
+            <div className="pt-6 md:pt-0 md:px-6">
+              <div className="flex items-center gap-2.5 text-amber-800 dark:text-amber-300 mb-3 font-serif font-bold text-base">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300/60 dark:border-amber-800/60">
+                  <Award className="h-4 w-4" />
+                </div>
+                <span>মূল্যায়নের মূল ভিত্তি</span>
+              </div>
+              <ul className="space-y-2.5 text-xs sm:text-sm text-stone-700 dark:text-stone-300">
+                <li className="flex items-start gap-2 leading-relaxed">
+                  <span className="text-amber-500 font-bold text-sm leading-none mt-0.5">✦</span>
+                  <span>ঐতিহ্য ও নান্দনিক মণ্ডপসজ্জা</span>
                 </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Card 2: Evaluation Criteria */}
-          <div className="rounded-xl border border-amber-200/80 bg-white dark:bg-[#141417] dark:border-zinc-800 p-5 shadow-xs">
-            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-2 font-bold text-sm">
-              <Award className="h-4 w-4" />
-              <span>মূল্যায়নের মূল ভিত্তি</span>
+                <li className="flex items-start gap-2 leading-relaxed">
+                  <span className="text-amber-500 font-bold text-sm leading-none mt-0.5">✦</span>
+                  <span>স্বকীয় প্রতিমা নির্মাণ ও শৈল্পিক ভাব</span>
+                </li>
+                <li className="flex items-start gap-2 leading-relaxed">
+                  <span className="text-amber-500 font-bold text-sm leading-none mt-0.5">✦</span>
+                  <span>পরিবেশবান্ধব উপাদান ও পরিচ্ছন্নতা</span>
+                </li>
+                <li className="flex items-start gap-2 leading-relaxed">
+                  <span className="text-amber-500 font-bold text-sm leading-none mt-0.5">✦</span>
+                  <span>শৃঙ্খলা, দর্শনার্থী নিরাপত্তা ও আলোকসজ্জা</span>
+                </li>
+              </ul>
             </div>
-            <ul className="space-y-1.5 text-xs text-[#57534e] dark:text-[#a8a29e]">
-              <li className="flex items-start gap-1.5 leading-snug">
-                <span className="text-amber-500 font-bold">•</span>
-                <span>ঐতিহ্য ও নান্দনিক মণ্ডপসজ্জা</span>
-              </li>
-              <li className="flex items-start gap-1.5 leading-snug">
-                <span className="text-amber-500 font-bold">•</span>
-                <span>স্বকীয় প্রতিমা নির্মাণ ও শৈল্পিক ভাব</span>
-              </li>
-              <li className="flex items-start gap-1.5 leading-snug">
-                <span className="text-amber-500 font-bold">•</span>
-                <span>পরিবেশবান্ধব উপাদান ও পরিচ্ছন্নতা</span>
-              </li>
-              <li className="flex items-start gap-1.5 leading-snug">
-                <span className="text-amber-500 font-bold">•</span>
-                <span>শৃঙ্খলা, দর্শনার্থী নিরাপত্তা ও আলোকসজ্জা</span>
-              </li>
-            </ul>
-          </div>
 
-          {/* Card 3: Club Participation */}
-          <div className="rounded-xl border border-amber-200/80 bg-white dark:bg-[#141417] dark:border-zinc-800 p-5 shadow-xs sm:col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 mb-2 font-bold text-sm">
-              <Users className="h-4 w-4" />
-              <span>অংশগ্রহণকারী নির্দেশিকা</span>
-            </div>
-            <p className="text-xs text-[#57534e] dark:text-[#a8a29e] leading-relaxed">
-              ত্রিপুরার যে কোনো নিবন্ধিত বা সর্বজনীন পূজা কমিটি ও ক্লাব এই শারদ সম্মান প্রতিযোগিতায়
-              অংশগ্রহণ করতে পারবে। নিচে থাকা ফর্মটি পূরণ করে আপনার ক্লাবের অন্তর্ভুক্তি নিশ্চিত করুন।
-            </p>
-            <div className="mt-3 flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
-              <ShieldCheck className="h-4 w-4 shrink-0" />
-              <span>অংশগ্রহণ সম্পূর্ণ বিনামূল্যে</span>
+            {/* Column 3: Guidelines */}
+            <div className="pt-6 md:pt-0 md:px-6 last:pr-0 sm:col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-200 mb-3 font-serif font-bold text-base">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300/60 dark:border-amber-800/60">
+                  <Users className="h-4 w-4" />
+                </div>
+                <span>অংশগ্রহণকারী নির্দেশিকা</span>
+              </div>
+              <p className="text-xs sm:text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
+                ত্রিপুরার যে কোনো নিবন্ধিত বা সর্বজনীন পূজা কমিটি ও ক্লাব এই শারদ সম্মান প্রতিযোগিতায়
+                অংশগ্রহণ করতে পারবে। নিচে থাকা ফর্মটি পূরণ করে আপনার ক্লাবের অন্তর্ভুক্তি নিশ্চিত করুন।
+              </p>
+              <div className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-300/80 px-3.5 py-1.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800/60 dark:text-emerald-300">
+                <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>অংশগ্রহণ সম্পূর্ণ বিনামূল্যে</span>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ─── Event Registration Form Section ─── */}
-        <section id="register" className="mt-10 scroll-mt-10">
-          <div className="overflow-hidden rounded-2xl border border-amber-300/80 bg-white dark:bg-[#141417] dark:border-zinc-800 shadow-md">
-            {/* Header of Form */}
-            <div className="bg-gradient-to-r from-[#991b1b] to-[#c2410c] px-6 py-4 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-base font-bold sm:text-lg flex items-center gap-2">
-                    <Flame className="h-5 w-5 text-amber-300" />
-                    <span>ইভেন্ট নিবন্ধন ফরম (Event Registration)</span>
-                  </h2>
-                  <p className="mt-0.5 text-xs text-amber-100">
-                    শারদ সম্মানের জন্য আপনার ক্লাব বা পূজোর বিস্তারিত তথ্য জমা দিন
-                  </p>
-                </div>
+        {/* ─── Decorative Alpana Divider ─── */}
+        <FestiveDivider title="॥ শারদ সম্মান আবেদন পত্র ॥" />
+
+        {/* ─── Festive Registration Form (Scroll / Traditional Frame) ─── */}
+        <section id="register" className="relative scroll-mt-10 my-6">
+          <div className="relative rounded-3xl border-2 border-amber-400/60 bg-gradient-to-b from-amber-50/50 via-white to-amber-50/40 p-6 sm:p-10 md:p-12 shadow-sm dark:border-amber-700/50 dark:from-[#18130a] dark:via-[#100e0a] dark:to-[#18130a]">
+            {/* Traditional Ornamental Alpona Corners */}
+            <FestiveCorner className="absolute top-3 left-3 h-8 w-8 text-amber-500/80 dark:text-amber-400/60" />
+            <FestiveCorner className="absolute top-3 right-3 h-8 w-8 -scale-x-100 text-amber-500/80 dark:text-amber-400/60" />
+            <FestiveCorner className="absolute bottom-3 left-3 h-8 w-8 -scale-y-100 text-amber-500/80 dark:text-amber-400/60" />
+            <FestiveCorner className="absolute bottom-3 right-3 h-8 w-8 -scale-x-100 -scale-y-100 text-amber-500/80 dark:text-amber-400/60" />
+
+            {/* Inscription Header */}
+            <div className="text-center mb-8">
+              <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-700 dark:bg-red-950/80 dark:text-red-300">
+                <Flame className="h-5 w-5" />
               </div>
+              <h2 className="font-serif text-xl sm:text-2xl font-bold text-red-800 dark:text-red-400">
+                ইভেন্ট নিবন্ধন ফরম (Event Registration)
+              </h2>
+              <p className="mt-1 text-xs sm:text-sm text-stone-600 dark:text-stone-300">
+                শারদ সম্মানের জন্য আপনার ক্লাব বা পূজোর বিস্তারিত তথ্য প্রদান করুন
+              </p>
             </div>
 
-            <div className="p-6 md:p-8">
-              {!isFormEnabled ? (
-                /* When form is disabled by admin */
-                <div className="py-8 text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-                    <Lock className="h-6 w-6" />
-                  </div>
-                  <h3 className="mt-3 text-sm font-bold text-slate-900 dark:text-slate-100">
-                    অনলাইন নিবন্ধন আপাতত বন্ধ রয়েছে
-                  </h3>
-                  <p className="mt-1 text-xs text-slate-500">
-                    শারদ সম্মান প্রতিযোগিতার নিবন্ধন সাময়িকভাবে স্থগিত বা সম্পন্ন হয়েছে।
-                  </p>
+            {/* Form Content */}
+            {!isFormEnabled ? (
+              /* When form is disabled by admin */
+              <div className="py-8 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                  <Lock className="h-6 w-6" />
                 </div>
-              ) : submitted ? (
-                /* Success Message */
-                <div className="py-8 text-center">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
-                    <CheckCircle2 className="h-8 w-8" />
-                  </div>
-                  <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-slate-100">
-                    ধন্যবাদ! আপনার নিবন্ধন সফল হয়েছে
-                  </h3>
-                  <p className="mx-auto mt-2 max-w-md text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    আপনার ক্লাবের নাম ও আবেদনপত্র অ্যাডমিন ইনবক্সে জমা হয়েছে। আমাদের শারদ সম্মান টিম
-                    শীঘ্রই আপনার সাথে যোগাযোগ করবে।
-                  </p>
-                  <button
-                    onClick={() => {
-                      setSubmitted(false);
-                      setPhone("");
-                      setAddress("");
-                      setCustomField("");
-                    }}
-                    className="mt-4 rounded-full border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-zinc-700 dark:text-zinc-300"
+                <h3 className="mt-3 text-sm font-bold text-stone-900 dark:text-stone-100">
+                  অনলাইন নিবন্ধন আপাতত বন্ধ রয়েছে
+                </h3>
+                <p className="mt-1 text-xs text-stone-500">
+                  শারদ সম্মান প্রতিযোগিতার নিবন্ধন সাময়িকভাবে স্থগিত বা সম্পন্ন হয়েছে।
+                </p>
+              </div>
+            ) : submitted ? (
+              /* Success Message */
+              <div className="py-8 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
+                  <CheckCircle2 className="h-10 w-10" />
+                </div>
+                <h3 className="mt-4 font-serif text-lg font-bold text-stone-900 dark:text-stone-100">
+                  ধন্যবাদ! আপনার নিবন্ধন সফল হয়েছে
+                </h3>
+                <p className="mx-auto mt-2 max-w-md text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+                  আপনার ক্লাবের নাম ও আবেদনপত্র অ্যাডমিন ইনবক্সে জমা হয়েছে। আমাদের শারদ সম্মান টিম
+                  শীঘ্রই আপনার সাথে যোগাযোগ করবে।
+                </p>
+                <button
+                  onClick={() => {
+                    setSubmitted(false);
+                    setPhone("");
+                    setAddress("");
+                    setCustomField("");
+                  }}
+                  className="mt-6 rounded-full border border-amber-400 px-6 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-100/50 dark:border-amber-700 dark:text-amber-200 transition-colors"
+                >
+                  আরেকটি নিবন্ধন জমা দিন
+                </button>
+              </div>
+            ) : !userId ? (
+              /* When user is NOT logged in */
+              <div className="py-6 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                  <Lock className="h-6 w-6" />
+                </div>
+                <h3 className="mt-3 font-serif text-base font-bold text-stone-900 dark:text-stone-100">
+                  নিবন্ধন করতে লগইন করা আবশ্যক
+                </h3>
+                <p className="mx-auto mt-1 max-w-md text-xs text-stone-600 dark:text-stone-400">
+                  শুধুমাত্র নিবন্ধিত ও লগইন করা ব্যবহারকারীগণ শারদ সম্মানে নিজেদের ক্লাবের নাম
+                  অন্তর্ভুক্ত করতে পারবেন।
+                </p>
+                <div className="mt-5">
+                  <Link
+                    to="/auth"
+                    search={{ redirect: "/event" }}
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red-700 to-amber-700 px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md hover:from-red-800 hover:to-amber-800 transition-all"
                   >
-                    আরেকটি নিবন্ধন করুন
-                  </button>
+                    <span>লগইন / সাইন আপ করুন</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
-              ) : !userId ? (
-                /* When user is NOT logged in */
-                <div className="py-6 text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-                    <Lock className="h-6 w-6" />
-                  </div>
-                  <h3 className="mt-3 text-sm font-bold text-slate-900 dark:text-slate-100">
-                    নিবন্ধন করতে লগইন করা আবশ্যক
-                  </h3>
-                  <p className="mx-auto mt-1 max-w-md text-xs text-slate-600 dark:text-slate-400">
-                    শুধুমাত্র নিবন্ধিত ও লগইন করা ব্যবহারকারীগণ শারদ সম্মানে নিজেদের ক্লাবের নাম
-                    অন্তর্ভুক্ত করতে পারবেন।
-                  </p>
-                  <div className="mt-4">
-                    <Link
-                      to="/auth"
-                      search={{ redirect: "/event" }}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#991b1b] to-[#c2410c] px-5 py-2 text-xs font-bold text-white shadow hover:opacity-90 transition-opacity"
-                    >
-                      <span>লগইন / সাইন আপ করুন</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
+              </div>
+            ) : (
+              /* Authenticated User Registration Form */
+              <form onSubmit={handleSubmit} className="space-y-5 max-w-2xl mx-auto">
+                {/* Logged in badge */}
+                <div className="flex items-center justify-between rounded-xl bg-amber-100/70 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-800/60 px-4 py-2.5 text-xs text-amber-950 dark:text-amber-200">
+                  <span className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>
+                      লগইন আছেন: <strong>{userDisplayName || "User"}</strong> ({userEmail})
+                    </span>
+                  </span>
+                  <span className="text-[10px] text-amber-800 dark:text-amber-300 font-bold uppercase tracking-wider bg-amber-200/60 dark:bg-amber-900/60 px-2 py-0.5 rounded-md">
+                    Verified
+                  </span>
                 </div>
-              ) : (
-                /* Authenticated User Registration Form */
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Logged in badge */}
-                  <div className="flex items-center justify-between rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 px-3.5 py-2 text-xs text-amber-900 dark:text-amber-200">
-                    <span className="flex items-center gap-1.5">
-                      <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                      <span>
-                        লগইন করা আছেন: <strong>{userDisplayName || "User"}</strong> ({userEmail})
-                      </span>
-                    </span>
-                    <span className="text-[10px] text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider">
-                      Verified User
-                    </span>
-                  </div>
 
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {/* Full Name */}
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                        আপনার নাম (Full Name) <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="আপনার পুরো নাম লিখুন"
-                        className="w-full rounded-lg border border-slate-300 bg-background px-3 py-2 text-xs text-foreground focus:border-[#991b1b] focus:outline-none dark:border-zinc-700"
-                      />
-                    </div>
-
-                    {/* Phone Number */}
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                        ফোন নম্বর (Phone Number) <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        required
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="যেমন: +91 98765 43210"
-                        className="w-full rounded-lg border border-slate-300 bg-background px-3 py-2 text-xs text-foreground focus:border-[#991b1b] focus:outline-none dark:border-zinc-700"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Custom Field (Club Name) */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Full Name */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      {customLabel} <span className="text-red-500">*</span>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
+                      আপনার নাম (Full Name) <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       required
-                      value={customField}
-                      onChange={(e) => setCustomField(e.target.value)}
-                      placeholder="যেমন: ভারত রত্ন সংঘ / মিলন সংঘ / ইত্যাদি"
-                      className="w-full rounded-lg border border-slate-300 bg-background px-3 py-2 text-xs text-foreground focus:border-[#991b1b] focus:outline-none dark:border-zinc-700"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="আপনার পুরো নাম লিখুন"
+                      className="w-full rounded-xl border border-amber-300/70 bg-white/90 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-red-600 focus:ring-2 focus:ring-amber-400/20 focus:outline-none dark:bg-zinc-900/90 dark:border-amber-700/60 dark:text-stone-100"
                     />
-                    <p className="mt-1 text-[11px] text-slate-500">
-                      আপনার পূজা কমিটি বা ক্লাবের আনুষ্ঠানিক নাম উল্লেখ করুন।
-                    </p>
                   </div>
 
-                  {/* Address */}
+                  {/* Phone Number */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      পূজামণ্ডপ / ক্লাবের পূর্ণ ঠিকানা (Address) <span className="text-red-500">*</span>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
+                      ফোন নম্বর (Phone Number) <span className="text-red-500">*</span>
                     </label>
-                    <textarea
+                    <input
+                      type="tel"
                       required
-                      rows={3}
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      placeholder="রাস্তা, এলাকা, পাড়া, পিনকোড ও জেলা উল্লেখ করুন..."
-                      className="w-full rounded-lg border border-slate-300 bg-background p-3 text-xs text-foreground focus:border-[#991b1b] focus:outline-none dark:border-zinc-700"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="যেমন: +91 98765 43210"
+                      className="w-full rounded-xl border border-amber-300/70 bg-white/90 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-red-600 focus:ring-2 focus:ring-amber-400/20 focus:outline-none dark:bg-zinc-900/90 dark:border-amber-700/60 dark:text-stone-100"
                     />
                   </div>
+                </div>
 
-                  {/* Submit Button */}
-                  {isButtonEnabled ? (
-                    <div className="pt-2">
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#991b1b] to-[#c2410c] px-6 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow hover:from-[#7f1d1d] hover:to-[#9a3412] disabled:opacity-50 transition-all sm:w-auto"
-                      >
-                        {submitting ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>জমা দেওয়া হচ্ছে...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Send className="h-4 w-4" />
-                            <span>{buttonText}</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-800 border border-amber-200">
-                      নিবন্ধন বাটনটি বর্তমানে নিষ্ক্রিয় রাখা হয়েছে।
-                    </div>
-                  )}
-                </form>
-              )}
-            </div>
+                {/* Custom Field (Club Name) */}
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
+                    {customLabel} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={customField}
+                    onChange={(e) => setCustomField(e.target.value)}
+                    placeholder="যেমন: ভারত রত্ন সংঘ / মিলন সংঘ / ইত্যাদি"
+                    className="w-full rounded-xl border border-amber-300/70 bg-white/90 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-red-600 focus:ring-2 focus:ring-amber-400/20 focus:outline-none dark:bg-zinc-900/90 dark:border-amber-700/60 dark:text-stone-100"
+                  />
+                  <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
+                    আপনার পূজা কমিটি বা ক্লাবের আনুষ্ঠানিক নাম উল্লেখ করুন।
+                  </p>
+                </div>
+
+                {/* Address */}
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
+                    পূজামণ্ডপ / ক্লাবের পূর্ণ ঠিকানা (Address) <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="রাস্তা, এলাকা, পাড়া, পিনকোড ও জেলা উল্লেখ করুন..."
+                    className="w-full rounded-xl border border-amber-300/70 bg-white/90 p-3 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-red-600 focus:ring-2 focus:ring-amber-400/20 focus:outline-none dark:bg-zinc-900/90 dark:border-amber-700/60 dark:text-stone-100"
+                  />
+                </div>
+
+                {/* Submit Button */}
+                {isButtonEnabled ? (
+                  <div className="pt-3 text-center">
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-700 via-crimson-600 to-amber-600 px-10 py-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-red-700/25 hover:from-red-800 hover:to-amber-700 disabled:opacity-50 transition-all border border-amber-300/40"
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>জমা দেওয়া হচ্ছে...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4" />
+                          <span>{buttonText}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="rounded-xl bg-amber-50 p-3 text-xs text-amber-800 border border-amber-200 text-center">
+                    নিবন্ধন বাটনটি বর্তমানে নিষ্ক্রিয় রাখা হয়েছে।
+                  </div>
+                )}
+              </form>
+            )}
           </div>
         </section>
       </main>
