@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { MessageSquare, Loader2, Calendar, Reply, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
@@ -69,9 +69,7 @@ export function CommentsSection({
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [replyingTo, setReplyingTo] = useState<{ id: number; name: string } | null>(null);
 
-  // Reply form state
-  const [replyName, setReplyName] = useState("");
-  const [replyEmail, setReplyEmail] = useState("");
+  // Reply form state (no name/email — auto from session)
   const [replyDraft, setReplyDraft] = useState("");
   const [replySubmitting, setReplySubmitting] = useState(false);
 
@@ -81,10 +79,18 @@ export function CommentsSection({
   const [draft, setDraft] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userDisplayName, setUserDisplayName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user) setUserId(data.session.user.id);
+      if (data.session?.user) {
+        const u = data.session.user;
+        setUserId(u.id);
+        setUserEmail(u.email ?? null);
+        // Try to get display name from user metadata
+        setUserDisplayName(u.user_metadata?.display_name || u.user_metadata?.full_name || u.email?.split("@")[0] || "User");
+      }
     });
   }, []);
 
@@ -113,19 +119,22 @@ export function CommentsSection({
     e.preventDefault();
     const isReply = !!parentId;
     const body = (isReply ? replyDraft : draft).trim();
-    const authorName = (isReply ? replyName : name).trim();
-    const authorEmail = (isReply ? replyEmail : email).trim();
+    const minChars = isReply ? 15 : MIN_CHARACTERS;
 
-    if (!body || !authorName || !authorEmail) { toast.error("Please fill in all fields."); return; }
+    // For replies, use auto-detected session user
+    const authorName = isReply ? (userDisplayName || "") : name.trim();
+    const authorEmail = isReply ? (userEmail || "") : email.trim();
+
+    if (!body || !authorName || !authorEmail) { toast.error(isReply ? "Please login to reply." : "Please fill in all fields."); return; }
     if (containsLinkOrScript(body)) {
       toast(`YOU CAN'T POST THIS COMMENT, BECAUSE OUR ${SITE_NAME.toUpperCase()} DISABLED THIS FEATURE TO PROTECT FOR SCAMER SPAM AND PROMOTION.`);
       return;
     }
-    if (body.length < MIN_CHARACTERS) {
-      toast(`Please ${authorName}, your comment is too short â€” it must be at least ${MIN_CHARACTERS} characters (currently ${body.length} characters).`);
+    if (body.length < minChars) {
+      toast(`Reply must be at least ${minChars} characters (currently ${body.length}).`);
       return;
     }
-    if (hasExcessiveWordRepetition(body)) {
+    if (!isReply && hasExcessiveWordRepetition(body)) {
       toast(`Please ${authorName}, your comment has been flagged. A single word cannot be repeated more than 5 times.`);
       return;
     }
@@ -135,7 +144,7 @@ export function CommentsSection({
       await postCommentFn({ data: { articleSlug, articleTitle, name: authorName, email: authorEmail, body, parentId: parentId ?? null } });
       if (userId) trackComment(userId, articleSlug);
       toast.success(isReply ? "Reply submitted! Pending approval." : "Comment submitted! It is pending administrator approval before appearing here.");
-      if (isReply) { setReplyDraft(""); setReplyName(""); setReplyEmail(""); setReplyingTo(null); }
+      if (isReply) { setReplyDraft(""); setReplyingTo(null); }
       else { setDraft(""); setName(""); setEmail(""); setShowForm(false); }
       loadComments();
     } catch (err: any) {
@@ -162,31 +171,44 @@ export function CommentsSection({
   ) => (
     <form onSubmit={onSubmit} className={`space-y-4 rounded-lg border border-border bg-card p-4 ${isReply ? "ml-8 mt-3 border-l-4 border-l-primary/30" : "mt-5"}`}>
       {replyToName && (
-        <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-          <Reply className="h-3 w-3" /> Replying to <strong>{replyToName}</strong>
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+            <Reply className="h-3 w-3" /> Replying to <strong>{replyToName}</strong>
+          </p>
+          {isReply && userDisplayName && (
+            <p className="text-xs text-muted-foreground">
+              Replying as <strong>{userDisplayName}</strong>
+            </p>
+          )}
+        </div>
       )}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Name</label>
-          <input type="text" required value={n} onChange={(e) => setN(e.target.value)} placeholder="e.g. John Doe"
-            className="w-full border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
+      {!isReply && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Name</label>
+            <input type="text" required value={n} onChange={(e) => setN(e.target.value)} placeholder="e.g. John Doe"
+              className="w-full border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Email</label>
+            <input type="email" required value={em} onChange={(e) => setEm(e.target.value)} placeholder="e.g. john@example.com"
+              className="w-full border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
+          </div>
         </div>
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Email</label>
-          <input type="email" required value={em} onChange={(e) => setEm(e.target.value)} placeholder="e.g. john@example.com"
-            className="w-full border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
-        </div>
-      </div>
+      )}
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Comment</label>
+        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+          {isReply ? "Your Reply" : "Comment"}
+        </label>
         <textarea required value={dr} onChange={(e) => setDr(e.target.value)}
-          placeholder="Write your comment... (minimum 81 characters, links are automatically blocked)"
-          rows={4} maxLength={1000}
+          placeholder={isReply ? "Write your reply... (minimum 15 characters)" : "Write your comment... (minimum 81 characters, links are automatically blocked)"}
+          rows={isReply ? 3 : 4} maxLength={1000}
           className="w-full border border-border bg-background p-3 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{dr.length}/{MIN_CHARACTERS} min characters ({dr.length} total)</span>
+        <span className="text-xs text-muted-foreground">
+          {dr.length}/{isReply ? 15 : MIN_CHARACTERS} min characters ({dr.length} total)
+        </span>
         <div className="flex gap-2">
           {onCancel && (
             <button type="button" onClick={onCancel}
@@ -194,7 +216,8 @@ export function CommentsSection({
               Cancel
             </button>
           )}
-          <button type="submit" disabled={sub || !dr.trim() || !n.trim() || !em.trim()}
+          <button type="submit"
+            disabled={sub || !dr.trim() || (!isReply && (!n.trim() || !em.trim()))}
             className="bg-foreground px-5 py-2 text-xs font-bold uppercase tracking-widest text-background hover:opacity-90 disabled:opacity-40 transition-opacity inline-flex items-center gap-1.5">
             {sub && <Loader2 className="h-3 w-3 animate-spin" />}
             {isReply ? "Submit Reply" : "Submit Comment"}
@@ -241,8 +264,9 @@ export function CommentsSection({
                   </div>
                   <button
                     onClick={() => {
+                      if (!userId) { toast.error("Please login to reply."); return; }
                       setReplyingTo(isReplyingThis ? null : { id: c.id, name: c.user });
-                      setReplyName(""); setReplyEmail(""); setReplyDraft("");
+                      setReplyDraft("");
                     }}
                     className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors shrink-0"
                   >
