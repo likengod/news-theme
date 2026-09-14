@@ -67,121 +67,141 @@ async function ensureDeployTable() {
 
 // ─── Git Status ──────────────────────────────────────────────────────────────
 
-export const getGitStatus = createServerFn({ method: "GET" }).handler(async () => {
-  let version = "v1.0.57";
-  try {
-    const pkgPath = path.join(ROOT, "package.json");
-    const pkgRaw = fs.readFileSync(pkgPath, "utf-8");
-    const pkg = JSON.parse(pkgRaw);
-    if (pkg.version) {
-      version = pkg.version.startsWith("v") ? pkg.version : `v${pkg.version}`;
-    }
-  } catch {}
+let gitStatusCache: { data: any; expiry: number } | null = null;
+const GIT_STATUS_CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache
 
-  let latestVersion = version;
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
-    const headers: Record<string, string> = { "User-Agent": "News-Theme-Updater" };
-    if (PERMANENT_GIT_PAT) {
-      headers["Authorization"] = `token ${PERMANENT_GIT_PAT}`;
+export function invalidateGitStatusCache() {
+  gitStatusCache = null;
+}
+
+export const getGitStatus = createServerFn({ method: "GET" })
+  .validator((d?: { forceRefresh?: boolean }) => d)
+  .handler(async ({ data }) => {
+    if (!data?.forceRefresh && gitStatusCache && gitStatusCache.expiry > Date.now()) {
+      return gitStatusCache.data;
     }
-    const res = await fetch(
-      `https://raw.githubusercontent.com/likengod/news-theme/main/package.json?t=${Date.now()}`,
-      {
-        headers,
-        cache: "no-store",
-        signal: controller.signal,
-      },
-    );
-    clearTimeout(timeoutId);
-    if (res.ok) {
-      const remotePkg: any = await res.json();
-      if (remotePkg.version) {
-        const remoteV = remotePkg.version.startsWith("v")
-          ? remotePkg.version
-          : `v${remotePkg.version}`;
-        if (parseSemver(remoteV) > parseSemver(latestVersion)) {
-          latestVersion = remoteV;
-        }
+
+    let version = "v1.0.57";
+    try {
+      const pkgPath = path.join(ROOT, "package.json");
+      const pkgRaw = fs.readFileSync(pkgPath, "utf-8");
+      const pkg = JSON.parse(pkgRaw);
+      if (pkg.version) {
+        version = pkg.version.startsWith("v") ? pkg.version : `v${pkg.version}`;
       }
-    }
-  } catch (e) {
-    console.warn("[Deploy] Remote version check notice:", e);
-  }
+    } catch {}
 
-  // Also check remote tags directly via git ls-remote with authenticated url
-  try {
-    const authUrl = getAuthenticatedGitUrl();
-    const tagsOutput = git(`ls-remote --tags --sort=v:refname ${authUrl}`);
-    if (tagsOutput && !tagsOutput.includes("fatal") && !tagsOutput.includes("unknown error")) {
-      const lines = tagsOutput.trim().split("\n");
-      for (let i = lines.length - 1; i >= 0; i--) {
-        const match = lines[i].match(/refs\/tags\/(v?[0-9]+\.[0-9]+(\.[0-9]+)?)/);
-        if (match && match[1]) {
-          const tag = match[1].startsWith("v") ? match[1] : `v${match[1]}`;
-          if (parseSemver(tag) > parseSemver(latestVersion)) {
-            latestVersion = tag;
+    let latestVersion = version;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      const headers: Record<string, string> = { "User-Agent": "News-Theme-Updater" };
+      if (PERMANENT_GIT_PAT) {
+        headers["Authorization"] = `token ${PERMANENT_GIT_PAT}`;
+      }
+      const res = await fetch(
+        `https://raw.githubusercontent.com/likengod/news-theme/main/package.json?t=${Date.now()}`,
+        {
+          headers,
+          cache: "no-store",
+          signal: controller.signal,
+        },
+      );
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const remotePkg: any = await res.json();
+        if (remotePkg.version) {
+          const remoteV = remotePkg.version.startsWith("v")
+            ? remotePkg.version
+            : `v${remotePkg.version}`;
+          if (parseSemver(remoteV) > parseSemver(latestVersion)) {
+            latestVersion = remoteV;
           }
-          break;
         }
       }
+    } catch (e) {
+      console.warn("[Deploy] Remote version check notice:", e);
     }
-  } catch {}
 
-  const branch = git("rev-parse --abbrev-ref HEAD");
-  const commitHash = git("rev-parse --short HEAD");
-  const commitFull = git("rev-parse HEAD");
-  const commitMessage = git("log -1 --pretty=%s");
-  const commitDate = git("log -1 --pretty=%ci");
-  const remote = git("remote get-url origin");
-  const dirty = git("status --porcelain");
+    // Also check remote tags directly via git ls-remote with authenticated url
+    try {
+      const authUrl = getAuthenticatedGitUrl();
+      const tagsOutput = git(`ls-remote --tags --sort=v:refname ${authUrl}`);
+      if (tagsOutput && !tagsOutput.includes("fatal") && !tagsOutput.includes("unknown error")) {
+        const lines = tagsOutput.trim().split("\n");
+        for (let i = lines.length - 1; i >= 0; i--) {
+          const match = lines[i].match(/refs\/tags\/(v?[0-9]+\.[0-9]+(\.[0-9]+)?)/);
+          if (match && match[1]) {
+            const tag = match[1].startsWith("v") ? match[1] : `v${match[1]}`;
+            if (parseSemver(tag) > parseSemver(latestVersion)) {
+              latestVersion = tag;
+            }
+            break;
+          }
+        }
+      }
+    } catch {}
 
-  const isGitInstalled = Boolean(
-    remote &&
-    !remote.includes("unknown error") &&
-    !remote.includes("fatal") &&
-    !remote.includes("not a git repository"),
-  );
+    const branch = git("rev-parse --abbrev-ref HEAD");
+    const commitHash = git("rev-parse --short HEAD");
+    const commitFull = git("rev-parse HEAD");
+    const commitMessage = git("log -1 --pretty=%s");
+    const commitDate = git("log -1 --pretty=%ci");
+    const remote = git("remote get-url origin");
+    const dirty = git("status --porcelain");
 
-  let ahead = 0;
-  let behind = 0;
+    const isGitInstalled = Boolean(
+      remote &&
+      !remote.includes("unknown error") &&
+      !remote.includes("fatal") &&
+      !remote.includes("not a git repository"),
+    );
 
-  const authRemote = getAuthenticatedGitUrl();
-  if (isGitInstalled) {
-    if (!remote || !remote.includes(PERMANENT_GIT_PAT)) {
-      git(`remote set-url origin ${authRemote}`);
+    let ahead = 0;
+    let behind = 0;
+
+    const authRemote = getAuthenticatedGitUrl();
+    if (isGitInstalled) {
+      if (!remote || !remote.includes(PERMANENT_GIT_PAT)) {
+        git(`remote set-url origin ${authRemote}`);
+      }
+      git("fetch origin main --tags");
+      const activeBranch = branch.includes("fatal") ? "main" : branch;
+      const behindStr = git(`rev-list --count HEAD..origin/${activeBranch}`);
+      const aheadStr = git(`rev-list --count origin/${activeBranch}..HEAD`);
+      behind = parseInt(behindStr) || 0;
+      ahead = parseInt(aheadStr) || 0;
     }
-    git("fetch origin main --tags");
-    const activeBranch = branch.includes("fatal") ? "main" : branch;
-    const behindStr = git(`rev-list --count HEAD..origin/${activeBranch}`);
-    const aheadStr = git(`rev-list --count origin/${activeBranch}..HEAD`);
-    behind = parseInt(behindStr) || 0;
-    ahead = parseInt(aheadStr) || 0;
-  }
 
-  const hasNewVersion = parseSemver(latestVersion) > parseSemver(version);
-  if (hasNewVersion && behind === 0) {
-    behind = 1;
-  }
+    const hasNewVersion = parseSemver(latestVersion) > parseSemver(version);
+    if (hasNewVersion && behind === 0) {
+      behind = 1;
+    }
 
-  return {
-    version,
-    latestVersion,
-    branch: branch.includes("fatal") ? "main" : branch,
-    commitHash: commitHash.includes("fatal") ? "head" : commitHash,
-    commitFull: commitFull.includes("fatal") ? "" : commitFull,
-    commitMessage: commitMessage.includes("fatal") ? "" : commitMessage,
-    commitDate: commitDate.includes("fatal") ? "" : commitDate,
-    remote: PERMANENT_GIT_REPO,
-    isConfigured: true,
-    hasChanges: dirty.length > 0 && !dirty.includes("fatal"),
-    changedFiles: dirty && !dirty.includes("fatal") ? dirty.split("\n").filter(Boolean).length : 0,
-    ahead,
-    behind,
-    hasNewVersion,
-  };
-});
+    const result = {
+      version,
+      latestVersion,
+      branch: branch.includes("fatal") ? "main" : branch,
+      commitHash: commitHash.includes("fatal") ? "head" : commitHash,
+      commitFull: commitFull.includes("fatal") ? "" : commitFull,
+      commitMessage: commitMessage.includes("fatal") ? "" : commitMessage,
+      commitDate: commitDate.includes("fatal") ? "" : commitDate,
+      remote: PERMANENT_GIT_REPO,
+      isConfigured: true,
+      hasChanges: dirty.length > 0 && !dirty.includes("fatal"),
+      changedFiles: dirty && !dirty.includes("fatal") ? dirty.split("\n").filter(Boolean).length : 0,
+      ahead,
+      behind,
+      hasNewVersion,
+    };
+
+    gitStatusCache = {
+      data: result,
+      expiry: Date.now() + GIT_STATUS_CACHE_TTL,
+    };
+
+    return result;
+  });
 
 // ─── Git Pull ────────────────────────────────────────────────────────────────
 
@@ -253,6 +273,8 @@ export const gitPull = createServerFn({ method: "POST" }).handler(async () => {
       process.exit(0);
     } catch {}
   }, 1200);
+
+  invalidateGitStatusCache();
 
   return {
     success: true,

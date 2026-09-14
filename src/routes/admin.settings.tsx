@@ -47,12 +47,8 @@ import {
   A,
   LogoUploader,
 } from "@/components/admin/settings/SettingsHelpers";
+import { GeneralSettingsForm } from "@/components/admin/settings/GeneralSettingsForm";
 
-const GeneralSettingsForm = lazy(() =>
-  import("@/components/admin/settings/GeneralSettingsForm").then((m) => ({
-    default: m.GeneralSettingsForm,
-  })),
-);
 const ProtectionSettingsForm = lazy(() =>
   import("@/components/admin/settings/ProtectionSettingsForm").then((m) => ({
     default: m.ProtectionSettingsForm,

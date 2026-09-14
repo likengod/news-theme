@@ -85,15 +85,21 @@ const EVENT = "nt:homepage-updated";
 
 // ─── Server Functions (MySQL Database Persistence) ─────────────────────────
 
+let homepageConfigCache: { data: HomepageConfig; expiry: number } | null = null;
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
 export const getHomepageConfigServer = createServerFn({ method: "GET" }).handler(
   async (): Promise<HomepageConfig> => {
+    if (homepageConfigCache && homepageConfigCache.expiry > Date.now()) {
+      return homepageConfigCache.data;
+    }
     try {
       const rows = await query(
         "SELECT value FROM site_settings WHERE setting_key = 'homepage_config'",
       );
       if (rows.length > 0 && rows[0].value) {
         const parsed = JSON.parse(rows[0].value);
-        return {
+        const res = {
           ...defaultHomepageConfig,
           ...parsed,
           newsGridColumns:
@@ -101,8 +107,11 @@ export const getHomepageConfigServer = createServerFn({ method: "GET" }).handler
               ? parsed.newsGridColumns
               : defaultHomepageConfig.newsGridColumns,
         };
+        homepageConfigCache = { data: res, expiry: Date.now() + CACHE_TTL_MS };
+        return res;
       }
     } catch {}
+    homepageConfigCache = { data: defaultHomepageConfig, expiry: Date.now() + CACHE_TTL_MS };
     return defaultHomepageConfig;
   },
 );
@@ -117,6 +126,7 @@ export const saveHomepageConfigServer = createServerFn({ method: "POST" })
        ON DUPLICATE KEY UPDATE value = ?`,
       [json, json],
     );
+    homepageConfigCache = null;
     return { success: true };
   });
 

@@ -11,9 +11,15 @@ import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 
+// Cache setup status in memory once confirmed complete
+let isSetupCompleteCached = false;
+
 // 1. Check if setup wizard is required
 export const checkSetupStatus = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ required: boolean }> => {
+    if (isSetupCompleteCached) {
+      return { required: false };
+    }
     try {
       const config = loadDbConfig();
       if (!config) {
@@ -38,6 +44,7 @@ export const checkSetupStatus = createServerFn({ method: "GET" }).handler(
         return { required: true };
       }
 
+      isSetupCompleteCached = true;
       return { required: false };
     } catch (err: any) {
       console.log("[Setup Status] Connection check warning:", err?.message || err);
@@ -66,6 +73,7 @@ export const executeSetup = createServerFn({ method: "POST" })
       const { dbConfig, adminConfig } = data;
 
       // 1. Create DB and test connection
+      isSetupCompleteCached = false;
       await testDbConnection(dbConfig);
 
       // 2. Close existing pool

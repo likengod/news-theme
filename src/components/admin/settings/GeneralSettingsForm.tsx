@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Save, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { loadSettings, saveSettings, cleanCopyright, type SiteSettings } from "@/lib/site-content";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { LogoUploader } from "@/components/admin/settings/SettingsHelpers";
 
 type FieldDef = {
@@ -63,14 +64,26 @@ const GROUPS: { title: string; fields: FieldDef[] }[] = [
 ];
 
 export function GeneralSettingsForm() {
+  const contextSettings = useSiteSettings();
   const [settings, setSettings] = useState<SiteSettings>(() => {
     const s = loadSettings();
-    if (s.copyright) {
-      s.copyright = cleanCopyright(s.copyright);
+    const merged = { ...contextSettings, ...s };
+    if (merged.copyright) {
+      merged.copyright = cleanCopyright(merged.copyright);
     }
-    return s;
+    return merged;
   });
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (contextSettings && Object.keys(contextSettings).length > 0) {
+      setSettings((prev) => ({
+        ...prev,
+        ...contextSettings,
+        copyright: cleanCopyright(contextSettings.copyright || prev.copyright),
+      }));
+    }
+  }, [contextSettings]);
 
   const update = (k: keyof SiteSettings, v: any) =>
     setSettings((s) => ({

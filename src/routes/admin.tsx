@@ -192,6 +192,20 @@ function AdminLayout() {
 
   useEffect(() => {
     let mounted = true;
+
+    // Check if we already checked for updates recently in this session (within 10 minutes)
+    if (typeof window !== "undefined") {
+      const lastCheck = sessionStorage.getItem("admin_update_check_time");
+      const cachedStatus = sessionStorage.getItem("admin_update_status");
+      if (lastCheck && cachedStatus && Date.now() - parseInt(lastCheck) < 10 * 60 * 1000) {
+        try {
+          const parsed = JSON.parse(cachedStatus);
+          setUpdateStatus(parsed);
+          return;
+        } catch {}
+      }
+    }
+
     getGitStatus()
       .then((res) => {
         if (!mounted) return;
@@ -203,7 +217,7 @@ function AdminLayout() {
             localStorage.getItem("force_update_lock") === "1");
         const hasUpdate =
           isSimulated || Boolean(res?.hasNewVersion || (res?.behind && res.behind > 0));
-        setUpdateStatus({
+        const statusObj = {
           hasUpdate,
           currentVersion: cur,
           latestVersion: isSimulated
@@ -212,7 +226,12 @@ function AdminLayout() {
               : "v2.0.0"
             : latest,
           checked: true,
-        });
+        };
+        setUpdateStatus(statusObj);
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("admin_update_status", JSON.stringify(statusObj));
+          sessionStorage.setItem("admin_update_check_time", Date.now().toString());
+        }
       })
       .catch((e) => {
         console.error("Version check notice:", e);

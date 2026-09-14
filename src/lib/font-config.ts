@@ -284,8 +284,8 @@ function mergeFonts(savedFonts?: FontEntry[]): FontEntry[] {
   return [...SYSTEM_FONTS, ...userOnly];
 }
 
-// Local cache for server operations
-const CACHE_TTL_MS = 10000;
+// Local cache for server operations (5 min TTL, cleared on save)
+const CACHE_TTL_MS = 5 * 60 * 1000;
 const cache = new Map<string, { value: any; expiry: number }>();
 
 function getCached<T>(key: string): T | null {

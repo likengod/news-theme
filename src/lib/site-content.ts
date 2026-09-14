@@ -652,13 +652,13 @@ export const saveCustomPageServer = createServerFn({ method: "POST" })
     return { success: true };
   });
 
-// Server-side cache utility for site settings and ad configurations (10s TTL)
+// Server-side cache utility for site settings and ad configurations (5 min TTL, cleared on save)
 type CacheEntry<T> = {
   data: T;
   expiry: number;
 };
 const SERVER_CACHE: Record<string, CacheEntry<any>> = {};
-const CACHE_TTL_MS = 10000;
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 function getCached<T>(key: string): T | null {
   const entry = SERVER_CACHE[key];
