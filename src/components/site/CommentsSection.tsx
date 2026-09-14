@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { MessageSquare, Loader2, Calendar, Reply, ChevronDown, Feather } from "lucide-react";
+import { MessageSquare, Loader2, Reply, ChevronDown, Feather } from "lucide-react";
 import { toast } from "sonner";
 import { getArticleComments, postArticleComment } from "@/lib/comments.functions";
 import { authClient as supabase } from "@/lib/auth-client";
@@ -295,9 +295,6 @@ export function CommentsSection({
                 <div className="flex items-start justify-between gap-3">
                   <div className="text-sm font-semibold text-foreground">
                     {c.user}
-                    <span className="ml-2 text-xs font-normal text-muted-foreground inline-flex items-center gap-1">
-                      <Calendar className="h-3 w-3 inline" /> {c.date}
-                    </span>
                   </div>
                   <button
                     onClick={() => {
@@ -318,9 +315,6 @@ export function CommentsSection({
                       <li key={r.id} className="pt-2">
                         <div className="text-sm font-semibold text-foreground">
                           {r.user}
-                          <span className="ml-2 text-xs font-normal text-muted-foreground inline-flex items-center gap-1">
-                            <Calendar className="h-3 w-3 inline" /> {r.date}
-                          </span>
                         </div>
                         <p className="mt-1 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{r.body}</p>
                       </li>
