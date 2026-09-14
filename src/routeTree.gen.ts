@@ -24,6 +24,7 @@ import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as EventRouteImport } from './routes/event'
 import { Route as EditorialPolicyRouteImport } from './routes/editorial-policy'
 import { Route as EarnPointsRouteImport } from './routes/earn-points'
 import { Route as DmcaRouteImport } from './routes/dmca'
@@ -132,6 +133,11 @@ const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventRoute = EventRouteImport.update({
+  id: '/event',
+  path: '/event',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EditorialPolicyRoute = EditorialPolicyRouteImport.update({
@@ -320,6 +326,7 @@ export interface FileRoutesByFullPath {
   '/dmca': typeof DmcaRoute
   '/earn-points': typeof EarnPointsRoute
   '/editorial-policy': typeof EditorialPolicyRoute
+  '/event': typeof EventRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
@@ -370,6 +377,7 @@ export interface FileRoutesByTo {
   '/dmca': typeof DmcaRoute
   '/earn-points': typeof EarnPointsRoute
   '/editorial-policy': typeof EditorialPolicyRoute
+  '/event': typeof EventRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
@@ -422,6 +430,7 @@ export interface FileRoutesById {
   '/dmca': typeof DmcaRoute
   '/earn-points': typeof EarnPointsRoute
   '/editorial-policy': typeof EditorialPolicyRoute
+  '/event': typeof EventRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
@@ -475,6 +484,7 @@ export interface FileRouteTypes {
     | '/dmca'
     | '/earn-points'
     | '/editorial-policy'
+    | '/event'
     | '/forgot-password'
     | '/privacy-policy'
     | '/profile'
@@ -525,6 +535,7 @@ export interface FileRouteTypes {
     | '/dmca'
     | '/earn-points'
     | '/editorial-policy'
+    | '/event'
     | '/forgot-password'
     | '/privacy-policy'
     | '/profile'
@@ -576,6 +587,7 @@ export interface FileRouteTypes {
     | '/dmca'
     | '/earn-points'
     | '/editorial-policy'
+    | '/event'
     | '/forgot-password'
     | '/privacy-policy'
     | '/profile'
@@ -628,6 +640,7 @@ export interface RootRouteChildren {
   DmcaRoute: typeof DmcaRoute
   EarnPointsRoute: typeof EarnPointsRoute
   EditorialPolicyRoute: typeof EditorialPolicyRoute
+  EventRoute: typeof EventRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ProfileRoute: typeof ProfileRoute
@@ -753,6 +766,13 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event': {
+      id: '/event'
+      path: '/event'
+      fullPath: '/event'
+      preLoaderRoute: typeof EventRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/editorial-policy': {
@@ -1053,6 +1073,7 @@ const rootRouteChildren: RootRouteChildren = {
   DmcaRoute: DmcaRoute,
   EarnPointsRoute: EarnPointsRoute,
   EditorialPolicyRoute: EditorialPolicyRoute,
+  EventRoute: EventRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   ProfileRoute: ProfileRoute,

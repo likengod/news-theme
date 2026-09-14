@@ -75,6 +75,29 @@ const workWithUsFields: FieldDef[] = [
   },
 ];
 
+const eventFields: FieldDef[] = [
+  { key: "eventTitle", label: "Event Title (ইভেন্টের শিরোনাম)" },
+  { key: "eventSubtitle", label: "Event Subtitle (উপশিরোনাম)" },
+  { key: "eventDescription", label: "Event Description (বিস্তারিত বিবরণ)", textarea: true },
+  { key: "eventDate", label: "Event Schedule / Date (তারিখ ও সময়কাল)" },
+  { key: "eventLocation", label: "Event Location (স্থান / অঞ্চল)" },
+  {
+    key: "eventPrizes",
+    label: "Prizes & Recognition (পুরস্কার ও সম্মাননা তালিকা)",
+    textarea: true,
+    hint: "Format: One prize or category per line",
+  },
+  {
+    key: "eventCustomInputLabel",
+    label: "Custom Registration Field Label (e.g. ক্লাবের নাম / Club Name)",
+    hint: "Customize the extra input field shown in the registration form",
+  },
+  {
+    key: "eventButtonText",
+    label: "Registration Button Text (e.g. নিবন্ধন করুন / Join Event / Register)",
+  },
+];
+
 function PagesPage() {
   const [pages, setPages] = useState<PageContent[]>(() => loadPages());
   const [settings, setSettings] = useState<SiteSettings>(() => loadSettings());
@@ -98,10 +121,10 @@ function PagesPage() {
     setSettings((prev) => ({ ...prev, [k]: v }));
 
   const onSave = async () => {
-    if (activeSlug === "subscription" || activeSlug === "work-with-us") {
+    if (activeSlug === "subscription" || activeSlug === "work-with-us" || activeSlug === "event") {
       await saveSiteSettingsServer({ data: settings }).catch(() => {});
       toast.success(
-        `${activeSlug === "subscription" ? "Subscription" : "Work With Us"} settings saved!`,
+        `${activeSlug === "subscription" ? "Subscription" : activeSlug === "work-with-us" ? "Work With Us" : "Event"} settings saved!`,
       );
     } else {
       savePages(pages);
@@ -112,7 +135,8 @@ function PagesPage() {
 
   const isSubscription = activeSlug === "subscription";
   const isWorkWithUs = activeSlug === "work-with-us";
-  const isSettingsPage = isSubscription || isWorkWithUs;
+  const isEvent = activeSlug === "event";
+  const isSettingsPage = isSubscription || isWorkWithUs || isEvent;
 
   return (
     <div className="space-y-6">
@@ -179,6 +203,19 @@ function PagesPage() {
                 <span className="truncate">Work With Us Settings</span>
               </button>
             </li>
+            <li className="mt-1">
+              <button
+                onClick={() => setActiveSlug("event")}
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
+                  isEvent
+                    ? "bg-slate-900 text-white shadow-sm"
+                    : "text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <Sparkles className="h-4 w-4 shrink-0" />
+                <span className="truncate">Event Page Settings</span>
+              </button>
+            </li>
           </ul>
         </aside>
 
@@ -191,7 +228,9 @@ function PagesPage() {
                   ? "Subscription Settings"
                   : isWorkWithUs
                     ? "Work With Us Settings"
-                    : active?.title}
+                    : isEvent
+                      ? "Event Page Settings (শারদ সম্মান)"
+                      : active?.title}
               </h2>
               <p className="text-xs text-slate-400">
                 Slug: /{isSettingsPage ? activeSlug : active?.slug}
@@ -215,7 +254,44 @@ function PagesPage() {
             </div>
           </div>
 
-          {isSubscription ? (
+          {isEvent ? (
+            <Card
+              title="Event Page Setup (শারদ সম্মান)"
+              subtitle="Configure the event details, custom registration form, button names, and Durga Puja theme options."
+            >
+              {eventFields.map((f) => (
+                <Field key={f.key} f={f} s={settings} update={updateSetting} />
+              ))}
+
+              <div className="pt-3 border-t border-slate-100 space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.eventButtonEnabled !== false}
+                    onChange={(e) => updateSetting("eventButtonEnabled", e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                  />
+                  <div>
+                    <span className="text-xs font-bold text-slate-700 block">Show Join / Register Button</span>
+                    <span className="text-[11px] text-slate-500 block">When checked, the Join/Register button is visible on the event page</span>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.eventFormEnabled !== false}
+                    onChange={(e) => updateSetting("eventFormEnabled", e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                  />
+                  <div>
+                    <span className="text-xs font-bold text-slate-700 block">Enable Registration Form</span>
+                    <span className="text-[11px] text-slate-500 block">When unchecked, the form is closed and users will see that registration is closed</span>
+                  </div>
+                </label>
+              </div>
+            </Card>
+          ) : isSubscription ? (
             <Card
               title="Subscription Setup"
               subtitle="Configure the /subscription page content and pricing."

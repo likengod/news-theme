@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Clock,
   Filter,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/admin/inbox")({
 
 type InboxRequest = {
   id: number;
-  type: "contact" | "work_with_us" | "withdraw" | "delete_account";
+  type: "contact" | "work_with_us" | "withdraw" | "delete_account" | "event";
   user_id?: string;
   user_email?: string;
   user_name?: string;
@@ -74,6 +75,12 @@ const TYPE_META: Record<
     icon: UserX,
     color: "text-red-600",
     bg: "bg-red-50",
+  },
+  event: {
+    label: "Event Registration",
+    icon: Sparkles,
+    color: "text-amber-600",
+    bg: "bg-amber-50",
   },
 };
 
@@ -243,7 +250,7 @@ function AdminInboxPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {Object.entries(TYPE_META)
           .filter(([type]) => isEnterprisePlus || type !== "withdraw")
           .map(([type, meta]) => {
@@ -298,8 +305,8 @@ function AdminInboxPage() {
           Filters
         </span>
 
-        <div className="flex gap-1">
-          {["all", "contact", "work_with_us", "withdraw", "delete_account"]
+        <div className="flex flex-wrap gap-1">
+          {["all", "contact", "work_with_us", "withdraw", "delete_account", "event"]
             .filter((t) => isEnterprisePlus || t !== "withdraw")
             .map((t) => (
             <button

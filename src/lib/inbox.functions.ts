@@ -5,7 +5,7 @@ import { z } from "zod";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type InboxType = "contact" | "work_with_us" | "withdraw" | "delete_account";
+export type InboxType = "contact" | "work_with_us" | "withdraw" | "delete_account" | "event";
 export type InboxStatus = "Pending" | "Approved" | "Rejected";
 
 // ─── Submit Functions (Public / Authenticated) ────────────────────────────────
@@ -165,6 +165,48 @@ export const submitDeleteAccountRequest = createServerFn({ method: "POST" })
         `User ${profile.display_name || profile.email} has requested account deletion.`,
       ],
     );
+    return { ok: true };
+  });
+
+/**
+ * Submit event registration (authenticated user)
+ */
+export const submitEventRegistration = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator((data) =>
+    z
+      .object({
+        name: z.string().min(1, "Name is required").max(100),
+        email: z.string().email("Invalid email").max(100),
+        phone: z.string().min(1, "Phone number is required").max(25),
+        address: z.string().min(1, "Address is required").max(500),
+        customField: z.string().max(255).optional(),
+        customFieldLabel: z.string().optional(),
+        eventName: z.string().default("শারদ সম্মান"),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const details = JSON.stringify({
+      "Event Name": data.eventName,
+      "Phone": data.phone.trim(),
+      "Address": data.address.trim(),
+      [data.customFieldLabel || "Club Name"]: data.customField?.trim() || "N/A",
+    });
+
+    await query(
+      `INSERT INTO inbox_requests (type, user_id, user_email, user_name, title, details, status)
+       VALUES (?, ?, ?, ?, ?, ?, 'Pending')`,
+      [
+        "event",
+        context.userId || null,
+        data.email.trim(),
+        data.name.trim(),
+        `Event Registration — ${data.eventName}`,
+        details,
+      ],
+    );
+
     return { ok: true };
   });
 

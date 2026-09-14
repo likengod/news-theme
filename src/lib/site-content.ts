@@ -128,6 +128,18 @@ export type SiteSettings = {
   customAlertFontFamily: string;
   customAlertFontSize: number;
 
+  // Event Page Customizations
+  eventTitle: string;
+  eventSubtitle: string;
+  eventDescription: string;
+  eventDate: string;
+  eventLocation: string;
+  eventPrizes: string;
+  eventCustomInputLabel: string;
+  eventButtonText: string;
+  eventButtonEnabled: boolean;
+  eventFormEnabled: boolean;
+
   // Software License
   licenseKey?: string;
   licenseType?: string;
@@ -222,6 +234,20 @@ export const defaultSettings: SiteSettings = {
     "Volunteer Journalist (Entry level): Contribute stories on your beat. Get bylines, mentorship and editorial feedback.\nIntern Journalist (150+ verified news): Volunteer journalists who cross 150 published news auto-upgrade to a paid Intern role.\nPermanent Employee (2,000+ verified news): Interns who publish 2,000 verified news items can apply for a permanent staff position.",
   workWithUsFaqs:
     "How do I earn points ?: Points are automatically credited to your account dashboard every time an editor approves and publishes your submitted news, fact-check, or proofread draft.\nWhen do I get paid ?: Once you reach the minimum point threshold, you can request a withdrawal from your dashboard. Funds are transferred directly to your configured bank account via NEFT/UPI.\nWhat is the difference between Fact Checker and Journalist ?: Journalists actively write and submit original stories. Fact Checkers focus on reviewing existing drafts submitted by others to ensure accuracy before publication.\nCan I lose my rank ?: Yes. Violating the Journalist Rules, such as submitting plagiarized content or fake news, can result in point deductions or account suspension.",
+
+  // Event Page Defaults
+  eventTitle: "শারদ সম্মান ২০২৬",
+  eventSubtitle: "সেরা দুর্গোৎসব মূল্যায়ন ও শারদ সম্মাননা প্রতিযোগিতা",
+  eventDescription:
+    "আসন্ন শারদোৎসবে ত্রিপুরার ঐতিহ্যবাহী ও সর্বজনীন দুর্গাপূজা কমিটি এবং ক্লাবগুলোর জন্য বিশেষ শারদ সম্মান প্রতিযোগিতা। শ্রেষ্ঠ মণ্ডপসজ্জা, প্রতিমা নির্মাণ, আলোকসজ্জা ও পরিবেশবান্ধব ভাবনার ওপর ভিত্তি করে প্রদান করা হবে বিশেষ পুরস্কার ও স্মারক সম্মাননা।",
+  eventDate: "শারদীয়া দুর্গাপূজা ২০২৬ (মহা পঞ্চমী থেকে বিজয়া দশমী)",
+  eventLocation: "ত্রিপুরা ও সংলগ্ন অঞ্চল",
+  eventPrizes:
+    "১ম স্থান: ৫০,০০০ টাকা ও বিশেষ শারদ স্মারক\n২য় স্থান: ৩০,০০০ টাকা ও রৌপ্য স্মারক\n৩য় স্থান: ২০,০০০ টাকা ও সম্মাননা পত্র\nবিশেষ বিভাগ: সেরা আলোকসজ্জা, সেরা প্রতিমা ও সেরা শৃঙ্খলা পুরস্কার",
+  eventCustomInputLabel: "ক্লাবের নাম / Club Name",
+  eventButtonText: "নিবন্ধন করুন",
+  eventButtonEnabled: true,
+  eventFormEnabled: true,
 
   googleSiteVerification: "",
   bingSiteVerification: "",

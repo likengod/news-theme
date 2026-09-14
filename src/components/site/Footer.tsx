@@ -24,6 +24,7 @@ export function Footer() {
       { label: t("footer.about"), to: "/about" },
       { label: t("footer.contact"), to: "/contact" },
       { label: t("footer.submitNews"), to: "/submit-news" },
+      { label: t("footer.event", "Event"), to: "/event" },
     ],
     [
       { label: t("footer.privacyPolicy"), to: "/privacy-policy" },
