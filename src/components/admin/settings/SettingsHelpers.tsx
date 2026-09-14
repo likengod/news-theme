@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { ExternalLink, Eye, EyeOff, Edit2, CheckCircle2, XCircle, Save, X } from "lucide-react";
-import { type SiteSettings } from "@/lib/site-content";
+import { type SiteSettings, saveSettings } from "@/lib/site-content";
 import { type MediaUsage } from "@/lib/media-library";
 import { MediaField } from "@/components/admin/MediaField";
+import { toast } from "sonner";
 
 export function Card({
   title,
@@ -84,9 +85,18 @@ export function IntegrationField({
 
   const [localValue, setLocalValue] = useState(savedValue === "#" ? "" : savedValue || "");
 
-  const handleSave = () => {
+  const handleSave = async () => {
     update(f.key, localValue as never);
     setIsEditing(false);
+    
+    // Auto-save to backend
+    const newSettings = { ...s, [f.key]: localValue as never };
+    try {
+      await saveSettings(newSettings);
+      toast.success(`${f.label} saved successfully`);
+    } catch (e: any) {
+      toast.error("Failed to save setting");
+    }
   };
 
   const handleCancel = () => {
@@ -196,7 +206,16 @@ export function IntegrationField({
               <Toggle
                 label={f.toggleLabel || `Enable ${f.label}`}
                 checked={!!s[f.toggleKey]}
-                onChange={(v) => update(f.toggleKey!, v as never)}
+                onChange={async (v) => {
+                  update(f.toggleKey!, v as never);
+                  const newSettings = { ...s, [f.toggleKey!]: v as never };
+                  try {
+                    await saveSettings(newSettings);
+                    toast.success("Settings updated");
+                  } catch (e: any) {
+                    toast.error("Failed to update setting");
+                  }
+                }}
               />
             </div>
           )}
