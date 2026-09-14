@@ -170,7 +170,7 @@ export function CommentsSection({
     replyToName?: string,
   ) => isReply ? (
     /* ── Reply form: compact, inline, minimal space ── */
-    <form onSubmit={onSubmit} className="mt-2 ml-7 pl-3 border-l-2 border-[#141414]/30">
+    <form onSubmit={onSubmit} className="mt-2 ml-3 pl-2.5 border-l-2 border-[#141414]/30">
       {/* Header: who is replying */}
       <div className="flex items-center gap-1.5 mb-1.5 text-xs text-[#141414]">
         <Reply className="h-3 w-3 text-[#141414]" />
@@ -299,20 +299,17 @@ export function CommentsSection({
             return (
               <li key={c.id} className="py-2.5 first:pt-2 last:pb-0">
                 {/* Author Info */}
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-slate-100 border border-slate-200/80 flex items-center justify-center text-[10px] font-bold text-slate-700 uppercase shrink-0">
-                    {c.user?.[0] || "U"}
-                  </div>
-                  <span className="text-xs font-semibold text-[#141414] tracking-tight">{c.user}</span>
+                <div className="text-xs font-semibold text-[#141414] tracking-tight">
+                  {c.user}
                 </div>
 
                 {/* Comment Body - reduced text size with comfortable reading */}
-                <p className="mt-1 text-[13px] text-[#222222] leading-snug whitespace-pre-line pl-7">
+                <p className="mt-1 text-[13px] text-[#222222] leading-snug whitespace-pre-line">
                   {c.body}
                 </p>
 
                 {/* Action Button */}
-                <div className="mt-1 flex items-center pl-7">
+                <div className="mt-1 flex items-center">
                   <button
                     onClick={() => {
                       if (!userId) { toast.error("Please login to reply."); return; }
@@ -328,7 +325,7 @@ export function CommentsSection({
 
                 {/* Nested Replies */}
                 {replies.length > 0 && (
-                  <ul className="mt-2 ml-7 space-y-1.5 border-l-2 border-slate-200 pl-3">
+                  <ul className="mt-2 ml-3 space-y-1.5 border-l-2 border-slate-200 pl-3">
                     {replies.map((r) => (
                       <li key={r.id} className="bg-slate-50/70 border border-slate-100 rounded-md px-2.5 py-1.5">
                         <div className="flex items-center gap-1.5">
