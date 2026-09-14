@@ -24,9 +24,16 @@ export function PopupAd() {
   const [ads, setAds] = useState<AdSlideItem[]>([]);
   const [idx, setIdx] = useState(0);
 
-  const initialMode = ctx?.adConfig
+  const planType = (ctx?.siteSettings?.licenseType || "").toLowerCase();
+  const isEnterprise = planType.includes("enterprise");
+
+  let initialMode = ctx?.adConfig
     ? ctx.adConfig.modes["popup"] || "image"
     : loadAdSlotMode("popup");
+  if (!isEnterprise) {
+    initialMode = "script";
+  }
+
   const initialScript = ctx?.adConfig
     ? ctx.adConfig.scripts["popup"] || ""
     : loadAdSlotScript("popup");
@@ -43,7 +50,9 @@ export function PopupAd() {
 
   useEffect(() => {
     if (ctx?.adConfig) {
-      setSlotMode(ctx.adConfig.modes["popup"] || "image");
+      let mode = ctx.adConfig.modes["popup"] || "image";
+      if (!isEnterprise) mode = "script";
+      setSlotMode(mode);
       setSlotScript(ctx.adConfig.scripts["popup"] || "");
       setDbRotation(ctx.adConfig.rotations["popup"] || 6);
       if (ctx.adConfig.popupConfig) {

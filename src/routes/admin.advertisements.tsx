@@ -213,7 +213,11 @@ function AdvertisementsPage() {
     } else {
       setAds(loadAds(tab));
       setRotation(loadAdRotation(tab));
-      setSlotMode(loadAdSlotMode(tab));
+      let mode = loadAdSlotMode(tab);
+      if ((tab === "popup" || tab === "leaderboard") && !isEnterprise) {
+        mode = "script";
+      }
+      setSlotMode(mode);
       setSlotScript(loadAdSlotScript(tab));
       if (tab === "popup") {
         setPopupConfig(loadPopupConfig());
@@ -390,7 +394,7 @@ function AdvertisementsPage() {
               return null;
             }
             const isActive = tab === s.key;
-            const isLocked = (s.key === "popup" || s.key === "leaderboard") && !isPremium;
+            const isLocked = false;
             const count = slotCounts[s.key] || 0;
             return (
               <button
@@ -463,12 +467,22 @@ function AdvertisementsPage() {
                   setSlotMode(mode);
                   saveAdSlotMode(slot, mode);
                 }}
+                disabled={(tab === "popup" || tab === "leaderboard") && !isEnterprise}
               />
               <Label
                 htmlFor="mode-switch"
-                className="text-xs font-semibold text-slate-900 cursor-pointer"
+                className={`text-xs font-semibold ${
+                  (tab === "popup" || tab === "leaderboard") && !isEnterprise
+                    ? "text-slate-400 cursor-not-allowed"
+                    : "text-slate-900 cursor-pointer"
+                }`}
               >
                 Custom Ads
+                {(tab === "popup" || tab === "leaderboard") && !isEnterprise && (
+                  <span className="ml-1.5 inline-flex items-center rounded-full bg-amber-100 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-amber-800">
+                    Enterprise
+                  </span>
+                )}
               </Label>
             </div>
           </div>
@@ -476,8 +490,7 @@ function AdvertisementsPage() {
       </div>
 
       {/* Main Tab Content */}
-      {((tab === "popup" || tab === "leaderboard") && !isPremium) ||
-      ((tab === "hero_showcase" || tab === "reel_ads") && !isEnterprisePlus) ? (
+      {(tab === "hero_showcase" || tab === "reel_ads") && !isEnterprisePlus ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
             <Lock className="h-8 w-8 text-slate-400" />

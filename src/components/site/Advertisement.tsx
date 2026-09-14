@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ScriptAdRenderer } from "./ScriptAdRenderer";
-import { useAdSettings } from "./AdSettingsContext";
+import { useAdSettings, useSiteSettings } from "./AdSettingsContext";
 import { currentRoleSeesPopups } from "@/lib/roles";
 import {
   loadAds,
@@ -52,12 +52,21 @@ export default function Advertisement({
 }: AdProps) {
   const ctx = useAdSettings();
 
-  const initialMode =
+  const s = useSiteSettings();
+  const planType = (s?.licenseType || "").toLowerCase();
+  const isEnterprise = planType.includes("enterprise");
+
+  let initialMode =
     slot && ctx?.adConfig
       ? ctx.adConfig.modes[slot] || "image"
       : slot
         ? loadAdSlotMode(slot)
         : "image";
+
+  if (slot === "leaderboard" && !isEnterprise) {
+    initialMode = "script";
+  }
+
   const initialScript =
     slot && ctx?.adConfig ? ctx.adConfig.scripts[slot] || "" : slot ? loadAdSlotScript(slot) : "";
   const initialSlides =
@@ -76,7 +85,9 @@ export default function Advertisement({
 
   useEffect(() => {
     if (slot && ctx?.adConfig) {
-      setSlotMode(ctx.adConfig.modes[slot] || "image");
+      let mode = ctx.adConfig.modes[slot] || "image";
+      if (slot === "leaderboard" && !isEnterprise) mode = "script";
+      setSlotMode(mode);
       setSlotScript(ctx.adConfig.scripts[slot] || "");
       setDbSlides(ctx.adConfig.slots[slot] || []);
       setDbInterval((ctx.adConfig.rotations[slot] || 5) * 1000);
@@ -86,7 +97,9 @@ export default function Advertisement({
   useEffect(() => {
     if (!slot) return;
     const sync = () => {
-      setSlotMode(loadAdSlotMode(slot));
+      let mode = loadAdSlotMode(slot);
+      if (slot === "leaderboard" && !isEnterprise) mode = "script";
+      setSlotMode(mode);
       setSlotScript(loadAdSlotScript(slot));
       setDbSlides(loadAds(slot));
       setDbInterval(loadAdRotation(slot) * 1000);
