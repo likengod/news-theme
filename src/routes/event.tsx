@@ -107,7 +107,7 @@ function EventPage() {
   const eventLocation = s.eventLocation || "ত্রিপুরা ও সংলগ্ন অঞ্চল";
   const customLabel = s.eventCustomInputLabel || "ক্লাবের নাম / Club Name";
   const buttonText = s.eventButtonText || "নিবন্ধন করুন";
-  const eventImageUrl = s.eventImageUrl || "";
+  const eventImageUrl = s.eventImageUrl || "/durga-face.png";
   const isButtonEnabled = s.eventButtonEnabled !== false;
   const isFormEnabled = s.eventFormEnabled !== false;
 
@@ -166,13 +166,13 @@ function EventPage() {
             aria-hidden="true"
           />
 
-          {/* Event Banner / Poster Image (if provided) */}
+          {/* Durga Face Artwork (Natural & Cardless) */}
           {eventImageUrl && (
-            <div className="mx-auto mb-6 max-w-2xl px-2">
+            <div className="mx-auto mb-4 flex justify-center">
               <img
                 src={eventImageUrl}
                 alt={eventTitle}
-                className="mx-auto max-h-80 w-auto max-w-full object-contain"
+                className="h-28 sm:h-36 md:h-44 w-auto object-contain select-none"
               />
             </div>
           )}
