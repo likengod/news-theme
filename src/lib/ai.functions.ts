@@ -186,7 +186,7 @@ Output exactly and ONLY a JSON object (without markdown \`\`\`json blocks) with 
           generationConfig: { temperature: 0.7, responseMimeType: "application/json" },
         };
         let res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiApiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${settings.geminiApiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

@@ -84,6 +84,20 @@ export const deleteComment = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+// Admin only: Delete ALL comments permanently
+export const deleteAllCommentsFn = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator((data: { status?: string }) => data ?? {})
+  .handler(async ({ data }) => {
+    if (data.status && data.status !== "All") {
+      await query("DELETE FROM comments WHERE status = ?", [data.status]);
+    } else {
+      await query("DELETE FROM comments", []);
+    }
+    const [{ count }] = await query("SELECT COUNT(*) as count FROM comments", []);
+    return { success: true, remaining: count };
+  });
+
 // Public: Get approved comments for an article
 export const getArticleComments = createServerFn({ method: "GET" })
   .validator((slug: string) => slug)
