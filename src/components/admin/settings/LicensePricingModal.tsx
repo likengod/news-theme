@@ -68,7 +68,7 @@ export function LicensePricingModal({ isOpen, onClose }: { isOpen: boolean; onCl
               </li>
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 shrink-0 text-emerald-500" />
-                <span className="text-slate-700">Unlock all features</span>
+                <span className="text-slate-700">Basic Theme Features</span>
               </li>
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 shrink-0 text-emerald-500" />
@@ -77,6 +77,26 @@ export function LicensePricingModal({ isOpen, onClose }: { isOpen: boolean; onCl
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 shrink-0 text-emerald-500" />
                 <span className="text-slate-700">Email support</span>
+              </li>
+              <li className="flex items-start gap-3 opacity-50">
+                <X className="h-5 w-5 shrink-0 text-slate-400" />
+                <span className="text-slate-500 line-through">Stock Market Ticker</span>
+              </li>
+              <li className="flex items-start gap-3 opacity-50">
+                <X className="h-5 w-5 shrink-0 text-slate-400" />
+                <span className="text-slate-500 line-through">Rewards & Multiple Ads</span>
+              </li>
+              <li className="flex items-start gap-3 opacity-50">
+                <X className="h-5 w-5 shrink-0 text-slate-400" />
+                <span className="text-slate-500 line-through">Custom Popup/Leaderboard Ads</span>
+              </li>
+              <li className="flex items-start gap-3 opacity-50">
+                <X className="h-5 w-5 shrink-0 text-slate-400" />
+                <span className="text-slate-500 line-through">Earn Points & Wallet System</span>
+              </li>
+              <li className="flex items-start gap-3 opacity-50">
+                <X className="h-5 w-5 shrink-0 text-slate-400" />
+                <span className="text-slate-500 line-through">Inbox Withdrawal Requests</span>
               </li>
               <li className="flex items-start gap-3 opacity-50">
                 <X className="h-5 w-5 shrink-0 text-slate-400" />
@@ -135,6 +155,26 @@ export function LicensePricingModal({ isOpen, onClose }: { isOpen: boolean; onCl
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 shrink-0 text-emerald-500" />
                 <span className="text-slate-900 font-medium">Includes all Premium features</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="h-5 w-5 shrink-0 text-emerald-500" />
+                <span className="text-slate-700">Stock Market Ticker</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="h-5 w-5 shrink-0 text-emerald-500" />
+                <span className="text-slate-700">Rewards & Multiple Ads</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="h-5 w-5 shrink-0 text-emerald-500" />
+                <span className="text-slate-700">Custom Popup/Leaderboard Ads</span>
+              </li>
+              <li className="flex items-start gap-3 opacity-50">
+                <X className="h-5 w-5 shrink-0 text-slate-400" />
+                <span className="text-slate-500 line-through">Earn Points & Wallet System</span>
+              </li>
+              <li className="flex items-start gap-3 opacity-50">
+                <X className="h-5 w-5 shrink-0 text-slate-400" />
+                <span className="text-slate-500 line-through">Inbox Withdrawal Requests</span>
               </li>
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 shrink-0 text-emerald-500" />
@@ -222,6 +262,26 @@ export function LicensePricingModal({ isOpen, onClose }: { isOpen: boolean; onCl
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 shrink-0 text-emerald-400" />
                 <span className="text-slate-300 font-medium">Includes all Premium features</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="h-5 w-5 shrink-0 text-emerald-400" />
+                <span className="text-slate-300">Stock Market Ticker</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="h-5 w-5 shrink-0 text-emerald-400" />
+                <span className="text-slate-300">Rewards & Multiple Ads</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="h-5 w-5 shrink-0 text-emerald-400" />
+                <span className="text-slate-300">Custom Popup/Leaderboard Ads</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="h-5 w-5 shrink-0 text-emerald-400" />
+                <span className="text-slate-300">Earn Points & Wallet System</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="h-5 w-5 shrink-0 text-emerald-400" />
+                <span className="text-slate-300">Inbox Withdrawal Requests</span>
               </li>
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 shrink-0 text-emerald-400" />
