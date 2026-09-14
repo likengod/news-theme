@@ -123,7 +123,7 @@ function CategoriesPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <CsvImportExport data={allCats} filename="categories" onImport={handleImport} />
+          <CsvImportExport data={paged} getData={async () => allCats} filename="categories" onImport={handleImport} />
           {allCats.filter(c => c.showInHeader).length > 0 && (
             <button
               onClick={() => setReordering(true)}

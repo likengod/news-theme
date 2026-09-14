@@ -129,7 +129,7 @@ function TagsPage() {
           </h1>
           <p className="text-sm text-slate-500">Manage keywords and tags for articles taxonomy.</p>
         </div>
-        <CsvImportExport data={tags} filename="tags" onImport={handleImport} />
+        <CsvImportExport data={paged} getData={async () => tags} filename="tags" onImport={handleImport} />
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-lg border border-slate-200 bg-white p-3 md:p-5">

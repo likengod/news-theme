@@ -261,7 +261,7 @@ function UsersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <CsvImportExport data={allUsers} filename="users" onImport={handleImport} />
+          <CsvImportExport data={rows} getData={async () => allUsers} filename="users" onImport={handleImport} />
           <div className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">
             <Users className="h-4 w-4" /> Total Users: {total}
           </div>
