@@ -57,12 +57,14 @@ export const listJournalists = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<JournalistListRow[]> => {
     await assertAdmin(context.userId);
 
-    const roles = await query("SELECT user_id FROM user_roles WHERE role = 'journalist'");
-    const ids = roles.map((r: any) => r.user_id);
-    if (ids.length === 0) return [];
+    const profiles = await query(`
+      SELECT p.* 
+      FROM profiles p
+      INNER JOIN user_roles ur ON p.id = ur.user_id
+      WHERE ur.role = 'journalist'
+    `);
 
-    const placeholders = ids.map(() => "?").join(",");
-    const profiles = await query(`SELECT * FROM profiles WHERE id IN (${placeholders})`, ids);
+    if (profiles.length === 0) return [];
 
     // Fetch actual published articles count from MySQL database
     const stats = await query(
@@ -78,18 +80,24 @@ export const listJournalists = createServerFn({ method: "GET" })
       }
     }
 
+    const updates: Promise<any>[] = [];
+
     // Backfill journalist_id and sync actual articles_published count
     for (const p of profiles) {
       if (!p.journalist_id) {
         const gen = await generateJournalistId();
-        await query("UPDATE profiles SET journalist_id = ? WHERE id = ?", [gen, p.id]);
+        updates.push(query("UPDATE profiles SET journalist_id = ? WHERE id = ?", [gen, p.id]));
         p.journalist_id = gen;
       }
       const actualCount = countMap.get(p.journalist_id.trim()) ?? 0;
       if (Number(p.articles_published ?? 0) !== actualCount) {
-        await query("UPDATE profiles SET articles_published = ? WHERE id = ?", [actualCount, p.id]);
+        updates.push(query("UPDATE profiles SET articles_published = ? WHERE id = ?", [actualCount, p.id]));
         p.articles_published = actualCount;
       }
+    }
+
+    if (updates.length > 0) {
+      await Promise.all(updates);
     }
 
     return profiles.map((p: any) => ({

@@ -26,7 +26,7 @@ import {
   Eye,
 } from "lucide-react";
 import { toast } from "sonner";
-import { getJournalistStats } from "@/lib/articles-store";
+
 import { MediaField } from "@/components/admin/MediaField";
 import {
   loadRanks,
@@ -100,7 +100,7 @@ function JournalistsPage() {
   const [ranks, setRanks] = useState<JournalistRank[]>(() => loadRanks());
   const [authorized, setAuthorized] = useState<AuthorizedSettings>(() => loadAuthorized());
   const [authSaving, setAuthSaving] = useState(false);
-  const articleStats = useMemo(() => getJournalistStats(), []);
+
 
   // Fetch every user whose role is Journalist
   const list = useServerFn(listJournalists);
