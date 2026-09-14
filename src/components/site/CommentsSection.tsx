@@ -291,7 +291,7 @@ export function CommentsSection({
                   </ul>
                 )}
 
-                {isReplyingThis && commentFormFields(true, replyName, setReplyName, replyEmail, setReplyEmail, replyDraft, setReplyDraft, replySubmitting,
+                {isReplyingThis && commentFormFields(true, "", () => {}, "", () => {}, replyDraft, setReplyDraft, replySubmitting,
                   (e) => submitComment(e, c.id), () => setReplyingTo(null), c.user)}
               </li>
             );
