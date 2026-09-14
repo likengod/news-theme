@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { MessageSquare, Loader2, Reply, ChevronDown, Feather } from "lucide-react";
 import { toast } from "sonner";
 import { getArticleComments, postArticleComment } from "@/lib/comments.functions";
-import { authClient as supabase } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { trackComment } from "@/lib/user-actions-tracker";
 
 type Comment = {
@@ -83,7 +83,7 @@ export function CommentsSection({
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    authClient.auth.getSession().then(({ data }) => {
       if (data.session?.user) {
         const u = data.session.user;
         setUserId(u.id);
