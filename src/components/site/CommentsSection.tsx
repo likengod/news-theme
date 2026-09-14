@@ -168,47 +168,84 @@ export function CommentsSection({
     onSubmit: (e: React.FormEvent) => void,
     onCancel?: () => void,
     replyToName?: string,
-  ) => (
-    <form onSubmit={onSubmit} className={`space-y-4 rounded-lg border border-border bg-card p-4 ${isReply ? "ml-8 mt-3 border-l-4 border-l-primary/30" : "mt-5"}`}>
-      {replyToName && (
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-            <Reply className="h-3 w-3" /> Replying to <strong>{replyToName}</strong>
-          </p>
-          {isReply && userDisplayName && (
-            <p className="text-xs text-muted-foreground">
-              Replying as <strong>{userDisplayName}</strong>
-            </p>
-          )}
+  ) => isReply ? (
+    /* ── Reply form: compact, inline, no heavy card ── */
+    <form onSubmit={onSubmit} className="mt-3 ml-10 pl-4 border-l-2 border-primary/20">
+      {/* Compact header: who is replying to whom */}
+      <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
+        <Reply className="h-3.5 w-3.5 text-primary/60" />
+        <span>Replying to <strong className="text-foreground">{replyToName}</strong></span>
+        {userDisplayName && (
+          <>
+            <span className="text-muted-foreground/40">·</span>
+            <span>as <strong className="text-foreground">{userDisplayName}</strong></span>
+          </>
+        )}
+      </div>
+      {/* Textarea with avatar-style layout */}
+      <div className="flex gap-3 items-start">
+        <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold text-primary uppercase">
+          {userDisplayName?.[0] || "?"}
         </div>
-      )}
-      {!isReply && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Name</label>
-            <input type="text" required value={n} onChange={(e) => setN(e.target.value)} placeholder="e.g. John Doe"
-              className="w-full border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Email</label>
-            <input type="email" required value={em} onChange={(e) => setEm(e.target.value)} placeholder="e.g. john@example.com"
-              className="w-full border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
+        <div className="flex-1">
+          <textarea
+            required
+            value={dr}
+            onChange={(e) => setDr(e.target.value)}
+            placeholder="Write your reply... (min. 15 characters)"
+            rows={2}
+            maxLength={500}
+            autoFocus
+            className="w-full resize-none border-0 border-b border-border bg-transparent pb-1 pt-0.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-foreground transition-colors"
+          />
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-[11px] text-muted-foreground/70">
+              {dr.length} / 500 {dr.length < 15 && dr.length > 0 && <span className="text-amber-500">(min 15)</span>}
+            </span>
+            <div className="flex items-center gap-2">
+              {onCancel && (
+                <button type="button" onClick={onCancel}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1">
+                  Cancel
+                </button>
+              )}
+              <button
+                type="submit"
+                disabled={sub || dr.trim().length < 15}
+                className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-xs font-semibold text-background hover:opacity-80 disabled:opacity-30 transition-opacity"
+              >
+                {sub && <Loader2 className="h-3 w-3 animate-spin" />}
+                Reply
+              </button>
+            </div>
           </div>
         </div>
-      )}
+      </div>
+    </form>
+  ) : (
+    /* ── Main comment form: full card ── */
+    <form onSubmit={onSubmit} className="mt-5 space-y-4 rounded-lg border border-border bg-card p-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Name</label>
+          <input type="text" required value={n} onChange={(e) => setN(e.target.value)} placeholder="e.g. John Doe"
+            className="w-full border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Email</label>
+          <input type="email" required value={em} onChange={(e) => setEm(e.target.value)} placeholder="e.g. john@example.com"
+            className="w-full border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
+        </div>
+      </div>
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-          {isReply ? "Your Reply" : "Comment"}
-        </label>
+        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Comment</label>
         <textarea required value={dr} onChange={(e) => setDr(e.target.value)}
-          placeholder={isReply ? "Write your reply... (minimum 15 characters)" : "Write your comment... (minimum 81 characters, links are automatically blocked)"}
-          rows={isReply ? 3 : 4} maxLength={1000}
+          placeholder="Write your comment... (minimum 81 characters, links are automatically blocked)"
+          rows={4} maxLength={1000}
           className="w-full border border-border bg-background p-3 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">
-          {dr.length}/{isReply ? 15 : MIN_CHARACTERS} min characters ({dr.length} total)
-        </span>
+        <span className="text-xs text-muted-foreground">{dr.length}/{MIN_CHARACTERS} min characters ({dr.length} total)</span>
         <div className="flex gap-2">
           {onCancel && (
             <button type="button" onClick={onCancel}
@@ -217,10 +254,10 @@ export function CommentsSection({
             </button>
           )}
           <button type="submit"
-            disabled={sub || !dr.trim() || (!isReply && (!n.trim() || !em.trim()))}
+            disabled={sub || !dr.trim() || !n.trim() || !em.trim()}
             className="bg-foreground px-5 py-2 text-xs font-bold uppercase tracking-widest text-background hover:opacity-90 disabled:opacity-40 transition-opacity inline-flex items-center gap-1.5">
             {sub && <Loader2 className="h-3 w-3 animate-spin" />}
-            {isReply ? "Submit Reply" : "Submit Comment"}
+            Submit Comment
           </button>
         </div>
       </div>
