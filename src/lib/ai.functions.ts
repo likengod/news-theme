@@ -25,23 +25,42 @@ Updated HTML Content:`;
     // 1. Try Gemini
     if (settings.geminiApiKey) {
       try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${settings.geminiApiKey}`,
+        const payload = {
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7 },
+        };
+        let res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiApiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { temperature: 0.7 },
-            }),
+            body: JSON.stringify(payload),
           },
         );
+        if (!res.ok) {
+          const errBody = await res.text();
+          if (errBody.includes("is not found")) {
+            res = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${settings.geminiApiKey}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              },
+            );
+          } else {
+             errorContext += `Gemini failed: ${res.statusText}. `;
+          }
+        }
         if (res.ok) {
+          // If it was ok on first try, we need to read json if we haven't already
+          // But wait, if errBody was read, it's not ok. So we only read json if res.ok.
           const json = await res.json();
           const text = json.candidates?.[0]?.content?.parts?.[0]?.text || "";
           return text.replace(/```html|```/g, "").trim();
         } else {
-          errorContext += `Gemini failed: ${res.statusText}. `;
+          errorContext += `Gemini fallback failed: ${res.statusText}. `;
+        }
         }
       } catch (e: any) {
         errorContext += `Gemini error: ${e.message}. `;
@@ -163,23 +182,40 @@ Output exactly and ONLY a JSON object (without markdown \`\`\`json blocks) with 
     // 1. Try Gemini
     if (settings.geminiApiKey) {
       try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${settings.geminiApiKey}`,
+        const payload = {
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7, responseMimeType: "application/json" },
+        };
+        let res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiApiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { temperature: 0.7, responseMimeType: "application/json" },
-            }),
+            body: JSON.stringify(payload),
           },
         );
+        if (!res.ok) {
+          const errBody = await res.text();
+          if (errBody.includes("is not found")) {
+            res = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${settings.geminiApiKey}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              },
+            );
+          } else {
+             errorContext += `Gemini failed: ${res.statusText}. `;
+          }
+        }
         if (res.ok) {
           const json = await res.json();
           const text = json.candidates?.[0]?.content?.parts?.[0]?.text || "";
           return cleanJsonResponse(text);
         } else {
-          errorContext += `Gemini failed: ${res.statusText}. `;
+          errorContext += `Gemini fallback failed: ${res.statusText}. `;
+        }
         }
       } catch (e: any) {
         errorContext += `Gemini error: ${e.message}. `;

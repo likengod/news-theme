@@ -219,18 +219,35 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
 
     let generatedComments: string[] = [];
     try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${settings.geminiApiKey}`,
+      const payload = {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.8 },
+      };
+
+      let res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiApiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.8 },
-          }),
+          body: JSON.stringify(payload),
         }
       );
-      const resData = await res.json();
+      
+      let resData = await res.json();
+      
+      // Fallback if 1.5 flash isn't found/supported for this API key/region
+      if (!res.ok && resData.error?.message?.includes("is not found")) {
+        res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${settings.geminiApiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
+        resData = await res.json();
+      }
+
       if (!res.ok) throw new Error(resData.error?.message || "Failed to generate");
 
       const text = resData.candidates?.[0]?.content?.parts?.[0]?.text || "";
