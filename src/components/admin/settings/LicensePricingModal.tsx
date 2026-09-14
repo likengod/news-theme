@@ -94,13 +94,13 @@ export function LicensePricingModal({ isOpen, onClose }: { isOpen: boolean; onCl
                 <X className="h-5 w-5 shrink-0 text-slate-400" />
                 <span className="text-slate-500 line-through">Inbox Withdrawal Requests</span>
               </li>
-              <li className="flex items-start gap-3 opacity-50">
-                <X className="h-5 w-5 shrink-0 text-slate-400" />
-                <span className="text-slate-500 line-through">Installation support</span>
+              <li className="flex items-start gap-3">
+                <Check className="h-5 w-5 shrink-0 text-emerald-500" />
+                <span className="text-slate-700">Installation support</span>
               </li>
-              <li className="flex items-start gap-3 opacity-50">
-                <X className="h-5 w-5 shrink-0 text-slate-400" />
-                <span className="text-slate-500 line-through">Monthly dedicated support</span>
+              <li className="flex items-start gap-3">
+                <Check className="h-5 w-5 shrink-0 text-emerald-500" />
+                <span className="text-slate-700">Monthly dedicated support</span>
               </li>
               <li className="flex items-start gap-3 opacity-50">
                 <X className="h-5 w-5 shrink-0 text-slate-400" />
