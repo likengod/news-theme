@@ -96,6 +96,11 @@ const eventFields: FieldDef[] = [
     key: "eventButtonText",
     label: "Registration Button Text (e.g. নিবন্ধন করুন / Join Event / Register)",
   },
+  {
+    key: "eventImageUrl",
+    label: "Event Banner / Poster Image URL (ইভেন্ট ছবি বা ব্যানারের লিঙ্ক)",
+    hint: "ইভেন্টের ব্যানার বা ছবির URL প্রদান করুন। এটি পেজের শীর্ষে সুন্দরভাবে প্রদর্শিত হবে।",
+  },
 ];
 
 function PagesPage() {

@@ -139,6 +139,7 @@ export type SiteSettings = {
   eventButtonText: string;
   eventButtonEnabled: boolean;
   eventFormEnabled: boolean;
+  eventImageUrl: string;
 
   // Software License
   licenseKey?: string;
@@ -248,6 +249,7 @@ export const defaultSettings: SiteSettings = {
   eventButtonText: "নিবন্ধন করুন",
   eventButtonEnabled: true,
   eventFormEnabled: true,
+  eventImageUrl: "",
 
   googleSiteVerification: "",
   bingSiteVerification: "",

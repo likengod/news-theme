@@ -46,77 +46,7 @@ export const Route = createFileRoute("/event")({
   component: EventPage,
 });
 
-/** Traditional Bengali / Durga Puja Trishul & Third-Eye (ত্রিনয়ন) Festive Motif */
-function DurgaMotif({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 64 64"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden="true"
-    >
-      {/* Central Trishul Spear */}
-      <path
-        d="M32 6V58M32 6L28 14M32 6L36 14"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      {/* Outer Curved Trishul Prongs */}
-      <path
-        d="M18 16C18 28 32 34 32 34C32 34 46 28 46 16"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M18 16L14 20M46 16L50 20"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      {/* Trishul Base Ring */}
-      <circle cx="32" cy="34" r="3" stroke="currentColor" strokeWidth="2" />
-      {/* Third Eye (ত্রিনয়ন) */}
-      <ellipse cx="32" cy="45" rx="8" ry="4.5" stroke="currentColor" strokeWidth="2" />
-      <circle cx="32" cy="45" r="2.5" fill="currentColor" />
-    </svg>
-  );
-}
-
-/** Traditional Alpana / Decorative Corner Ornament */
-function FestiveCorner({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 40 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden="true"
-    >
-      <path
-        d="M3 37V12C3 7.02944 7.02944 3 12 3H37"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M8 37V16C8 11.5817 11.5817 8 16 8H37"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeDasharray="3 3"
-        opacity="0.8"
-      />
-      <circle cx="13" cy="13" r="3" fill="currentColor" />
-      <circle cx="23" cy="8" r="1.5" fill="currentColor" />
-      <circle cx="8" cy="23" r="1.5" fill="currentColor" />
-    </svg>
-  );
-}
-
-/** Symmetrical Festive Alpana / Flourish Divider */
+/** Symmetrical Festive Flourish Divider */
 function FestiveDivider({ title = "॥ শুভ শারদীয়া ॥" }: { title?: string }) {
   return (
     <div className="flex items-center justify-center gap-3 py-8" aria-hidden="true">
@@ -177,6 +107,7 @@ function EventPage() {
   const eventLocation = s.eventLocation || "ত্রিপুরা ও সংলগ্ন অঞ্চল";
   const customLabel = s.eventCustomInputLabel || "ক্লাবের নাম / Club Name";
   const buttonText = s.eventButtonText || "নিবন্ধন করুন";
+  const eventImageUrl = s.eventImageUrl || "";
   const isButtonEnabled = s.eventButtonEnabled !== false;
   const isFormEnabled = s.eventFormEnabled !== false;
 
@@ -235,10 +166,16 @@ function EventPage() {
             aria-hidden="true"
           />
 
-          {/* Trishul & Third-Eye Sacred Emblem */}
-          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-b from-amber-100 to-amber-200 text-red-700 shadow-md border-2 border-amber-400/80 dark:from-[#2e1d09] dark:to-[#1a1005] dark:text-amber-400 dark:border-amber-600/60">
-            <DurgaMotif className="h-11 w-11 drop-shadow-sm" />
-          </div>
+          {/* Event Banner / Poster Image (if provided) */}
+          {eventImageUrl && (
+            <div className="mx-auto mb-6 max-w-2xl px-2">
+              <img
+                src={eventImageUrl}
+                alt={eventTitle}
+                className="mx-auto max-h-80 w-auto max-w-full object-contain"
+              />
+            </div>
+          )}
 
           {/* Festive Sacred Salutation */}
           <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-red-500/15 to-amber-500/10 px-4 py-1.5 text-xs sm:text-sm font-serif font-bold text-amber-900 dark:text-amber-200 mb-4 tracking-wide shadow-xs">
@@ -363,27 +300,20 @@ function EventPage() {
         {/* ─── Decorative Alpana Divider ─── */}
         <FestiveDivider title="॥ শারদ সম্মান আবেদন পত্র ॥" />
 
-        {/* ─── Festive Registration Form (Scroll / Traditional Frame) ─── */}
-        <section id="register" className="relative scroll-mt-10 my-6">
-          <div className="relative rounded-3xl border-2 border-amber-400/60 bg-gradient-to-b from-amber-50/50 via-white to-amber-50/40 p-6 sm:p-10 md:p-12 shadow-sm dark:border-amber-700/50 dark:from-[#18130a] dark:via-[#100e0a] dark:to-[#18130a]">
-            {/* Traditional Ornamental Alpona Corners */}
-            <FestiveCorner className="absolute top-3 left-3 h-8 w-8 text-amber-500/80 dark:text-amber-400/60" />
-            <FestiveCorner className="absolute top-3 right-3 h-8 w-8 -scale-x-100 text-amber-500/80 dark:text-amber-400/60" />
-            <FestiveCorner className="absolute bottom-3 left-3 h-8 w-8 -scale-y-100 text-amber-500/80 dark:text-amber-400/60" />
-            <FestiveCorner className="absolute bottom-3 right-3 h-8 w-8 -scale-x-100 -scale-y-100 text-amber-500/80 dark:text-amber-400/60" />
-
-            {/* Inscription Header */}
-            <div className="text-center mb-8">
-              <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-700 dark:bg-red-950/80 dark:text-red-300">
-                <Flame className="h-5 w-5" />
-              </div>
-              <h2 className="font-serif text-xl sm:text-2xl font-bold text-red-800 dark:text-red-400">
-                ইভেন্ট নিবন্ধন ফরম (Event Registration)
-              </h2>
-              <p className="mt-1 text-xs sm:text-sm text-stone-600 dark:text-stone-300">
-                শারদ সম্মানের জন্য আপনার ক্লাব বা পূজোর বিস্তারিত তথ্য প্রদান করুন
-              </p>
+        {/* ─── Festive Registration Form (Seamless, No Card Effect) ─── */}
+        <section id="register" className="relative scroll-mt-10 my-10 max-w-2xl mx-auto px-2">
+          {/* Inscription Header */}
+          <div className="text-center mb-8">
+            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-700 dark:bg-red-950/80 dark:text-red-300">
+              <Flame className="h-5 w-5" />
             </div>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-red-800 dark:text-red-400">
+              ইভেন্ট নিবন্ধন ফরম (Event Registration)
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-stone-600 dark:text-stone-300">
+              শারদ সম্মানের জন্য আপনার ক্লাব বা পূজোর বিস্তারিত তথ্য প্রদান করুন
+            </p>
+          </div>
 
             {/* Form Content */}
             {!isFormEnabled ? (
@@ -557,7 +487,6 @@ function EventPage() {
                 )}
               </form>
             )}
-          </div>
         </section>
       </main>
 
