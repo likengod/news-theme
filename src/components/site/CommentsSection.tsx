@@ -170,22 +170,22 @@ export function CommentsSection({
     replyToName?: string,
   ) => isReply ? (
     /* ── Reply form: compact, inline, minimal space ── */
-    <form onSubmit={onSubmit} className="mt-2.5 ml-4 pl-3 border-l-2 border-[#141414]/30">
-      {/* Compact header: who is replying to whom */}
-      <div className="flex items-center gap-2 mb-1.5 text-xs text-[#141414]">
-        <Reply className="h-3.5 w-3.5 text-[#141414]" />
-        <span>Replying to <strong className="text-[#141414]">{replyToName}</strong></span>
+    <form onSubmit={onSubmit} className="mt-2 ml-7 pl-3 border-l-2 border-[#141414]/30">
+      {/* Header: who is replying */}
+      <div className="flex items-center gap-1.5 mb-1.5 text-xs text-[#141414]">
+        <Reply className="h-3 w-3 text-[#141414]" />
+        <span className="text-[11px]">Replying to <strong className="font-semibold text-[#141414]">{replyToName}</strong></span>
         {userDisplayName && (
           <>
-            <span className="text-[#141414]/40">·</span>
-            <span>as <strong className="text-[#141414]">{userDisplayName}</strong></span>
+            <span className="text-[#141414]/30">·</span>
+            <span className="text-[11px] text-[#141414]/80">as <strong className="font-semibold text-[#141414]">{userDisplayName}</strong></span>
           </>
         )}
       </div>
       {/* Textarea with feather pen icon */}
-      <div className="flex gap-2.5 items-start">
-        <div className="flex items-center justify-center shrink-0 mt-1 text-[#141414]">
-          <Feather className="h-4 w-4" />
+      <div className="flex gap-2 items-start bg-slate-50/80 border border-slate-200/80 rounded-lg p-2">
+        <div className="flex items-center justify-center shrink-0 mt-0.5 text-[#141414]/80">
+          <Feather className="h-3.5 w-3.5" />
         </div>
         <div className="flex-1">
           <textarea
@@ -196,23 +196,23 @@ export function CommentsSection({
             rows={2}
             maxLength={500}
             autoFocus
-            className="w-full resize-none border-0 border-b border-[#141414]/20 bg-transparent pb-1 pt-0.5 text-sm text-[#141414] placeholder:text-[#141414]/50 focus:outline-none focus:border-[#141414] transition-colors"
+            className="w-full resize-none border-0 bg-transparent p-0 text-xs text-[#141414] placeholder:text-muted-foreground/60 focus:outline-none transition-colors"
           />
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-[11px] text-[#141414]/60">
-              {dr.length} / 500 {dr.length < 15 && dr.length > 0 && <span className="text-amber-600 font-medium">(min 15)</span>}
+          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-slate-200/60">
+            <span className="text-[10px] text-muted-foreground">
+              {dr.length}/500 {dr.length < 15 && dr.length > 0 && <span className="text-amber-600 font-medium">(min 15)</span>}
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               {onCancel && (
                 <button type="button" onClick={onCancel}
-                  className="text-xs text-[#141414]/70 hover:text-[#141414] transition-colors px-2 py-1 font-medium">
+                  className="text-[11px] text-muted-foreground hover:text-[#141414] transition-colors px-2 py-0.5 font-medium">
                   Cancel
                 </button>
               )}
               <button
                 type="submit"
                 disabled={sub || dr.trim().length < 15}
-                className="inline-flex items-center gap-1.5 rounded-full bg-[#141414] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#141414]/90 disabled:opacity-30 transition-opacity"
+                className="inline-flex items-center gap-1 rounded-full bg-[#141414] px-3 py-1 text-[11px] font-semibold text-white hover:bg-[#141414]/90 disabled:opacity-30 transition-opacity"
               >
                 {sub && <Loader2 className="h-3 w-3 animate-spin text-white" />}
                 Reply
@@ -223,40 +223,40 @@ export function CommentsSection({
       </div>
     </form>
   ) : (
-    /* ── Main comment form: full card ── */
-    <form onSubmit={onSubmit} className="mt-5 space-y-4 rounded-lg border border-border bg-card p-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    /* ── Main comment form: compact card ── */
+    <form onSubmit={onSubmit} className="mt-3 space-y-3 rounded-lg border border-border/70 bg-card/60 p-3.5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Name</label>
+          <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Name</label>
           <input type="text" required value={n} onChange={(e) => setN(e.target.value)} placeholder="e.g. John Doe"
-            className="w-full border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
+            className="w-full rounded border border-border bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-foreground" />
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Email</label>
+          <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Email</label>
           <input type="email" required value={em} onChange={(e) => setEm(e.target.value)} placeholder="e.g. john@example.com"
-            className="w-full border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
+            className="w-full rounded border border-border bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-foreground" />
         </div>
       </div>
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Comment</label>
+        <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Comment</label>
         <textarea required value={dr} onChange={(e) => setDr(e.target.value)}
           placeholder="Write your comment... (minimum 30 characters, links are automatically blocked)"
-          rows={4} maxLength={1000}
-          className="w-full border border-border bg-background p-3 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
+          rows={3} maxLength={1000}
+          className="w-full rounded border border-border bg-background p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-foreground" />
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{dr.length}/{MIN_CHARACTERS} min characters ({dr.length} total)</span>
+        <span className="text-[11px] text-muted-foreground">{dr.length}/{MIN_CHARACTERS} min characters ({dr.length} total)</span>
         <div className="flex gap-2">
           {onCancel && (
             <button type="button" onClick={onCancel}
-              className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+              className="px-3 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
               Cancel
             </button>
           )}
           <button type="submit"
             disabled={sub || !dr.trim() || !n.trim() || !em.trim()}
-            className="bg-foreground px-5 py-2 text-xs font-bold uppercase tracking-widest text-background hover:opacity-90 disabled:opacity-40 transition-opacity inline-flex items-center gap-1.5">
-            {sub && <Loader2 className="h-3 w-3 animate-spin" />}
+            className="rounded-full bg-[#141414] px-4 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40 transition-opacity inline-flex items-center gap-1.5">
+            {sub && <Loader2 className="h-3 w-3 animate-spin text-white" />}
             Submit Comment
           </button>
         </div>
@@ -265,14 +265,20 @@ export function CommentsSection({
   );
 
   return (
-    <section className="mt-10 border-t border-border pt-6">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="headline font-serif text-2xl font-bold text-primary flex items-center gap-2">
-          <MessageSquare className="h-5 w-5" />
-          Comments ({topLevel.length})
-        </h3>
-        <button type="button" onClick={() => setShowForm((s) => !s)}
-          className="bg-foreground px-4 py-2 text-xs font-bold uppercase tracking-widest text-background hover:opacity-90 transition-opacity">
+    <section className="mt-8 border-t border-border pt-4">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-2.5 border-b border-border">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="h-4 w-4 text-foreground" />
+          <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
+            Comments <span className="text-xs font-medium text-muted-foreground ml-0.5">({topLevel.length})</span>
+          </h3>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowForm((s) => !s)}
+          className="rounded-full bg-[#141414] px-3.5 py-1 text-xs font-semibold text-white hover:bg-[#141414]/90 transition-opacity"
+        >
           {showForm ? "Cancel" : "Post Comment"}
         </button>
       </div>
@@ -281,50 +287,63 @@ export function CommentsSection({
         (e) => submitComment(e, null), () => setShowForm(false))}
 
       {loading ? (
-        <div className="flex items-center justify-center py-8 text-slate-400">
-          <Loader2 className="h-5 w-5 animate-spin mr-2" />
-          <span className="text-sm">Loading comments...</span>
+        <div className="flex items-center justify-center py-6 text-slate-400">
+          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          <span className="text-xs">Loading comments...</span>
         </div>
       ) : (
-        <ul className="mt-4 divide-y divide-border/60">
+        <ul className="divide-y divide-border/50">
           {visibleTopLevel.map((c) => {
             const replies = getReplies(c.id);
             const isReplyingThis = replyingTo?.id === c.id;
             return (
-              <li key={c.id} className="py-3 first:pt-0 last:pb-0">
-                <div className="text-sm font-semibold text-foreground leading-tight">
-                  {c.user}
+              <li key={c.id} className="py-2.5 first:pt-2 last:pb-0">
+                {/* Author Info */}
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-slate-100 border border-slate-200/80 flex items-center justify-center text-[10px] font-bold text-slate-700 uppercase shrink-0">
+                    {c.user?.[0] || "U"}
+                  </div>
+                  <span className="text-xs font-semibold text-[#141414] tracking-tight">{c.user}</span>
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground leading-snug whitespace-pre-line">{c.body}</p>
 
-                {/* Action button placed below comment */}
-                <div className="mt-1.5 flex items-center">
+                {/* Comment Body - reduced text size with comfortable reading */}
+                <p className="mt-1 text-[13px] text-[#222222] leading-snug whitespace-pre-line pl-7">
+                  {c.body}
+                </p>
+
+                {/* Action Button */}
+                <div className="mt-1 flex items-center pl-7">
                   <button
                     onClick={() => {
                       if (!userId) { toast.error("Please login to reply."); return; }
                       setReplyingTo(isReplyingThis ? null : { id: c.id, name: c.user });
                       setReplyDraft("");
                     }}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#141414] hover:opacity-75 transition-opacity"
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#141414]/70 hover:text-[#141414] transition-colors py-0.5"
                   >
-                    <Reply className="h-3.5 w-3.5 text-[#141414]" />
+                    <Reply className="h-3 w-3 text-[#141414]/70" />
                     <span>{isReplyingThis ? "Cancel" : "Reply"}</span>
                   </button>
                 </div>
 
+                {/* Nested Replies */}
                 {replies.length > 0 && (
-                  <ul className="mt-2.5 ml-4 space-y-2 border-l-2 border-[#141414]/20 pl-3">
+                  <ul className="mt-2 ml-7 space-y-1.5 border-l-2 border-slate-200 pl-3">
                     {replies.map((r) => (
-                      <li key={r.id} className="pt-0.5">
-                        <div className="text-xs font-semibold text-[#141414] leading-tight">
-                          {r.user}
+                      <li key={r.id} className="bg-slate-50/70 border border-slate-100 rounded-md px-2.5 py-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] font-bold text-[#141414]">{r.user}</span>
+                          {r.user.toLowerCase() === "admin" && (
+                            <span className="bg-slate-900 text-white text-[9px] font-bold uppercase px-1 py-0.2 rounded tracking-wide">Staff</span>
+                          )}
                         </div>
-                        <p className="mt-0.5 text-xs text-[#141414]/90 leading-relaxed whitespace-pre-line">{r.body}</p>
+                        <p className="mt-0.5 text-xs text-[#2b2b2b] leading-relaxed whitespace-pre-line">{r.body}</p>
                       </li>
                     ))}
                   </ul>
                 )}
 
+                {/* Reply Form */}
                 {isReplyingThis && commentFormFields(true, "", () => {}, "", () => {}, replyDraft, setReplyDraft, replySubmitting,
                   (e) => submitComment(e, c.id), () => setReplyingTo(null), c.user)}
               </li>
@@ -332,21 +351,22 @@ export function CommentsSection({
           })}
 
           {topLevel.length === 0 && (
-            <li className="py-8 text-center text-sm text-muted-foreground border border-dashed border-border rounded-lg bg-card/50">
+            <li className="py-6 text-center text-xs text-muted-foreground border border-dashed border-border rounded-lg bg-card/40 mt-3">
               No approved comments yet. Be the first to comment!
             </li>
           )}
         </ul>
       )}
 
+      {/* Load More Button */}
       {hasMore && (
-        <div className="mt-6 text-center">
+        <div className="mt-4 text-center">
           <button
             onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
-            className="inline-flex items-center gap-2 border border-border px-6 py-2.5 text-sm font-semibold text-foreground hover:bg-card transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-background px-4 py-1.5 text-xs font-semibold text-[#141414] hover:bg-slate-50 transition-colors shadow-xs"
           >
-            <ChevronDown className="h-4 w-4" />
-            Load More Comments ({topLevel.length - visibleCount} remaining)
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            <span>Load More Comments ({topLevel.length - visibleCount} remaining)</span>
           </button>
         </div>
       )}
