@@ -223,7 +223,7 @@ function ArticlesPage() {
           <p className="text-sm text-slate-500">Manage news posts, drafts, and reviews.</p>
         </div>
         <div className="flex items-center gap-2">
-          <CsvImportExport getData={getAllArticlesFn} filename="articles" onImport={handleImport} />
+          <CsvImportExport data={rows} getData={getAllArticlesFn} filename="articles" onImport={handleImport} />
           <button
             onClick={() => setCreating(true)}
             className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
