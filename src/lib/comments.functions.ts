@@ -224,31 +224,34 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
         generationConfig: { temperature: 0.8 },
       };
 
-      let res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiApiKey}`,
-        {
+      // Try models in order until one works
+      const modelsToTry = [
+        { url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${settings.geminiApiKey}` },
+        { url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${settings.geminiApiKey}` },
+        { url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiApiKey}` },
+        { url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${settings.geminiApiKey}` },
+        { url: `https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${settings.geminiApiKey}` },
+      ];
+
+      const triedErrors: string[] = [];
+      let resData: any = null;
+
+      for (const model of modelsToTry) {
+        const modelName = model.url.split("/models/")[1].split(":")[0];
+        const res = await fetch(model.url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          resData = data;
+          break;
         }
-      );
-      
-      let resData = await res.json();
-      
-      // Fallback if 1.5 flash isn't found/supported for this API key/region
-      if (!res.ok && resData.error?.message?.includes("is not found")) {
-        res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${settings.geminiApiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          }
-        );
-        resData = await res.json();
+        triedErrors.push(`${modelName}: ${data.error?.message || res.statusText}`);
       }
 
-      if (!res.ok) throw new Error(resData.error?.message || "Failed to generate");
+      if (!resData) throw new Error("All models failed. Errors: " + triedErrors.join(" | "));
 
       const text = resData.candidates?.[0]?.content?.parts?.[0]?.text || "";
       const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();

@@ -61,7 +61,6 @@ Updated HTML Content:`;
         } else {
           errorContext += `Gemini fallback failed: ${res.statusText}. `;
         }
-        }
       } catch (e: any) {
         errorContext += `Gemini error: ${e.message}. `;
       }
@@ -215,7 +214,6 @@ Output exactly and ONLY a JSON object (without markdown \`\`\`json blocks) with 
           return cleanJsonResponse(text);
         } else {
           errorContext += `Gemini fallback failed: ${res.statusText}. `;
-        }
         }
       } catch (e: any) {
         errorContext += `Gemini error: ${e.message}. `;
