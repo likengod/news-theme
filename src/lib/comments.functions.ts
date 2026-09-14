@@ -226,11 +226,10 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
 
       // Try models in order until one works
       const modelsToTry = [
-        { url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${settings.geminiApiKey}` },
-        { url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${settings.geminiApiKey}` },
-        { url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiApiKey}` },
-        { url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${settings.geminiApiKey}` },
-        { url: `https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${settings.geminiApiKey}` },
+        { url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${settings.geminiApiKey}` },
+        { url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${settings.geminiApiKey}` },
+        { url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${settings.geminiApiKey}` },
+        { url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${settings.geminiApiKey}` },
       ];
 
       const triedErrors: string[] = [];
