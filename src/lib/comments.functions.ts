@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "@/lib/auth-middleware";
 import { query } from "./db.server";
+import { getSiteSettingsServer } from "./site-content";
 
 export type CommentRow = {
   id: number;
@@ -164,4 +165,83 @@ export const postArticleComment = createServerFn({ method: "POST" })
     );
 
     return { success: true };
+  });
+export const generateDummyCommentsFn = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator((d: { publicUserId: string; articleSlug: string; count: number }) => d)
+  .handler(async ({ data }) => {
+    const { publicUserId, articleSlug, count } = data;
+
+    // 1. Validate Profile
+    const profiles = await query("SELECT display_name, email FROM profiles WHERE public_user_id = ?", [publicUserId]);
+    if (profiles.length === 0) {
+      throw new Error("User with that Public ID not found.");
+    }
+    const profile = profiles[0];
+
+    // 2. Validate Article
+    // We try exactly this slug or a url that might have the slug
+    // Let's just extract the slug if they pasted a full URL
+    let finalSlug = articleSlug;
+    try {
+      if (finalSlug.includes("/")) {
+        const parts = finalSlug.split("/");
+        finalSlug = parts[parts.length - 1] || parts[parts.length - 2];
+      }
+    } catch (e) {}
+
+    const articles = await query("SELECT title FROM articles WHERE slug = ?", [finalSlug]);
+    if (articles.length === 0) {
+      throw new Error("Article not found for that slug/link.");
+    }
+    const article = articles[0];
+
+    // 3. Generate Comments via AI
+    const settings = await getSiteSettingsServer();
+    if (!settings.geminiApiKey) {
+      throw new Error("Gemini API Key is not configured in Site Settings.");
+    }
+
+    const prompt = \Generate exactly \ distinct, realistic, and engaging reader comments for a news article titled "\". 
+    The comments should vary in length (1-3 sentences) and tone (agreeing, asking questions, adding perspective). 
+    Return ONLY a valid JSON array of strings. Do not include markdown blocks or any other text.\;
+
+    let generatedComments: string[] = [];
+    try {
+      const res = await fetch(
+        \https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=\\,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.8 },
+          }),
+        }
+      );
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error?.message || "Failed to generate");
+
+      const text = resData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      const cleaned = text.replace(/\\\json/g, "").replace(/\\\/g, "").trim();
+      generatedComments = JSON.parse(cleaned);
+      if (!Array.isArray(generatedComments)) {
+        throw new Error("Invalid format returned by AI");
+      }
+    } catch (err: any) {
+      throw new Error("AI Generation failed: " + err.message);
+    }
+
+    // 4. Insert into database
+    let inserted = 0;
+    for (const commentBody of generatedComments) {
+      if (typeof commentBody !== "string") continue;
+      await query(
+        "INSERT INTO comments (article_slug, article_title, user_name, user_email, body, status) VALUES (?, ?, ?, ?, ?, ?)",
+        [finalSlug, article.title, profile.display_name || "User", profile.email || "", commentBody.substring(0, 1000), "Approved"]
+      );
+      inserted++;
+    }
+
+    return { success: true, count: inserted };
   });
