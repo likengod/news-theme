@@ -202,14 +202,14 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
       throw new Error("Gemini API Key is not configured in Site Settings.");
     }
 
-    const prompt = \`Generate exactly \${count} distinct, realistic, and engaging reader comments for a news article titled "\${article.title}". 
+    const prompt = `Generate exactly ${count} distinct, realistic, and engaging reader comments for a news article titled "${article.title}". 
     The comments should vary in length (1-3 sentences) and tone (agreeing, asking questions, adding perspective). 
-    Return ONLY a valid JSON array of strings. Do not include markdown blocks or any other text.\`;
+    Return ONLY a valid JSON array of strings. Do not include markdown blocks or any other text.`;
 
     let generatedComments: string[] = [];
     try {
       const res = await fetch(
-        \`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=\${settings.geminiApiKey}\`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiApiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -223,7 +223,7 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
       if (!res.ok) throw new Error(resData.error?.message || "Failed to generate");
 
       const text = resData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      const cleaned = text.replace(/\`\`\`json/g, "").replace(/\`\`\`/g, "").trim();
+      const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
       generatedComments = JSON.parse(cleaned);
       if (!Array.isArray(generatedComments)) {
         throw new Error("Invalid format returned by AI");
