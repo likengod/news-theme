@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, ChevronLeft, ChevronRight, Sparkles, X, Trash2 } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Sparkles, X, Trash2, Flame } from "lucide-react";
 import { toast } from "sonner";
 import {
   getAdminComments,
@@ -60,6 +60,7 @@ function CommentsPage() {
   const [aiPositivity, setAiPositivity] = useState(80);
   const [aiLanguage, setAiLanguage] = useState("random_mix");
   const [aiCustomPrompt, setAiCustomPrompt] = useState("");
+  const [aiAllowSlang, setAiAllowSlang] = useState(true);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [recentArticles, setRecentArticles] = useState<{ id: number; title: string; slug: string }[]>([]);
 
@@ -97,6 +98,7 @@ function CommentsPage() {
           positivity: aiPositivity,
           language: aiLanguage,
           customPrompt: aiCustomPrompt,
+          allowSlang: aiAllowSlang,
         },
       });
       toast.success(`Successfully generated ${res.count} realistic comments!`);
@@ -429,6 +431,39 @@ function CommentsPage() {
                   <span>50% (Balanced)</span>
                   <span>100% (All Supportive)</span>
                 </div>
+              </div>
+
+              {/* Authentic Tripura Street Slang & Dialect Toggle */}
+              <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3.5 flex items-start justify-between gap-3">
+                <div>
+                  <label
+                    onClick={() => setAiAllowSlang(!aiAllowSlang)}
+                    className="text-xs font-bold text-amber-950 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Flame className="h-4 w-4 text-amber-600 shrink-0" />
+                    Tripura Street Slang & Sharp Dialect (আঞ্চলিক স্ল্যাং ও ক্ষোভপূর্ণ ভাষা)
+                  </label>
+                  <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                    Allows authentic local expressions in critical comments:{" "}
+                    <span className="font-medium">
+                      "বালের রাস্তা", "ফাইজলামি বন্ধ করুক", "কিতা অইতাছে", "আবাইল্লা", "ধুর ছাই", "খচ্চর", "তেঁড়ামি"
+                    </span>{" "}
+                    so critical reader reactions sound 100% natural, raw, and realistic.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAiAllowSlang(!aiAllowSlang)}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition mt-0.5 ${
+                    aiAllowSlang ? "bg-amber-600" : "bg-slate-300"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${
+                      aiAllowSlang ? "translate-x-4" : "translate-x-0"
+                    }`}
+                  />
+                </button>
               </div>
 
               {/* User Public IDs */}

@@ -251,10 +251,12 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
       positivity: number;
       language: string;
       customPrompt?: string;
+      allowSlang?: boolean;
     }) => d,
   )
   .handler(async ({ data }) => {
-    const { publicUserIds, articleSlug, count, positivity, language, customPrompt } = data;
+    const { publicUserIds, articleSlug, count, positivity, language, customPrompt, allowSlang } =
+      data;
 
     // 1. Validate / retrieve Profiles
     const rawIds = (publicUserIds || "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -331,6 +333,19 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
       languageInstruction = `- Language: ${language}.`;
     }
 
+    const slangInstruction = allowSlang
+      ? `
+- AUTHENTIC TRIPURA STREET SLANG & CASUAL EXPLOITATION (FOR CRITICAL / QUESTIONING COMMENTS):
+  When generating critical, questioning, or annoyed comments, make them sound 100% authentic, passionate, and raw, like real frustrated citizens commenting on Tripura Facebook pages & local portals.
+  * Naturally incorporate authentic local mild scolding, street venting, and Tripura/East Bengal dialect words:
+    - Casual venting & annoyance words: 'বালের / বাল' (e.g. "বালের রাস্তা", "বালের কাম", "কি বাল করতাছে প্রশাসন", "kono baler kam oitase na"), 'ধুর ছাই / ধুর' (e.g. "ধুর ছাই, আর ভালো লাগে না"), 'আরেহ / আরে দূর'.
+    - Scolding & sharp reactions: 'ফাইজলামি' (e.g. "ফাইজলামি বন্ধ করুক", "faizlami suru korse"), 'আবাইল্লা / আবাল' (e.g. "আবাইল্লা পাবলিক না আমরা", "abailya public"), 'খচ্চর' (e.g. "খচ্চর ঠিকাদার / দালাল"), 'বাউড়া', 'ছ্যাঁচড়া', 'তেঁড়ামি / ত্যাঁড়ামি', 'ফকিন্নির পুত / ফকিন্নির পো'.
+    - Local Tripura & Sylheti dialect terms: 'কিতা অইতাছে / কিতা অইছে' (কি হচ্ছে), 'কিতা কস / কিতা করতাছইন', 'কাম অইছে না', 'হুনো / হুনছ নি', 'কইতাম নি', 'গেছইন / আইছইন'.
+  * Distribute these expressions naturally among the critical comments so they sound completely genuine, realistic, and unscripted.`
+      : `
+- Critical Comments Tone:
+  Express genuine citizen concerns, questions, and skepticism constructively and sharply.`;
+
     const customPromptInstruction =
       customPrompt && customPrompt.trim()
         ? `
@@ -344,6 +359,7 @@ Generate exactly ${count} distinct, completely human-sounding reader comments.
 
 Rules:
 ${languageInstruction}
+${slangInstruction}
 - Tone / Sentiment Distribution:
   Approximately ${posRatio}% of comments should be positive, appreciative, or supportive.
   Approximately ${negRatio}% should be skeptical, questioning, raising concerns, or critical.
@@ -360,7 +376,13 @@ Return ONLY a valid JSON array of strings, e.g. ["Comment 1", "Comment 2"]. No m
     try {
       const payload = {
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.85 },
+        generationConfig: { temperature: 0.9 },
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+        ],
       };
 
       const modelsToTry = [
