@@ -170,21 +170,21 @@ export function CommentsSection({
     replyToName?: string,
   ) => isReply ? (
     /* ── Reply form: compact, inline, minimal space ── */
-    <form onSubmit={onSubmit} className="mt-2 ml-5 pl-3 border-l-2 border-primary/30">
+    <form onSubmit={onSubmit} className="mt-2.5 ml-4 pl-3 border-l-2 border-[#141414]/30">
       {/* Compact header: who is replying to whom */}
-      <div className="flex items-center gap-2 mb-1.5 text-xs text-muted-foreground">
-        <Reply className="h-3.5 w-3.5 text-primary/60" />
-        <span>Replying to <strong className="text-foreground">{replyToName}</strong></span>
+      <div className="flex items-center gap-2 mb-1.5 text-xs text-[#141414]">
+        <Reply className="h-3.5 w-3.5 text-[#141414]" />
+        <span>Replying to <strong className="text-[#141414]">{replyToName}</strong></span>
         {userDisplayName && (
           <>
-            <span className="text-muted-foreground/40">·</span>
-            <span>as <strong className="text-foreground">{userDisplayName}</strong></span>
+            <span className="text-[#141414]/40">·</span>
+            <span>as <strong className="text-[#141414]">{userDisplayName}</strong></span>
           </>
         )}
       </div>
       {/* Textarea with feather pen icon */}
       <div className="flex gap-2.5 items-start">
-        <div className="flex items-center justify-center shrink-0 mt-1 text-primary">
+        <div className="flex items-center justify-center shrink-0 mt-1 text-[#141414]">
           <Feather className="h-4 w-4" />
         </div>
         <div className="flex-1">
@@ -196,25 +196,25 @@ export function CommentsSection({
             rows={2}
             maxLength={500}
             autoFocus
-            className="w-full resize-none border-0 border-b border-border bg-transparent pb-1 pt-0.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-foreground transition-colors"
+            className="w-full resize-none border-0 border-b border-[#141414]/20 bg-transparent pb-1 pt-0.5 text-sm text-[#141414] placeholder:text-[#141414]/50 focus:outline-none focus:border-[#141414] transition-colors"
           />
           <div className="flex items-center justify-between mt-2">
-            <span className="text-[11px] text-muted-foreground/70">
-              {dr.length} / 500 {dr.length < 15 && dr.length > 0 && <span className="text-amber-500">(min 15)</span>}
+            <span className="text-[11px] text-[#141414]/60">
+              {dr.length} / 500 {dr.length < 15 && dr.length > 0 && <span className="text-amber-600 font-medium">(min 15)</span>}
             </span>
             <div className="flex items-center gap-2">
               {onCancel && (
                 <button type="button" onClick={onCancel}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1">
+                  className="text-xs text-[#141414]/70 hover:text-[#141414] transition-colors px-2 py-1 font-medium">
                   Cancel
                 </button>
               )}
               <button
                 type="submit"
                 disabled={sub || dr.trim().length < 15}
-                className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-xs font-semibold text-background hover:opacity-80 disabled:opacity-30 transition-opacity"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#141414] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#141414]/90 disabled:opacity-30 transition-opacity"
               >
-                {sub && <Loader2 className="h-3 w-3 animate-spin" />}
+                {sub && <Loader2 className="h-3 w-3 animate-spin text-white" />}
                 Reply
               </button>
             </div>
@@ -305,21 +305,21 @@ export function CommentsSection({
                       setReplyingTo(isReplyingThis ? null : { id: c.id, name: c.user });
                       setReplyDraft("");
                     }}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#141414] hover:opacity-75 transition-opacity"
                   >
-                    <Reply className="h-3 w-3" />
+                    <Reply className="h-3.5 w-3.5 text-[#141414]" />
                     <span>{isReplyingThis ? "Cancel" : "Reply"}</span>
                   </button>
                 </div>
 
                 {replies.length > 0 && (
-                  <ul className="mt-2 ml-5 space-y-2 border-l-2 border-border/70 pl-3">
+                  <ul className="mt-2.5 ml-4 space-y-2 border-l-2 border-[#141414]/20 pl-3">
                     {replies.map((r) => (
-                      <li key={r.id} className="pt-1">
-                        <div className="text-xs font-semibold text-foreground leading-tight">
+                      <li key={r.id} className="pt-0.5">
+                        <div className="text-xs font-semibold text-[#141414] leading-tight">
                           {r.user}
                         </div>
-                        <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed whitespace-pre-line">{r.body}</p>
+                        <p className="mt-0.5 text-xs text-[#141414]/90 leading-relaxed whitespace-pre-line">{r.body}</p>
                       </li>
                     ))}
                   </ul>
