@@ -37,6 +37,8 @@ function CommentsPage() {
   const [aiPublicUserId, setAiPublicUserId] = useState("");
   const [aiArticleSlug, setAiArticleSlug] = useState("");
   const [aiCount, setAiCount] = useState(5);
+  const [aiPositivity, setAiPositivity] = useState(80);
+  const [aiLanguage, setAiLanguage] = useState("Bengali");
   const [aiGenerating, setAiGenerating] = useState(false);
   const generateAiComments = useServerFn(generateDummyCommentsFn);
 
@@ -46,13 +48,21 @@ function CommentsPage() {
     try {
       setAiGenerating(true);
       const res = await generateAiComments({
-        data: { publicUserId: aiPublicUserId, articleSlug: aiArticleSlug, count: aiCount },
+        data: {
+          publicUserIds: aiPublicUserId,
+          articleSlug: aiArticleSlug,
+          count: aiCount,
+          positivity: aiPositivity,
+          language: aiLanguage,
+        },
       });
       toast.success(`Successfully generated \${res.count} comments!`);
       setShowAiModal(false);
       setAiPublicUserId("");
       setAiArticleSlug("");
       setAiCount(5);
+      setAiPositivity(80);
+      setAiLanguage("Bengali");
       loadComments();
     } catch (err: any) {
       toast.error(err.message || "Failed to generate comments");
@@ -207,18 +217,18 @@ function CommentsPage() {
             <form onSubmit={handleGenerateAi} className="p-6 space-y-5">
               <div>
                 <label className="mb-1.5 block text-sm font-semibold text-slate-700">
-                  User Public ID
+                  User Public IDs (comma separated)
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. 1000000000"
+                  placeholder="e.g. 1000000000, 1000000001"
                   value={aiPublicUserId}
                   onChange={(e) => setAiPublicUserId(e.target.value)}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
                 <p className="mt-1 text-xs text-slate-500">
-                  Must be an exact Public ID from the Users table.
+                  Multiple Public IDs can be added separated by commas.
                 </p>
               </div>
 
@@ -236,19 +246,51 @@ function CommentsPage() {
                 />
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Number of Comments
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    max="50"
+                    value={aiCount}
+                    onChange={(e) => setAiCount(parseInt(e.target.value) || 1)}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Positivity (%)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    max="100"
+                    value={aiPositivity}
+                    onChange={(e) => setAiPositivity(parseInt(e.target.value) || 0)}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="mb-1.5 block text-sm font-semibold text-slate-700">
-                  Number of Comments
+                  Language
                 </label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  max="50"
-                  value={aiCount}
-                  onChange={(e) => setAiCount(parseInt(e.target.value) || 1)}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
+                <select
+                  value={aiLanguage}
+                  onChange={(e) => setAiLanguage(e.target.value)}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                >
+                  <option value="Bengali">Bengali</option>
+                  <option value="English">English</option>
+                  <option value="Hinglish">Hinglish</option>
+                  <option value="Mixed (Bengali & English)">Mixed (Bengali & English)</option>
+                </select>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">

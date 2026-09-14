@@ -168,20 +168,25 @@ export const postArticleComment = createServerFn({ method: "POST" })
   });
 export const generateDummyCommentsFn = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .validator((d: { publicUserId: string; articleSlug: string; count: number }) => d)
+  .validator((d: { publicUserIds: string; articleSlug: string; count: number; positivity: number; language: string }) => d)
   .handler(async ({ data }) => {
-    const { publicUserId, articleSlug, count } = data;
+    const { publicUserIds, articleSlug, count, positivity, language } = data;
 
-    // 1. Validate Profile
-    const profiles = await query("SELECT display_name, email FROM profiles WHERE public_user_id = ?", [publicUserId]);
-    if (profiles.length === 0) {
-      throw new Error("User with that Public ID not found.");
+    // 1. Validate Profile(s)
+    const rawIds = publicUserIds.split(",").map((s) => s.trim()).filter(Boolean);
+    if (rawIds.length === 0) {
+      throw new Error("No valid Public IDs provided.");
     }
-    const profile = profiles[0];
+    
+    // Fetch profiles in one query
+    const placeholders = rawIds.map(() => "?").join(",");
+    const profiles = await query(`SELECT public_user_id, display_name, email FROM profiles WHERE public_user_id IN (${placeholders})`, rawIds);
+    
+    if (profiles.length === 0) {
+      throw new Error("None of the provided Public IDs were found.");
+    }
 
     // 2. Validate Article
-    // We try exactly this slug or a url that might have the slug
-    // Let's just extract the slug if they pasted a full URL
     let finalSlug = articleSlug;
     try {
       if (finalSlug.includes("/")) {
@@ -202,9 +207,15 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
       throw new Error("Gemini API Key is not configured in Site Settings.");
     }
 
-    const prompt = `Generate exactly ${count} distinct, realistic, and engaging reader comments for a news article titled "${article.title}". 
-    The comments should vary in length (1-3 sentences) and tone (agreeing, asking questions, adding perspective). 
-    Return ONLY a valid JSON array of strings. Do not include markdown blocks or any other text.`;
+    const posRatio = Math.min(Math.max(positivity, 0), 100);
+    const negRatio = 100 - posRatio;
+
+    const prompt = `Generate exactly ${count} distinct, realistic reader comments for a news article titled "${article.title}". 
+    Constraints:
+    - Language: Must be strictly written in ${language}.
+    - Tone/Sentiment Ratio: Approximately ${posRatio}% of the comments should be positive/agreeing, and ${negRatio}% should be negative, questioning, or critical.
+    - Length: Vary between 1 to 3 sentences.
+    - Format: Return ONLY a valid JSON array of strings. Do not include markdown blocks or any other text.`;
 
     let generatedComments: string[] = [];
     try {
@@ -236,6 +247,10 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
     let inserted = 0;
     for (const commentBody of generatedComments) {
       if (typeof commentBody !== "string") continue;
+      
+      // Pick a random profile from the found ones
+      const profile = profiles[Math.floor(Math.random() * profiles.length)];
+      
       await query(
         "INSERT INTO comments (article_slug, article_title, user_name, user_email, body, status) VALUES (?, ?, ?, ?, ?, ?)",
         [finalSlug, article.title, profile.display_name || "User", profile.email || "", commentBody.substring(0, 1000), "Approved"]
