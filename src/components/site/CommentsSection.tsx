@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { MessageSquare, Loader2, Calendar, Reply, ChevronDown } from "lucide-react";
+import { MessageSquare, Loader2, Calendar, Reply, ChevronDown, Feather } from "lucide-react";
 import { toast } from "sonner";
 import { getArticleComments, postArticleComment } from "@/lib/comments.functions";
 import { authClient as supabase } from "@/lib/auth-client";
@@ -182,10 +182,10 @@ export function CommentsSection({
           </>
         )}
       </div>
-      {/* Textarea with avatar-style layout */}
-      <div className="flex gap-3 items-start">
-        <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold text-primary uppercase">
-          {userDisplayName?.[0] || "?"}
+      {/* Textarea with feather pen icon */}
+      <div className="flex gap-2.5 items-start">
+        <div className="flex items-center justify-center shrink-0 mt-1 text-primary">
+          <Feather className="h-4 w-4" />
         </div>
         <div className="flex-1">
           <textarea
