@@ -176,7 +176,7 @@ export const postArticleComment = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     // 1. Enforce Option A validations on the server-side as well
     const SITE_NAME = "News Theme";
-    const MIN_CHARACTERS = 81;
+    const minChars = data.parentId ? 15 : 30;
     const URL_PATTERNS = [
       /https?:\/\//i,
       /\bwww\./i,
@@ -195,8 +195,8 @@ export const postArticleComment = createServerFn({ method: "POST" })
       );
     }
 
-    if (data.body.length < MIN_CHARACTERS) {
-      throw new Error(`Comment must be at least ${MIN_CHARACTERS} characters long.`);
+    if (data.body.length < minChars) {
+      throw new Error(`${data.parentId ? "Reply" : "Comment"} must be at least ${minChars} characters long.`);
     }
 
     const words = data.body

@@ -16,7 +16,7 @@ type Comment = {
 };
 
 const SITE_NAME = "News Theme";
-const MIN_CHARACTERS = 81;
+const MIN_CHARACTERS = 30;
 const PAGE_SIZE = 6;
 
 // Detect URLs, domains, emails, html/script tags, and common obfuscations like "example [dot] com"
@@ -131,7 +131,7 @@ export function CommentsSection({
       return;
     }
     if (body.length < minChars) {
-      toast(`Reply must be at least ${minChars} characters (currently ${body.length}).`);
+      toast(`${isReply ? "Reply" : "Comment"} must be at least ${minChars} characters (currently ${body.length}).`);
       return;
     }
     if (!isReply && hasExcessiveWordRepetition(body)) {
@@ -240,7 +240,7 @@ export function CommentsSection({
       <div>
         <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Comment</label>
         <textarea required value={dr} onChange={(e) => setDr(e.target.value)}
-          placeholder="Write your comment... (minimum 81 characters, links are automatically blocked)"
+          placeholder="Write your comment... (minimum 30 characters, links are automatically blocked)"
           rows={4} maxLength={1000}
           className="w-full border border-border bg-background p-3 text-sm focus:outline-none focus:ring-1 focus:ring-foreground" />
       </div>
