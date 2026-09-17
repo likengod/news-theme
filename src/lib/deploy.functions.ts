@@ -244,10 +244,11 @@ export const gitPull = createServerFn({ method: "POST" }).handler(async () => {
   setTimeout(async () => {
     try {
       const { spawn } = await import("child_process");
+      const appPort = process.env.APP_PORT || process.env.PORT || "3098";
       if (process.platform !== "win32") {
         // If PM2 is managing the process, process.exit(0) will auto-restart it immediately.
-        // In case PM2 is not running, launch nohup node server.js on port 3000 after 2 seconds.
-        const restartCmd = `sleep 2 && if ! fuser 3000/tcp >/dev/null 2>&1; then PORT=3000 APP_PORT=3000 nohup ${process.argv[0]} server.js > server.log 2>&1 & fi`;
+        // In case PM2 is not running, launch nohup node server.js on port 3098 after 2 seconds.
+        const restartCmd = `sleep 2 && if ! fuser ${appPort}/tcp >/dev/null 2>&1; then PORT=${appPort} APP_PORT=${appPort} nohup ${process.argv[0]} server.js > server.log 2>&1 & fi`;
         const child = spawn("sh", ["-c", restartCmd], {
           detached: true,
           stdio: "ignore",
@@ -257,7 +258,7 @@ export const gitPull = createServerFn({ method: "POST" }).handler(async () => {
       } else {
         const child = spawn(
           "cmd.exe",
-          ["/c", `timeout /t 2 /nobreak >nul & set PORT=3000 & "${process.argv[0]}" server.js`],
+          ["/c", `timeout /t 2 /nobreak >nul & set PORT=${appPort} & "${process.argv[0]}" server.js`],
           {
             detached: true,
             stdio: "ignore",

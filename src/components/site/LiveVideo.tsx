@@ -1,12 +1,19 @@
 import { Radio, Play, Volume2, VolumeX } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
 
 export function LiveVideo() {
   const { liveVideo } = useHomepageConfig();
-  const [isPlaying, setIsPlaying] = useState(false);
+  const autoPlay = liveVideo?.autoplay !== false;
+  const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [muted, setMuted] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    if (autoPlay) {
+      setIsPlaying(true);
+    }
+  }, [autoPlay]);
 
   // If live stream is toggled off in admin settings, do not render
   if (liveVideo?.enabled === false) {
@@ -15,7 +22,26 @@ export function LiveVideo() {
 
   const src = useMemo(() => {
     if (liveVideo.provider === "youtube") {
-      return `https://www.youtube-nocookie.com/embed/live_stream?channel=${liveVideo.youtubeChannelId}&autoplay=1&mute=${muted ? 1 : 0}&controls=1&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`;
+      const raw = (liveVideo.youtubeChannelId || "").trim();
+      let videoId = "";
+      let channelId = raw;
+
+      if (raw.includes("watch?v=")) {
+        videoId = raw.split("watch?v=")[1]?.split("&")[0] || "";
+      } else if (raw.includes("youtu.be/")) {
+        videoId = raw.split("youtu.be/")[1]?.split("?")[0] || "";
+      } else if (raw.includes("youtube.com/live/")) {
+        videoId = raw.split("youtube.com/live/")[1]?.split("?")[0] || "";
+      } else if (raw.includes("channel/")) {
+        channelId = raw.split("channel/")[1]?.split("/")[0]?.split("?")[0] || raw;
+      } else if (raw.length === 11 && !raw.startsWith("UC")) {
+        videoId = raw;
+      }
+
+      if (videoId) {
+        return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=${muted ? 1 : 0}&controls=1&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`;
+      }
+      return `https://www.youtube-nocookie.com/embed/live_stream?channel=${channelId}&autoplay=1&mute=${muted ? 1 : 0}&controls=1&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`;
     }
     const href = encodeURIComponent(liveVideo.facebookPageUrl);
     return `https://www.facebook.com/plugins/video.php?href=${href}&show_text=false&autoplay=1&mute=${muted ? 1 : 0}`;
@@ -55,10 +81,20 @@ export function LiveVideo() {
             <button
               type="button"
               onClick={toggleMute}
-              aria-label={muted ? "Unmute" : "Mute"}
-              className="absolute bottom-3 right-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded bg-black/70 text-white backdrop-blur transition hover:bg-black"
+              aria-label={muted ? "Unmute sound" : "Mute sound"}
+              className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/80 px-2.5 py-1 text-xs text-white backdrop-blur transition hover:bg-black cursor-pointer shadow-lg border border-white/10 hover:scale-105"
             >
-              {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              {muted ? (
+                <>
+                  <VolumeX className="h-3.5 w-3.5 text-red-400 animate-pulse" />
+                  <span className="text-[11px] font-medium tracking-wide">Tap for sound</span>
+                </>
+              ) : (
+                <>
+                  <Volume2 className="h-3.5 w-3.5 text-emerald-400" />
+                  <span className="text-[11px] font-medium tracking-wide">Sound On</span>
+                </>
+              )}
             </button>
           </>
         ) : (

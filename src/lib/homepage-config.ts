@@ -18,6 +18,7 @@ export type SectionStyle = {
 
 export type LiveVideoConfig = {
   enabled?: boolean;
+  autoplay?: boolean;
   provider: "youtube" | "facebook";
   youtubeChannelId: string;
   facebookPageUrl: string;
@@ -62,6 +63,7 @@ export const defaultHomepageConfig: HomepageConfig = {
   showBreakingBar: true,
   liveVideo: {
     enabled: true,
+    autoplay: true,
     provider: "youtube",
     youtubeChannelId: "UCIALMKvObZNtJ6AmdCLP7Lg",
     facebookPageUrl: "https://www.facebook.com/facebook",

@@ -40,7 +40,7 @@ jobs:
           if [ -d "dist/client/assets" ]; then
             cp -r dist/client/assets/* assets/ 2>/dev/null || true
           fi
-          zip -r cloudpanel-production.zip dist public assets server.js package.json package-lock.json
+          zip -r cloudpanel-production.zip dist public assets server.js ecosystem.config.cjs package.json package-lock.json
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -92,15 +92,18 @@ jobs:
             # Build production assets
             npm run build
 
-            # Restart application (supports PM2, systemd, or background node)
+            # Restart application (supports PM2, npx pm2, systemd, or background node)
             if command -v pm2 >/dev/null 2>&1; then
               pm2 reload all || pm2 restart all
+            elif command -v npx >/dev/null 2>&1; then
+              npx pm2 reload all || npx pm2 restart all || true
             elif systemctl is-active --quiet news-theme; then
               systemctl restart news-theme
             else
+              fuser -k 3098/tcp 2>/dev/null || true
               fuser -k 3000/tcp 2>/dev/null || true
               fuser -k 3099/tcp 2>/dev/null || true
-              nohup node server.js > server.log 2>&1 &
+              PORT=3098 APP_PORT=3098 nohup node server.js > server.log 2>&1 &
             fi
 
             echo "Deployment completed successfully!"
