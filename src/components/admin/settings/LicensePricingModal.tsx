@@ -221,9 +221,9 @@ export function LicensePricingModal({ isOpen, onClose }: { isOpen: boolean; onCl
             </a>
           </div>
 
-          {/* Enterprise+ Plan */}
+          {/* Enterprise Plus Plan */}
           <div className="flex flex-col rounded-2xl border border-slate-200 bg-slate-900 p-8 shadow-sm transition hover:shadow-md">
-            <h3 className="text-xl font-bold text-white">Enterprise+</h3>
+            <h3 className="text-xl font-bold text-white">Enterprise Plus</h3>
             <div className="mt-4 space-y-3">
               {isIndia ? (
                 <div>

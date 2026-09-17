@@ -318,7 +318,7 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
             <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-center mb-6">
               <p className="text-sm font-medium text-slate-800">Connection Settings Hidden</p>
               <p className="mt-1 text-xs text-slate-500">
-                Repository configuration is only visible to Enterprise+ users.
+                Repository configuration is only visible to Enterprise Plus users.
               </p>
             </div>
           )}
@@ -373,7 +373,7 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
             </p>
             <ol className="list-decimal space-y-1.5 pl-4 text-xs text-slate-700">
               <li>
-                Paste your Git remote URL and branch above, then <strong>Save changes</strong>.
+                Paste your Git remote URL and branch above, then <strong>Save</strong>.
               </li>
               <li>
                 Go to <strong>Admin &rarr; Website Update</strong> to view repo status.

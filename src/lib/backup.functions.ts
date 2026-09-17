@@ -1,19 +1,19 @@
-﻿import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
 import { getPool } from "./db.server";
-import { requireAuth } from "./auth-middleware";
+import { requireAdmin } from "./auth-middleware";
 
 export const generateBackupServer = createServerFn({ method: "GET" })
-  .middleware([requireAuth])
+  .middleware([requireAdmin])
   .handler(async () => {
     const pool = getPool();
     const conn = await pool.getConnection();
     try {
-      const [tables] = await conn.query("SHOW TABLES");
-      const backupData = {};
+      const [tables] = (await conn.query("SHOW TABLES")) as any;
+      const backupData: Record<string, any> = {};
 
       for (const row of tables) {
-        const tableName = Object.values(row)[0];
-        const [tableData] = await conn.query(`SELECT * FROM ${tableName}`);
+        const tableName = Object.values(row)[0] as string;
+        const [tableData] = (await conn.query(`SELECT * FROM ${tableName}`)) as any;
         backupData[tableName] = tableData;
       }
 
@@ -28,23 +28,24 @@ export const generateBackupServer = createServerFn({ method: "GET" })
   });
 
 export const restoreBackupServer = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
-  .validator((d) => d)
-  .handler(async ({ data }) => {
-    const conn = await db();
+  .middleware([requireAdmin])
+  .validator((d: any) => d)
+  .handler(async ({ data }: { data: any }) => {
+    const pool = getPool();
+    const conn = await pool.getConnection();
     try {
       await conn.query("SET FOREIGN_KEY_CHECKS = 0");
 
-      const tablesInBackup = Object.keys(data.backup.data);
+      const tablesInBackup = Object.keys(data?.backup?.data || {});
 
       for (const tableName of tablesInBackup) {
-        const rows = data.backup.data[tableName];
+        const rows = data.backup.data[tableName] || [];
 
         await conn.query(`TRUNCATE TABLE ${tableName}`);
 
         if (rows.length > 0) {
           const columns = Object.keys(rows[0]);
-          const values = rows.map((row) => columns.map((col) => row[col]));
+          const values = rows.map((row: any) => columns.map((col) => row[col]));
 
           const sql = `INSERT INTO ${tableName} (${columns.join(", ")}) VALUES ?`;
           await conn.query(sql, [values]);
@@ -53,9 +54,9 @@ export const restoreBackupServer = createServerFn({ method: "POST" })
 
       await conn.query("SET FOREIGN_KEY_CHECKS = 1");
       return { success: true };
-    } catch (e) {
+    } catch (e: any) {
       await conn.query("SET FOREIGN_KEY_CHECKS = 1");
-      throw new Error("Restore failed: " + e.message);
+      throw new Error("Restore failed: " + (e?.message || String(e)));
     } finally {
       conn.release();
     }

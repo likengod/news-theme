@@ -114,7 +114,7 @@ export const authClient = {
           return { data: { session: null }, error: null };
         }
 
-        res.session.validatedAt = now;
+        (res.session as any).validatedAt = now;
         localStorage.setItem(SESSION_KEY, JSON.stringify(res.session));
         return { data: { session: res.session }, error: null };
       } catch (err: any) {

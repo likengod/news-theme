@@ -77,6 +77,51 @@ export function persistBase64Image(dataUrl: string, prefix = "ad"): string {
 }
 
 /**
+ * Decodes a base64 document image and writes it to disk under /uploads/documents/.
+ * Returns the public web URL path (e.g. "/uploads/documents/doc_abc123.jpg").
+ */
+export function persistDocumentImage(dataUrl: string, prefix = "doc"): string {
+  if (!dataUrl || typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/")) {
+    return dataUrl;
+  }
+
+  const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+  if (!match) return dataUrl;
+
+  const mimeType = match[1].toLowerCase();
+  const base64Data = match[2];
+  const ext = MIME_TO_EXT[mimeType] || ".jpg";
+
+  const hash = crypto.createHash("md5").update(base64Data).digest("hex").slice(0, 12);
+  const safePrefix = prefix
+    .replace(/[^a-zA-Z0-9_-]/g, "_")
+    .slice(0, 30);
+  const filename = `${safePrefix}_${hash}${ext}`;
+
+  const buffer = Buffer.from(base64Data, "base64");
+  const cwd = process.cwd();
+  const targetDirs = [
+    path.join(cwd, "public", "uploads", "documents"),
+    path.join(cwd, "dist", "client", "uploads", "documents"),
+    path.join(cwd, "uploads", "documents"),
+  ];
+
+  for (const dir of targetDirs) {
+    try {
+      ensureDir(dir);
+      const filePath = path.join(dir, filename);
+      if (!fs.existsSync(filePath)) {
+        fs.writeFileSync(filePath, buffer);
+      }
+    } catch (err) {
+      console.error(`[DocStorage] Error writing ${filename} to ${dir}:`, err);
+    }
+  }
+
+  return `/uploads/documents/${filename}`;
+}
+
+/**
  * Iterates through ad items in a slot, converting any base64 images into static file URLs.
  */
 export function persistSlotAds(

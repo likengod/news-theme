@@ -30,7 +30,7 @@ export const Route = createFileRoute("/search")({
       });
     } catch (err) {
       console.warn("[Search loader] Error:", err);
-      return { rows: [], total: 0, totalPages: 1 };
+      return { items: [], total: 0, totalPages: 1 };
     }
   },
   head: () => ({
@@ -77,10 +77,10 @@ function SearchPage() {
   const { items, total, totalPages } = loaderData;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-between">
       <Header />
 
-      <main className="mx-auto max-w-7xl px-4 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-10 flex-1 w-full">
         <header className="border-b border-border pb-6">
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground">
             Search Feed
@@ -156,21 +156,25 @@ function SearchPage() {
                 No stories matched your search. Try changing keywords or category.
               </p>
             )}
-            {items.map((p, i) => (
+            {items.map((p: any, i: number) => (
               <article
                 key={`${p.title}-${i}`}
                 className="grid grid-cols-[140px_1fr] gap-5 py-6 first:pt-0 md:grid-cols-[200px_1fr]"
               >
-                <Link to={`/news/${p.slug}`} className="block overflow-hidden">
+                <Link to={`/news/${p.slug}` as any} className="block overflow-hidden">
                   <img
                     src={p.featuredImage || heroImg}
                     alt={p.title}
+                    loading="lazy"
+                    decoding="async"
+                    width={200}
+                    height={150}
                     className="aspect-[4/3] w-full object-cover rounded-sm hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
                 <div>
                   <h3 className="headline font-serif text-lg font-bold leading-snug text-primary line-clamp-2">
-                    <Link to={`/news/${p.slug}`} className="hover:underline">
+                    <Link to={`/news/${p.slug}` as any} className="hover:underline">
                       {p.title}
                     </Link>
                   </h3>

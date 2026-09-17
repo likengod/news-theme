@@ -187,6 +187,7 @@ export function getCurrentRoleId(): string {
 export function setCurrentRoleId(id: string) {
   if (typeof window === "undefined") return;
   localStorage.setItem(VIEWER_KEY, id);
+  window.dispatchEvent(new CustomEvent("nt:role-change", { detail: { roleId: id } }));
 }
 
 /** Whether the current viewer's role is configured to see popup ads. */

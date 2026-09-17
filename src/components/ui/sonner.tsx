@@ -14,13 +14,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
           border: "1px solid #1A1110",
         },
         classNames: {
-          toast: "group toast group-[.toaster]:shadow-lg",
-          description: "group-[.toast]:text-white/80",
-          actionButton: "group-[.toast]:bg-white group-[.toast]:text-[#1A1110]",
-          cancelButton: "group-[.toast]:bg-white/10 group-[.toast]:text-white",
-          title: "group-[.toast]:text-white",
+          toast: "group toast group-[.toaster]:shadow-lg font-medium",
+          description: "group-[.toast]:text-[#141414]/90",
+          actionButton: "group-[.toast]:bg-[#141414] group-[.toast]:text-white",
+          cancelButton: "group-[.toast]:bg-black/10 group-[.toast]:text-[#141414]",
+          title: "group-[.toast]:text-[#141414] font-semibold",
           error: "group-[.toaster]:!bg-[#1A1110] group-[.toaster]:!text-white",
-          success: "group-[.toaster]:!bg-[#1A1110] group-[.toaster]:!text-white",
+          success:
+            "group-[.toaster]:!bg-[#34C759] group-[.toaster]:!text-[#141414] group-[.toaster]:!border-[#2EAA4C] group-[.toaster]:shadow-md [&_[data-title]]:!text-[#141414] [&_[data-description]]:!text-[#141414] [&_[data-icon]]:!text-[#141414] [&_svg]:!text-[#141414] [&_svg]:!stroke-[#141414]",
         },
       }}
       {...props}

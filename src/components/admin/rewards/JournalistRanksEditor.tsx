@@ -26,7 +26,7 @@ export function JournalistRanksEditor({ ranks, onChangeField, onSave }: Props) {
           onClick={onSave}
           className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
         >
-          <Save className="h-4 w-4" /> Save Rank Scale
+          <Save className="h-4 w-4" /> Save
         </button>
       </div>
 

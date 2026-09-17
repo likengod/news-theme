@@ -57,7 +57,7 @@ function ResetPasswordPage() {
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error((error as any).message);
     toast.success("Password updated");
     navigate({ to: "/" });
   };

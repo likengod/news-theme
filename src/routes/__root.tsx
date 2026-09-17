@@ -85,8 +85,14 @@ import { checkSetupStatus } from "@/lib/setup.functions";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ location }) => {
-    // Don't intercept server-only API endpoints or RSS feeds
-    if (location.pathname.startsWith("/api/") || location.pathname === "/api/rss") return;
+    // Don't intercept server-only API endpoints, XML sitemaps or RSS feeds
+    if (
+      location.pathname.startsWith("/api/") ||
+      location.pathname === "/api/rss" ||
+      location.pathname === "/rss.xml" ||
+      location.pathname === "/sitemap.xml" ||
+      location.pathname === "/news-sitemap.xml"
+    ) return;
 
     // 1. Check setup status first before executing any DB queries
     try {
@@ -144,29 +150,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         settings: null,
         homepageConfig: null,
         adsConfig: null,
-        redirectRules: [],
         fontConfig: null,
         categories: [],
       };
     }
     try {
-      const [settings, homepageConfig, adsConfig, redirectRules, fontConfig, categories] =
+      const [settings, homepageConfig, adsConfig, fontConfig, categories] =
         await Promise.all([
           getSiteSettingsServer(),
           getHomepageConfigServer(),
           getAdConfigurationServer(),
-          getRedirectRulesServer(),
           getFontConfigServer(),
           getCategories(),
         ]);
-      return { settings, homepageConfig, adsConfig, redirectRules, fontConfig, categories };
+      return { settings, homepageConfig, adsConfig, fontConfig, categories };
     } catch (err) {
       console.error("[Root Loader] Failed to prefetch config:", err);
       return {
         settings: null,
         homepageConfig: null,
         adsConfig: null,
-        redirectRules: [],
         fontConfig: null,
         categories: [],
       };
@@ -174,27 +177,62 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   },
   head: ({ loaderData }) => {
     const s = loaderData?.settings;
+    const siteTitle = s?.siteName || "News Timeline";
+    const tagline = s?.tagline || "Breaking News";
     const title = s?.siteName
-      ? `${s.siteName} – ${s.tagline || "Breaking News"}`
+      ? `${s.siteName} – ${tagline}`
       : "News Timeline – Breaking News | Finance | Business | Market";
+
     const desc =
       s?.metaDescription ||
       "News Timeline delivers breaking news, market intelligence, and sharp business analysis covering finance, technology, energy and global markets.";
 
-    const metaTags = [
+    const robotsIndex = s?.seoRobotsIndex === false ? "noindex" : "index";
+    const robotsFollow = s?.seoRobotsFollow === false ? "nofollow" : "follow";
+    const robotsContent = `${robotsIndex}, ${robotsFollow}`;
+
+    const canonicalBase = s?.seoCanonicalBaseUrl ? s.seoCanonicalBaseUrl.replace(/\/$/, "") : "";
+    const ogImage = s?.seoOgImage || (canonicalBase ? `${canonicalBase}/og-image.jpg` : "/og-image.jpg");
+    const rawTwitter = s?.twitter || "";
+    let twitterHandle = "@NewsTimeline";
+    if (rawTwitter) {
+      const cleaned = rawTwitter.replace(/^https?:\/\/(www\.)?(twitter|x)\.com\//i, "").replace(/^@/, "").trim();
+      if (cleaned) twitterHandle = `@${cleaned}`;
+    }
+
+    const metaTags: Array<Record<string, any>> = [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: title },
       { name: "description", content: desc },
-      { name: "author", content: s?.siteName || "News Timeline" },
+      { name: "robots", content: robotsContent },
+      { name: "author", content: siteTitle },
       { property: "og:title", content: title },
       { property: "og:description", content: desc },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: ogImage },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@NewsTimeline" },
+      { name: "twitter:site", content: twitterHandle },
+      { name: "twitter:creator", content: twitterHandle },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: desc },
+      { name: "twitter:image", content: ogImage },
     ];
+
+    if (s?.seoKeywords) {
+      metaTags.push({ name: "keywords", content: s.seoKeywords });
+    }
+
+    if (s?.seoGooglebotNews ?? true) {
+      metaTags.push({
+        name: "googlebot-news",
+        content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+      });
+      metaTags.push({
+        name: "googlebot",
+        content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+      });
+    }
 
     if (s?.forceHttps) {
       metaTags.push({ httpEquiv: "Content-Security-Policy", content: "upgrade-insecure-requests" });
@@ -224,12 +262,68 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const activeSectionFontIds = Object.values(fontConfig.sectionMapping || {});
     const googleFontsUrl = buildGoogleFontsUrl(fontConfig.fonts, activeSectionFontIds);
 
+    const links: Array<Record<string, any>> = [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: appCss },
+      {
+        rel: "alternate",
+        type: "application/rss+xml",
+        title: `${siteTitle} RSS Feed`,
+        href: "/rss.xml",
+      },
+    ];
+
+    if (googleFontsUrl) {
+      links.push({
+        rel: "preload",
+        as: "style",
+        href: googleFontsUrl,
+      });
+      links.push({
+        rel: "stylesheet",
+        href: googleFontsUrl,
+        media: "print",
+        onLoad: "this.media='all'",
+      });
+    }
+
+    if (canonicalBase) {
+      links.push({ rel: "canonical", href: canonicalBase });
+    }
+
+    const orgSchema: Record<string, any> = {
+      "@context": "https://schema.org",
+      "@type": s?.seoOrganizationType || "NewsMediaOrganization",
+      name: s?.seoNewsPublicationName || siteTitle,
+      url: canonicalBase || "http://localhost:3099",
+      description: desc,
+    };
+    if (s?.logoLight || canonicalBase) {
+      orgSchema.logo = s?.logoLight || `${canonicalBase}/logo.png`;
+    }
+    if (s?.seoEditorialContactEmail || s?.contactEmail) {
+      orgSchema.contactPoint = {
+        "@type": "ContactPoint",
+        email: s?.seoEditorialContactEmail || s?.contactEmail,
+        contactType: "editorial",
+      };
+    }
+    orgSchema.publishingPrinciples = s?.seoEditorialPolicyUrl || "/editorial-policy";
+    orgSchema.correctionsPolicy = s?.seoCorrectionsPolicyUrl || "/contact";
+    orgSchema.diversityPolicy = s?.seoFactCheckingPolicyUrl || "/fact-checking-policy";
+
+    const scripts: Array<Record<string, any>> = [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(orgSchema),
+      },
+    ];
+
     return {
       meta: metaTags,
-      links: [
-        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-        { rel: "stylesheet", href: appCss },
-      ],
+      links: links,
+      scripts: scripts,
     };
   },
   shellComponent: RootShell,
@@ -319,7 +413,7 @@ function RootComponent() {
       if (adsConfig.slots) {
         Object.keys(adsConfig.slots).forEach((slot) => {
           const key = slot === "home1" ? "nt:site-ads" : `nt:site-ads-${slot}`;
-          localStorage.setItem(key, JSON.stringify(adsConfig.slots[slot as any]));
+          localStorage.setItem(key, JSON.stringify((adsConfig.slots as any)[slot]));
         });
       }
       if (adsConfig.modes) {
@@ -387,14 +481,11 @@ function RootComponent() {
 
   // Re-apply font vars on settings update from admin
   useEffect(() => {
-    const handleFontUpdate = () => {
+    const handleFontUpdate = (e: Event) => {
       try {
-        const raw = localStorage.getItem(FONT_CONFIG_KEY);
-        if (raw) {
-          const fc = JSON.parse(raw) as FontConfiguration;
-          const faceCss = buildFontFaceCss(fc.fonts);
-          const faceStyle = document.getElementById("nt-font-face");
-          if (faceStyle) faceStyle.textContent = faceCss;
+        const detail = (e as CustomEvent).detail;
+        if (detail) {
+          const fc = typeof detail === "string" ? JSON.parse(detail) : detail;
           const varsCss = buildSectionCssVars(fc);
           const varsStyle = document.getElementById("nt-font-vars");
           if (varsStyle) varsStyle.textContent = varsCss;
@@ -408,27 +499,36 @@ function RootComponent() {
   const contextValue = {
     settings: loaderData?.settings ?? defaultSettings,
     homepageConfig: loaderData?.homepageConfig ?? defaultHomepageConfig,
-    adConfig: loaderData?.adsConfig ?? {
+    adConfig: (loaderData?.adsConfig ?? {
       slots: {
         home1: [],
         home2: [],
         ad3: [],
         popup: [],
+        leaderboard: [],
+        hero_showcase: [],
+        reel_ads: [],
       },
       modes: {
         home1: "image",
         home2: "image",
         ad3: "image",
         popup: "image",
+        leaderboard: "image",
+        hero_showcase: "image",
+        reel_ads: "image",
       },
-      scripts: { home1: "", home2: "", ad3: "", popup: "" },
+      scripts: { home1: "", home2: "", ad3: "", popup: "", leaderboard: "", hero_showcase: "", reel_ads: "" },
       rotations: {
         home1: 5,
         home2: 5,
         ad3: 5,
         popup: 6,
+        leaderboard: 5,
+        hero_showcase: 5,
+        reel_ads: 5,
       },
-    },
+    }) as any,
     fontConfig: fontConfig,
     categories: loaderData?.categories ?? [],
   };

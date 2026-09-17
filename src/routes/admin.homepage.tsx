@@ -88,7 +88,7 @@ function HomepageEditorPage() {
   const onSave = () => {
     saveHomepageConfig(cfg);
     setDirty(false);
-    toast.success("Homepage updated and saved to MySQL database!");
+    toast.success("Saved successfully");
   };
 
   const onReset = () => {
@@ -122,7 +122,7 @@ function HomepageEditorPage() {
             className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
-            {dirty ? "Save changes" : "Saved"}
+            {dirty ? "Save" : "Saved"}
           </button>
         </div>
       </div>
@@ -251,7 +251,7 @@ function HomepageEditorPage() {
           className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-lg hover:bg-slate-800 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
-          {dirty ? "Save changes to MySQL" : "All saved"}
+          {dirty ? "Save" : "Saved"}
         </button>
       </div>
     </div>

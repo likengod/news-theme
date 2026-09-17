@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Plus, Search, ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
+import { Plus, Search, ChevronLeft, ChevronRight, GripVertical, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   getCategories,
@@ -10,6 +10,8 @@ import {
   importCategories,
   type CategoryRow,
 } from "@/lib/taxonomy.functions";
+import { generateCategoryDescriptionServer } from "@/lib/ai.functions";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { slugify } from "@/lib/news-data";
 import { CategoryTable } from "@/components/admin/categories/CategoryTable";
 import { ReorderModal } from "@/components/admin/categories/ReorderModal";
@@ -26,16 +28,57 @@ function CategoriesPage() {
   const saveCatFn = useServerFn(saveCategory);
   const deleteCatFn = useServerFn(deleteCategory);
   const importCatsFn = useServerFn(importCategories);
+  const generateCatDescFn = useServerFn(generateCategoryDescriptionServer);
+  const siteSettings = useSiteSettings();
 
   const [cats, setCats] = useState<Cat[]>([]);
   const [allCats, setAllCats] = useState<Cat[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
   const [editing, setEditing] = useState<Cat | null>(null);
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [page, setPage] = useState(1);
   const [q, setQ] = useState("");
   const [reordering, setReordering] = useState(false);
   const PAGE_SIZE = 15;
+
+  const handleAiGenerateDescription = async () => {
+    if (!editing?.name?.trim()) {
+      toast.error("Please enter a Category Name first");
+      return;
+    }
+    setIsGeneratingAi(true);
+    try {
+      const res = await generateCatDescFn({
+        data: {
+          categoryName: editing.name.trim(),
+          categorySlug: editing.slug || slugify(editing.name),
+          siteName: siteSettings?.siteName,
+        },
+      });
+
+      if (res?.description) {
+        setEditing((prev) =>
+          prev
+            ? {
+                ...prev,
+                description: res.description,
+                metaDescription: prev.metaDescription || res.description,
+              }
+            : null,
+        );
+        toast.success(
+          res.provider
+            ? `AI generated description using ${res.provider}!`
+            : "SEO description generated successfully!",
+        );
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to generate description with AI");
+    } finally {
+      setIsGeneratingAi(false);
+    }
+  };
 
   const loadCategories = async () => {
     try {
@@ -110,26 +153,26 @@ function CategoriesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
+          <h1 className="flex items-center gap-2 text-xl sm:text-2xl font-bold tracking-tight">
             News Categories
-            <span className="rounded-md bg-slate-100 px-2.5 py-0.5 text-sm font-semibold text-slate-600">
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
               {allCats.length} Total
             </span>
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
             Manage article categories, SEO metadata, and category feeds.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <CsvImportExport data={paged} getData={async () => allCats} filename="categories" onImport={handleImport} />
           {allCats.filter(c => c.showInHeader).length > 0 && (
             <button
               onClick={() => setReordering(true)}
-              className="inline-flex items-center gap-2 rounded-md bg-white border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-xs"
+              className="inline-flex items-center gap-1.5 sm:gap-2 rounded-md bg-white border border-slate-200 px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-xs whitespace-nowrap transition"
             >
-              <GripVertical className="h-4 w-4 text-slate-400" /> Reorder Header
+              <GripVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400" /> Reorder Header
             </button>
           )}
           <button
@@ -139,14 +182,15 @@ function CategoriesPage() {
                 name: "",
                 slug: "",
                 description: "",
+                metaTitle: "",
                 metaDescription: "",
                 showInHeader: false,
                 sortOrder: 0,
               })
             }
-            className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-md bg-slate-900 px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 transition whitespace-nowrap shadow-xs"
           >
-            <Plus className="h-4 w-4" /> Add Category
+            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Add Category
           </button>
         </div>
       </div>
@@ -262,13 +306,42 @@ function CategoriesPage() {
               </div>
             )}
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-600">Description</label>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-600">Description</label>
+                <button
+                  type="button"
+                  onClick={handleAiGenerateDescription}
+                  disabled={isGeneratingAi || !editing.name?.trim()}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 border border-indigo-200/80 px-2.5 py-1 text-xs font-semibold text-indigo-700 shadow-2xs transition active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                  title={
+                    !editing.name?.trim()
+                      ? "Enter Category Name first"
+                      : "Generate an SEO-friendly news description with AI"
+                  }
+                >
+                  {isGeneratingAi ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-600" />
+                      <span>Generating with AI...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+                      <span>Generate with AI</span>
+                    </>
+                  )}
+                </button>
+              </div>
               <textarea
                 value={editing.description}
                 onChange={(e) => setEditing({ ...editing, description: e.target.value })}
                 rows={3}
+                placeholder="National news, political developments, and policy updates across the country."
                 className="w-full rounded-md border border-slate-200 p-2.5 text-sm focus:border-slate-900 focus:outline-none"
               />
+              <p className="mt-1 text-[11px] text-slate-500">
+                SEO-friendly summary used across category headers, archive feeds, and Google search snippets.
+              </p>
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
               <button
@@ -281,7 +354,7 @@ function CategoriesPage() {
                 onClick={() => handleSave(editing)}
                 className="rounded-md bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
               >
-                Save Category
+                Save
               </button>
             </div>
           </div>

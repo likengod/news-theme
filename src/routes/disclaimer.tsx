@@ -1,24 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PolicyLayout } from "@/components/site/PolicyLayout";
-import { getCustomPagesServer } from "@/lib/site-content";
+import { getCustomPagesServer, buildPageHead } from "@/lib/site-content";
 
 export const Route = createFileRoute("/disclaimer")({
-  head: () => ({
-    meta: [
-      { title: "Disclaimer — News Theme" },
-      {
-        name: "description",
-        content:
-          "Editorial, financial and general disclaimers for content published by News Theme.",
-      },
-      { property: "og:url", content: "https://gorillatechsolution.com/disclaimer" },
-    ],
-    links: [{ rel: "canonical", href: "https://gorillatechsolution.com/disclaimer" }],
-  }),
   loader: async () => {
     const pages = await getCustomPagesServer().catch(() => []);
     return pages.find((p) => p.slug === "disclaimer");
   },
+  head: ({ loaderData: page }) =>
+    buildPageHead({
+      page,
+      defaultTitle: "Disclaimer",
+      defaultDescription:
+        "Editorial, financial and general disclaimers for content published by News Theme.",
+      slug: "/disclaimer",
+    }),
   component: DisclaimerPage,
 });
 

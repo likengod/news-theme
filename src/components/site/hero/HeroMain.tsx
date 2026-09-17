@@ -81,12 +81,14 @@ export function HeroMain({ activeLeads, cfg }: any) {
               alt={featured.title}
               loading={index === 0 ? "eager" : "lazy"}
               fetchPriority={index === 0 ? "high" : "auto"}
+              decoding={index === 0 ? "sync" : "async"}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
               width={800}
               height={500}
               className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </div>
-          <h2 className="headline mt-4 hidden text-2xl text-foreground group-hover:underline md:block md:text-3xl">
+          <h2 className="headline mt-3 text-xl font-bold text-foreground group-hover:underline md:mt-4 md:text-3xl">
             {featured.title}
           </h2>
           <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
@@ -140,7 +142,7 @@ export function HeroMain({ activeLeads, cfg }: any) {
                   SPONSORED
                 </span>
               </div>
-              <ScriptAdRenderer script={featuredAdScript} />
+              <ScriptAdRenderer code={featuredAdScript} />
             </div>
           </CarouselItem>,
         );
@@ -197,19 +199,24 @@ export function HeroMain({ activeLeads, cfg }: any) {
             {/* Dots */}
             {count > 1 && (
               <div className="mt-4 flex justify-center sm:pointer-events-none sm:absolute sm:inset-x-0 sm:top-0 sm:mt-0 sm:aspect-[16/10] sm:items-end sm:pb-3">
-                <div className="flex gap-1.5 rounded-full sm:pointer-events-auto sm:bg-white/30 sm:px-2 sm:py-1 sm:backdrop-blur-sm">
+                <div className="flex items-center gap-0.5 rounded-full sm:pointer-events-auto sm:bg-white/30 sm:px-1.5 sm:py-0.5 sm:backdrop-blur-sm">
                   {Array.from({ length: count }).map((_, i) => (
                     <button
                       key={i}
-                      className={`h-2.5 w-2.5 sm:h-2 sm:w-2 rounded-full transition-all ${
-                        i === current ? "bg-slate-900" : "bg-slate-300 sm:bg-slate-600/60"
-                      }`}
+                      type="button"
+                      className="flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-full transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                       onClick={(e) => {
                         e.preventDefault();
                         api?.scrollTo(i);
                       }}
                       aria-label={`Go to slide ${i + 1}`}
-                    />
+                    >
+                      <span
+                        className={`block h-2.5 w-2.5 sm:h-2 sm:w-2 rounded-full transition-all ${
+                          i === current ? "bg-slate-900" : "bg-slate-300 sm:bg-slate-600/60"
+                        }`}
+                      />
+                    </button>
                   ))}
                 </div>
               </div>

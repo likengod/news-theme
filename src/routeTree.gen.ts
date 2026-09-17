@@ -16,14 +16,18 @@ import { Route as VerifiedJournalistRouteImport } from './routes/verified-journa
 import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
 import { Route as SubscriptionRouteImport } from './routes/subscription'
 import { Route as SubmitNewsRouteImport } from './routes/submit-news'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as NewsSitemapDotxmlRouteImport } from './routes/news-sitemap[.]xml'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as FactCheckingPolicyRouteImport } from './routes/fact-checking-policy'
 import { Route as EventRouteImport } from './routes/event'
 import { Route as EditorialPolicyRouteImport } from './routes/editorial-policy'
 import { Route as EarnPointsRouteImport } from './routes/earn-points'
@@ -34,6 +38,7 @@ import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ArchiveRouteImport } from './routes/archive'
+import { Route as ApplyJournalistRouteImport } from './routes/apply-journalist'
 import { Route as ApplyRouteImport } from './routes/apply'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
@@ -95,6 +100,11 @@ const SubmitNewsRoute = SubmitNewsRouteImport.update({
   path: '/submit-news',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SetupRoute = SetupRouteImport.update({
   id: '/setup',
   path: '/setup',
@@ -103,6 +113,11 @@ const SetupRoute = SetupRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RssDotxmlRoute = RssDotxmlRouteImport.update({
+  id: '/rss.xml',
+  path: '/rss.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -130,9 +145,19 @@ const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NewsSitemapDotxmlRoute = NewsSitemapDotxmlRouteImport.update({
+  id: '/news-sitemap.xml',
+  path: '/news-sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FactCheckingPolicyRoute = FactCheckingPolicyRouteImport.update({
+  id: '/fact-checking-policy',
+  path: '/fact-checking-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventRoute = EventRouteImport.update({
@@ -183,6 +208,11 @@ const AuthRoute = AuthRouteImport.update({
 const ArchiveRoute = ArchiveRouteImport.update({
   id: '/archive',
   path: '/archive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApplyJournalistRoute = ApplyJournalistRouteImport.update({
+  id: '/apply-journalist',
+  path: '/apply-journalist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApplyRoute = ApplyRouteImport.update({
@@ -317,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/apply': typeof ApplyRoute
+  '/apply-journalist': typeof ApplyJournalistRoute
   '/archive': typeof ArchiveRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
@@ -327,14 +358,18 @@ export interface FileRoutesByFullPath {
   '/earn-points': typeof EarnPointsRoute
   '/editorial-policy': typeof EditorialPolicyRoute
   '/event': typeof EventRoute
+  '/fact-checking-policy': typeof FactCheckingPolicyRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/news-sitemap.xml': typeof NewsSitemapDotxmlRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/reels': typeof ReelsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/rss.xml': typeof RssDotxmlRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit-news': typeof SubmitNewsRoute
   '/subscription': typeof SubscriptionRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
@@ -368,6 +403,7 @@ export interface FileRoutesByTo {
   '/$slug': typeof SlugRoute
   '/about': typeof AboutRoute
   '/apply': typeof ApplyRoute
+  '/apply-journalist': typeof ApplyJournalistRoute
   '/archive': typeof ArchiveRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
@@ -378,14 +414,18 @@ export interface FileRoutesByTo {
   '/earn-points': typeof EarnPointsRoute
   '/editorial-policy': typeof EditorialPolicyRoute
   '/event': typeof EventRoute
+  '/fact-checking-policy': typeof FactCheckingPolicyRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/news-sitemap.xml': typeof NewsSitemapDotxmlRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/reels': typeof ReelsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/rss.xml': typeof RssDotxmlRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit-news': typeof SubmitNewsRoute
   '/subscription': typeof SubscriptionRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
@@ -421,6 +461,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/apply': typeof ApplyRoute
+  '/apply-journalist': typeof ApplyJournalistRoute
   '/archive': typeof ArchiveRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
@@ -431,14 +472,18 @@ export interface FileRoutesById {
   '/earn-points': typeof EarnPointsRoute
   '/editorial-policy': typeof EditorialPolicyRoute
   '/event': typeof EventRoute
+  '/fact-checking-policy': typeof FactCheckingPolicyRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/news-sitemap.xml': typeof NewsSitemapDotxmlRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/reels': typeof ReelsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/rss.xml': typeof RssDotxmlRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit-news': typeof SubmitNewsRoute
   '/subscription': typeof SubscriptionRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
@@ -475,6 +520,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/apply'
+    | '/apply-journalist'
     | '/archive'
     | '/auth'
     | '/contact'
@@ -485,14 +531,18 @@ export interface FileRouteTypes {
     | '/earn-points'
     | '/editorial-policy'
     | '/event'
+    | '/fact-checking-policy'
     | '/forgot-password'
+    | '/news-sitemap.xml'
     | '/privacy-policy'
     | '/profile'
     | '/reels'
     | '/refund-policy'
     | '/reset-password'
+    | '/rss.xml'
     | '/search'
     | '/setup'
+    | '/sitemap.xml'
     | '/submit-news'
     | '/subscription'
     | '/terms-and-conditions'
@@ -526,6 +576,7 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/about'
     | '/apply'
+    | '/apply-journalist'
     | '/archive'
     | '/auth'
     | '/contact'
@@ -536,14 +587,18 @@ export interface FileRouteTypes {
     | '/earn-points'
     | '/editorial-policy'
     | '/event'
+    | '/fact-checking-policy'
     | '/forgot-password'
+    | '/news-sitemap.xml'
     | '/privacy-policy'
     | '/profile'
     | '/reels'
     | '/refund-policy'
     | '/reset-password'
+    | '/rss.xml'
     | '/search'
     | '/setup'
+    | '/sitemap.xml'
     | '/submit-news'
     | '/subscription'
     | '/terms-and-conditions'
@@ -578,6 +633,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/apply'
+    | '/apply-journalist'
     | '/archive'
     | '/auth'
     | '/contact'
@@ -588,14 +644,18 @@ export interface FileRouteTypes {
     | '/earn-points'
     | '/editorial-policy'
     | '/event'
+    | '/fact-checking-policy'
     | '/forgot-password'
+    | '/news-sitemap.xml'
     | '/privacy-policy'
     | '/profile'
     | '/reels'
     | '/refund-policy'
     | '/reset-password'
+    | '/rss.xml'
     | '/search'
     | '/setup'
+    | '/sitemap.xml'
     | '/submit-news'
     | '/subscription'
     | '/terms-and-conditions'
@@ -631,6 +691,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   ApplyRoute: typeof ApplyRoute
+  ApplyJournalistRoute: typeof ApplyJournalistRoute
   ArchiveRoute: typeof ArchiveRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
@@ -641,14 +702,18 @@ export interface RootRouteChildren {
   EarnPointsRoute: typeof EarnPointsRoute
   EditorialPolicyRoute: typeof EditorialPolicyRoute
   EventRoute: typeof EventRoute
+  FactCheckingPolicyRoute: typeof FactCheckingPolicyRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  NewsSitemapDotxmlRoute: typeof NewsSitemapDotxmlRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ProfileRoute: typeof ProfileRoute
   ReelsRoute: typeof ReelsRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  RssDotxmlRoute: typeof RssDotxmlRoute
   SearchRoute: typeof SearchRoute
   SetupRoute: typeof SetupRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SubmitNewsRoute: typeof SubmitNewsRoute
   SubscriptionRoute: typeof SubscriptionRoute
   TermsAndConditionsRoute: typeof TermsAndConditionsRoute
@@ -712,6 +777,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubmitNewsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/setup': {
       id: '/setup'
       path: '/setup'
@@ -724,6 +796,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rss.xml': {
+      id: '/rss.xml'
+      path: '/rss.xml'
+      fullPath: '/rss.xml'
+      preLoaderRoute: typeof RssDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -761,11 +840,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/news-sitemap.xml': {
+      id: '/news-sitemap.xml'
+      path: '/news-sitemap.xml'
+      fullPath: '/news-sitemap.xml'
+      preLoaderRoute: typeof NewsSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forgot-password': {
       id: '/forgot-password'
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fact-checking-policy': {
+      id: '/fact-checking-policy'
+      path: '/fact-checking-policy'
+      fullPath: '/fact-checking-policy'
+      preLoaderRoute: typeof FactCheckingPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/event': {
@@ -836,6 +929,13 @@ declare module '@tanstack/react-router' {
       path: '/archive'
       fullPath: '/archive'
       preLoaderRoute: typeof ArchiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apply-journalist': {
+      id: '/apply-journalist'
+      path: '/apply-journalist'
+      fullPath: '/apply-journalist'
+      preLoaderRoute: typeof ApplyJournalistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/apply': {
@@ -1064,6 +1164,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   ApplyRoute: ApplyRoute,
+  ApplyJournalistRoute: ApplyJournalistRoute,
   ArchiveRoute: ArchiveRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
@@ -1074,14 +1175,18 @@ const rootRouteChildren: RootRouteChildren = {
   EarnPointsRoute: EarnPointsRoute,
   EditorialPolicyRoute: EditorialPolicyRoute,
   EventRoute: EventRoute,
+  FactCheckingPolicyRoute: FactCheckingPolicyRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  NewsSitemapDotxmlRoute: NewsSitemapDotxmlRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   ProfileRoute: ProfileRoute,
   ReelsRoute: ReelsRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  RssDotxmlRoute: RssDotxmlRoute,
   SearchRoute: SearchRoute,
   SetupRoute: SetupRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SubmitNewsRoute: SubmitNewsRoute,
   SubscriptionRoute: SubscriptionRoute,
   TermsAndConditionsRoute: TermsAndConditionsRoute,

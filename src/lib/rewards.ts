@@ -7,14 +7,14 @@ export type RecurringReward = {
   title: string;
   reward: string; // e.g. "₹0.40 per share"
   cap: string; // e.g. "up to ₹2 / day"
-  rank: string; // "all" | "bronze" | "silver" | "gold" | "diamond"
+  rank?: string; // "all" | "bronze" | "silver" | "gold" | "diamond"
 };
 
 export type OneTimeReward = {
   id: string;
   title: string;
   points: number;
-  rank: string; // "all" | "bronze" | "silver" | "gold" | "diamond"
+  rank?: string; // "all" | "bronze" | "silver" | "gold" | "diamond"
 };
 
 export type RewardGroup = {

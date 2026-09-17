@@ -177,7 +177,7 @@ export function TopBar() {
           <Link to="/subscription" className="hidden hover:text-foreground sm:inline">
             {t("nav.subscribe")}
           </Link>
-          <span className="hidden text-border sm:inline">|</span>
+          <span aria-hidden="true" className="hidden text-muted-foreground/40 sm:inline select-none">|</span>
           <UserMenu />
           <SearchBox className="grid h-7 w-7 place-items-center text-foreground hover:bg-muted transition-colors rounded-sm" />
 

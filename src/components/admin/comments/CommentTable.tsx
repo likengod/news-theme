@@ -15,15 +15,15 @@ const badge: Record<CommentRow["status"], string> = {
 
 export function CommentTable({ comments, onSetStatus, onDelete }: Props) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table className="w-full text-left text-sm">
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <table className="w-full min-w-[650px] text-left text-sm">
         <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
           <tr>
-            <th className="px-5 py-3">User</th>
-            <th className="px-5 py-3">Comment Body</th>
-            <th className="px-5 py-3">Article</th>
-            <th className="px-5 py-3">Status</th>
-            <th className="px-5 py-3 text-right">Actions</th>
+            <th className="px-4 sm:px-5 py-3">User</th>
+            <th className="px-4 sm:px-5 py-3">Comment Body</th>
+            <th className="px-4 sm:px-5 py-3">Article</th>
+            <th className="px-4 sm:px-5 py-3">Status</th>
+            <th className="px-4 sm:px-5 py-3 text-right">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">

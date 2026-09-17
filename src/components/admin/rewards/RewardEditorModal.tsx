@@ -36,7 +36,7 @@ export function SaveBar({ onSave, onCancel }: { onSave: () => void; onCancel: ()
         onClick={onSave}
         className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
       >
-        <Save className="h-3.5 w-3.5" /> Save Task
+        <Save className="h-3.5 w-3.5" /> Save
       </button>
     </div>
   );

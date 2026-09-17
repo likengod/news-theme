@@ -4,7 +4,7 @@ import { useHomepageConfig } from "@/hooks/use-homepage-config";
 
 export function LiveVideo() {
   const { liveVideo } = useHomepageConfig();
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 

@@ -221,7 +221,7 @@ function ProfilePage() {
     }
     setSaving(true);
     try {
-      await doDeleteRequest({ data: {} });
+      await doDeleteRequest();
       setDeleteRequested(true);
       toast.success("Deletion request submitted. Our team will review it within 48 hours.");
     } catch (err: any) {

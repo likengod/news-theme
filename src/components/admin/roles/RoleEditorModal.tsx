@@ -127,7 +127,7 @@ export function RoleEditorModal({ role, isNew, onClose, onSave }: Props) {
               onClick={submit}
               className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
             >
-              <Save className="h-4 w-4" /> Save Role
+              <Save className="h-4 w-4" /> Save
             </button>
           </div>
         </div>

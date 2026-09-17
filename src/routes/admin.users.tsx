@@ -27,6 +27,7 @@ import { UserTable } from "@/components/admin/users/UserTable";
 import { UserActionModal } from "@/components/admin/users/UserActionModal";
 import { CreateUserModal } from "@/components/admin/users/CreateUserModal";
 import { CsvImportExport } from "@/components/admin/CsvImportExport";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 
 export const Route = createFileRoute("/admin/users")({
   component: UsersPage,
@@ -59,12 +60,21 @@ function UsersPage() {
       .catch(() => {});
   }, []);
 
+  const siteSettings = useSiteSettings();
+  const planType = (siteSettings?.licenseType || "").toLowerCase();
+  const isEnterprisePlus =
+    planType.includes("enterprise+") ||
+    planType.includes("enterprise plus");
+
   const [q, setQ] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | AppRole>("all");
   const [sort, setSort] = useState<SortMode>("recent");
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const limit = 20;
+
+  const effectiveSort: SortMode =
+    !isEnterprisePlus && (sort === "points_desc" || sort === "points_asc") ? "recent" : sort;
 
   const navigate = useNavigate();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -75,8 +85,8 @@ function UsersPage() {
   }, []);
 
   const usersQuery = useQuery({
-    queryKey: ["admin-users", q, roleFilter, sort, page],
-    queryFn: () => listFn({ data: { q, role: roleFilter, sort, page, limit } }),
+    queryKey: ["admin-users", q, roleFilter, effectiveSort, page],
+    queryFn: () => listFn({ data: { q, role: roleFilter, sort: effectiveSort, page, limit } }),
   });
 
   const rows = useMemo(() => usersQuery.data?.rows ?? [], [usersQuery.data]);
@@ -186,7 +196,7 @@ function UsersPage() {
   const handleToggleBan = async (row: AdminUserRow) => {
     const next = row.status === "Active" ? "Suspended" : "Active";
     try {
-      await banFn({ data: { userId: row.id, suspended: next === "Suspended" } });
+      await banFn({ data: { userId: row.id, suspend: next === "Suspended" } });
       toast.success(`User is now ${next}`);
       qc.invalidateQueries({ queryKey: ["admin-users"] });
     } catch (e: any) {
@@ -197,7 +207,7 @@ function UsersPage() {
   const handleDelete = async (row: AdminUserRow) => {
     if (!confirm(`Are you sure you want to permanently delete ${row.email}?`)) return;
     try {
-      await delFn({ data: row.id });
+      await delFn({ data: { userId: row.id } });
       toast.success("User deleted");
       qc.invalidateQueries({ queryKey: ["admin-users"] });
     } catch (e: any) {
@@ -207,7 +217,7 @@ function UsersPage() {
 
   const handleRegenId = async (row: AdminUserRow) => {
     try {
-      const res = await regenFn({ data: row.id });
+      const res = await regenFn({ data: { userId: row.id } });
       toast.success(`New Public ID generated: ${res.publicUserId}`);
       qc.invalidateQueries({ queryKey: ["admin-users"] });
     } catch (e: any) {
@@ -217,7 +227,7 @@ function UsersPage() {
 
   const handleSavePoints = async (userId: string, points: number) => {
     try {
-      await pointsFn({ data: { userId, points } });
+      await pointsFn({ data: { userId, mode: "set", amount: points } });
       toast.success("Points updated");
       setModal({ kind: null, row: null });
       qc.invalidateQueries({ queryKey: ["admin-users"] });
@@ -253,17 +263,19 @@ function UsersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Users Management</h1>
-          <p className="text-sm text-slate-500">
-            Server-paginated list of registered users, roles, public IDs, and points.
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Users Management</h1>
+          <p className="text-xs sm:text-sm text-slate-500">
+            {isEnterprisePlus
+              ? "Server-paginated list of registered users, roles, public IDs, and points."
+              : "Server-paginated list of registered users, roles, and public IDs."}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <CsvImportExport data={rows} getData={async () => allUsers} filename="users" onImport={handleImport} />
-          <div className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">
-            <Users className="h-4 w-4" /> Total Users: {total}
+          <div className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-slate-100 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-slate-700 whitespace-nowrap">
+            <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Total Users: {total}
           </div>
         </div>
       </div>
@@ -280,13 +292,14 @@ function UsersPage() {
           setRoleFilter(val);
           setPage(1);
         }}
-        sort={sort}
+        sort={effectiveSort}
         onSortChange={(val) => {
           setSort(val);
           setPage(1);
         }}
         roles={roles}
         onCreateClick={() => setShowCreate(true)}
+        isEnterprisePlus={isEnterprisePlus}
       />
 
       {/* Users Table */}
@@ -309,7 +322,11 @@ function UsersPage() {
           onToggleBan={handleToggleBan}
           onDelete={handleDelete}
           onRegenId={handleRegenId}
-          onOpenModal={(kind, row) => setModal({ kind, row })}
+          onOpenModal={(kind, row) => {
+            if (kind === "points" && !isEnterprisePlus) return;
+            setModal({ kind, row });
+          }}
+          isEnterprisePlus={isEnterprisePlus}
         />
       )}
 

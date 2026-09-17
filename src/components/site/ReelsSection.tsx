@@ -64,8 +64,8 @@ export function ReelsSection() {
                 key={it.url}
                 onClick={() => setPlayingUrl(it.url)}
                 style={{
-                  width: "23%",
-                  minWidth: "23%",
+                  width: "27%",
+                  minWidth: "27%",
                 }}
                 className="group relative aspect-[9/16] shrink-0 snap-start overflow-hidden rounded-2xl bg-black border border-border/40 shadow-sm transition-all duration-300 hover:scale-[1.02] cursor-pointer md:!w-auto md:!min-w-0 md:shrink"
               >
@@ -105,8 +105,8 @@ export function ReelsSection() {
                       </div>
                     </div>
 
-                    {/* Title / Label overlay at bottom */}
-                    <div className="absolute bottom-3 left-2.5 right-2.5 z-10">
+                    {/* Title / Label overlay at bottom: Hidden on mobile screens (< md), visible on desktop */}
+                    <div className="hidden md:block absolute bottom-3 left-2.5 right-2.5 z-10">
                       <p className="text-xs font-bold leading-snug text-white line-clamp-2 drop-shadow-md">
                         {it.title || "Watch Reel"}
                       </p>

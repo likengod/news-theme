@@ -49,6 +49,9 @@ export function HeadlineArticle({
             src={item.img}
             alt={item.title}
             loading="lazy"
+            decoding="async"
+            width={400}
+            height={250}
             className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         </div>

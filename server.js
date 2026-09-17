@@ -177,6 +177,12 @@ const server = createServer(async (req, res) => {
       res.setHeader(key, value);
     });
 
+    // Essential HTTP Security Headers
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "SAMEORIGIN");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+
     // Ensure HTML documents are never cached so visitors always receive fresh chunk manifests
     const contentType = response.headers.get("content-type") || "";
     if (contentType.includes("text/html")) {

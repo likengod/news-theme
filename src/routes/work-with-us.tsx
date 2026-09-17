@@ -16,23 +16,31 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { getSiteSettingsServer } from "@/lib/site-content";
+import { getSiteSettingsServer, buildPageHead, defaultSettings, type SiteSettings } from "@/lib/site-content";
 
 export const Route = createFileRoute("/work-with-us")({
-  loader: async () => {
-    const settings = await getSiteSettingsServer();
+  loader: async (): Promise<{ settings: SiteSettings }> => {
+    const settings = (await getSiteSettingsServer().catch(() => null)) || defaultSettings;
     return { settings };
   },
-  head: () => ({
-    meta: [
-      { title: "Work With Us — News Theme" },
-      {
-        name: "description",
-        content:
-          "Apply as a volunteer journalist and grow into an Intern and Permanent role at News Theme.",
+  head: ({ loaderData }) => {
+    const s = loaderData?.settings;
+    return buildPageHead({
+      page: {
+        title: s?.workWithUsHeroTitle || "Work With Us",
+        metaTitle: s?.workWithUsMetaTitle,
+        metaDescription: s?.workWithUsMetaDescription,
+        ogImage: s?.workWithUsOgImage,
+        metaKeywords: s?.workWithUsKeywords,
+        canonicalUrl: s?.workWithUsCanonicalUrl,
+        noIndex: s?.workWithUsNoIndex,
       },
-    ],
-  }),
+      defaultTitle: "Work With Us",
+      defaultDescription:
+        "Apply as a volunteer journalist and grow into an Intern and Permanent role at News Theme.",
+      slug: "/work-with-us",
+    });
+  },
   component: WorkWithUsPage,
 });
 
@@ -102,10 +110,10 @@ function WorkWithUsPage() {
     .filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-between">
       <Header showTicker={false} showBreakingBar={false} />
 
-      <main className="mx-auto max-w-7xl px-4 py-10 space-y-16">
+      <main className="mx-auto max-w-7xl px-4 py-10 space-y-16 flex-1 w-full">
         {/* Hero Section */}
         <header className="max-w-4xl">
           <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">

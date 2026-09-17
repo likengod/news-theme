@@ -90,12 +90,17 @@ export function MediaField({
 
   const handleFile = async (f?: File | null) => {
     if (!f) return;
+    if (f.size > 1 * 1024 * 1024) {
+      toast.error(`"${f.name}" (${formatBytes(f.size)}) exceeds 1 MB limit. File size must be less than 1 MB.`);
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
     try {
       const item = await trackUpload(f, usage);
       onChange(item.dataUrl);
       toast.success("Uploaded to file manager");
-    } catch {
-      toast.error("Upload failed");
+    } catch (err: any) {
+      toast.error(err?.message || "Upload failed");
     }
     if (fileRef.current) fileRef.current.value = "";
   };
@@ -130,6 +135,7 @@ export function MediaField({
         ref={fileRef}
         type="file"
         accept={accept}
+        aria-label={label ? `Upload ${label}` : "Upload media image"}
         hidden
         onChange={(e) => handleFile(e.target.files?.[0])}
       />

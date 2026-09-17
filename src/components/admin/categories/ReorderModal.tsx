@@ -141,7 +141,7 @@ export function ReorderModal({
             disabled={saving || items.length === 0}
             className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
           >
-            {saving ? "Saving..." : "Save Order"}
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
       </div>

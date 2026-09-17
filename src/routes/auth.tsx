@@ -128,7 +128,7 @@ function AuthPage() {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (uid) {
-        const { data: prof } = await (supabase.from("profiles") as any)
+        const { data: prof } = await ((supabase as any).from("profiles"))
           .select("active")
           .eq("id", uid)
           .maybeSingle();
@@ -160,7 +160,7 @@ function AuthPage() {
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { error } = await (supabase.auth.signUp as any)({
       email: parsed.data.email,
       password: parsed.data.password,
       phone: parsed.data.phone,
@@ -173,7 +173,7 @@ function AuthPage() {
           last_name: parsed.data.lastName,
           username: parsed.data.username,
         },
-      },
+      } as any,
     });
     setLoading(false);
     if (error) return toast.error(error.message);

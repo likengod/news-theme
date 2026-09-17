@@ -23,7 +23,7 @@ export const requireAuth = createMiddleware({ type: "function" }).server(async (
     throw new Error("Unauthorized: Only Bearer tokens are supported");
   }
 
-  const token = authHeader.replace("Bearer ", "");
+  const token = authHeader.replace("Bearer ", "").trim();
   if (!token) {
     throw new Error("Unauthorized: No token provided");
   }
@@ -42,6 +42,62 @@ export const requireAuth = createMiddleware({ type: "function" }).server(async (
 
   const session = sessions[0];
   const rolesRows = await query("SELECT role FROM user_roles WHERE user_id = ?", [session.user_id]);
+  const roles = rolesRows.map((r: any) => r.role);
+
+  return next({
+    context: {
+      userId: session.user_id,
+      claims: {
+        sub: session.user_id,
+        email: session.email,
+        roles,
+      },
+    },
+  });
+});
+
+/**
+ * Administrator & Editor Role Verification Middleware
+ * Strictly verifies the user has a valid active session AND is an admin or editor.
+ */
+export const requireAdmin = createMiddleware({ type: "function" }).server(async ({ next }) => {
+  const request = getRequest();
+
+  if (!request?.headers) {
+    throw new Error("Unauthorized: No request headers available");
+  }
+
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new Error("Unauthorized: Bearer token required");
+  }
+
+  const token = authHeader.replace("Bearer ", "").trim();
+  if (!token) {
+    throw new Error("Unauthorized: No token provided");
+  }
+
+  const sessions = await query(
+    `SELECT s.*, u.email FROM sessions s
+       JOIN users u ON s.user_id = u.id
+       WHERE s.id = ? AND s.expires_at > NOW()`,
+    [token],
+  );
+
+  if (sessions.length === 0) {
+    throw new Error("Unauthorized: Invalid token or session expired");
+  }
+
+  const session = sessions[0];
+  const rolesRows = await query(
+    `SELECT role FROM user_roles WHERE user_id = ? AND role IN ('admin', 'editor')`,
+    [session.user_id],
+  );
+
+  if (rolesRows.length === 0) {
+    throw new Error("Forbidden: Administrator privileges required");
+  }
+
   const roles = rolesRows.map((r: any) => r.role);
 
   return next({

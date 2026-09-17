@@ -1,8 +1,8 @@
-﻿import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import crypto from "crypto";
-import { query, hashPassword } from "./db.server";
+import { query, hashPassword, cleanupExpiredSessions } from "./db.server";
 import { z } from "zod";
 import disposableDomains from "disposable-email-domains";
 
@@ -173,6 +173,9 @@ export const signInServer = createServerFn({ method: "POST" })
       user.id,
       expiresAt,
     ]);
+
+    // Opportunistic non-blocking prune of expired sessions
+    cleanupExpiredSessions().catch(() => {});
 
     return {
       session: {

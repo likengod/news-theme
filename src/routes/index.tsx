@@ -7,6 +7,7 @@ import { LazySection } from "@/components/site/LazySection";
 import { useQuery } from "@tanstack/react-query";
 import { getHomepageArticles } from "@/lib/articles.functions";
 import { getTags } from "@/lib/taxonomy.functions";
+import { getArticleImage } from "@/lib/news-data";
 import { Newspaper } from "lucide-react";
 
 // Below-the-fold sections: code-split so they aren't in the initial JS bundle.
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/")({
   loader: async () => {
     try {
       const [articles, tags] = await Promise.all([
-        getHomepageArticles({ data: 50 }).catch((err) => {
+        getHomepageArticles({ data: 25 }).catch((err) => {
           console.warn(
             "[Homepage Loader] getHomepageArticles fallback to empty:",
             err?.message || err,
@@ -55,25 +56,39 @@ export const Route = createFileRoute("/")({
       return { articles: [], tags: [] };
     }
   },
-  head: () => ({
-    meta: [
-      { title: HOME_TITLE },
-      { name: "description", content: HOME_DESC },
-      { property: "og:title", content: HOME_TITLE },
-      { property: "og:description", content: HOME_DESC },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: SITE_URL },
-      { property: "og:image", content: HOME_IMG },
-      { property: "og:image:width", content: "1200" },
-      { property: "og:image:height", content: "630" },
-      { property: "og:site_name", content: "News Theme" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: HOME_TITLE },
-      { name: "twitter:description", content: HOME_DESC },
-      { name: "twitter:image", content: HOME_IMG },
-    ],
-    links: [{ rel: "canonical", href: SITE_URL }],
-  }),
+  head: ({ loaderData }: any) => {
+    const firstArticle = loaderData?.articles?.[0];
+    const heroImage = firstArticle ? getArticleImage(firstArticle.featuredImage, 0) : HOME_IMG;
+    const links: Array<Record<string, any>> = [{ rel: "canonical", href: SITE_URL }];
+    if (heroImage) {
+      links.push({
+        rel: "preload",
+        as: "image",
+        href: heroImage,
+        fetchPriority: "high",
+      });
+    }
+
+    return {
+      meta: [
+        { title: HOME_TITLE },
+        { name: "description", content: HOME_DESC },
+        { property: "og:title", content: HOME_TITLE },
+        { property: "og:description", content: HOME_DESC },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: SITE_URL },
+        { property: "og:image", content: heroImage || HOME_IMG },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { property: "og:site_name", content: "News Theme" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: HOME_TITLE },
+        { name: "twitter:description", content: HOME_DESC },
+        { name: "twitter:image", content: heroImage || HOME_IMG },
+      ],
+      links,
+    };
+  },
   component: Home,
 });
 
@@ -89,8 +104,8 @@ function Home() {
       <main className="mx-auto max-w-7xl px-4 py-4 md:py-10">
         {/* On Mobile Devices (< md): Render Watch section directly below Header */}
         <div className="block md:hidden border-b border-border mb-2 pb-2">
-          <Suspense fallback={null}>
-            <Columnists />
+          <Suspense fallback={<div className="min-h-[130px] w-full" />}>
+            <Columnists hideTitle />
           </Suspense>
         </div>
 
@@ -108,7 +123,7 @@ function Home() {
         </LazySection>
 
         <LazySection minHeight={480}>
-          <ReelsSection articles={dbArticles} />
+          <ReelsSection />
         </LazySection>
 
         <LazySection minHeight={700}>

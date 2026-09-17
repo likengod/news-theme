@@ -62,7 +62,7 @@ export function SocialLinksEditor() {
           }`}
         >
           <Save className="h-4 w-4" />
-          {saved ? "Saved!" : "Save Social Links"}
+          {saved ? "Saved!" : "Save"}
         </button>
       </div>
 

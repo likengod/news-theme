@@ -4,6 +4,7 @@ import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { SocialIcons } from "@/components/site/SocialIcons";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { toast } from "sonner";
 import { submitContactMessage } from "@/lib/inbox.functions";
 
@@ -27,20 +28,23 @@ export const Route = createFileRoute("/contact")({
 });
 
 function ContactPage() {
+  const s = useSiteSettings();
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", subject: "News tip", message: "" });
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
+  const phoneHref = (s.contactPhone || "+91 99999 99999").replace(/[^0-9+]/g, "");
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-between">
       <Header />
 
-      <main className="mx-auto max-w-7xl px-4 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-10 flex-1 w-full">
         <header className="border-b border-border pb-6">
           <h1 className="font-serif text-5xl font-bold text-foreground md:text-6xl">Contact Us</h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Story tips, corrections, partnership and advertising enquiries — the News Theme desk
+            Story tips, corrections, partnership and advertising enquiries — the {s.siteName || "News Theme"} desk
             reads every message. We aim to reply within one business day.
           </p>
         </header>
@@ -48,12 +52,25 @@ function ContactPage() {
         <section className="grid grid-cols-1 gap-10 py-10 lg:grid-cols-[1fr_360px]">
           {/* Form */}
           <div>
-            <h2 className="headline font-serif text-2xl font-bold text-primary">
-              Send us a message
-            </h2>
+            <h2 className="headline text-2xl font-bold text-foreground">Send us a message</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Fill out the form below and our editorial or business desk will get back to you promptly.
+            </p>
+
             {sent ? (
-              <div className="mt-6 border border-border bg-card/40 p-6 text-sm text-foreground">
-                Thanks — your message has been received. Our team will get back to you shortly.
+              <div className="mt-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-6 text-emerald-800 dark:text-emerald-300">
+                <h3 className="font-bold">Thank you for reaching out!</h3>
+                <p className="mt-1 text-sm">Your message has been received. Our team will review it shortly.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSent(false);
+                    setForm({ name: "", email: "", subject: "News tip", message: "" });
+                  }}
+                  className="mt-4 text-xs font-semibold underline hover:opacity-80"
+                >
+                  Send another message
+                </button>
               </div>
             ) : (
               <form
@@ -147,25 +164,23 @@ function ContactPage() {
               <ul className="space-y-4 text-sm text-muted-foreground">
                 <li className="flex items-start gap-3">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
-                  <span>
-                    Agartala, Tripura (W)
-                    <br />
-                    India — Pin: 799006
+                  <span className="whitespace-pre-line">
+                    {s.address || "Agartala, Tripura (W)\nIndia — Pin: 799006"}
                   </span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Phone className="h-4 w-4 shrink-0 text-foreground" />
-                  <a href="tel:+919999999999" className="hover:text-foreground hover:underline">
-                    +91 99999 99999
+                  <a href={`tel:${phoneHref}`} className="hover:text-foreground hover:underline">
+                    {s.contactPhone || "+91 99999 99999"}
                   </a>
                 </li>
                 <li className="flex items-center gap-3">
                   <Mail className="h-4 w-4 shrink-0 text-foreground" />
                   <a
-                    href="mailto:hello@northeasttimeline.com"
+                    href={`mailto:${s.contactEmail || "hello@northeasttimeline.com"}`}
                     className="hover:text-foreground hover:underline"
                   >
-                    hello@northeasttimeline.com
+                    {s.contactEmail || "hello@northeasttimeline.com"}
                   </a>
                 </li>
                 <li className="flex items-start gap-3">
@@ -179,22 +194,42 @@ function ContactPage() {
               <h3 className="mb-4 border-b-2 border-foreground pb-2 text-xs font-bold uppercase tracking-widest text-foreground">
                 Desks
               </h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <ul className="space-y-2.5 text-sm text-muted-foreground">
                 <li>
                   <span className="font-semibold text-foreground">News tips:</span>{" "}
-                  tips@northeasttimeline.com
+                  <a
+                    href={`mailto:${s.emailNewsTips || "tips@northeasttimeline.com"}`}
+                    className="hover:text-foreground hover:underline"
+                  >
+                    {s.emailNewsTips || "tips@northeasttimeline.com"}
+                  </a>
                 </li>
                 <li>
                   <span className="font-semibold text-foreground">Advertising:</span>{" "}
-                  ads@northeasttimeline.com
+                  <a
+                    href={`mailto:${s.emailAdvertising || "ads@northeasttimeline.com"}`}
+                    className="hover:text-foreground hover:underline"
+                  >
+                    {s.emailAdvertising || "ads@northeasttimeline.com"}
+                  </a>
                 </li>
                 <li>
                   <span className="font-semibold text-foreground">Careers:</span>{" "}
-                  careers@northeasttimeline.com
+                  <a
+                    href={`mailto:${s.emailCareers || "careers@northeasttimeline.com"}`}
+                    className="hover:text-foreground hover:underline"
+                  >
+                    {s.emailCareers || "careers@northeasttimeline.com"}
+                  </a>
                 </li>
                 <li>
                   <span className="font-semibold text-foreground">Corrections:</span>{" "}
-                  corrections@northeasttimeline.com
+                  <a
+                    href={`mailto:${s.emailCorrections || "corrections@northeasttimeline.com"}`}
+                    className="hover:text-foreground hover:underline"
+                  >
+                    {s.emailCorrections || "corrections@northeasttimeline.com"}
+                  </a>
                 </li>
               </ul>
             </div>
@@ -203,7 +238,20 @@ function ContactPage() {
               <h3 className="mb-4 border-b-2 border-foreground pb-2 text-xs font-bold uppercase tracking-widest text-foreground">
                 Follow
               </h3>
-              <SocialIcons size="md" />
+              <SocialIcons
+                size="md"
+                links={{
+                  facebook: s.facebook,
+                  instagram: s.instagram,
+                  twitter: s.twitter,
+                  pinterest: s.pinterest,
+                  tiktok: s.tiktok,
+                  whatsapp: s.whatsapp,
+                  youtube: s.youtube,
+                  linkedin: s.linkedin,
+                  telegram: s.telegram,
+                }}
+              />
             </div>
           </aside>
         </section>

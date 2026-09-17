@@ -9,12 +9,12 @@ import { viewsFor } from "@/lib/news-data";
 export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, tags }: any) {
   return (
     <aside className="space-y-6 lg:col-span-3 lg:border-l lg:border-border lg:pl-6">
-      <h3
+      <h2
         className="rule-top font-bold uppercase tracking-[0.25em]"
         style={{ color: cfg.heroOpinion.color, fontSize: `${cfg.heroOpinion.fontSize}px` }}
       >
         {cfg.heroOpinion.title}
-      </h3>
+      </h2>
       <ul className="space-y-5">
         {activeOpinionItems.map((o: any, i: number) => (
           <li key={`${o?.title || "opinion"}-${i}`}>
@@ -48,12 +48,12 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
       </div>
 
       <div>
-        <h3
+        <h2
           className="rule-top font-bold uppercase tracking-[0.25em]"
           style={{ color: cfg.heroPopular.color, fontSize: `${cfg.heroPopular.fontSize}px` }}
         >
           {cfg.heroPopular.title}
-        </h3>
+        </h2>
         <ul className="mt-4 space-y-4">
           {activePopularItems.map((p: any, i: number) => (
             <li key={`${p?.title || "popular"}-${i}`}>

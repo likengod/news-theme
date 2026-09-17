@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Save, Link as LinkIcon } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaYoutube, FaWhatsapp } from "react-icons/fa6";
 import { toast } from "sonner";
@@ -48,7 +48,7 @@ export function SocialLinksForm() {
           return (
             <div key={p.key}>
               <label className="mb-1.5 flex items-center gap-2 text-xs font-semibold text-slate-600">
-                {Icon && <Icon className="h-3.5 w-3.5" style={{ color: p.color }} />}
+                {Icon && React.createElement(Icon as any, { className: "h-3.5 w-3.5", style: { color: p.color } })}
                 {p.label}
               </label>
               <input
@@ -75,7 +75,7 @@ export function SocialLinksForm() {
             }`}
           >
             <Save className="h-4 w-4" />
-            {saved ? "Saved!" : "Save Social Links"}
+            {saved ? "Saved!" : "Save"}
           </button>
         </div>
       </div>

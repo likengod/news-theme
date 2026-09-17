@@ -75,7 +75,7 @@ export function Masthead() {
                 className={`mx-auto h-16 object-contain ${s.logoLight ? "hidden dark:block" : ""} ${showText ? "mb-2" : ""}`}
               />
             )}
-            {showText && (
+            {showText ? (
               <h1
                 className="leading-none text-3xl sm:text-5xl md:text-6xl lg:text-7xl uppercase"
                 style={{
@@ -106,6 +106,8 @@ export function Masthead() {
                       : "THEME"}
                 </span>
               </h1>
+            ) : (
+              <h1 className="sr-only">{s.logoText || "Today Tripura"}</h1>
             )}
           </Link>
           <p className="mt-2.5 sm:mt-3 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.25em] md:tracking-[0.35em] text-muted-foreground">

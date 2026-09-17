@@ -165,15 +165,15 @@ export const HeroBoard = React.memo(function HeroBoard({
       <div className="grid gap-8 lg:grid-cols-12">
         <div className="lg:col-span-9">
           <div className="grid gap-8 lg:grid-cols-12">
-            <div className="hidden lg:col-span-4 lg:block">
-              <HeroSidebarLeft activeLeftItems={activeLeftItems} />
-            </div>
             <HeroMain
               hasDbArticles={hasDbArticles}
               activeLeads={activeLeads}
               cfg={cfg}
               articlesByCategory={articlesByCategory}
             />
+            <div className="hidden lg:col-span-4 lg:block lg:order-first">
+              <HeroSidebarLeft activeLeftItems={activeLeftItems} />
+            </div>
           </div>
           <HeroBottomGrid cfg={cfg} activeBottomItems={activeBottomItems} />
           <HeroCultureRow cfg={cfg} activeCultureItems={activeCultureItems} />

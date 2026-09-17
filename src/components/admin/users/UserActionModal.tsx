@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, Save, Lock, Eye, EyeOff } from "lucide-react";
 import type { AdminUserRow } from "@/lib/admin-users.functions";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 
 type Props = {
   kind: "points" | "password" | "details";
@@ -19,6 +20,16 @@ export function UserActionModal({
   onSavePassword,
   onSaveDetails,
 }: Props) {
+  const siteSettings = useSiteSettings();
+  const planType = (siteSettings?.licenseType || "").toLowerCase();
+  const isEnterprisePlus =
+    planType.includes("enterprise+") ||
+    planType.includes("enterprise plus");
+
+  if (kind === "points" && !isEnterprisePlus) {
+    return null;
+  }
+
   const [points, setPoints] = useState(row.points);
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);

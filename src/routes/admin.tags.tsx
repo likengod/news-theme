@@ -119,32 +119,32 @@ function TagsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
             Tags{" "}
             {!loading && (
-              <span className="ml-1 text-base font-normal text-slate-500">({tags.length})</span>
+              <span className="ml-1 text-xs sm:text-base font-normal text-slate-500">({tags.length})</span>
             )}
           </h1>
-          <p className="text-sm text-slate-500">Manage keywords and tags for articles taxonomy.</p>
+          <p className="text-xs sm:text-sm text-slate-500">Manage keywords and tags for articles taxonomy.</p>
         </div>
         <CsvImportExport data={paged} getData={async () => tags} filename="tags" onImport={handleImport} />
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-lg border border-slate-200 bg-white p-3 md:p-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 rounded-lg border border-slate-200 bg-white p-3 md:p-5">
         <div className="flex items-center gap-2 flex-1 sm:max-w-md">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Tag name (e.g. inflation)"
-            className="flex-1 rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
+            className="flex-1 rounded-md border border-slate-200 px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:border-slate-900 focus:outline-none"
           />
           <button
             onClick={add}
-            className="inline-flex shrink-0 items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            className="inline-flex shrink-0 items-center gap-1.5 sm:gap-2 rounded-md bg-slate-900 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white hover:bg-slate-800 transition whitespace-nowrap shadow-xs"
           >
-            <Plus className="h-4 w-4" /> Add
+            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Add
           </button>
         </div>
 
@@ -319,7 +319,7 @@ function EditDrawer({
             onClick={() => onSave(form)}
             className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
           >
-            Save changes
+            Save
           </button>
         </div>
       </div>

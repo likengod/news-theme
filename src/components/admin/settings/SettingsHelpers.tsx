@@ -244,6 +244,7 @@ export function Toggle({
       </div>
       <button
         type="button"
+        aria-label={label}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition ${
           checked ? "bg-slate-900" : "bg-slate-300"

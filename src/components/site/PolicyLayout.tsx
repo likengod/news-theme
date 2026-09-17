@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
+import { useSiteSettings } from "./AdSettingsContext";
 
 export type PolicySection = {
   heading: string;
@@ -21,10 +22,13 @@ type Props = {
   eyebrow?: string;
   title: string;
   intro?: ReactNode;
+  content?: ReactNode;
   notice?: ReactNode;
   sections: PolicySection[];
   lastUpdated?: string;
   contactEmail?: string;
+  hideDivider?: boolean;
+  dropCapIntro?: boolean;
 };
 
 const POLICIES = [
@@ -34,6 +38,7 @@ const POLICIES = [
   { label: "Refund Policy", to: "/refund-policy" as const },
   { label: "Disclaimer", to: "/disclaimer" as const },
   { label: "Editorial Policy", to: "/editorial-policy" as const },
+  { label: "Fact-Checking Policy", to: "/fact-checking-policy" as const },
   { label: "DMCA", to: "/dmca" as const },
   { label: "About", to: "/about" as const },
   { label: "Submit News", to: "/submit-news" as const },
@@ -47,14 +52,21 @@ function slug(s: string) {
 }
 
 export function PolicyLayout({
-  eyebrow = "Policy",
+  eyebrow = "",
   title,
   intro,
+  content,
   notice,
   sections,
-  lastUpdated = "January 10, 2026",
-  contactEmail = "legal@northeasttimeline.com",
+  lastUpdated = "",
+  contactEmail,
+  hideDivider,
+  dropCapIntro,
 }: Props) {
+  const s = useSiteSettings();
+  const actualEmail = contactEmail || s?.contactEmail || "legal@northeasttimeline.com";
+  const actualPhone = s?.contactPhone || "+91 99999 99999";
+  const actualAddress = s?.address || "Agartala, Tripura (W) India";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const active = POLICIES.find((p) => p.to === pathname);
   const others = POLICIES.filter((p) => p.to !== pathname);
@@ -62,10 +74,10 @@ export function PolicyLayout({
   const [connectOpen, setConnectOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-between">
       <Header showTicker={false} showBreakingBar={false} />
 
-      <main className="mx-auto max-w-7xl px-4 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-10 flex-1 w-full">
         <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
           {/* ───────── Left: Policy Centre ───────── */}
           <aside className="lg:sticky lg:top-6 lg:self-start">
@@ -143,16 +155,16 @@ export function PolicyLayout({
                   href={`mailto:${contactEmail}`}
                   className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted"
                 >
-                  <Mail className="h-4 w-4 text-muted-foreground" /> {contactEmail}
+                  <Mail className="h-4 w-4 text-muted-foreground" /> {actualEmail}
                 </a>
                 <a
-                  href="tel:+911234567890"
+                  href={`tel:${actualPhone.replace(/[^0-9+]/g, "")}`}
                   className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted"
                 >
-                  <Phone className="h-4 w-4 text-muted-foreground" /> +91 12345 67890
+                  <Phone className="h-4 w-4 text-muted-foreground" /> {actualPhone}
                 </a>
                 <p className="flex items-start gap-2 rounded-lg px-2 py-1.5 text-foreground/80">
-                  <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" /> Guwahati, Assam, India
+                  <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" /> {actualAddress}
                 </p>
                 <Link
                   to="/contact"
@@ -178,15 +190,29 @@ export function PolicyLayout({
                   {title}
                 </h1>
               </div>
-              <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                {eyebrow === "Policy" ? "Narrative Sync" : eyebrow} · {lastUpdated}
-              </p>
+              {eyebrow && eyebrow !== "Narrative Sync" ? (
+                <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  {eyebrow} {lastUpdated ? `· ${lastUpdated}` : ""}
+                </p>
+              ) : lastUpdated ? (
+                <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  {lastUpdated}
+                </p>
+              ) : null}
               {intro && (
-                <p className="mt-4 max-w-3xl text-[15px] leading-relaxed text-muted-foreground">
+                <p
+                  className={`mt-4 max-w-3xl text-[15px] sm:text-base leading-relaxed text-muted-foreground ${
+                    dropCapIntro || pathname === "/about"
+                      ? "first-letter:float-left first-letter:text-5xl sm:first-letter:text-6xl first-letter:font-bold first-letter:mr-3.5 first-letter:leading-[0.8] first-letter:font-serif first-letter:text-foreground"
+                      : ""
+                  }`}
+                >
                   {intro}
                 </p>
               )}
-              <div className="mt-6 h-px w-full bg-border" />
+              {!hideDivider && pathname !== "/about" && (
+                <div className="mt-6 h-px w-full bg-border" />
+              )}
             </header>
 
             {notice && (
@@ -198,22 +224,30 @@ export function PolicyLayout({
               </aside>
             )}
 
-            <div className="mt-10 space-y-10">
-              {sections.map((s) => (
-                <section key={s.heading} id={slug(s.heading)} className="scroll-mt-24">
-                  <h2
-                    className="headline text-2xl md:text-[28px]"
-                    style={{ WebkitLineClamp: "unset" as never }}
-                  >
-                    {s.heading}
-                  </h2>
-                  <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-foreground/90">
-                    {s.body}
-                  </div>
-                </section>
-              ))}
+            {content && (
+              <div className="mt-8 text-[15px] leading-relaxed text-foreground/90">{content}</div>
+            )}
 
-              <section id="contact" className="scroll-mt-24 border-t border-border pt-8">
+            {sections && sections.length > 0 && (
+              <div className="mt-10 space-y-10">
+                {sections.map((s) => (
+                  <section key={s.heading} id={slug(s.heading)} className="scroll-mt-24">
+                    <h2
+                      className="headline text-2xl md:text-[28px]"
+                      style={{ WebkitLineClamp: "unset" as never }}
+                    >
+                      {s.heading}
+                    </h2>
+                    <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-foreground/90">
+                      {s.body}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-10 border-t border-border pt-8">
+              <section id="contact" className="scroll-mt-24">
                 <h2
                   className="headline text-2xl md:text-[28px]"
                   style={{ WebkitLineClamp: "unset" as never }}
@@ -221,9 +255,10 @@ export function PolicyLayout({
                   Contact Us
                 </h2>
                 <p className="mt-3 text-[15px] leading-relaxed">
-                  Questions about this policy? Email{" "}
-                  <a href={`mailto:${contactEmail}`} className="font-semibold underline">
-                    {contactEmail}
+                  {pathname === "/about" ? "Have questions or want to get in touch?" : "Questions about this policy?"}{" "}
+                  Email{" "}
+                  <a href={`mailto:${actualEmail}`} className="font-semibold underline">
+                    {actualEmail}
                   </a>{" "}
                   or use our{" "}
                   <Link to="/contact" className="font-semibold underline">

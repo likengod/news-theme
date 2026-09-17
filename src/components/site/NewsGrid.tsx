@@ -174,12 +174,12 @@ export const NewsGrid = React.memo(function NewsGrid({
           const colCfg = cfg.newsGridColumns[i];
           return (
             <div key={i} className="flex flex-col">
-              <h3
+              <h2
                 className="mb-3 font-extrabold uppercase tracking-widest"
                 style={{ color: colCfg.color, fontSize: `${colCfg.fontSize}px` }}
               >
                 {colCfg.title}
-              </h3>
+              </h2>
               <Link
                 to="/news/$slug"
                 params={{ slug: col?.slug || "sample" }}
@@ -203,9 +203,9 @@ export const NewsGrid = React.memo(function NewsGrid({
                     </span>
                   )}
                 </div>
-                <p className="mt-3 line-clamp-2 overflow-hidden font-serif text-[17px] font-bold leading-snug text-primary group-hover:underline">
+                <h3 className="mt-3 line-clamp-2 overflow-hidden font-serif text-[17px] font-bold leading-snug text-primary group-hover:underline">
                   {col.lead}
-                </p>
+                </h3>
               </Link>
               <ul className="mt-3 space-y-3 border-t border-border pt-3">
                 {col.items.map((item, idx) => (

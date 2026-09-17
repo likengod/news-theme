@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { generateSectionHtmlServer } from "@/lib/ai.functions";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import {
   Sparkles,
   Loader2,
@@ -13,6 +14,7 @@ import {
   Type,
   Trash2,
   HelpCircle,
+  Lock,
 } from "lucide-react";
 
 export function htmlToNormalText(html?: string): string {
@@ -84,6 +86,8 @@ export function normalTextToHtml(text?: string): string {
 }
 
 export function SectionEditorItem({ sec, idx, activeSections, update }: any) {
+  const siteSettings = useSiteSettings();
+  const isEnterprise = (siteSettings?.licenseType || "").toLowerCase().includes("enterprise");
   const [mode, setMode] = useState<"normal" | "html" | "preview">("normal");
   const [normalText, setNormalText] = useState<string>(() => htmlToNormalText(sec.body || ""));
   const [rawHtml, setRawHtml] = useState<string>(sec.body || "");
@@ -139,6 +143,10 @@ export function SectionEditorItem({ sec, idx, activeSections, update }: any) {
   };
 
   const handleGenerate = async () => {
+    if (!isEnterprise) {
+      toast.error("AI Content Assistant is exclusively available for Enterprise and Enterprise+ license holders.");
+      return;
+    }
     if (!prompt.trim()) {
       toast.error("Please enter instructions for the AI.");
       return;
@@ -260,10 +268,35 @@ export function SectionEditorItem({ sec, idx, activeSections, update }: any) {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setShowModal(true)}
-              className="flex items-center gap-1.5 text-xs font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1 rounded-lg transition-colors shadow-2xs"
+              onClick={() => {
+                if (!isEnterprise) {
+                  toast.error("AI Content Assistant is exclusively available for Enterprise and Enterprise+ license holders.");
+                  return;
+                }
+                setShowModal(true);
+              }}
+              className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-lg transition-colors shadow-2xs ${
+                isEnterprise
+                  ? "text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200"
+                  : "text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 cursor-pointer"
+              }`}
+              title={
+                !isEnterprise
+                  ? "Enterprise Feature Locked — Upgrade to Enterprise or Enterprise+ to use AI Assistant"
+                  : "AI Assistant"
+              }
             >
-              <Sparkles className="h-3.5 w-3.5 text-indigo-600" /> AI Assistant
+              {isEnterprise ? (
+                <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+              ) : (
+                <Lock className="h-3.5 w-3.5 text-amber-600" />
+              )}
+              <span>AI Assistant</span>
+              {!isEnterprise && (
+                <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded ml-0.5">
+                  Enterprise
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -355,7 +388,7 @@ export function SectionEditorItem({ sec, idx, activeSections, update }: any) {
       </div>
 
       {/* AI Assistant Modal */}
-      {showModal && (
+      {showModal && isEnterprise && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
           <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">

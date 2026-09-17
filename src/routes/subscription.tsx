@@ -5,20 +5,32 @@ import { Check, Crown } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { loadRoles, setCurrentRoleId, getCurrentRoleId, upgradeToPremiumServer } from "@/lib/roles";
-import { loadSettings } from "@/lib/site-content";
+import { loadSettings, getSiteSettingsServer, buildPageHead } from "@/lib/site-content";
 import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/subscription")({
-  head: () => ({
-    meta: [
-      { title: "Subscription — News Theme" },
-      {
-        name: "description",
-        content:
-          "Upgrade to Premium for ad-free reading, exclusive stories and early access. Monthly or yearly plans.",
+  loader: async () => {
+    const settings = await getSiteSettingsServer().catch(() => null);
+    return { settings };
+  },
+  head: ({ loaderData }) => {
+    const s = loaderData?.settings;
+    return buildPageHead({
+      page: {
+        title: s?.subscriptionTitle || "Subscription",
+        metaTitle: s?.subscriptionMetaTitle,
+        metaDescription: s?.subscriptionMetaDescription,
+        ogImage: s?.subscriptionOgImage,
+        metaKeywords: s?.subscriptionKeywords,
+        canonicalUrl: s?.subscriptionCanonicalUrl,
+        noIndex: s?.subscriptionNoIndex,
       },
-    ],
-  }),
+      defaultTitle: "Subscription",
+      defaultDescription:
+        "Upgrade to Premium for ad-free reading, exclusive stories and early access. Monthly or yearly plans.",
+      slug: "/subscription",
+    });
+  },
   component: SubscriptionPage,
 });
 
@@ -92,9 +104,9 @@ function SubscriptionPage() {
   ).replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-between">
       <Header showTicker={false} showBreakingBar={false} />
-      <main className="mx-auto max-w-5xl px-4 py-12">
+      <main className="mx-auto max-w-5xl px-4 py-12 flex-1 w-full">
         <header className="text-center">
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Membership

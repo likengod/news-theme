@@ -72,7 +72,7 @@ export function PageEditorModal({ page, onClose, onSave }: Props) {
               onClick={submit}
               className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
             >
-              <Save className="h-4 w-4" /> Save Page to MySQL
+              <Save className="h-4 w-4" /> Save
             </button>
           </div>
         </div>

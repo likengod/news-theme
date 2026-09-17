@@ -303,7 +303,7 @@ function ReelViewerModal({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
-            <h4 className="text-sm font-bold">Share to</h4>
+            <p className="text-sm font-bold">Share to</p>
             <button
               type="button"
               onClick={() => setShowShareMenu(false)}
@@ -390,7 +390,7 @@ function ReelViewerModal({
   );
 }
 
-export function Columnists() {
+export function Columnists({ hideTitle }: { hideTitle?: boolean } = {}) {
   const cfg = useHomepageConfig();
   const adCtx = useAdSettings();
   const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
@@ -438,7 +438,7 @@ export function Columnists() {
         className="mt-0 md:mt-6 flex overflow-x-auto gap-2 pb-3 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:gap-4 md:pb-3"
       >
         {displayItems.map((item, index) => {
-          if (item.isAd && item.ad) {
+          if (item.isAd) {
             const ad = item.ad;
             const adImg = ad.imagePortrait || ad.imageLandscape || ad.image;
             const adHref = ad.href || "#";
@@ -448,7 +448,7 @@ export function Columnists() {
             return (
               <div
                 key={`reel-ad-${index}`}
-                className="group block shrink-0 snap-start w-[23%] sm:w-[45%] md:w-[31%] lg:w-[calc(20%-0.8rem)]"
+                className="group block shrink-0 snap-start w-[27%] sm:w-[45%] md:w-[31%] lg:w-[calc(20%-0.8rem)]"
               >
                 <a
                   href={adHref}
@@ -461,6 +461,7 @@ export function Columnists() {
                     alt={ad.label || "Sponsored Ad"}
                     loading="lazy"
                     decoding="async"
+                    sizes="(max-width: 768px) 27vw, 150px"
                     width={270}
                     height={480}
                     className="h-full w-full object-cover transition duration-500 group-hover/ad:scale-105"
@@ -477,7 +478,7 @@ export function Columnists() {
                 </a>
 
                 {/* Sponsored text BELOW the ad */}
-                <div className="mt-1.5 flex items-center gap-1 text-[10px] md:text-[11px] font-semibold text-amber-600 dark:text-amber-500 truncate">
+                <div className="mt-1.5 flex items-center gap-1 text-[10px] md:text-[11px] font-semibold text-amber-800 dark:text-amber-400 truncate">
                   <Sparkles className="h-2.5 w-2.5 shrink-0" />
                   <span>Sponsored</span>
                   {!isGenericLabel && (
@@ -496,7 +497,7 @@ export function Columnists() {
             <div
               key={v.title + index}
               onClick={() => setActiveReelIndex(reelIdx)}
-              className="group block shrink-0 snap-start cursor-pointer w-[23%] sm:w-[45%] md:w-[31%] lg:w-[calc(20%-0.8rem)]"
+              className="group block shrink-0 snap-start cursor-pointer w-[27%] sm:w-[45%] md:w-[31%] lg:w-[calc(20%-0.8rem)]"
             >
               <div className="relative aspect-[9/16] overflow-hidden rounded-xl bg-black border border-border/40 shadow-sm transition duration-500 hover:scale-[1.02]">
                 <img
@@ -504,6 +505,7 @@ export function Columnists() {
                   alt={v.title}
                   loading="lazy"
                   decoding="async"
+                  sizes="(max-width: 768px) 27vw, 150px"
                   width={270}
                   height={480}
                   className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
@@ -516,15 +518,20 @@ export function Columnists() {
                   </span>
                 )}
 
-                <h4 className="absolute bottom-11 left-2.5 right-2.5 text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
-                  {v.title}
-                </h4>
+                {/* Title: Completely hidden when hideTitle is set or on mobile devices (< md) */}
+                {!hideTitle && (
+                  <div className="hidden md:block">
+                    <h3 className="absolute bottom-11 left-2.5 right-2.5 text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
+                      {v.title}
+                    </h3>
+                  </div>
+                )}
 
-                <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-black shadow transition-transform group-hover:scale-110">
-                    <Play className="h-3 w-3 fill-current ml-0.5" />
+                <div className="absolute bottom-1.5 left-1.5 md:bottom-2.5 md:left-2.5 flex items-center gap-1 md:gap-1.5">
+                  <span className="flex h-5 w-5 md:h-7 md:w-7 items-center justify-center rounded-full bg-white/95 text-black shadow transition-transform group-hover:scale-110">
+                    <Play className="h-2.5 w-2.5 md:h-3 md:w-3 fill-current ml-0.5" />
                   </span>
-                  <span className="text-xs font-semibold text-white drop-shadow">{v.duration}</span>
+                  <span className="text-[9px] md:text-xs font-semibold text-white drop-shadow">{v.duration}</span>
                 </div>
               </div>
               <Views

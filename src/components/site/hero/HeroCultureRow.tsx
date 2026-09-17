@@ -5,7 +5,7 @@ import { formatViews, viewsFor } from "@/lib/news-data";
 export function HeroCultureRow({ cfg, activeCultureItems }: any) {
   return (
     <div className="mt-10 border-t border-border pt-6">
-      <h3
+      <h2
         className="mb-6 font-bold uppercase tracking-[0.25em]"
         style={{
           color: cfg.heroCultureMusic.color,
@@ -13,7 +13,7 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
         }}
       >
         {cfg.heroCultureMusic.title}
-      </h3>
+      </h2>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {activeCultureItems.map((c: any, i: number) => (
           <Link
@@ -41,9 +41,9 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
                 {formatViews(c.views || viewsFor(c.title))} views
               </span>
             </div>
-            <h4 className="headline mt-3 text-lg leading-tight text-foreground group-hover:underline">
+            <h3 className="headline mt-3 text-lg leading-tight text-foreground group-hover:underline">
               {c.title}
-            </h4>
+            </h3>
             <p className="mt-2 line-clamp-3 text-sm leading-snug text-muted-foreground">
               {c.excerpt}
             </p>

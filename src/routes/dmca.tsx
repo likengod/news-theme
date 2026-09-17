@@ -1,23 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PolicyLayout } from "@/components/site/PolicyLayout";
-import { getCustomPagesServer } from "@/lib/site-content";
+import { getCustomPagesServer, buildPageHead } from "@/lib/site-content";
 
 export const Route = createFileRoute("/dmca")({
-  head: () => ({
-    meta: [
-      { title: "DMCA — News Theme" },
-      {
-        name: "description",
-        content: "How to submit a DMCA copyright takedown notice to News Theme.",
-      },
-      { property: "og:url", content: "https://gorillatechsolution.com/dmca" },
-    ],
-    links: [{ rel: "canonical", href: "https://gorillatechsolution.com/dmca" }],
-  }),
   loader: async () => {
     const pages = await getCustomPagesServer().catch(() => []);
     return pages.find((p) => p.slug === "dmca");
   },
+  head: ({ loaderData: page }) =>
+    buildPageHead({
+      page,
+      defaultTitle: "DMCA Notice & Policy",
+      defaultDescription: "How to submit a DMCA copyright takedown notice to News Theme.",
+      slug: "/dmca",
+    }),
   component: DmcaPage,
 });
 

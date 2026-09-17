@@ -8,9 +8,10 @@ type Props<T> = {
   getData?: () => Promise<T[]>;
   filename: string;
   onImport: (data: T[]) => void;
+  iconOnly?: boolean;
 };
 
-export function CsvImportExport<T>({ data, getData, filename, onImport }: Props<T>) {
+export function CsvImportExport<T>({ data, getData, filename, onImport, iconOnly }: Props<T>) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -90,35 +91,53 @@ export function CsvImportExport<T>({ data, getData, filename, onImport }: Props<
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5 sm:gap-2">
       <input type="file" accept=".csv" ref={fileRef} onChange={handleImport} className="hidden" />
       <button
         onClick={() => fileRef.current?.click()}
-        className="inline-flex items-center gap-2 rounded-md bg-white border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+        title="Import CSV"
+        aria-label="Import CSV"
+        className={
+          iconOnly
+            ? "h-9 w-9 inline-flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-xs shrink-0"
+            : "inline-flex items-center gap-1.5 sm:gap-2 rounded-md bg-white border border-slate-200 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 transition whitespace-nowrap shadow-xs"
+        }
       >
-        <Upload className="h-4 w-4" /> Import CSV
+        <Upload className={iconOnly ? "h-4 w-4" : "h-3.5 w-3.5 sm:h-4 sm:w-4"} />
+        {!iconOnly && " Import CSV"}
       </button>
       
       {getData ? (
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setShowExportMenu(!showExportMenu)}
-            className="inline-flex items-center gap-2 rounded-md bg-white border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+            title="Export CSV"
+            aria-label="Export CSV"
+            className={
+              iconOnly
+                ? "h-9 w-9 inline-flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-xs shrink-0"
+                : "inline-flex items-center gap-1.5 sm:gap-2 rounded-md bg-white border border-slate-200 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 transition whitespace-nowrap shadow-xs"
+            }
           >
-            <Download className="h-4 w-4" /> Export CSV <ChevronDown className="h-3 w-3 opacity-50" />
+            <Download className={iconOnly ? "h-4 w-4" : "h-3.5 w-3.5 sm:h-4 sm:w-4"} />
+            {!iconOnly && (
+              <>
+                {" "}Export CSV <ChevronDown className="h-3 w-3 opacity-50" />
+              </>
+            )}
           </button>
           
           {showExportMenu && (
-            <div className="absolute right-0 mt-1 w-48 rounded-md bg-white shadow-lg border border-slate-100 py-1 z-50">
+            <div className="absolute right-0 mt-1 w-44 sm:w-48 rounded-md bg-white shadow-lg border border-slate-100 py-1 z-50">
               <button
                 onClick={() => handleExport("page")}
-                className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+                className="w-full text-left px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-50 transition"
               >
                 Export Current Page
               </button>
               <button
                 onClick={() => handleExport("all")}
-                className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+                className="w-full text-left px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-50 transition"
               >
                 Export All Data
               </button>
@@ -128,9 +147,16 @@ export function CsvImportExport<T>({ data, getData, filename, onImport }: Props<
       ) : (
         <button
           onClick={() => handleExport("page")}
-          className="inline-flex items-center gap-2 rounded-md bg-white border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+          title="Export CSV"
+          aria-label="Export CSV"
+          className={
+            iconOnly
+              ? "h-9 w-9 inline-flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-xs shrink-0"
+              : "inline-flex items-center gap-1.5 sm:gap-2 rounded-md bg-white border border-slate-200 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 transition whitespace-nowrap shadow-xs"
+          }
         >
-          <Download className="h-4 w-4" /> Export CSV
+          <Download className={iconOnly ? "h-4 w-4" : "h-3.5 w-3.5 sm:h-4 sm:w-4"} />
+          {!iconOnly && " Export CSV"}
         </button>
       )}
     </div>

@@ -33,7 +33,7 @@ export function ActivateWebsiteTab({
     if (!rawKey) return;
     setIsActivating(true);
 
-    // 1. Direct validation for Enterprise+, Enterprise, Premium, or Demo licenses
+    // 1. Direct validation for Enterprise Plus, Enterprise, Premium, or Demo licenses
     if (
       rawKey.startsWith("DEMO-") ||
       rawKey.startsWith("ENTPLUS-") ||
@@ -44,7 +44,7 @@ export function ActivateWebsiteTab({
       rawKey.includes("PREMIUM") ||
       rawKey.length >= 16
     ) {
-      let plan = "Enterprise+";
+      let plan = "Enterprise Plus";
       let role = "VIP";
       let months = 6; // Default to 6 months demo
 
@@ -61,9 +61,10 @@ export function ActivateWebsiteTab({
       if (
         rawKey.includes("ENTPLUS") ||
         rawKey.includes("ENTERPRISE-PLUS") ||
-        rawKey.includes("ENTERPRISE+")
+        rawKey.includes("ENTERPRISE+") ||
+        rawKey.includes("ENTERPRISE PLUS")
       ) {
-        plan = "Enterprise+";
+        plan = "Enterprise Plus";
         role = "VIP";
       } else if (rawKey.includes("ENTERPRISE")) {
         plan = "Enterprise";
@@ -191,7 +192,7 @@ export function ActivateWebsiteTab({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              {s.licenseType !== "Enterprise+" && (
+              {s.licenseType !== "Enterprise Plus" && (
                 <button
                   onClick={() => setIsPricingModalOpen(true)}
                   className="shrink-0 flex items-center justify-center gap-2 rounded-lg bg-[#34c759] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#2eaa4c]"
@@ -200,7 +201,7 @@ export function ActivateWebsiteTab({
                   Upgrade License
                 </button>
               )}
-              {s.licenseType === "Enterprise+" && (
+              {s.licenseType === "Enterprise Plus" && (
                 <span className="shrink-0 flex items-center justify-center gap-2 rounded-lg bg-emerald-100 px-4 py-2 text-xs font-semibold text-emerald-800 border border-emerald-200">
                   <ShieldCheck className="h-4 w-4" />
                   Fully Upgraded
@@ -222,7 +223,7 @@ export function ActivateWebsiteTab({
               </span>
               <div className="mt-1 flex items-center gap-1.5">
                 <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-extrabold text-emerald-800">
-                  {s.licenseType || "Enterprise+"}
+                  {s.licenseType || "Enterprise Plus"}
                 </span>
                 <span className="rounded-full bg-slate-900 px-2.5 py-0.5 text-[10px] font-bold text-white">
                   {s.licenseRole || "VIP"}

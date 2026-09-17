@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, UserCheck, X, Loader2, Coins, Wallet, Image as ImageIcon } from "lucide-react";
+import { Search, UserCheck, X, Loader2, Coins, Wallet, Image as ImageIcon, BadgeCheck } from "lucide-react";
 import {
   searchJournalists,
   awardJournalistPoints,
   type JournalistSearchResult,
 } from "@/lib/journalist.functions";
 import { MediaField } from "@/components/admin/MediaField";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 function ImageInput({
   value,
   onChange,
@@ -70,6 +71,12 @@ function JournalistPicker({
   onSelect: (j: JournalistSearchResult | null) => void;
 }) {
   const runSearch = useServerFn(searchJournalists);
+  const siteSettings = useSiteSettings();
+  const planType = (siteSettings?.licenseType || "").toLowerCase();
+  const isEnterprisePlus =
+    planType.includes("enterprise+") ||
+    planType.includes("enterprise plus");
+
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
   const [results, setResults] = useState<JournalistSearchResult[] | null>(null);
@@ -115,12 +122,14 @@ function JournalistPicker({
                 setResults(null);
                 setQ("");
               }}
-              className="shrink-0 rounded-md border border-emerald-300 bg-white px-2.5 py-1 text-xs font-medium text-emerald-800 hover:bg-emerald-100"
+              className="shrink-0 rounded-md border border-emerald-300 bg-white px-2.5 py-1 text-xs font-medium text-emerald-800 hover:bg-emerald-100 cursor-pointer"
             >
               Change
             </button>
           </div>
-          <AwardPointsBox publicUserId={journalistId} displayName={journalistName} />
+          {isEnterprisePlus && (
+            <AwardPointsBox publicUserId={journalistId} displayName={journalistName} />
+          )}
         </div>
       ) : (
         <div className="flex gap-2">
@@ -197,6 +206,14 @@ function AwardPointsBox({
   publicUserId: string;
   displayName: string;
 }) {
+  const siteSettings = useSiteSettings();
+  const planType = (siteSettings?.licenseType || "").toLowerCase();
+  const isEnterprisePlus =
+    planType.includes("enterprise+") ||
+    planType.includes("enterprise plus");
+
+  if (!isEnterprisePlus) return null;
+
   const runAward = useServerFn(awardJournalistPoints);
   const [amount, setAmount] = useState<string>("");
   const [reason, setReason] = useState<string>("");

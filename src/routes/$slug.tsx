@@ -48,10 +48,13 @@ const TEXT_ROTATION_CSS: Record<string, React.CSSProperties> = {
 };
 
 export const Route = createFileRoute("/$slug")({
-  validateSearch: (raw: Record<string, unknown>) => ({
-    page: Number(raw.page) > 0 ? Number(raw.page) : 1,
-  }),
-  loaderDeps: ({ search: { page } }) => ({ page }),
+  validateSearch: (raw: Record<string, unknown>): { page?: number } => {
+    const p = Number(raw.page);
+    return {
+      page: p > 0 ? p : undefined,
+    };
+  },
+  loaderDeps: ({ search }) => ({ page: search.page ?? 1 }),
   loader: async ({ params, deps }) => {
     try {
       const data = await getCategoryData({
@@ -193,7 +196,7 @@ function CategoryPage() {
           <section className="grid grid-cols-1 gap-8 py-8 md:grid-cols-3">
             {featured.map((f) => (
               <article key={f.title} className="flex flex-col">
-                <Link to={`/news/${f.slug}`} className="group block overflow-hidden">
+                <Link to={`/news/${f.slug}` as any} className="group block overflow-hidden">
                   {f.img ? (
                     <img
                       src={f.img}
@@ -212,7 +215,7 @@ function CategoryPage() {
                   )}
                 </Link>
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-widest">
-                  {f.kickers.map((k) => (
+                  {f.kickers.map((k: string) => (
                     <span key={k} className="text-foreground">
                       {k}
                     </span>
@@ -222,7 +225,7 @@ function CategoryPage() {
                   </span>
                 </div>
                 <h2 className="headline mt-2 font-serif text-xl font-bold leading-snug text-primary line-clamp-3">
-                  <Link to={`/news/${f.slug}`} className="hover:underline">
+                  <Link to={`/news/${f.slug}` as any} className="hover:underline">
                     {f.title}
                   </Link>
                 </h2>
@@ -275,11 +278,15 @@ function CategoryPage() {
               {list.map((p, i) => (
                 <React.Fragment key={p.title}>
                   <article className="grid grid-cols-[140px_1fr] gap-5 py-6 first:pt-0 md:grid-cols-[200px_1fr]">
-                    <Link to={`/news/${p.slug}`} className="block overflow-hidden">
+                    <Link to={`/news/${p.slug}` as any} className="block overflow-hidden">
                       {p.img ? (
                         <img
                           src={p.img}
                           alt={p.title}
+                          loading="lazy"
+                          decoding="async"
+                          width={200}
+                          height={150}
                           className="aspect-[4/3] w-full object-cover"
                         />
                       ) : (
@@ -290,7 +297,7 @@ function CategoryPage() {
                     </Link>
                     <div>
                       <h3 className="headline font-serif text-lg font-bold leading-snug text-primary line-clamp-2">
-                        <Link to={`/news/${p.slug}`} className="hover:underline">
+                        <Link to={`/news/${p.slug}` as any} className="hover:underline">
                           {p.title}
                         </Link>
                       </h3>
@@ -301,7 +308,7 @@ function CategoryPage() {
                         <span className="text-muted-foreground normal-case tracking-normal">
                           {p.date}
                         </span>
-                        {p.tags.map((t) => (
+                        {p.tags.map((t: string) => (
                           <span key={t} className="font-semibold text-foreground">
                             · {t}
                           </span>
@@ -359,7 +366,7 @@ function CategoryPage() {
                       <li key={l.title} className="grid grid-cols-[1fr_72px] gap-3">
                         <div>
                           <Link
-                            to={`/news/${l.slug}`}
+                            to={`/news/${l.slug}` as any}
                             className="headline block font-serif text-sm font-bold leading-snug text-primary hover:underline line-clamp-2"
                           >
                             {l.title}
@@ -368,11 +375,15 @@ function CategoryPage() {
                             {l.date}
                           </p>
                         </div>
-                        <Link to={`/news/${l.slug}`} className="block overflow-hidden">
+                        <Link to={`/news/${l.slug}` as any} className="block overflow-hidden">
                           {l.img ? (
                             <img
                               src={l.img}
                               alt={l.title}
+                              loading="lazy"
+                              decoding="async"
+                              width={72}
+                              height={72}
                               className="aspect-square w-full object-cover"
                             />
                           ) : (

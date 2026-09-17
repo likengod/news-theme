@@ -286,9 +286,9 @@ function EarnPointsPage() {
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
               <Lock className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h1 className="mt-6 text-xl font-bold text-card-foreground">Enterprise+ Feature</h1>
+            <h1 className="mt-6 text-xl font-bold text-card-foreground">Enterprise Plus Feature</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              The Wallet and Rewards system is exclusively available on the Enterprise+ plan.
+              The Wallet and Rewards system is exclusively available on the Enterprise Plus plan.
               Please ask the site administrator to upgrade their license to unlock this feature.
             </p>
             <Link
@@ -305,10 +305,10 @@ function EarnPointsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-between">
       <Header showTicker={false} showBreakingBar={false} />
 
-      <main className="mx-auto max-w-5xl px-4 py-10">
+      <main className="mx-auto max-w-5xl px-4 py-10 flex-1 w-full">
         <header className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Wallet Rewards

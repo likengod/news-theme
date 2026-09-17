@@ -29,6 +29,7 @@ type Props = {
   onDelete: (row: AdminUserRow) => void;
   onRegenId: (row: AdminUserRow) => void;
   onOpenModal: (kind: "points" | "password" | "details", row: AdminUserRow) => void;
+  isEnterprisePlus?: boolean;
 };
 
 export function UserTable({
@@ -46,6 +47,7 @@ export function UserTable({
   onDelete,
   onRegenId,
   onOpenModal,
+  isEnterprisePlus = false,
 }: Props) {
   const copyPublicId = (pid: string) => {
     navigator.clipboard.writeText(pid);
@@ -112,7 +114,9 @@ export function UserTable({
                 <th className="px-4 py-3">User</th>
                 <th className="px-4 py-3">Public ID</th>
                 <th className="px-4 py-3">Role</th>
-                <th className="px-4 py-3 text-right">Points</th>
+                {isEnterprisePlus && (
+                  <th className="px-4 py-3 text-right">Points</th>
+                )}
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
@@ -207,9 +211,11 @@ export function UserTable({
                     </td>
 
                     {/* Points */}
-                    <td className="px-4 py-3 text-right font-semibold text-amber-700">
-                      {r.points.toLocaleString()} pts
-                    </td>
+                    {isEnterprisePlus && (
+                      <td className="px-4 py-3 text-right font-semibold text-amber-700">
+                        {r.points.toLocaleString()} pts
+                      </td>
+                    )}
 
                     {/* Status dropdown */}
                     <td className="px-4 py-3">
@@ -250,13 +256,15 @@ export function UserTable({
                         >
                           <UserPen className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => onOpenModal("points", r)}
-                          title="Manage Points"
-                          className="rounded-md border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-100"
-                        >
-                          <Wallet className="h-4 w-4" />
-                        </button>
+                        {isEnterprisePlus && (
+                          <button
+                            onClick={() => onOpenModal("points", r)}
+                            title="Manage Points"
+                            className="rounded-md border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-100"
+                          >
+                            <Wallet className="h-4 w-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => onOpenModal("password", r)}
                           title="Reset Password"
@@ -280,7 +288,7 @@ export function UserTable({
 
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-400">
+                  <td colSpan={isEnterprisePlus ? 7 : 6} className="px-4 py-8 text-center text-sm text-slate-400">
                     No users found matching your filters.
                   </td>
                 </tr>

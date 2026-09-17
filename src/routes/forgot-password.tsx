@@ -34,11 +34,11 @@ function ForgotPasswordPage() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    const { error } = await (supabase.auth as any).resetPasswordForEmail(parsed.data.email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error((error as any).message);
     setSent(true);
     toast.success("Reset link sent — check your inbox");
   };

@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Gift, Award, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
@@ -38,8 +38,19 @@ export const Route = createFileRoute("/admin/rewards")({
 });
 
 function RewardsPage() {
+  const navigate = useNavigate();
   const s = useSiteSettings();
-  const isEnterprise = (s.licenseType || "").toLowerCase().includes("enterprise");
+  const planType = (s.licenseType || "").toLowerCase();
+  const isEnterprisePlus =
+    planType.includes("enterprise+") ||
+    planType.includes("enterprise plus");
+
+  useEffect(() => {
+    if (!isEnterprisePlus) {
+      toast.error("Rewards & Points feature is exclusively available on Enterprise Plus licenses.");
+      navigate({ to: "/admin", replace: true });
+    }
+  }, [isEnterprisePlus, navigate]);
 
   const [groups, setGroups] = useState<RewardGroup[]>(() => loadRewards());
   const [active, setActive] = useState<string>("all");
@@ -47,6 +58,7 @@ function RewardsPage() {
   const [claims, setClaims] = useState<PendingClaim[]>(() => loadAllPendingClaims());
 
   useEffect(() => {
+    if (!isEnterprisePlus) return;
     // Sync from MySQL server on mount
     getRewardsServer()
       .then((r) => setGroups(r))
@@ -57,18 +69,25 @@ function RewardsPage() {
     getPendingClaimsServer()
       .then((c) => setClaims(c))
       .catch(() => {});
-  }, []);
+  }, [isEnterprisePlus]);
 
-  if (!isEnterprise) {
+  if (!isEnterprisePlus) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 mb-4">
           <Lock className="h-8 w-8 text-slate-400" />
         </div>
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Enterprise Feature</h2>
-        <p className="text-slate-500 max-w-md">
-          The Rewards & Points Engine requires an Enterprise or Enterprise+ license. Please upgrade your license to unlock this feature.
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Enterprise Plus Feature Locked</h2>
+        <p className="text-slate-500 max-w-md mb-6">
+          The Rewards & Points Engine is exclusively available on Enterprise Plus licenses. Please upgrade your license to unlock this feature.
         </p>
+        <Link
+          to="/admin/settings"
+          search={{ tab: "activate" }}
+          className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white hover:bg-slate-800 transition"
+        >
+          Activate Website
+        </Link>
       </div>
     );
   }
@@ -85,12 +104,12 @@ function RewardsPage() {
 
   const handleSaveRanks = () => {
     saveRanks(ranksList);
-    toast.success("Journalist ranks points scale saved to MySQL!");
+    toast.success("Saved successfully");
   };
 
   const handleApproveClaim = (claim: PendingClaim) => {
     updateClaimStatus(claim.userId, claim.id, "approved");
-    toast.success(`Claim approved! Awarded +${claim.points} pts to user in MySQL`);
+    toast.success(`Claim approved! Awarded +${claim.points} pts`);
     setClaims((prev) => prev.map((c) => (c.id === claim.id ? { ...c, status: "approved" } : c)));
   };
 
@@ -154,9 +173,6 @@ function RewardsPage() {
             Define earning rules per user role, journalist rank scales, and review social proof
             claims.
           </p>
-        </div>
-        <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-1.5 text-xs font-bold text-amber-800">
-          <Gift className="h-4 w-4 text-amber-600" /> MySQL Points Engine Active
         </div>
       </div>
 

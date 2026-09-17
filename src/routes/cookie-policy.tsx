@@ -1,23 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PolicyLayout } from "@/components/site/PolicyLayout";
-import { getCustomPagesServer } from "@/lib/site-content";
+import { getCustomPagesServer, buildPageHead } from "@/lib/site-content";
 
 export const Route = createFileRoute("/cookie-policy")({
-  head: () => ({
-    meta: [
-      { title: "Cookie Policy — News Theme" },
-      {
-        name: "description",
-        content: "How News Theme uses cookies and similar technologies, and how to manage them.",
-      },
-      { property: "og:url", content: "https://gorillatechsolution.com/cookie-policy" },
-    ],
-    links: [{ rel: "canonical", href: "https://gorillatechsolution.com/cookie-policy" }],
-  }),
   loader: async () => {
     const pages = await getCustomPagesServer().catch(() => []);
     return pages.find((p) => p.slug === "cookie-policy");
   },
+  head: ({ loaderData: page }) =>
+    buildPageHead({
+      page,
+      defaultTitle: "Cookie Policy",
+      defaultDescription: "How News Theme uses cookies and similar technologies, and how to manage them.",
+      slug: "/cookie-policy",
+    }),
   component: CookiePage,
 });
 

@@ -10,6 +10,7 @@ type Props = {
   onSortChange: (val: any) => void;
   roles: Role[];
   onCreateClick: () => void;
+  isEnterprisePlus?: boolean;
 };
 
 export function UserFilterBar({
@@ -21,6 +22,7 @@ export function UserFilterBar({
   onSortChange,
   roles,
   onCreateClick,
+  isEnterprisePlus = false,
 }: Props) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -58,8 +60,12 @@ export function UserFilterBar({
           className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm focus:border-slate-900 focus:outline-none"
         >
           <option value="recent">Recently Added</option>
-          <option value="points_desc">Highest Points</option>
-          <option value="points_asc">Lowest Points</option>
+          {isEnterprisePlus && (
+            <>
+              <option value="points_desc">Highest Points</option>
+              <option value="points_asc">Lowest Points</option>
+            </>
+          )}
           <option value="name">Name / Email (A–Z)</option>
         </select>
       </div>

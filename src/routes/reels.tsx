@@ -83,7 +83,7 @@ function ReelsPage() {
         {/* Reels Grid: exactly 4 columns on mobile, 5 columns on desktop */}
         <div className="grid grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
           {displayReels.map((entry, index) => {
-            if (entry.isAd && entry.ad) {
+            if (entry.isAd) {
               const ad = entry.ad;
               const adImg = ad.imagePortrait || ad.imageLandscape || ad.image;
               const adHref = ad.href || "#";
@@ -155,10 +155,12 @@ function ReelsPage() {
                     </span>
                   )}
 
-                  {/* Title overlay at bottom */}
-                  <h3 className="absolute bottom-8 sm:bottom-9 left-1.5 right-1.5 sm:left-2 sm:right-2 text-[9px] sm:text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
-                    {reel.title}
-                  </h3>
+                  {/* Title overlay at bottom: Hidden on mobile screens (< md), visible on desktop */}
+                  <div className="hidden md:block">
+                    <h3 className="absolute bottom-8 md:bottom-9 left-1.5 right-1.5 md:left-2 md:right-2 text-[9px] md:text-xs font-bold leading-tight text-white drop-shadow line-clamp-2">
+                      {reel.title}
+                    </h3>
+                  </div>
 
                   {/* Play icon & duration */}
                   <div className="absolute bottom-1.5 left-1.5 sm:bottom-2 sm:left-2 flex items-center gap-1 sm:gap-1.5">

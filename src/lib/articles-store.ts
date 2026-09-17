@@ -28,6 +28,7 @@ export const blankRow = (): Row => ({
   newsType: "Standard",
   journalistId: "",
   journalistName: "",
+  access_level: "Free",
 });
 
 const mk = (partial: Partial<Row>): Row => ({ ...blankRow(), ...partial });

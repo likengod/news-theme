@@ -166,8 +166,9 @@ function ArticlePage() {
 
   useEffect(() => {
     if (!data) return;
+    const article = data;
     async function checkAccess() {
-      if (data.access_level !== "Premium") {
+      if (article.access_level !== "Premium") {
         setCheckingAuth(false);
         return;
       }

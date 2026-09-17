@@ -32,7 +32,7 @@ export const Route = createFileRoute("/archive")({
       });
     } catch (err) {
       console.warn("[Archive loader] Error:", err);
-      return { rows: [], total: 0, totalPages: 1 };
+      return { items: [], total: 0, totalPages: 1 };
     }
   },
   head: () => ({
@@ -97,10 +97,10 @@ function ArchivePage() {
     .join(" ");
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-between">
       <Header />
 
-      <main className="mx-auto max-w-7xl px-4 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-10 flex-1 w-full">
         <header className="border-b border-border pb-6">
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground">
             Archive
@@ -120,12 +120,12 @@ function ArchivePage() {
                 No stories found for this date. Try a different day, month or year.
               </p>
             )}
-            {items.map((p, i) => (
+            {items.map((p: any, i: number) => (
               <React.Fragment key={`${p.title}-${i}`}>
                 <article className="py-6 first:pt-0">
                   <div>
                     <h3 className="headline font-serif text-lg font-bold leading-snug text-primary line-clamp-2">
-                      <Link to={`/news/${p.slug}`} className="hover:underline">
+                      <Link to={`/news/${p.slug}` as any} className="hover:underline">
                         {p.title}
                       </Link>
                     </h3>

@@ -24,7 +24,7 @@ export function PopupAd() {
   const [ads, setAds] = useState<AdSlideItem[]>([]);
   const [idx, setIdx] = useState(0);
 
-  const planType = (ctx?.siteSettings?.licenseType || "").toLowerCase();
+  const planType = (ctx?.settings?.licenseType || (ctx as any)?.siteSettings?.licenseType || "").toLowerCase();
   const isEnterprise = planType.includes("enterprise");
 
   let initialMode = ctx?.adConfig
@@ -87,12 +87,33 @@ export function PopupAd() {
     return () => window.removeEventListener("nt:search-modal-state", handleSearchState);
   }, []);
 
+  const [canSeePopups, setCanSeePopups] = useState(() => currentRoleSeesPopups());
+
+  useEffect(() => {
+    const handleRoleChange = () => {
+      const allowed = currentRoleSeesPopups();
+      setCanSeePopups(allowed);
+      if (!allowed) {
+        setOpen(false);
+      }
+    };
+    window.addEventListener("nt:role-change", handleRoleChange);
+    window.addEventListener("storage", handleRoleChange);
+    return () => {
+      window.removeEventListener("nt:role-change", handleRoleChange);
+      window.removeEventListener("storage", handleRoleChange);
+    };
+  }, []);
+
   const openTimerRef = useRef<number | null>(null);
   const recheckTimerRef = useRef<number | null>(null);
 
   // Trigger popup according to popupConfig frequency and delays
   useEffect(() => {
-    if (!currentRoleSeesPopups()) return;
+    if (!canSeePopups || !currentRoleSeesPopups()) {
+      setOpen(false);
+      return;
+    }
     if (
       isSearchOpen ||
       (typeof document !== "undefined" && document.body.classList.contains("search-modal-open"))
@@ -192,7 +213,7 @@ export function PopupAd() {
     }
 
     return clearAllTimers;
-  }, [isMobile, ctx?.adConfig, isSearchOpen, popupConfig, slotMode, slotScript]);
+  }, [isMobile, ctx?.adConfig, isSearchOpen, popupConfig, slotMode, slotScript, canSeePopups]);
 
   const closeDelaySeconds = Math.max(1, popupConfig.closeDelaySeconds ?? 6);
   const closeDelayMs = closeDelaySeconds * 1000;
@@ -217,7 +238,7 @@ export function PopupAd() {
     return () => window.clearInterval(i);
   }, [open, ads.length, slotMode, dbRotation]);
 
-  if (!open) return null;
+  if (!open || !canSeePopups) return null;
   if (slotMode === "image" && ads.length === 0) return null;
   const ad = ads[idx] ?? ads[0];
 

@@ -66,7 +66,7 @@ function RolesPage() {
       : roles.map((r) => (r.id === id ? { ...draft, id } : r));
 
     persist(next);
-    toast.success(isNew ? "Role created and saved to MySQL" : "Role updated in MySQL");
+    toast.success(isNew ? "Role created successfully" : "Saved successfully");
     setEditing(null);
   };
 
@@ -85,7 +85,7 @@ function RolesPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">User Roles</h1>
           <p className="text-sm text-slate-500">
-            Create, edit and delete roles available in the Users screen. Syncs to MySQL.
+            Create, edit and delete roles available in the Users screen.
           </p>
         </div>
         <button

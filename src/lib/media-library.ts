@@ -213,6 +213,8 @@ export function fileToDataUrl(
   });
 }
 
+export const MAX_MEDIA_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
+
 export async function trackUpload(
   file: File,
   usage: MediaUsage = "other",
@@ -220,6 +222,11 @@ export async function trackUpload(
   customDescription?: string,
   watermarkData?: string,
 ): Promise<MediaItem> {
+  if (file.size > MAX_MEDIA_FILE_SIZE) {
+    throw new Error(
+      `File "${file.name}" (${formatBytes(file.size)}) exceeds the 1 MB limit. Please upload a file less than 1 MB.`,
+    );
+  }
   const dataUrl = await fileToDataUrl(file, watermarkData);
   return await mediaLibrary.add({
     name: customName || file.name,

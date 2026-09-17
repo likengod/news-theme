@@ -138,9 +138,16 @@ export default function Advertisement({
 
   const finalInterval = slot ? dbInterval : intervalMs;
 
-  const [canSeeAds, setCanSeeAds] = useState(true);
+  const [canSeeAds, setCanSeeAds] = useState(() => currentRoleSeesPopups());
   useEffect(() => {
-    setCanSeeAds(currentRoleSeesPopups());
+    const syncRole = () => setCanSeeAds(currentRoleSeesPopups());
+    syncRole();
+    window.addEventListener("nt:role-change", syncRole);
+    window.addEventListener("storage", syncRole);
+    return () => {
+      window.removeEventListener("nt:role-change", syncRole);
+      window.removeEventListener("storage", syncRole);
+    };
   }, []);
 
   const [index, setIndex] = useState(0);
@@ -250,9 +257,9 @@ export default function Advertisement({
           {(title || caption) && (
             <div className="p-3">
               {title && (
-                <h4 className="headline text-base leading-snug text-foreground group-hover:underline">
+                <p className="headline text-base font-semibold leading-snug text-foreground group-hover:underline">
                   {title}
-                </h4>
+                </p>
               )}
               {caption && (
                 <p className="mt-1 text-xs leading-snug text-muted-foreground">{caption}</p>

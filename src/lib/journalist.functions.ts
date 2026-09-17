@@ -1,6 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { query, hashPassword } from "./db.server";
+import { persistDocumentImage } from "./ad-storage.server";
+import { DEFAULT_RANKS, rankForCount } from "./journalist-ranks";
 import crypto from "crypto";
 
 export type JournalistListRow = {
@@ -17,6 +20,13 @@ export type JournalistListRow = {
   bloodGroup: string | null;
   dob: string | null;
   validTill: string | null;
+  fatherName: string | null;
+  motherName: string | null;
+  gender: string | null;
+  maritalStatus: string | null;
+  husbandName: string | null;
+  documentType: string | null;
+  documentUrl: string | null;
   address: string | null;
   state: string | null;
   country: string | null;
@@ -114,6 +124,13 @@ export const listJournalists = createServerFn({ method: "GET" })
       bloodGroup: p.blood_group ?? null,
       dob: p.dob ?? p.date_of_birth ?? null,
       validTill: p.valid_till ?? null,
+      fatherName: p.father_name ?? null,
+      motherName: p.mother_name ?? null,
+      gender: p.gender ?? null,
+      maritalStatus: p.marital_status ?? null,
+      husbandName: p.husband_name ?? null,
+      documentType: p.document_type ?? null,
+      documentUrl: p.document_url ?? null,
       address: p.address ?? null,
       state: p.state ?? null,
       country: p.country ?? null,
@@ -130,6 +147,7 @@ export type JournalistLookup =
   | { found: false }
   | {
       found: true;
+      userId: string;
       verified: boolean;
       active: boolean;
       role: string;
@@ -142,6 +160,11 @@ export type JournalistLookup =
       bloodGroup: string | null;
       dob: string | null;
       validTill: string | null;
+      fatherName: string | null;
+      motherName: string | null;
+      gender: string | null;
+      maritalStatus: string | null;
+      husbandName: string | null;
       address: string | null;
       state: string | null;
       country: string | null;
@@ -156,20 +179,26 @@ const JOURNALIST_ROLES_ALL = new Set(["author", "editor", "admin", "journalist"]
 export const lookupJournalist = createServerFn({ method: "POST" })
   .inputValidator((data: { publicUserId: string }) => {
     const id = String(data?.publicUserId ?? "").trim();
-    if (id.length < 3) throw new Error("Enter a valid Journalist ID or User ID");
+    if (id.length < 3) throw new Error("Enter a valid Journalist ID, User ID, or Phone Number");
     return { publicUserId: id };
   })
   .handler(async ({ data }): Promise<JournalistLookup> => {
     const q = data.publicUserId;
-    const isNumeric = /^\d{10}$/.test(q);
+    const cleanId = q.toUpperCase().replace(/-/g, "");
+    const cleanDigits = q.replace(/\D/g, "");
+    const last10 = cleanDigits.length >= 10 ? cleanDigits.slice(-10) : "";
 
-    let profiles;
-    if (isNumeric) {
-      profiles = await query("SELECT * FROM profiles WHERE public_user_id = ?", [q]);
-    } else {
-      const cleanQ = q.toUpperCase().replace(/-/g, "");
-      profiles = await query("SELECT * FROM profiles WHERE REPLACE(journalist_id, '-', '') = ?", [cleanQ]);
+    let sql = `SELECT * FROM profiles 
+               WHERE public_user_id = ? 
+                  OR REPLACE(journalist_id, '-', '') = ?`;
+    const params: any[] = [q, cleanId];
+    if (last10) {
+      sql += ` OR REPLACE(REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', ''), '(', '') LIKE ?`;
+      params.push(`%${last10}`);
     }
+    sql += " LIMIT 1";
+
+    const profiles = await query(sql, params);
 
     if (profiles.length === 0) return { found: false };
     const p = profiles[0];
@@ -190,6 +219,7 @@ export const lookupJournalist = createServerFn({ method: "POST" })
 
     return {
       found: true,
+      userId: p.id,
       verified: JOURNALIST_ROLES_ALL.has(best),
       active: Number(p.active) !== 0 && p.active !== false && p.active !== "0" && p.active !== null,
       role: best,
@@ -202,12 +232,131 @@ export const lookupJournalist = createServerFn({ method: "POST" })
       bloodGroup: p.blood_group ?? null,
       dob: p.dob ?? p.date_of_birth ?? null,
       validTill: p.valid_till ?? null,
+      fatherName: p.father_name ?? null,
+      motherName: p.mother_name ?? null,
+      gender: p.gender ?? null,
+      maritalStatus: p.marital_status ?? null,
+      husbandName: p.husband_name ?? null,
       address: p.address ?? null,
       state: p.state ?? null,
       country: p.country ?? null,
       pinCode: p.pin_code ?? null,
       articlesPublished: Number(p.articles_published ?? 0),
       memberSince: p.created_at ? new Date(p.created_at).toISOString() : new Date().toISOString(),
+    };
+  });
+
+export type JournalistPrivateStats =
+  | { authorized: false }
+  | {
+      authorized: true;
+      publishedTotal: number;
+      publishedLastMonth: number;
+      publishedLastYear: number;
+      rankName: string;
+      rankColor: string;
+      rankPointsPerNews: number;
+      walletPoints: number;
+    };
+
+export const getJournalistPrivateStats = createServerFn({ method: "POST" })
+  .inputValidator((data: { targetUserId: string; sessionToken?: string }) => {
+    if (!data?.targetUserId) throw new Error("targetUserId is required");
+    return {
+      targetUserId: String(data.targetUserId).trim(),
+      sessionToken: data.sessionToken ? String(data.sessionToken).trim() : undefined,
+    };
+  })
+  .handler(async ({ data }): Promise<JournalistPrivateStats> => {
+    // 1. Determine viewer's identity and authenticate session
+    let token = data.sessionToken;
+    if (!token) {
+      try {
+        const req = getRequest();
+        const authHeader = req?.headers?.get("authorization");
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+          token = authHeader.replace("Bearer ", "").trim();
+        }
+      } catch {}
+    }
+
+    if (!token) {
+      return { authorized: false };
+    }
+
+    const sessions = await query(
+      `SELECT user_id FROM sessions WHERE id = ? AND expires_at > NOW()`,
+      [token],
+    );
+    if (sessions.length === 0) {
+      return { authorized: false };
+    }
+
+    const viewerUserId = sessions[0].user_id;
+
+    // Check roles of viewer
+    const rolesRows = await query(`SELECT role FROM user_roles WHERE user_id = ?`, [viewerUserId]);
+    const viewerRoles = rolesRows.map((r: any) => String(r.role).toLowerCase());
+    const isAdminOrEditor = viewerRoles.includes("admin") || viewerRoles.includes("editor");
+    const isOwnerJournalist = viewerUserId === data.targetUserId;
+
+    // Only the journalist themselves or an admin/editor can view private performance & wallet metrics
+    if (!isAdminOrEditor && !isOwnerJournalist) {
+      return { authorized: false };
+    }
+
+    // 2. Fetch target profile
+    const targetProfiles = await query(`SELECT * FROM profiles WHERE id = ?`, [data.targetUserId]);
+    if (targetProfiles.length === 0) {
+      return { authorized: false };
+    }
+    const p = targetProfiles[0];
+
+    // 3. Count published news: total, last month, last year
+    const artStats = await query(
+      `SELECT 
+         COUNT(*) as total,
+         SUM(CASE WHEN date >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 ELSE 0 END) as last_month,
+         SUM(CASE WHEN date >= DATE_SUB(NOW(), INTERVAL 365 DAY) THEN 1 ELSE 0 END) as last_year
+       FROM articles 
+       WHERE status = 'Published' 
+         AND (journalistId = ? OR journalistId = ? OR journalistId = ?)`,
+      [p.public_user_id, p.journalist_id ?? "", p.id],
+    );
+
+    const artTotal = Number(artStats[0]?.total ?? 0);
+    const publishedTotal = Math.max(Number(p.articles_published ?? 0), artTotal);
+    const publishedLastMonth = Number(artStats[0]?.last_month ?? 0);
+    const publishedLastYear = Number(artStats[0]?.last_year ?? 0);
+
+    // 4. Derive rank configuration
+    let ranks = DEFAULT_RANKS;
+    try {
+      const settingRows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'journalist_ranks_config'",
+      );
+      if (settingRows.length > 0 && settingRows[0].value) {
+        const parsed = JSON.parse(settingRows[0].value);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          ranks = [...parsed].sort((a: any, b: any) => a.minNews - b.minNews);
+        }
+      }
+    } catch {}
+
+    const rankMatch = rankForCount(publishedTotal, ranks);
+    const rankName = rankMatch ? rankMatch.name : "Reporter";
+    const rankColor = rankMatch ? rankMatch.color : "emerald";
+    const rankPointsPerNews = rankMatch ? rankMatch.pointsPerNews : 5;
+
+    return {
+      authorized: true,
+      publishedTotal,
+      publishedLastMonth,
+      publishedLastYear,
+      rankName,
+      rankColor,
+      rankPointsPerNews,
+      walletPoints: Number(p.points ?? 0),
     };
   });
 
@@ -333,6 +482,13 @@ export type JournalistUpsertInput = {
   bloodGroup?: string;
   dob?: string;
   validTill?: string;
+  fatherName?: string;
+  motherName?: string;
+  gender?: string;
+  maritalStatus?: string;
+  husbandName?: string;
+  documentType?: string;
+  documentUrl?: string;
   address?: string;
   state?: string;
   country?: string;
@@ -369,6 +525,16 @@ export const upsertJournalist = createServerFn({ method: "POST" })
       bloodGroup: cleanText(data.bloodGroup, 8),
       dob: cleanText(data.dob, 40),
       validTill: cleanText(data.validTill, 40),
+      fatherName: cleanText(data.fatherName, 255),
+      motherName: cleanText(data.motherName, 255),
+      gender: cleanText(data.gender, 50),
+      maritalStatus: cleanText(data.maritalStatus, 50),
+      husbandName:
+        data.gender === "Female" && data.maritalStatus === "Married"
+          ? cleanText(data.husbandName, 255)
+          : null,
+      documentType: cleanText(data.documentType, 100),
+      documentUrl: data.documentUrl ? String(data.documentUrl).trim() : undefined,
       address: cleanText(data.address, 300),
       state: cleanText(data.state, 80),
       country: cleanText(data.country, 80),
@@ -424,10 +590,13 @@ export const upsertJournalist = createServerFn({ method: "POST" })
       if (!publicUserId) publicUserId = crypto.randomBytes(5).toString("hex");
 
       const journalistId = await generateJournalistId();
+      const savedDocUrl = data.documentUrl
+        ? (data.documentUrl.startsWith("data:image/") ? persistDocumentImage(data.documentUrl, "doc") : data.documentUrl)
+        : null;
 
       await query(
-        `INSERT INTO profiles (id, public_user_id, display_name, email, active, journalist_id, phone, blood_group, dob, valid_till, address, state, country, pin_code, avatar_url, articles_published, points) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO profiles (id, public_user_id, display_name, email, active, journalist_id, phone, blood_group, dob, valid_till, father_name, mother_name, gender, marital_status, husband_name, document_type, document_url, address, state, country, pin_code, avatar_url, articles_published, points) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           userId,
           publicUserId,
@@ -439,6 +608,13 @@ export const upsertJournalist = createServerFn({ method: "POST" })
           data.bloodGroup,
           data.dob,
           data.validTill,
+          data.fatherName,
+          data.motherName,
+          data.gender,
+          data.maritalStatus,
+          data.husbandName,
+          data.documentType ?? null,
+          savedDocUrl,
           data.address,
           data.state,
           data.country,
@@ -463,6 +639,10 @@ export const upsertJournalist = createServerFn({ method: "POST" })
         await query("UPDATE users SET email = ? WHERE id = ?", [data.email, userId]);
       }
 
+      const savedDocUrl = data.documentUrl
+        ? (data.documentUrl.startsWith("data:image/") ? persistDocumentImage(data.documentUrl, "doc") : data.documentUrl)
+        : data.documentUrl;
+
       const patch: any = {
         display_name: data.displayName,
         email: data.email,
@@ -470,11 +650,18 @@ export const upsertJournalist = createServerFn({ method: "POST" })
         blood_group: data.bloodGroup,
         dob: data.dob,
         valid_till: data.validTill,
+        father_name: data.fatherName,
+        mother_name: data.motherName,
+        gender: data.gender,
+        marital_status: data.maritalStatus,
+        husband_name: data.husbandName,
         address: data.address,
         state: data.state,
         country: data.country,
         pin_code: data.pinCode,
       };
+      if (data.documentType !== undefined) patch.document_type = data.documentType;
+      if (savedDocUrl !== undefined) patch.document_url = savedDocUrl;
       if (data.avatarUrl !== null) patch.avatar_url = data.avatarUrl;
       if (typeof data.articlesPublished === "number")
         patch.articles_published = data.articlesPublished;

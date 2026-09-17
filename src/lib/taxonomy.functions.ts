@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireAuth } from "@/lib/auth-middleware";
+import { requireAuth, requireAdmin } from "@/lib/auth-middleware";
 import { query } from "./db.server";
 import { slugify } from "./news-data";
 
@@ -21,6 +21,11 @@ export type TagRow = {
   slug: string;
   count?: number; // count of articles using tag
 };
+
+let cachedTags: { data: TagRow[]; expiry: number } | null = null;
+export function clearTagsCache() {
+  cachedTags = null;
+}
 
 // --- Category Functions ---
 
@@ -61,9 +66,10 @@ export const getCategories = createServerFn({ method: "GET" })
   });
 
 export const saveCategory = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
+  .middleware([requireAdmin])
   .validator((data: any) => data)
   .handler(async ({ data }): Promise<CategoryRow> => {
+    clearTagsCache();
     const c = data;
     const slug = c.slug || slugify(c.name);
     const sortOrder = c.sortOrder || 0;
@@ -104,17 +110,19 @@ export const saveCategory = createServerFn({ method: "POST" })
   });
 
 export const deleteCategory = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
+  .middleware([requireAdmin])
   .validator((id: number) => id)
   .handler(async ({ data: id }) => {
+    clearTagsCache();
     await query("DELETE FROM categories WHERE id = ?", [id]);
     return { success: true };
   });
 
 export const importCategories = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
+  .middleware([requireAdmin])
   .validator((cats: any[]) => cats)
   .handler(async ({ data: cats }) => {
+    clearTagsCache();
     if (!cats || cats.length === 0) return { success: true };
     for (const c of cats) {
       if (!c.name) continue;
@@ -161,6 +169,9 @@ export const importCategories = createServerFn({ method: "POST" })
 // --- Tag Functions ---
 
 export const getTags = createServerFn({ method: "GET" }).handler(async (): Promise<TagRow[]> => {
+  if (cachedTags && cachedTags.expiry > Date.now()) {
+    return cachedTags.data;
+  }
   try {
     const tags = await query("SELECT * FROM tags ORDER BY name ASC");
     if (!Array.isArray(tags)) return [];
@@ -187,12 +198,19 @@ export const getTags = createServerFn({ method: "GET" }).handler(async (): Promi
       });
     }
 
-    return tags.map((r: any) => ({
+    const mapped: TagRow[] = tags.map((r: any) => ({
       id: r.id,
       name: r.name,
       slug: r.slug,
       count: counts.get(r.name?.toLowerCase?.() || "") || 0,
     }));
+
+    cachedTags = {
+      data: mapped,
+      expiry: Date.now() + 60 * 1000,
+    };
+
+    return mapped;
   } catch (err: any) {
     console.warn("[getTags] Query warning:", err?.message || err);
     return [];
@@ -200,9 +218,10 @@ export const getTags = createServerFn({ method: "GET" }).handler(async (): Promi
 });
 
 export const saveTag = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
+  .middleware([requireAdmin])
   .validator((data: any) => data)
   .handler(async ({ data }): Promise<TagRow> => {
+    clearTagsCache();
     const t = data;
     const slug = t.slug || slugify(t.name);
 
@@ -216,17 +235,19 @@ export const saveTag = createServerFn({ method: "POST" })
   });
 
 export const deleteTag = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
+  .middleware([requireAdmin])
   .validator((id: number) => id)
   .handler(async ({ data: id }) => {
+    clearTagsCache();
     await query("DELETE FROM tags WHERE id = ?", [id]);
     return { success: true };
   });
 
 export const importTags = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
+  .middleware([requireAdmin])
   .validator((tags: any[]) => tags)
   .handler(async ({ data: tags }) => {
+    clearTagsCache();
     if (!tags || tags.length === 0) return { success: true };
     for (const t of tags) {
       if (!t.name) continue;

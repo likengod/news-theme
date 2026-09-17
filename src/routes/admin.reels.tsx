@@ -149,7 +149,7 @@ function ReelsEditor() {
             disabled={!dirty}
             className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
           >
-            <Save className="h-4 w-4" /> {dirty ? "Save changes" : "Saved"}
+            <Save className="h-4 w-4" /> {dirty ? "Save" : "Saved"}
           </button>
         </div>
       </div>

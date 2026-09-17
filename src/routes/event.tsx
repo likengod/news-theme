@@ -19,30 +19,33 @@ import { toast } from "sonner";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
-import { getSiteSettingsServer } from "@/lib/site-content";
+import { getSiteSettingsServer, buildPageHead, defaultSettings, type SiteSettings } from "@/lib/site-content";
 import { authClient } from "@/lib/auth-client";
 import { submitEventRegistration } from "@/lib/inbox.functions";
 
 export const Route = createFileRoute("/event")({
-  loader: async () => {
-    const settings = await getSiteSettingsServer();
+  loader: async (): Promise<{ settings: SiteSettings }> => {
+    const settings = (await getSiteSettingsServer().catch(() => null)) || defaultSettings;
     return { settings };
   },
-  head: () => ({
-    meta: [
-      { title: "শারদ সম্মান ২০২৬ — বিশেষ দুর্গোৎসব প্রতিযোগিতা | News Theme" },
-      {
-        name: "description",
-        content:
-          "শারদ সম্মান ২০২৬ দুর্গোৎসব প্রতিযোগিতা। সেরা মণ্ডপসজ্জা, সেরা প্রতিমা ও সেরা আলোকসজ্জার সম্মাননা। আজই আপনার ক্লাবের নাম নিবন্ধন করুন।",
+  head: ({ loaderData }) => {
+    const s = loaderData?.settings;
+    return buildPageHead({
+      page: {
+        title: s?.eventTitle || "শারদ সম্মান ২০২৬",
+        metaTitle: s?.eventMetaTitle,
+        metaDescription: s?.eventMetaDescription,
+        ogImage: s?.eventOgImage,
+        metaKeywords: s?.eventKeywords,
+        canonicalUrl: s?.eventCanonicalUrl,
+        noIndex: s?.eventNoIndex,
       },
-      { property: "og:title", content: "শারদ সম্মান ২০২৬ — বিশেষ দুর্গোৎসব প্রতিযোগিতা" },
-      {
-        property: "og:description",
-        content: "সেরা দুর্গোৎসব মূল্যায়ন ও শারদ সম্মাননা প্রতিযোগিতা। আজই নিবন্ধন করুন।",
-      },
-    ],
-  }),
+      defaultTitle: "শারদ সম্মান ২০২৬ — বিশেষ দুর্গোৎসব প্রতিযোগিতা",
+      defaultDescription:
+        "শারদ সম্মান ২০২৬ দুর্গোৎসব প্রতিযোগিতা। সেরা মণ্ডপসজ্জা, সেরা প্রতিমা ও সেরা আলোকসজ্জার সম্মাননা। আজই আপনার ক্লাবের নাম নিবন্ধন করুন।",
+      slug: "/event",
+    });
+  },
   component: EventPage,
 });
 
@@ -176,10 +179,10 @@ function EventPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FFFDF9] via-[#FFF9F0] to-[#FFFDF9] text-[#1a1a1a] dark:from-[#0d0c0a] dark:via-[#16120b] dark:to-[#0d0c0a] dark:text-[#f3f3f3]">
+    <div className="min-h-screen bg-gradient-to-b from-[#FFFDF9] via-[#FFF9F0] to-[#FFFDF9] text-[#1a1a1a] dark:from-[#0d0c0a] dark:via-[#16120b] dark:to-[#0d0c0a] dark:text-[#f3f3f3] flex flex-col justify-between">
       <Header />
 
-      <main className="mx-auto max-w-5xl px-4 py-8 md:py-14">
+      <main className="mx-auto max-w-5xl px-4 py-8 md:py-14 flex-1 w-full">
         {/* ─── Seamless Festive Hero Section (No Card Box) ─── */}
         <section className="relative text-center py-6 md:py-10">
           {/* Ambient Festive Aura & Warm Golden Glow */}

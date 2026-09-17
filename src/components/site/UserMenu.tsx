@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { authClient as supabase } from "@/lib/auth-client";
 import { getCurrentUserRole } from "@/lib/auth.functions";
+import { setCurrentRoleId } from "@/lib/roles";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { useTheme } from "@/lib/theme";
 
@@ -78,7 +79,10 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
         setPoints(getPoints(data.session.user.id));
         try {
           const roleRes = await getCurrentUserRole({ data: data.session.access_token });
-          if (mounted) setRole(roleRes.role);
+          if (mounted) {
+            setRole(roleRes.role);
+            if (roleRes.role) setCurrentRoleId(roleRes.role);
+          }
         } catch {
           if (mounted) setRole(null);
         }
@@ -99,12 +103,16 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
         setPoints(getPoints(session.user.id));
         try {
           const roleRes = await getCurrentUserRole({ data: session.access_token });
-          if (mounted) setRole(roleRes.role);
+          if (mounted) {
+            setRole(roleRes.role);
+            if (roleRes.role) setCurrentRoleId(roleRes.role);
+          }
         } catch {
           if (mounted) setRole(null);
         }
       } else {
         setRole(null);
+        setCurrentRoleId("reader");
       }
     });
     return () => {
@@ -115,6 +123,7 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    setCurrentRoleId("reader");
     toast.success("Signed out");
     navigate({ to: "/" });
   };
