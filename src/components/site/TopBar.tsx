@@ -216,14 +216,14 @@ export function TopBar() {
                         ? settings.logoTextPrimary
                         : settings.logoText
                           ? settings.logoText.split(" ")[0]
-                          : "NEWS"}
+                          : "Today"}
                     </span>{" "}
                     <span style={{ color: settings.logoColorSecondary || "#dc2626" }}>
                       {settings.logoTextSecondary !== undefined && settings.logoTextSecondary !== ""
                         ? settings.logoTextSecondary
                         : settings.logoText && settings.logoText.split(" ").length > 1
                           ? settings.logoText.split(" ").slice(1).join(" ")
-                          : "THEME"}
+                          : "Tripura"}
                     </span>
                   </SheetTitle>
                   <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground truncate">

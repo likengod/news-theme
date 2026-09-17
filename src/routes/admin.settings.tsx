@@ -222,7 +222,7 @@ function SettingsPage() {
       </div>
 
       <Suspense fallback={<SettingsTabSkeleton />}>
-        {tab === "general" && <GeneralSettingsForm />}
+        {tab === "general" && <GeneralSettingsForm s={s} update={update} onSave={onSave} />}
 
         {tab === "seo" && <SeoSettingsTab s={s} update={update} />}
 

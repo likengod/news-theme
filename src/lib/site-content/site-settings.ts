@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "../auth-middleware";
+import { attachAuth } from "../auth-attacher";
 import { query } from "../db.server";
 import { getCached, setCached, clearCache } from "./server-cache";
 
@@ -217,16 +218,16 @@ export function normalizeLicenseType(type?: string): string {
 }
 
 export const defaultSettings: SiteSettings = {
-  siteName: "News Theme",
+  siteName: "Today Tripura",
   tagline: "Your daily window to the world — unfiltered, insightful, and always ahead.",
-  logoText: "NEWS THEME",
-  contactEmail: "contact@newstheme.com",
+  logoText: "Today Tripura",
+  contactEmail: "contact@todaytripura.com",
   contactPhone: "+1 (555) 234-5678",
-  address: "123 Fifth Avenue, Suite 800, New York, NY 10010",
-  emailNewsTips: "tips@northeasttimeline.com",
-  emailAdvertising: "ads@northeasttimeline.com",
-  emailCareers: "careers@northeasttimeline.com",
-  emailCorrections: "corrections@northeasttimeline.com",
+  address: "Agartala, Tripura, India",
+  emailNewsTips: "tips@todaytripura.com",
+  emailAdvertising: "ads@todaytripura.com",
+  emailCareers: "careers@todaytripura.com",
+  emailCorrections: "corrections@todaytripura.com",
   facebook: "https://facebook.com",
   instagram: "https://instagram.com",
   twitter: "https://twitter.com",
@@ -238,19 +239,19 @@ export const defaultSettings: SiteSettings = {
   telegram: "https://telegram.org",
   googleNews: "https://news.google.com",
   footerNote: "The premier source for global reporting, cultural commentary, and critical analysis.",
-  copyright: `© ${new Date().getFullYear()} News Theme. All rights reserved.`,
+  copyright: `© ${new Date().getFullYear()} Today Tripura. All rights reserved.`,
   builtByText: "Built with Modern Web",
   builtByUrl: "https://example.com",
-  metaDescription: "Global breaking news, insightful analysis, and independent reporting.",
+  metaDescription: "Tripura and Northeast breaking news, insightful analysis, and independent reporting.",
   logoLight: "",
   logoDark: "",
   footerLogoLight: "",
   footerLogoDark: "",
   favicon: "",
   logoDisplayMode: "both",
-  logoTextPrimary: "News",
+  logoTextPrimary: "Today",
   logoColorPrimary: "#000000",
-  logoTextSecondary: "Theme",
+  logoTextSecondary: "Tripura",
   logoColorSecondary: "#dc2626",
   googleAnalyticsId: "",
   googleTagManagerId: "",
@@ -465,7 +466,7 @@ export const getSiteSettingsServer = createServerFn({ method: "GET" }).handler(
 );
 
 export const saveSiteSettingsServer = createServerFn({ method: "POST" })
-  .middleware([requireAdmin])
+  .middleware([attachAuth, requireAdmin])
   .validator((settings) => settings as SiteSettings)
   .handler(async ({ data }) => {
     const cleanedData = {

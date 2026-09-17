@@ -104,14 +104,14 @@ export function Footer() {
                     ? s.logoTextPrimary
                     : s.logoText
                       ? s.logoText.split(" ")[0]
-                      : "NEWS"}
+                      : "Today"}
                 </span>{" "}
                 <span style={{ color: s.logoColorSecondary || "#dc2626" }}>
                   {s.logoTextSecondary !== undefined && s.logoTextSecondary !== ""
                     ? s.logoTextSecondary
                     : s.logoText && s.logoText.split(" ").length > 1
                       ? s.logoText.split(" ").slice(1).join(" ")
-                      : "THEME"}
+                      : "Tripura"}
                 </span>
               </div>
             )}

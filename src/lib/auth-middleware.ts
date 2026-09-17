@@ -13,19 +13,20 @@ export const requireAuth = createMiddleware({ type: "function" }).server(async (
     throw new Error("Unauthorized: No request headers available");
   }
 
+  let token = "";
   const authHeader = request.headers.get("authorization");
-
-  if (!authHeader) {
-    throw new Error("Unauthorized: No authorization header provided");
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.replace("Bearer ", "").trim();
+  } else {
+    const cookieHeader = request.headers.get("cookie") || "";
+    const match = cookieHeader.match(/(?:^|;\s*)(?:nt_session|session_token|access_token)=([^;]+)/);
+    if (match) {
+      token = decodeURIComponent(match[1]);
+    }
   }
 
-  if (!authHeader.startsWith("Bearer ")) {
-    throw new Error("Unauthorized: Only Bearer tokens are supported");
-  }
-
-  const token = authHeader.replace("Bearer ", "").trim();
   if (!token) {
-    throw new Error("Unauthorized: No token provided");
+    throw new Error("Unauthorized: Bearer token or active session required");
   }
 
   // Query active session in MySQL database
@@ -67,14 +68,20 @@ export const requireAdmin = createMiddleware({ type: "function" }).server(async 
     throw new Error("Unauthorized: No request headers available");
   }
 
+  let token = "";
   const authHeader = request.headers.get("authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new Error("Unauthorized: Bearer token required");
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.replace("Bearer ", "").trim();
+  } else {
+    const cookieHeader = request.headers.get("cookie") || "";
+    const match = cookieHeader.match(/(?:^|;\s*)(?:nt_session|session_token|access_token)=([^;]+)/);
+    if (match) {
+      token = decodeURIComponent(match[1]);
+    }
   }
 
-  const token = authHeader.replace("Bearer ", "").trim();
   if (!token) {
-    throw new Error("Unauthorized: No token provided");
+    throw new Error("Unauthorized: Bearer token or active admin session required");
   }
 
   const sessions = await query(

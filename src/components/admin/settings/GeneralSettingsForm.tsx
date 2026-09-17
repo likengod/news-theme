@@ -8,11 +8,21 @@ import { LogoUploadersSection } from "./general/LogoUploadersSection";
 import { ContactDetailsSection } from "./general/ContactDetailsSection";
 import { FooterCopyrightSection } from "./general/FooterCopyrightSection";
 
-export function GeneralSettingsForm() {
+interface GeneralSettingsFormProps {
+  s?: SiteSettings;
+  update?: <K extends keyof SiteSettings>(k: K, v: SiteSettings[K]) => void;
+  onSave?: () => Promise<void>;
+}
+
+export function GeneralSettingsForm({
+  s: propSettings,
+  update: propUpdate,
+  onSave: propOnSave,
+}: GeneralSettingsFormProps = {}) {
   const contextSettings = useSiteSettings();
-  const [settings, setSettings] = useState<SiteSettings>(() => {
-    const s = loadSettings();
-    const merged = { ...contextSettings, ...s };
+  const [internalSettings, setInternalSettings] = useState<SiteSettings>(() => {
+    const loaded = loadSettings();
+    const merged = { ...contextSettings, ...loaded };
     if (merged.copyright) {
       merged.copyright = cleanCopyright(merged.copyright);
     }
@@ -20,30 +30,28 @@ export function GeneralSettingsForm() {
   });
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    if (contextSettings && Object.keys(contextSettings).length > 0) {
-      setSettings((prev) => ({
-        ...prev,
-        ...contextSettings,
-        copyright: cleanCopyright(contextSettings.copyright || prev.copyright),
-      }));
-    }
-  }, [contextSettings]);
+  const activeSettings = propSettings ?? internalSettings;
 
-  const update = (k: keyof SiteSettings, v: any) =>
-    setSettings((s) => ({
-      ...s,
-      [k]: k === "copyright" && typeof v === "string" ? cleanCopyright(v) : v,
-    }));
+  const handleUpdate = (k: keyof SiteSettings, v: any) => {
+    const val = k === "copyright" && typeof v === "string" ? cleanCopyright(v) : v;
+    if (propUpdate) {
+      propUpdate(k, val);
+    } else {
+      setInternalSettings((prev) => ({ ...prev, [k]: val }));
+    }
+  };
 
   const handleSave = async () => {
     try {
-      const cleaned = {
-        ...settings,
-        copyright: cleanCopyright(settings.copyright),
-      };
-      await saveSettings(cleaned);
-      setSettings(cleaned);
+      if (propOnSave) {
+        await propOnSave();
+      } else {
+        const cleaned = {
+          ...activeSettings,
+          copyright: cleanCopyright(activeSettings.copyright),
+        };
+        await saveSettings(cleaned);
+      }
       setSaved(true);
       toast.success("Saved successfully");
       setTimeout(() => setSaved(false), 2000);
@@ -57,10 +65,10 @@ export function GeneralSettingsForm() {
 
   return (
     <div className="space-y-6">
-      <BrandInfoSection settings={settings} update={update} />
-      <LogoUploadersSection settings={settings} update={update} />
-      <ContactDetailsSection settings={settings} update={update} />
-      <FooterCopyrightSection settings={settings} update={update} />
+      <BrandInfoSection settings={activeSettings} update={handleUpdate} />
+      <LogoUploadersSection settings={activeSettings} update={handleUpdate} />
+      <ContactDetailsSection settings={activeSettings} update={handleUpdate} />
+      <FooterCopyrightSection settings={activeSettings} update={handleUpdate} />
 
       {/* Save Button */}
       <div className="sticky bottom-4 flex justify-end">

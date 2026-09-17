@@ -21,8 +21,18 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
             name="siteName"
             type="text"
             value={settings.siteName || ""}
-            onChange={(e) => update("siteName", e.target.value)}
-            placeholder="News Timeline"
+            onChange={(e) => {
+              const val = e.target.value;
+              update("siteName", val);
+              const curLogo = settings.logoText || "";
+              if (!curLogo || curLogo === settings.siteName || curLogo.toLowerCase().includes("news theme") || curLogo.toLowerCase().includes("news timeline")) {
+                update("logoText", val);
+                const parts = val.trim().split(/\s+/);
+                update("logoTextPrimary", parts[0] || "");
+                update("logoTextSecondary", parts.slice(1).join(" "));
+              }
+            }}
+            placeholder="Today Tripura"
             className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
           />
         </div>
@@ -34,8 +44,18 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
             name="logoText"
             type="text"
             value={settings.logoText || ""}
-            onChange={(e) => update("logoText", e.target.value)}
-            placeholder="News Timeline"
+            onChange={(e) => {
+              const val = e.target.value;
+              update("logoText", val);
+              const parts = val.trim().split(/\s+/);
+              update("logoTextPrimary", parts[0] || "");
+              update("logoTextSecondary", parts.slice(1).join(" "));
+              const curName = settings.siteName || "";
+              if (!curName || curName.toLowerCase().includes("news theme") || curName.toLowerCase().includes("news timeline")) {
+                update("siteName", val);
+              }
+            }}
+            placeholder="Today Tripura"
             className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
           />
         </div>
@@ -135,14 +155,14 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
               id="logoTextPrimary"
               name="logoTextPrimary"
               type="text"
-              value={settings.logoTextPrimary ?? "News"}
+              value={settings.logoTextPrimary !== undefined ? settings.logoTextPrimary : (settings.logoText ? settings.logoText.split(" ")[0] : "Today")}
               onChange={(e) => {
                 const text = e.target.value;
-                const nextSec = settings.logoTextSecondary ?? "Theme";
+                const nextSec = settings.logoTextSecondary !== undefined ? settings.logoTextSecondary : (settings.logoText && settings.logoText.split(" ").length > 1 ? settings.logoText.split(" ").slice(1).join(" ") : "");
                 update("logoTextPrimary", text);
                 update("logoText", `${text} ${nextSec}`.trim());
               }}
-              placeholder="News"
+              placeholder="Today"
               className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
             />
             <div>
@@ -197,14 +217,14 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
               id="logoTextSecondary"
               name="logoTextSecondary"
               type="text"
-              value={settings.logoTextSecondary ?? "Theme"}
+              value={settings.logoTextSecondary !== undefined ? settings.logoTextSecondary : (settings.logoText && settings.logoText.split(" ").length > 1 ? settings.logoText.split(" ").slice(1).join(" ") : "Tripura")}
               onChange={(e) => {
                 const text = e.target.value;
-                const nextPri = settings.logoTextPrimary ?? "News";
+                const nextPri = settings.logoTextPrimary !== undefined ? settings.logoTextPrimary : (settings.logoText ? settings.logoText.split(" ")[0] : "Today");
                 update("logoTextSecondary", text);
                 update("logoText", `${nextPri} ${text}`.trim());
               }}
-              placeholder="Theme"
+              placeholder="Tripura"
               className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
             />
             <div>
