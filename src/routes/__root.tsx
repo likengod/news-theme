@@ -412,8 +412,12 @@ function RootComponent() {
     if (adsConfig) {
       if (adsConfig.slots) {
         Object.keys(adsConfig.slots).forEach((slot) => {
-          const key = slot === "home1" ? "nt:site-ads" : `nt:site-ads-${slot}`;
-          localStorage.setItem(key, JSON.stringify((adsConfig.slots as any)[slot]));
+          const slotAds = (adsConfig.slots as any)[slot];
+          if (Array.isArray(slotAds) && slotAds.length > 0) {
+            localStorage.setItem(`nt:ads:v2:${slot}`, JSON.stringify(slotAds));
+            const legacyKey = slot === "home1" ? "nt:site-ads" : `nt:site-ads-${slot}`;
+            localStorage.setItem(legacyKey, JSON.stringify(slotAds));
+          }
         });
       }
       if (adsConfig.modes) {

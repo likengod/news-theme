@@ -107,10 +107,10 @@ function UpdatesPage() {
     try {
       const res = await gitPull();
       if (res.updated) {
-        toast.success(`Updated to latest release! Reloading in 3 seconds...`);
+        toast.success(`Updated to latest release! Restarting server and reloading in 5 seconds...`);
         setTimeout(() => {
           window.location.reload();
-        }, 3000);
+        }, 5000);
       } else {
         toast.info("System core is already up to date");
         await refresh();
@@ -146,10 +146,10 @@ function UpdatesPage() {
       const res = await buildProject();
       setBuildOutput(res.buildLog || "");
       if (res.success) {
-        toast.success("Build completed successfully! Reloading in 3 seconds...");
+        toast.success("Build completed successfully! Restarting server and reloading in 5 seconds...");
         setTimeout(() => {
           window.location.reload();
-        }, 3000);
+        }, 5000);
       } else {
         toast.error("Build failed — check log below");
         await refresh();

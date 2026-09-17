@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ScriptAdRenderer } from "./ScriptAdRenderer";
 import { useAdSettings, useSiteSettings } from "./AdSettingsContext";
-import { currentRoleSeesPopups } from "@/lib/roles";
 import {
   loadAds,
   loadAdRotation,
@@ -69,8 +68,13 @@ export default function Advertisement({
 
   const initialScript =
     slot && ctx?.adConfig ? ctx.adConfig.scripts[slot] || "" : slot ? loadAdSlotScript(slot) : "";
+  const configSlides = slot && ctx?.adConfig?.slots ? ctx.adConfig.slots[slot] : undefined;
   const initialSlides =
-    slot && ctx?.adConfig ? ctx.adConfig.slots[slot] || [] : slot ? loadAds(slot) : [];
+    configSlides && configSlides.length > 0
+      ? configSlides
+      : slot
+        ? loadAds(slot)
+        : [];
   const initialInterval =
     slot && ctx?.adConfig
       ? (ctx.adConfig.rotations[slot] || 5) * 1000
@@ -86,10 +90,14 @@ export default function Advertisement({
   useEffect(() => {
     if (slot && ctx?.adConfig) {
       let mode = ctx.adConfig.modes[slot] || "image";
-      if (slot === "leaderboard" && !isEnterprise) mode = "script";
       setSlotMode(mode);
       setSlotScript(ctx.adConfig.scripts[slot] || "");
-      setDbSlides(ctx.adConfig.slots[slot] || []);
+      const s = ctx.adConfig.slots[slot];
+      if (s && s.length > 0) {
+        setDbSlides(s);
+      } else {
+        setDbSlides(loadAds(slot));
+      }
       setDbInterval((ctx.adConfig.rotations[slot] || 5) * 1000);
     }
   }, [slot, ctx?.adConfig]);
@@ -98,7 +106,6 @@ export default function Advertisement({
     if (!slot) return;
     const sync = () => {
       let mode = loadAdSlotMode(slot);
-      if (slot === "leaderboard" && !isEnterprise) mode = "script";
       setSlotMode(mode);
       setSlotScript(loadAdSlotScript(slot));
       setDbSlides(loadAds(slot));
@@ -115,21 +122,22 @@ export default function Advertisement({
           .map((s) => {
             let img = s.image;
             if (slot === "home1" || slot === "ad3" || slot === "popup" || slot === "reel_ads") {
-              // Strictly portrait slots: prioritize portrait image, filter out legacy landscape
-              img =
-                s.imagePortrait ||
-                (s.orientation === "portrait" ? s.image : "") ||
-                (s.imageLandscape && s.image === s.imageLandscape ? "" : s.image);
+              // Prioritize portrait, but gracefully fall back to primary image or landscape
+              img = s.imagePortrait || s.image || s.imageLandscape || "";
             } else if (slot === "home2" || slot === "leaderboard") {
-              // Strictly landscape slots: prioritize landscape image, filter out legacy portrait
-              img =
-                s.imageLandscape ||
-                (s.orientation === "landscape" ? s.image : "") ||
-                (s.imagePortrait && s.image === s.imagePortrait ? "" : s.image);
+              // Prioritize landscape, but gracefully fall back to primary image or portrait
+              img = s.imageLandscape || s.image || s.imagePortrait || "";
+            } else {
+              img = s.image || s.imagePortrait || s.imageLandscape || "";
             }
-            return { image: img, href: s.href };
+            return {
+              type: s.type || (s.scriptCode ? "script" : "image"),
+              scriptCode: s.scriptCode,
+              image: img,
+              href: s.href,
+            };
           })
-          .filter((s) => !!s.image)
+          .filter((s) => (s.type === "script" ? !!s.scriptCode : !!s.image))
     : slides && slides.length > 0
       ? slides
       : image || video
@@ -137,18 +145,6 @@ export default function Advertisement({
         : [];
 
   const finalInterval = slot ? dbInterval : intervalMs;
-
-  const [canSeeAds, setCanSeeAds] = useState(() => currentRoleSeesPopups());
-  useEffect(() => {
-    const syncRole = () => setCanSeeAds(currentRoleSeesPopups());
-    syncRole();
-    window.addEventListener("nt:role-change", syncRole);
-    window.addEventListener("storage", syncRole);
-    return () => {
-      window.removeEventListener("nt:role-change", syncRole);
-      window.removeEventListener("storage", syncRole);
-    };
-  }, []);
 
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -183,7 +179,6 @@ export default function Advertisement({
   const isScriptAd =
     slotMode === "script" || currentItem?.type === "script" || !!currentItem?.scriptCode;
 
-  if (!canSeeAds) return null;
   if (items.length === 0 && !isScriptAd) return null;
 
   return (
