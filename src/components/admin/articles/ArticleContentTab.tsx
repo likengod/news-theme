@@ -23,6 +23,7 @@ export default function ArticleContentTab({
             id="article-title"
             name="title"
             aria-label="Article Title"
+            autoComplete="off"
             value={row.title}
             onChange={(e) => {
               onChange("title", e.target.value);
@@ -53,6 +54,7 @@ export default function ArticleContentTab({
               id="article-slug"
               name="slug"
               aria-label="Title slug"
+              autoComplete="off"
               value={row.slug}
               onChange={(e) => onChange("slug", slugify(e.target.value))}
               placeholder="auto from title"
@@ -73,6 +75,7 @@ export default function ArticleContentTab({
               id="article-city"
               name="city"
               aria-label="City"
+              autoComplete="off"
               value={row.city}
               onChange={(e) => onChange("city", e.target.value)}
               placeholder="City"
@@ -82,6 +85,7 @@ export default function ArticleContentTab({
               id="article-state"
               name="state"
               aria-label="State"
+              autoComplete="off"
               value={row.state}
               onChange={(e) => onChange("state", e.target.value)}
               placeholder="State"
@@ -91,6 +95,7 @@ export default function ArticleContentTab({
               id="article-country"
               name="country"
               aria-label="Country"
+              autoComplete="off"
               value={row.country}
               onChange={(e) => onChange("country", e.target.value)}
               placeholder="Country"
@@ -105,6 +110,7 @@ export default function ArticleContentTab({
               id="article-excerpt"
               name="excerpt"
               aria-label="Excerpt / Summary"
+              autoComplete="off"
               rows={3}
               maxLength={200}
               value={row.excerpt}

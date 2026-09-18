@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Global Form Control Accessibility & Autofill Enhancement
  * Resolves Chrome DevTools issues:
  * 1. "A form field element should have an id or name attribute"
@@ -69,6 +69,60 @@ export function initFormAccessibility(): () => void {
           input.getAttribute("type") ||
           "Form field";
         input.setAttribute("aria-label", fallbackText);
+      }
+    }
+
+    // 3. Guarantee autocomplete attribute on autofill-recognized field names
+    if (!input.hasAttribute("autocomplete")) {
+      const nameOrId = (
+        (input.getAttribute("name") || input.getAttribute("id") || "")
+      ).toLowerCase();
+
+      const autofillKeywords = [
+        "country",
+        "city",
+        "state",
+        "address",
+        "zip",
+        "postal",
+        "phone",
+        "tel",
+        "mobile",
+        "email",
+        "author",
+        "username",
+        "password",
+        "search",
+        "q",
+        "query",
+        "title",
+        "name",
+        "first-name",
+        "last-name",
+      ];
+
+      if (autofillKeywords.some((kw) => nameOrId.includes(kw))) {
+        const isSearch =
+          input.getAttribute("type") === "search" ||
+          nameOrId.includes("search") ||
+          nameOrId === "q";
+        const isAdmin = typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
+
+        if (isSearch || isAdmin) {
+          input.setAttribute("autocomplete", "off");
+        } else if (nameOrId.includes("email")) {
+          input.setAttribute("autocomplete", "email");
+        } else if (nameOrId.includes("tel") || nameOrId.includes("phone")) {
+          input.setAttribute("autocomplete", "tel");
+        } else if (nameOrId.includes("country")) {
+          input.setAttribute("autocomplete", "country-name");
+        } else if (nameOrId.includes("city")) {
+          input.setAttribute("autocomplete", "address-level2");
+        } else if (nameOrId.includes("state")) {
+          input.setAttribute("autocomplete", "address-level1");
+        } else {
+          input.setAttribute("autocomplete", "off");
+        }
       }
     }
   }

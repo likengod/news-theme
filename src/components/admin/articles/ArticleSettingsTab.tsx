@@ -38,6 +38,7 @@ export default function ArticleSettingsTab({
             id="article-author"
             name="author"
             aria-label="Author"
+            autoComplete="off"
             value={row.author}
             onChange={(e) => onChange("author", e.target.value)}
             className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
