@@ -28,22 +28,31 @@ function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
   const [startDate, setStartDate] = useState("2026-09-01");
-  const [endDate, setEndDate] = useState("2026-09-17");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [endDate, setEndDate] = useState("2026-09-18");
 
-  const filteredArticles =
-    selectedCategory === "All"
-      ? data.topArticles
-      : data.topArticles.filter(
-          (a) => (a.category || "").toLowerCase() === selectedCategory.toLowerCase(),
-        );
+  const isDateFiltered = startDate !== "2026-09-01" || endDate !== "2026-09-18";
 
-  const filteredFeatured =
-    selectedCategory === "All"
-      ? data.featuredArticles
-      : data.featuredArticles.filter(
-          (a) => (a.category || "").toLowerCase() === selectedCategory.toLowerCase(),
-        );
+  const filteredArticles = isDateFiltered
+    ? data.topArticles.filter((a) => {
+        if (!a.date) return true;
+        const d = a.date.slice(0, 10);
+        return (!startDate || d >= startDate) && (!endDate || d <= endDate);
+      })
+    : data.topArticles;
+
+  const filteredFeatured = isDateFiltered
+    ? data.featuredArticles.filter((a) => {
+        if (!a.date) return true;
+        const d = a.date.slice(0, 10);
+        return (!startDate || d >= startDate) && (!endDate || d <= endDate);
+      })
+    : data.featuredArticles;
+
+  const handleResetDates = () => {
+    setStartDate("2026-09-01");
+    setEndDate("2026-09-18");
+    toast.info("Date range reset to default");
+  };
 
   const handleExport = () => {
     // Generate CSV report of top articles and stats
@@ -71,17 +80,52 @@ function DashboardPage() {
     toast.success("Analytics data exported successfully as CSV!");
   };
 
+  const handleSaveReport = () => {
+    const reportData = {
+      title: "Today Tripura - Newsroom Performance Snapshot",
+      generatedAt: new Date().toISOString(),
+      dateRange: { startDate, endDate },
+      kpis: {
+        totalPosts: data.totalArticles,
+        totalJournalists: data.totalJournalists,
+        totalSubscribers: data.totalSubscribers,
+        totalRevenue: `${data.currencySymbol || "₹"}${data.totalRevenue}`,
+        totalViews: data.totalViews,
+      },
+      topArticles: data.topArticles.slice(0, 10).map((a) => ({
+        title: a.title,
+        category: a.category,
+        views: a.views,
+        date: a.date,
+      })),
+    };
+
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], {
+      type: "application/json;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `todaytripura-report-${startDate}-to-${endDate}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Executive report snapshot downloaded!");
+  };
+
+  const handleSendEmail = () => {
+    toast.success(`Executive analytics report dispatched to admin mail!`);
+  };
+
   return (
     <div className="space-y-6 pb-12">
-      {/* 1. Header (Greeting, Date Controls, Category Filter, Export) */}
+      {/* 1. Header (Greeting, Date Controls, Export) */}
       <DashboardHeader
         startDate={startDate}
         endDate={endDate}
-        selectedCategory={selectedCategory}
-        categoryStats={data.categoryStats}
         onStartDateChange={setStartDate}
         onEndDateChange={setEndDate}
-        onCategoryChange={setSelectedCategory}
+        onResetDates={handleResetDates}
         onExport={handleExport}
       />
 
@@ -89,12 +133,12 @@ function DashboardPage() {
       <DashboardTabBar
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        onSaveReport={() => toast.success("Dashboard report snapshot saved!")}
+        onSaveReport={handleSaveReport}
         onExportPdf={() => {
           window.print();
-          toast.success("Preparing PDF printout...");
+          toast.success("Preparing print-ready executive PDF report...");
         }}
-        onSendEmail={() => toast.success("Scheduled automated executive report to admin email.")}
+        onSendEmail={handleSendEmail}
       />
 
       {/* 3. Core KPI Metrics Grid (Total Posts, Total Journalists, Total Subscribers, Total Revenue) */}

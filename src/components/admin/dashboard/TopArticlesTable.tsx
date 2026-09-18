@@ -87,9 +87,15 @@ export function TopArticlesTable({ articles, featuredArticles }: TopArticlesTabl
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
-                        {art.title}
-                      </p>
+                      <a
+                        href={path}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="truncate text-sm font-semibold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition inline-flex items-center gap-1.5"
+                      >
+                        <span className="truncate">{art.title}</span>
+                        <ExternalLink className="h-3 w-3 shrink-0 text-slate-400 group-hover:text-indigo-500" />
+                      </a>
                       {art.featured && (
                         <span className="shrink-0 rounded-md bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                           Featured
@@ -97,7 +103,14 @@ export function TopArticlesTable({ articles, featuredArticles }: TopArticlesTabl
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      <span className="font-mono text-slate-400 truncate max-w-[200px] sm:max-w-xs">{path}</span>
+                      <a
+                        href={path}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-mono text-slate-400 hover:text-indigo-600 truncate max-w-[200px] sm:max-w-xs"
+                      >
+                        {path}
+                      </a>
                       <span>·</span>
                       <span className="font-medium text-slate-600 dark:text-slate-300">{art.category || "General"}</span>
                       {art.date && (
