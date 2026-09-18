@@ -4,16 +4,10 @@ import { useHomepageConfig } from "@/hooks/use-homepage-config";
 
 export function LiveVideo() {
   const { liveVideo } = useHomepageConfig();
-  const autoPlay = liveVideo?.autoplay !== false;
-  const [isPlaying, setIsPlaying] = useState(autoPlay);
+  // Use Lite Facade on initial load to defer ~900 KiB of third-party YouTube scripts, CSS, and cookies
+  const [isPlaying, setIsPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  useEffect(() => {
-    if (autoPlay) {
-      setIsPlaying(true);
-    }
-  }, [autoPlay]);
 
   // If live stream is toggled off in admin settings, do not render
   if (liveVideo?.enabled === false) {

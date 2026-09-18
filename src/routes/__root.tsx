@@ -270,6 +270,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const links: Array<Record<string, any>> = [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "preload",
+        href: "/fonts/solaimanlipi-normal.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: "/fonts/solaimanlipi-bold.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
       { rel: "stylesheet", href: appCss },
       {
         rel: "alternate",
