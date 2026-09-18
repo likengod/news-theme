@@ -105,8 +105,11 @@ function UpdatesPage() {
   const handlePullAndUpdate = async () => {
     setPulling(true);
     try {
-      const res = await gitPull();
-      if (res.updated) {
+      const res: any = await gitPull();
+      const isUpdated = Boolean(
+        res?.updated || res?.data?.updated || res?.result?.updated || res?.success
+      );
+      if (isUpdated) {
         toast.success(`Updated and built latest release! Restarting server and reloading in 8 seconds...`);
         setTimeout(() => {
           window.location.reload();
@@ -116,7 +119,7 @@ function UpdatesPage() {
         await refresh();
       }
     } catch (err: any) {
-      toast.error("Update failed: " + err.message);
+      toast.error("Update failed: " + (err?.message || "Unknown error"));
     } finally {
       setPulling(false);
     }
@@ -125,15 +128,15 @@ function UpdatesPage() {
   const handleInitialize = async () => {
     setPulling(true);
     try {
-      const res = await initializeGitRepo();
-      if (res.success) {
+      const res: any = await initializeGitRepo();
+      if (res?.success) {
         toast.success("CI/CD Pipeline connected successfully!");
         await refresh();
       } else {
-        toast.error("Failed to connect: " + res.log);
+        toast.error("Failed to connect: " + (res?.log || "Unknown error"));
       }
     } catch (err: any) {
-      toast.error("Connection error: " + err.message);
+      toast.error("Connection error: " + (err?.message || "Unknown error"));
     } finally {
       setPulling(false);
     }
@@ -143,9 +146,9 @@ function UpdatesPage() {
     setBuilding(true);
     setBuildOutput("");
     try {
-      const res = await buildProject();
-      setBuildOutput(res.buildLog || "");
-      if (res.success) {
+      const res: any = await buildProject();
+      setBuildOutput(res?.buildLog || "");
+      if (res?.success) {
         toast.success("Build completed successfully! Restarting server and reloading in 8 seconds...");
         setTimeout(() => {
           window.location.reload();
@@ -155,7 +158,7 @@ function UpdatesPage() {
         await refresh();
       }
     } catch (err: any) {
-      toast.error("Build error: " + err.message);
+      toast.error("Build error: " + (err?.message || "Unknown error"));
     } finally {
       setBuilding(false);
     }

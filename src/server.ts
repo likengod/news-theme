@@ -33,8 +33,17 @@ async function normalizeCatastrophicSsrResponse(request: Request, response: Resp
   if (isServerFnOrApi) {
     const contentType = response.headers.get("content-type") ?? "";
     if (contentType.includes("text/html")) {
+      const errPayload = {
+        error: `Not Found or Server Error (${response.status})`,
+        success: false,
+        updated: false,
+      };
       return new Response(
-        JSON.stringify({ error: `Not Found or Server Error (${response.status})` }),
+        JSON.stringify({
+          ...errPayload,
+          data: errPayload,
+          result: errPayload,
+        }),
         {
           status: response.status >= 400 ? response.status : 500,
           headers: { "content-type": "application/json" },

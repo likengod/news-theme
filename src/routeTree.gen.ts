@@ -46,6 +46,8 @@ import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
+import { Route as ApiUpdatesRouteImport } from './routes/api/updates'
+import { Route as ApiUpdateRouteImport } from './routes/api/update'
 import { Route as ApiRssRouteImport } from './routes/api/rss'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminUpdatesRouteImport } from './routes/admin.updates'
@@ -250,6 +252,16 @@ const NewsSlugRoute = NewsSlugRouteImport.update({
   path: '/news/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUpdatesRoute = ApiUpdatesRouteImport.update({
+  id: '/api/updates',
+  path: '/api/updates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUpdateRoute = ApiUpdateRouteImport.update({
+  id: '/api/update',
+  path: '/api/update',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRssRoute = ApiRssRouteImport.update({
   id: '/api/rss',
   path: '/api/rss',
@@ -394,6 +406,8 @@ export interface FileRoutesByFullPath {
   '/admin/updates': typeof AdminUpdatesRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/rss': typeof ApiRssRoute
+  '/api/update': typeof ApiUpdateRoute
+  '/api/updates': typeof ApiUpdatesRoute
   '/news/$slug': typeof NewsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/seed-demo-admin': typeof ApiPublicSeedDemoAdminRoute
@@ -450,6 +464,8 @@ export interface FileRoutesByTo {
   '/admin/updates': typeof AdminUpdatesRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/rss': typeof ApiRssRoute
+  '/api/update': typeof ApiUpdateRoute
+  '/api/updates': typeof ApiUpdatesRoute
   '/news/$slug': typeof NewsSlugRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/seed-demo-admin': typeof ApiPublicSeedDemoAdminRoute
@@ -508,6 +524,8 @@ export interface FileRoutesById {
   '/admin/updates': typeof AdminUpdatesRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/rss': typeof ApiRssRoute
+  '/api/update': typeof ApiUpdateRoute
+  '/api/updates': typeof ApiUpdatesRoute
   '/news/$slug': typeof NewsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/seed-demo-admin': typeof ApiPublicSeedDemoAdminRoute
@@ -567,6 +585,8 @@ export interface FileRouteTypes {
     | '/admin/updates'
     | '/admin/users'
     | '/api/rss'
+    | '/api/update'
+    | '/api/updates'
     | '/news/$slug'
     | '/admin/'
     | '/api/public/seed-demo-admin'
@@ -623,6 +643,8 @@ export interface FileRouteTypes {
     | '/admin/updates'
     | '/admin/users'
     | '/api/rss'
+    | '/api/update'
+    | '/api/updates'
     | '/news/$slug'
     | '/admin'
     | '/api/public/seed-demo-admin'
@@ -680,6 +702,8 @@ export interface FileRouteTypes {
     | '/admin/updates'
     | '/admin/users'
     | '/api/rss'
+    | '/api/update'
+    | '/api/updates'
     | '/news/$slug'
     | '/admin/'
     | '/api/public/seed-demo-admin'
@@ -722,6 +746,8 @@ export interface RootRouteChildren {
   WithdrawPointsRoute: typeof WithdrawPointsRoute
   WorkWithUsRoute: typeof WorkWithUsRoute
   ApiRssRoute: typeof ApiRssRoute
+  ApiUpdateRoute: typeof ApiUpdateRoute
+  ApiUpdatesRoute: typeof ApiUpdatesRoute
   NewsSlugRoute: typeof NewsSlugRoute
   ApiPublicSeedDemoAdminRoute: typeof ApiPublicSeedDemoAdminRoute
 }
@@ -987,6 +1013,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/updates': {
+      id: '/api/updates'
+      path: '/api/updates'
+      fullPath: '/api/updates'
+      preLoaderRoute: typeof ApiUpdatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/update': {
+      id: '/api/update'
+      path: '/api/update'
+      fullPath: '/api/update'
+      preLoaderRoute: typeof ApiUpdateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rss': {
       id: '/api/rss'
       path: '/api/rss'
@@ -1195,6 +1235,8 @@ const rootRouteChildren: RootRouteChildren = {
   WithdrawPointsRoute: WithdrawPointsRoute,
   WorkWithUsRoute: WorkWithUsRoute,
   ApiRssRoute: ApiRssRoute,
+  ApiUpdateRoute: ApiUpdateRoute,
+  ApiUpdatesRoute: ApiUpdatesRoute,
   NewsSlugRoute: NewsSlugRoute,
   ApiPublicSeedDemoAdminRoute: ApiPublicSeedDemoAdminRoute,
 }

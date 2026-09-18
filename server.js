@@ -238,7 +238,18 @@ const server = createServer(async (req, res) => {
 
       if (isServerFnOrApi) {
         res.setHeader("Content-Type", "application/json; charset=utf-8");
-        res.end(JSON.stringify({ error: err?.message || "Internal Server Error" }));
+        const errPayload = {
+          error: err?.message || "Internal Server Error",
+          success: false,
+          updated: false,
+        };
+        res.end(
+          JSON.stringify({
+            ...errPayload,
+            data: errPayload,
+            result: errPayload,
+          }),
+        );
       } else {
         res.setHeader("Content-Type", "text/plain; charset=utf-8");
         res.end("Internal Server Error");
