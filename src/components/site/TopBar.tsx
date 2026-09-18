@@ -10,6 +10,8 @@ import { useSiteSettings, useCategories } from "@/components/site/AdSettingsCont
 import { loadSettings, defaultSettings } from "@/lib/site-content";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useTheme } from "@/lib/theme";
+import { getAccessibleLogoColor } from "@/lib/color-utils";
 const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
 
 const FONT_FAMILY_MAP: Record<string, string> = {
@@ -34,6 +36,8 @@ const otherCategories = ["Entertainment", "Health", "Education", "Jobs", "Travel
 
 export function TopBar() {
   const { t } = useTranslation();
+  const { theme } = useTheme();
+  const isDark = theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState(defaultSettings);
   const [mounted, setMounted] = useState(false);
@@ -218,7 +222,7 @@ export function TopBar() {
                           ? settings.logoText.split(" ")[0]
                           : "Today"}
                     </span>{" "}
-                    <span style={{ color: settings.logoColorSecondary || "#dc2626" }}>
+                    <span style={{ color: getAccessibleLogoColor(settings.logoColorSecondary || "#dc2626", isDark, 4.5) }}>
                       {settings.logoTextSecondary !== undefined && settings.logoTextSecondary !== ""
                         ? settings.logoTextSecondary
                         : settings.logoText && settings.logoText.split(" ").length > 1

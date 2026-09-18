@@ -5,10 +5,15 @@ import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { AttributionGuard } from "@/components/site/AttributionGuard";
 import { useTranslation } from "react-i18next";
 import { cleanCopyright } from "@/lib/site-content";
+import { useTheme } from "@/lib/theme";
+import { getAccessibleLogoColor } from "@/lib/color-utils";
 
 export function Footer() {
   const { t } = useTranslation();
+  const { theme } = useTheme();
+  const isDark = theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   const s = useSiteSettings();
+  const safeSecondaryColor = getAccessibleLogoColor(s.logoColorSecondary || "#dc2626", isDark, 4.5);
   const year = new Date().getFullYear();
   const rawCopyright = s.copyright || `© ${year} News Theme Media Co. All rights reserved.`;
   const copyright = cleanCopyright(rawCopyright).replace("{year}", String(year));
@@ -106,7 +111,7 @@ export function Footer() {
                       ? s.logoText.split(" ")[0]
                       : "Today"}
                 </span>{" "}
-                <span style={{ color: s.logoColorSecondary || "#dc2626" }}>
+                <span style={{ color: safeSecondaryColor }}>
                   {s.logoTextSecondary !== undefined && s.logoTextSecondary !== ""
                     ? s.logoTextSecondary
                     : s.logoText && s.logoText.split(" ").length > 1

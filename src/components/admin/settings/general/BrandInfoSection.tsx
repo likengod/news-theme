@@ -1,5 +1,6 @@
 import React from "react";
 import type { SiteSettings } from "@/lib/site-content";
+import { getContrastRatio, ensureAccessibleColor } from "@/lib/color-utils";
 
 interface BrandInfoSectionProps {
   settings: SiteSettings;
@@ -7,6 +8,15 @@ interface BrandInfoSectionProps {
 }
 
 export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
+  const priColor = settings.logoColorPrimary || "#000000";
+  const priContrastLight = getContrastRatio(priColor, "#ffffff");
+  const priIsAccessible = priContrastLight >= 4.5;
+  const priOptimized = ensureAccessibleColor(priColor, "#ffffff", 4.5);
+
+  const secColor = settings.logoColorSecondary || "#dc2626";
+  const secContrastLight = getContrastRatio(secColor, "#ffffff");
+  const secIsAccessible = secContrastLight >= 4.5;
+  const secOptimized = ensureAccessibleColor(secColor, "#ffffff", 4.5);
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-700 border-b border-slate-100 pb-2">
@@ -202,6 +212,27 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
                   Black
                 </button>
               </div>
+              <div className="mt-1.5 flex items-center justify-between text-[11px]">
+                {priIsAccessible ? (
+                  <span className="inline-flex items-center text-emerald-600 font-medium">
+                    ✓ WCAG AA ({priContrastLight.toFixed(1)}:1 contrast)
+                  </span>
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-flex items-center text-amber-600 font-medium">
+                      ⚠ Low contrast ({priContrastLight.toFixed(1)}:1)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => update("logoColorPrimary", priOptimized)}
+                      className="text-[10px] font-semibold text-blue-600 underline hover:text-blue-800"
+                      title="Adjust shade to pass WCAG AA contrast standard (4.5:1)"
+                    >
+                      Auto-fix ({priOptimized})
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -263,6 +294,27 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
                 >
                   Red
                 </button>
+              </div>
+              <div className="mt-1.5 flex items-center justify-between text-[11px]">
+                {secIsAccessible ? (
+                  <span className="inline-flex items-center text-emerald-600 font-medium">
+                    ✓ WCAG AA ({secContrastLight.toFixed(1)}:1 contrast)
+                  </span>
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-flex items-center text-amber-600 font-medium">
+                      ⚠ Low contrast ({secContrastLight.toFixed(1)}:1)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => update("logoColorSecondary", secOptimized)}
+                      className="text-[10px] font-semibold text-blue-600 underline hover:text-blue-800"
+                      title="Adjust shade to pass WCAG AA contrast standard (4.5:1)"
+                    >
+                      Auto-fix ({secOptimized})
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -281,15 +281,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
     if (googleFontsUrl) {
       links.push({
-        rel: "preload",
-        as: "style",
-        href: googleFontsUrl,
-      });
-      links.push({
         rel: "stylesheet",
         href: googleFontsUrl,
-        media: "print",
-        onLoad: "this.media='all'",
       });
     }
 

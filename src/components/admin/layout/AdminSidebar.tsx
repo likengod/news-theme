@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "@tanstack/react-router";
 import { Home as HomeIcon, X, LogOut } from "lucide-react";
 import { ADMIN_NAV_ITEMS } from "./navItems";
+import { getAccessibleLogoColor } from "@/lib/color-utils";
 
 interface AdminSidebarProps {
   open: boolean;
@@ -22,6 +23,7 @@ export function AdminSidebar({
   siteSettings: s,
   onLogout,
 }: AdminSidebarProps) {
+  const safeSecondaryColor = getAccessibleLogoColor(s?.logoColorSecondary || "#dc2626", false, 4.5);
   return (
     <>
       <aside
@@ -40,7 +42,7 @@ export function AdminSidebar({
                   <span style={{ color: s.logoColorPrimary || "#000000" }}>
                     {s.logoTextPrimary || "News"}
                   </span>{" "}
-                  <span style={{ color: s.logoColorSecondary || "#dc2626" }}>
+                  <span style={{ color: safeSecondaryColor }}>
                     {s.logoTextSecondary || "Theme"}
                   </span>
                 </div>

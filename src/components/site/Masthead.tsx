@@ -8,12 +8,20 @@ import { ChevronDown, Home, Search, X } from "lucide-react";
 const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
 
 import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
+import { useTheme } from "@/lib/theme";
+import { getAccessibleLogoColor } from "@/lib/color-utils";
 
 const otherCategories = ["Entertainment", "Health", "Education", "Jobs", "Travel", "Lifestyle"];
 
 export function Masthead() {
   const s = useSiteSettings();
   const dbCats = useCategories();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const safePrimaryColor = s.logoColorPrimary
+    ? getAccessibleLogoColor(s.logoColorPrimary, isDark, 4.5)
+    : undefined;
+  const safeSecondaryColor = getAccessibleLogoColor(s.logoColorSecondary || "#dc2626", isDark, 4.5);
 
   let navItems = sections;
   let dropdownItems = otherCategories;
@@ -85,7 +93,7 @@ export function Masthead() {
                 }}
               >
                 <span
-                  style={s.logoColorPrimary ? { color: s.logoColorPrimary } : undefined}
+                  style={safePrimaryColor ? { color: safePrimaryColor } : undefined}
                   className={
                     !s.logoColorPrimary || s.logoColorPrimary === "#000000"
                       ? "text-foreground dark:text-white"
@@ -98,7 +106,7 @@ export function Masthead() {
                       ? s.logoText.split(" ")[0]
                       : "Today"}
                 </span>{" "}
-                <span style={{ color: s.logoColorSecondary || "#dc2626" }}>
+                <span style={{ color: safeSecondaryColor }}>
                   {s.logoTextSecondary !== undefined && s.logoTextSecondary !== ""
                     ? s.logoTextSecondary
                     : s.logoText && s.logoText.split(" ").length > 1
