@@ -4,10 +4,16 @@ import { useHomepageConfig } from "@/hooks/use-homepage-config";
 
 export function LiveVideo() {
   const { liveVideo } = useHomepageConfig();
-  // Use Lite Facade on initial load to defer ~900 KiB of third-party YouTube scripts, CSS, and cookies
-  const [isPlaying, setIsPlaying] = useState(false);
+  const autoPlay = liveVideo?.autoplay !== false;
+  const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [muted, setMuted] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    if (autoPlay) {
+      setIsPlaying(true);
+    }
+  }, [autoPlay]);
 
   // If live stream is toggled off in admin settings, do not render
   if (liveVideo?.enabled === false) {
@@ -63,7 +69,7 @@ export function LiveVideo() {
               src={src}
               title={liveVideo.title || "Live Stream"}
               className="absolute inset-0 h-full w-full"
-              allow="autoplay; encrypted-media; picture-in-picture"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               referrerPolicy="strict-origin-when-cross-origin"
               frameBorder={0}
