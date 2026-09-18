@@ -89,13 +89,19 @@ function renderErrorPage(detail) {
 //#region src/server.ts
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./assets/server-DosQGdF3.js").then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./assets/server-B57EWcrU.js").then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
 async function normalizeCatastrophicSsrResponse(request, response) {
-	if (response.status < 500) return response;
 	const url = request.url || "";
-	if (url.includes("/_serverFn") || url.includes("_serverFn=") || url.includes("/api/") || request.headers.get("x-tss-server-function") != null || (request.headers.get("accept") ?? "").includes("application/json")) return response;
+	if (url.includes("/_serverFn") || url.includes("_serverFn=") || url.includes("/api/") || request.headers.get("x-tss-server-function") != null || (request.headers.get("accept") ?? "").includes("application/json")) {
+		if ((response.headers.get("content-type") ?? "").includes("text/html")) return new Response(JSON.stringify({ error: `Not Found or Server Error (${response.status})` }), {
+			status: response.status >= 400 ? response.status : 500,
+			headers: { "content-type": "application/json" }
+		});
+		return response;
+	}
+	if (response.status < 500) return response;
 	if (!(response.headers.get("content-type") ?? "").includes("application/json")) return response;
 	const body = await response.clone().text();
 	if (!body.includes("\"unhandled\":true") || !body.includes("\"message\":\"HTTPError\"")) return response;

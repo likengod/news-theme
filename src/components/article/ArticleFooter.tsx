@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Link } from "@tanstack/react-router";
+import { slugify } from "@/lib/news-data";
 
 const RelatedNews = lazy(() =>
   import("@/components/site/RelatedNews").then((m) => ({ default: m.RelatedNews })),
@@ -38,7 +39,7 @@ export function ArticleFooter({
           <Link
             key={t}
             to="/$slug"
-            params={{ slug: t.toLowerCase() }}
+            params={{ slug: slugify(t) }}
             className="rounded-full border border-border px-3 py-1 text-xs uppercase tracking-widest text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             {t}

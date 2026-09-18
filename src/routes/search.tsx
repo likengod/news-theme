@@ -161,7 +161,7 @@ function SearchPage() {
                 key={`${p.title}-${i}`}
                 className="grid grid-cols-[140px_1fr] gap-5 py-6 first:pt-0 md:grid-cols-[200px_1fr]"
               >
-                <Link to={`/news/${p.slug}` as any} className="block overflow-hidden">
+                <Link to="/news/$slug" params={{ slug: p.slug || "sample" }} className="block overflow-hidden">
                   <img
                     src={p.featuredImage || heroImg}
                     alt={p.title}
@@ -174,7 +174,7 @@ function SearchPage() {
                 </Link>
                 <div>
                   <h3 className="headline font-serif text-lg font-bold leading-snug text-primary line-clamp-2">
-                    <Link to={`/news/${p.slug}` as any} className="hover:underline">
+                    <Link to="/news/$slug" params={{ slug: p.slug || "sample" }} className="hover:underline">
                       {p.title}
                     </Link>
                   </h3>

@@ -196,7 +196,7 @@ function CategoryPage() {
           <section className="grid grid-cols-1 gap-8 py-8 md:grid-cols-3">
             {featured.map((f) => (
               <article key={f.title} className="flex flex-col">
-                <Link to={`/news/${f.slug}` as any} className="group block overflow-hidden">
+                <Link to="/news/$slug" params={{ slug: f.slug || "sample" }} className="group block overflow-hidden">
                   {f.img ? (
                     <img
                       src={f.img}
@@ -225,7 +225,7 @@ function CategoryPage() {
                   </span>
                 </div>
                 <h2 className="headline mt-2 font-serif text-xl font-bold leading-snug text-primary line-clamp-3">
-                  <Link to={`/news/${f.slug}` as any} className="hover:underline">
+                  <Link to="/news/$slug" params={{ slug: f.slug || "sample" }} className="hover:underline">
                     {f.title}
                   </Link>
                 </h2>
@@ -278,7 +278,7 @@ function CategoryPage() {
               {list.map((p, i) => (
                 <React.Fragment key={p.title}>
                   <article className="grid grid-cols-[140px_1fr] gap-5 py-6 first:pt-0 md:grid-cols-[200px_1fr]">
-                    <Link to={`/news/${p.slug}` as any} className="block overflow-hidden">
+                    <Link to="/news/$slug" params={{ slug: p.slug || "sample" }} className="block overflow-hidden">
                       {p.img ? (
                         <img
                           src={p.img}
@@ -297,7 +297,7 @@ function CategoryPage() {
                     </Link>
                     <div>
                       <h3 className="headline font-serif text-lg font-bold leading-snug text-primary line-clamp-2">
-                        <Link to={`/news/${p.slug}` as any} className="hover:underline">
+                        <Link to="/news/$slug" params={{ slug: p.slug || "sample" }} className="hover:underline">
                           {p.title}
                         </Link>
                       </h3>
@@ -366,7 +366,8 @@ function CategoryPage() {
                       <li key={l.title} className="grid grid-cols-[1fr_72px] gap-3">
                         <div>
                           <Link
-                            to={`/news/${l.slug}` as any}
+                            to="/news/$slug"
+                            params={{ slug: l.slug || "sample" }}
                             className="headline block font-serif text-sm font-bold leading-snug text-primary hover:underline line-clamp-2"
                           >
                             {l.title}
@@ -375,7 +376,7 @@ function CategoryPage() {
                             {l.date}
                           </p>
                         </div>
-                        <Link to={`/news/${l.slug}` as any} className="block overflow-hidden">
+                        <Link to="/news/$slug" params={{ slug: l.slug || "sample" }} className="block overflow-hidden">
                           {l.img ? (
                             <img
                               src={l.img}

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Views } from "@/components/site/Views";
 import { loadSettings } from "@/lib/site-content";
+import { slugify } from "@/lib/news-data";
 
 const FESTIVE_GRADIENT_MAP: Record<string, string> = {
   "indian-flag": "linear-gradient(to right, #FF9933, #000080, #138808)",
@@ -72,7 +73,7 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
         <span className="mx-2">/</span>
         <Link
           to="/$slug"
-          params={{ slug: category.toLowerCase() }}
+          params={{ slug: slugify(category) }}
           className="hover:text-foreground"
         >
           {category}

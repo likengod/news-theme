@@ -21,8 +21,6 @@ async function getServerEntry(): Promise<ServerEntry> {
 // h3 swallows in-handler throws into a normal 500 Response with body
 // {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
 async function normalizeCatastrophicSsrResponse(request: Request, response: Response): Promise<Response> {
-  if (response.status < 500) return response;
-
   const url = request.url || "";
   const isServerFnOrApi =
     url.includes("/_serverFn") ||
@@ -33,8 +31,20 @@ async function normalizeCatastrophicSsrResponse(request: Request, response: Resp
 
   // NEVER return HTML for a server function or JSON API call!
   if (isServerFnOrApi) {
+    const contentType = response.headers.get("content-type") ?? "";
+    if (contentType.includes("text/html")) {
+      return new Response(
+        JSON.stringify({ error: `Not Found or Server Error (${response.status})` }),
+        {
+          status: response.status >= 400 ? response.status : 500,
+          headers: { "content-type": "application/json" },
+        },
+      );
+    }
     return response;
   }
+
+  if (response.status < 500) return response;
 
   const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) return response;

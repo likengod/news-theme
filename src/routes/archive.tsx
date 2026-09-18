@@ -125,7 +125,7 @@ function ArchivePage() {
                 <article className="py-6 first:pt-0">
                   <div>
                     <h3 className="headline font-serif text-lg font-bold leading-snug text-primary line-clamp-2">
-                      <Link to={`/news/${p.slug}` as any} className="hover:underline">
+                      <Link to="/news/$slug" params={{ slug: p.slug || "sample" }} className="hover:underline">
                         {p.title}
                       </Link>
                     </h3>

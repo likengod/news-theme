@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArchiveFinder } from "@/components/site/ArchiveFinder";
 import { loadAds, loadAdRotation } from "@/lib/site-content";
+import { slugify } from "@/lib/news-data";
 
 const Advertisement = lazy(() => import("@/components/site/Advertisement"));
 
@@ -32,10 +33,7 @@ export function ArticleSidebar() {
               <Link
                 to="/news/$slug"
                 params={{
-                  slug: t
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, "-")
-                    .replace(/^-|-$/g, ""),
+                  slug: slugify(t),
                 }}
                 className="headline line-clamp-3 font-serif text-sm font-bold leading-snug text-primary hover:underline"
               >

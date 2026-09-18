@@ -228,7 +228,21 @@ const server = createServer(async (req, res) => {
     console.error("[Server Error]", err);
     if (!res.headersSent) {
       res.statusCode = 500;
-      res.end("Internal Server Error");
+      const rawUrl = req.url || "/";
+      const isServerFnOrApi =
+        rawUrl.includes("/_serverFn") ||
+        rawUrl.includes("_serverFn=") ||
+        rawUrl.includes("/api/") ||
+        req.headers["x-tss-server-function"] != null ||
+        (req.headers["accept"] || "").includes("application/json");
+
+      if (isServerFnOrApi) {
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        res.end(JSON.stringify({ error: err?.message || "Internal Server Error" }));
+      } else {
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        res.end("Internal Server Error");
+      }
     }
   }
 });
