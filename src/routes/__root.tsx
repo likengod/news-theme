@@ -39,6 +39,7 @@ import {
 import type { FontConfiguration } from "@/lib/font-config";
 import { getCategories } from "@/lib/taxonomy.functions";
 import "@/lib/i18n";
+import { initFormAccessibility } from "@/lib/form-a11y";
 
 import { NotFound } from "@/components/site/NotFound";
 
@@ -510,6 +511,11 @@ function RootComponent() {
     };
     window.addEventListener("nt:fonts-updated", handleFontUpdate);
     return () => window.removeEventListener("nt:fonts-updated", handleFontUpdate);
+  }, []);
+
+  // Ensure all form controls have valid id/name and accessible labels across the entire site
+  useEffect(() => {
+    return initFormAccessibility();
   }, []);
 
   // Auto-recover if browser holds stale client JS and receives unexpected HTML / 404 on server functions

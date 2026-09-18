@@ -20,6 +20,9 @@ export default function ArticleContentTab({
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <Field label="Title *">
           <input
+            id="article-title"
+            name="title"
+            aria-label="Article Title"
             value={row.title}
             onChange={(e) => {
               onChange("title", e.target.value);
@@ -33,6 +36,9 @@ export default function ArticleContentTab({
         <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
           <Field label="Category">
             <select
+              id="article-category"
+              name="category"
+              aria-label="Article Category"
               value={row.category}
               onChange={(e) => onChange("category", e.target.value)}
               className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
@@ -44,6 +50,9 @@ export default function ArticleContentTab({
           </Field>
           <Field label="Title slug (URL last segment)">
             <input
+              id="article-slug"
+              name="slug"
+              aria-label="Title slug"
               value={row.slug}
               onChange={(e) => onChange("slug", slugify(e.target.value))}
               placeholder="auto from title"
@@ -61,18 +70,27 @@ export default function ArticleContentTab({
           </div>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             <input
+              id="article-city"
+              name="city"
+              aria-label="City"
               value={row.city}
               onChange={(e) => onChange("city", e.target.value)}
               placeholder="City"
               className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
             />
             <input
+              id="article-state"
+              name="state"
+              aria-label="State"
               value={row.state}
               onChange={(e) => onChange("state", e.target.value)}
               placeholder="State"
               className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
             />
             <input
+              id="article-country"
+              name="country"
+              aria-label="Country"
               value={row.country}
               onChange={(e) => onChange("country", e.target.value)}
               placeholder="Country"
@@ -84,9 +102,13 @@ export default function ArticleContentTab({
         <div className="mt-4">
           <Field label="Excerpt / Summary">
             <textarea
+              id="article-excerpt"
+              name="excerpt"
+              aria-label="Excerpt / Summary"
+              rows={3}
+              maxLength={200}
               value={row.excerpt}
               onChange={(e) => onChange("excerpt", e.target.value)}
-              rows={2}
               placeholder="Short summary shown in news grid (1-2 lines)..."
               className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
             />

@@ -100,7 +100,10 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
         <form onSubmit={submit} className="relative w-full">
           <input
             ref={inputRef}
+            id="site-search-modal-query"
+            name="q"
             type="search"
+            aria-label="Search articles"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Type & hit enter"

@@ -212,6 +212,9 @@ function SubmitPage() {
             <Section number="1" title="Your news">
               <Field label="Headline" required>
                 <input
+                  id="submit-news-title"
+                  name="title"
+                  aria-label="Headline"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   maxLength={140}
@@ -230,6 +233,9 @@ function SubmitPage() {
                 }
               >
                 <textarea
+                  id="submit-news-details"
+                  name="details"
+                  aria-label="News details"
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
                   rows={8}
@@ -246,6 +252,9 @@ function SubmitPage() {
 
               <Field label="News location" required icon={<MapPin className="h-4 w-4" />}>
                 <input
+                  id="submit-news-location"
+                  name="newsLocation"
+                  aria-label="News location"
                   value={newsLocation}
                   onChange={(e) => setNewsLocation(e.target.value)}
                   placeholder="City, district, state"
@@ -281,6 +290,9 @@ function SubmitPage() {
                       <span>JPG, PNG · max {IMAGE_MAX_MB} MB</span>
                       <input
                         ref={imageInputRef}
+                        id="submit-news-image"
+                        name="image"
+                        aria-label="Upload photo"
                         type="file"
                         accept="image/*"
                         className="hidden"
@@ -317,6 +329,9 @@ function SubmitPage() {
                       <span>PDF only · max {PDF_MAX_MB} MB</span>
                       <input
                         ref={pdfInputRef}
+                        id="submit-news-pdf"
+                        name="pdf"
+                        aria-label="Attach press release / document"
                         type="file"
                         accept="application/pdf"
                         className="hidden"
@@ -360,6 +375,9 @@ function SubmitPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Full name" required icon={<User className="h-4 w-4" />}>
                   <input
+                    id="submit-news-fullname"
+                    name="fullName"
+                    aria-label="Full name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="As on your ID"
@@ -368,6 +386,9 @@ function SubmitPage() {
                 </Field>
                 <Field label="Phone number" required icon={<Phone className="h-4 w-4" />}>
                   <input
+                    id="submit-news-phone"
+                    name="phone"
+                    aria-label="Phone number"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     inputMode="tel"
@@ -379,6 +400,9 @@ function SubmitPage() {
 
               <Field label="Your location" required icon={<MapPin className="h-4 w-4" />}>
                 <input
+                  id="submit-news-reporter-location"
+                  name="reporterLocation"
+                  aria-label="Your location"
                   value={reporterLocation}
                   onChange={(e) => setReporterLocation(e.target.value)}
                   placeholder="Where are you writing from?"
@@ -391,6 +415,9 @@ function SubmitPage() {
             <div className="border-t-2 border-foreground pt-6">
               <label className="flex cursor-pointer items-start gap-3 text-sm">
                 <input
+                  id="submit-news-consent"
+                  name="consent"
+                  aria-label="Consent to terms and accuracy confirmation"
                   type="checkbox"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}

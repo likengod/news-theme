@@ -189,6 +189,9 @@ export function CommentsSection({
         </div>
         <div className="flex-1">
           <textarea
+            id="reply-comment-textarea"
+            name="reply_comment"
+            aria-label="Write your reply"
             required
             value={dr}
             onChange={(e) => setDr(e.target.value)}
@@ -227,19 +230,19 @@ export function CommentsSection({
     <form onSubmit={onSubmit} className="mt-3 space-y-3 rounded-lg border border-border/70 bg-card/60 p-3.5">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Name</label>
-          <input type="text" required value={n} onChange={(e) => setN(e.target.value)} placeholder="e.g. John Doe"
+          <label htmlFor="comment-author-name" className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Name</label>
+          <input id="comment-author-name" name="author_name" aria-label="Your Name" type="text" required value={n} onChange={(e) => setN(e.target.value)} placeholder="e.g. John Doe"
             className="w-full rounded border border-border bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-foreground" />
         </div>
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Email</label>
-          <input type="email" required value={em} onChange={(e) => setEm(e.target.value)} placeholder="e.g. john@example.com"
+          <label htmlFor="comment-author-email" className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Email</label>
+          <input id="comment-author-email" name="author_email" aria-label="Your Email" type="email" required value={em} onChange={(e) => setEm(e.target.value)} placeholder="e.g. john@example.com"
             className="w-full rounded border border-border bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-foreground" />
         </div>
       </div>
       <div>
-        <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Comment</label>
-        <textarea required value={dr} onChange={(e) => setDr(e.target.value)}
+        <label htmlFor="comment-body-textarea" className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Comment</label>
+        <textarea id="comment-body-textarea" name="comment_body" aria-label="Comment content" required value={dr} onChange={(e) => setDr(e.target.value)}
           placeholder="Write your comment... (minimum 30 characters, links are automatically blocked)"
           rows={3} maxLength={1000}
           className="w-full rounded border border-border bg-background p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-foreground" />

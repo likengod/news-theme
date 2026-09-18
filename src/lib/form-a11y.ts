@@ -1,0 +1,114 @@
+﻿/**
+ * Global Form Control Accessibility & Autofill Enhancement
+ * Resolves Chrome DevTools issues:
+ * 1. "A form field element should have an id or name attribute"
+ * 2. "No label associated with a form field"
+ */
+
+let initialized = false;
+
+export function initFormAccessibility(): () => void {
+  if (typeof window === "undefined" || initialized) {
+    return () => {};
+  }
+  initialized = true;
+
+  let counter = 0;
+
+  function patchElement(el: HTMLElement) {
+    const tag = el.tagName;
+    if (tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "SELECT") {
+      return;
+    }
+
+    const input = el as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+
+    // 1. Guarantee valid 'id' and 'name' attributes
+    const currentId = input.getAttribute("id");
+    const currentName = input.getAttribute("name");
+
+    if (!currentId && !currentName) {
+      const placeholder = input.getAttribute("placeholder") || "";
+      const type = input.getAttribute("type") || tag.toLowerCase();
+      const base = (placeholder || type || "field")
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 24);
+      const generated = `${base || "field"}-${++counter}`;
+      input.setAttribute("id", generated);
+      input.setAttribute("name", generated);
+    } else if (!currentId && currentName) {
+      if (document.getElementById(currentName)) {
+        input.setAttribute("id", `${currentName}-${++counter}`);
+      } else {
+        input.setAttribute("id", currentName);
+      }
+    } else if (currentId && !currentName) {
+      input.setAttribute("name", currentId);
+    }
+
+    // 2. Guarantee accessible label association
+    const hasAriaLabel = input.getAttribute("aria-label") || input.getAttribute("aria-labelledby");
+    const hasTitle = input.getAttribute("title");
+    const isInsideLabel = Boolean(input.closest("label"));
+    const assignedId = input.getAttribute("id");
+    const hasExplicitLabel = assignedId ? Boolean(document.querySelector(`label[for="${assignedId}"]`)) : false;
+
+    if (!hasAriaLabel && !hasTitle && !isInsideLabel && !hasExplicitLabel) {
+      // Check if parent container has an unassigned <label>
+      const parent = input.parentElement;
+      const siblingLabel = parent ? parent.querySelector("label:not([for])") : null;
+      if (siblingLabel && assignedId) {
+        siblingLabel.setAttribute("for", assignedId);
+      } else {
+        const placeholder = input.getAttribute("placeholder");
+        const fallbackText =
+          placeholder ||
+          (input.getAttribute("name") || "").replace(/[-_]/g, " ") ||
+          input.getAttribute("type") ||
+          "Form field";
+        input.setAttribute("aria-label", fallbackText);
+      }
+    }
+  }
+
+  function patchAll() {
+    try {
+      const elements = document.querySelectorAll<HTMLElement>("input, textarea, select");
+      elements.forEach(patchElement);
+    } catch {}
+  }
+
+  // Run on current DOM
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", patchAll);
+  } else {
+    patchAll();
+  }
+
+  // MutationObserver for SPA navigation, modals, and dynamic forms
+  let observer: MutationObserver | null = null;
+  try {
+    observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "childList") {
+          m.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const el = node as HTMLElement;
+              patchElement(el);
+              el.querySelectorAll?.<HTMLElement>("input, textarea, select").forEach(patchElement);
+            }
+          });
+        }
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  } catch {}
+
+  return () => {
+    observer?.disconnect();
+    initialized = false;
+  };
+}

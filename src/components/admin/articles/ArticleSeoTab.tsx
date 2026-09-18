@@ -17,6 +17,9 @@ export default function ArticleSeoTab({
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
         <Field label="Meta Title">
           <input
+            id="article-meta-title"
+            name="metaTitle"
+            aria-label="Meta Title"
             value={row.metaTitle}
             onChange={(e) => onChange("metaTitle", e.target.value)}
             placeholder={row.title || "Defaults to article title"}
@@ -29,6 +32,9 @@ export default function ArticleSeoTab({
 
         <Field label="Meta Description">
           <textarea
+            id="article-meta-description"
+            name="metaDescription"
+            aria-label="Meta Description"
             value={row.metaDescription}
             onChange={(e) => onChange("metaDescription", e.target.value)}
             rows={3}
@@ -42,6 +48,9 @@ export default function ArticleSeoTab({
 
         <Field label="Tags (comma separated)">
           <input
+            id="article-tags"
+            name="tags"
+            aria-label="Tags (comma separated)"
             value={row.tags}
             onChange={(e) => onChange("tags", e.target.value)}
             placeholder="markets, fed, inflation"

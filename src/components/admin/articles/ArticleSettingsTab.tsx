@@ -17,6 +17,9 @@ export default function ArticleSettingsTab({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Field label="News Type">
           <select
+            id="article-news-type"
+            name="newsType"
+            aria-label="News Type"
             value={row.newsType}
             onChange={(e) => onChange("newsType", e.target.value as Row["newsType"])}
             className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
@@ -32,6 +35,9 @@ export default function ArticleSettingsTab({
 
         <Field label="Author *">
           <input
+            id="article-author"
+            name="author"
+            aria-label="Author"
             value={row.author}
             onChange={(e) => onChange("author", e.target.value)}
             className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
@@ -40,6 +46,9 @@ export default function ArticleSettingsTab({
 
         <Field label="Status">
           <select
+            id="article-status"
+            name="status"
+            aria-label="Status"
             value={row.status}
             onChange={(e) => onChange("status", e.target.value as Row["status"])}
             className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
@@ -52,6 +61,9 @@ export default function ArticleSettingsTab({
 
         <Field label="Access Level">
           <select
+            id="article-access-level"
+            name="access_level"
+            aria-label="Access Level"
             value={row.access_level}
             onChange={(e) => onChange("access_level", e.target.value as Row["access_level"])}
             className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
@@ -63,6 +75,9 @@ export default function ArticleSettingsTab({
 
         <Field label="Publish Date">
           <input
+            id="article-publish-date"
+            name="date"
+            aria-label="Publish Date"
             type="datetime-local"
             value={formatDateTimeLocal(row.date)}
             onChange={(e) => onChange("date", e.target.value)}
@@ -73,6 +88,9 @@ export default function ArticleSettingsTab({
         {isEnterprise && (
           <Field label="Post Views">
             <input
+              id="article-views"
+              name="views"
+              aria-label="Post Views"
               type="number"
               min={0}
               value={row.views}
@@ -85,6 +103,9 @@ export default function ArticleSettingsTab({
         <Field label="Featured on homepage">
           <label className="flex h-9 items-center gap-2 rounded-md border border-slate-200 px-3 text-sm">
             <input
+              id="article-featured"
+              name="featured"
+              aria-label="Pin to hero / featured slot"
               type="checkbox"
               checked={row.featured}
               onChange={(e) => onChange("featured", e.target.checked)}
