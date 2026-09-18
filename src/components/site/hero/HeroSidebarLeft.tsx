@@ -6,7 +6,7 @@ export function HeroSidebarLeft({ activeLeftItems }: { activeLeftItems: any[] })
     <div className="divide-y divide-border lg:col-span-4">
       {activeLeftItems.map((it, i) => (
         <div key={`${it.title}-${i}`} className={i === 0 ? "pb-3" : "py-3"}>
-          <HeadlineArticle item={it} dense />
+          <HeadlineArticle item={it} dense priority={i === 0} />
         </div>
       ))}
     </div>

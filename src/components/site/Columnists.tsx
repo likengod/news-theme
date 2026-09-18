@@ -459,8 +459,9 @@ export function Columnists({ hideTitle }: { hideTitle?: boolean } = {}) {
                   <img
                     src={adImg}
                     alt={ad.label || "Sponsored Ad"}
-                    loading="lazy"
-                    decoding="async"
+                    loading={index < 2 ? "eager" : "lazy"}
+                    fetchPriority={index === 0 ? "high" : "auto"}
+                    decoding={index === 0 ? "sync" : "async"}
                     sizes="(max-width: 768px) 27vw, 150px"
                     width={270}
                     height={480}
@@ -503,8 +504,9 @@ export function Columnists({ hideTitle }: { hideTitle?: boolean } = {}) {
                 <img
                   src={v.img}
                   alt={v.title}
-                  loading="lazy"
-                  decoding="async"
+                  loading={index < 2 ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  decoding={index === 0 ? "sync" : "async"}
                   sizes="(max-width: 768px) 27vw, 150px"
                   width={270}
                   height={480}

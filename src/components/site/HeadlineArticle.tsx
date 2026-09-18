@@ -31,9 +31,11 @@ export function MinRead({ seed, kicker }: { seed?: string; kicker?: string }) {
 export function HeadlineArticle({
   item,
   dense = false,
+  priority = false,
 }: {
   item: Item & { slug?: string };
   dense?: boolean;
+  priority?: boolean;
 }) {
   if (!item) return null;
   return (
@@ -48,8 +50,9 @@ export function HeadlineArticle({
           <img
             src={item.img}
             alt={item.title}
-            loading="lazy"
-            decoding="async"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            decoding={priority ? "sync" : "async"}
             width={400}
             height={250}
             className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-105"
