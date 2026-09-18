@@ -8,7 +8,7 @@ const csrfMiddleware = createCsrfMiddleware({
   filter: (ctx) => ctx.handlerType === "serverFn",
 });
 
-const errorMiddleware = createMiddleware().server(async ({ next }) => {
+const errorMiddleware = createMiddleware().server(async ({ next, ...rest }: any) => {
   try {
     return await next();
   } catch (error: any) {
@@ -26,6 +26,21 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
     ) {
       throw error;
     }
+
+    const handlerType = rest?.handlerType;
+    const request = rest?.request;
+    const url = request?.url || "";
+    const isServerFn =
+      handlerType === "serverFn" ||
+      url.includes("/_serverFn") ||
+      url.includes("_serverFn=") ||
+      request?.headers?.get("x-tss-server-function") != null;
+
+    if (isServerFn) {
+      console.error("[Start Error Middleware: serverFn error]", error);
+      throw error;
+    }
+
     console.error("[Start Error Middleware]", error);
     return new Response(renderErrorPage(error?.message), {
       status: 500,

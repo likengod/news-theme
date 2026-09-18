@@ -89,11 +89,13 @@ function renderErrorPage(detail) {
 //#region src/server.ts
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./assets/server-26c0WA9Z.js").then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./assets/server-BytIoNCM.js").then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
-async function normalizeCatastrophicSsrResponse(response) {
+async function normalizeCatastrophicSsrResponse(request, response) {
 	if (response.status < 500) return response;
+	const url = request.url || "";
+	if (url.includes("/_serverFn") || url.includes("_serverFn=") || url.includes("/api/") || request.headers.get("x-tss-server-function") != null || (request.headers.get("accept") ?? "").includes("application/json")) return response;
 	if (!(response.headers.get("content-type") ?? "").includes("application/json")) return response;
 	const body = await response.clone().text();
 	if (!body.includes("\"unhandled\":true") || !body.includes("\"message\":\"HTTPError\"")) return response;
@@ -105,9 +107,14 @@ async function normalizeCatastrophicSsrResponse(response) {
 }
 var server_default = { async fetch(request, env, ctx) {
 	try {
-		return await normalizeCatastrophicSsrResponse(await (await getServerEntry()).fetch(request, env, ctx));
+		return await normalizeCatastrophicSsrResponse(request, await (await getServerEntry()).fetch(request, env, ctx));
 	} catch (error) {
 		console.error(error);
+		const url = request.url || "";
+		if (url.includes("/_serverFn") || url.includes("_serverFn=") || url.includes("/api/") || request.headers.get("x-tss-server-function") != null || (request.headers.get("accept") ?? "").includes("application/json")) return new Response(JSON.stringify({ error: error?.message || "Internal Server Error" }), {
+			status: 500,
+			headers: { "content-type": "application/json" }
+		});
 		return new Response(renderErrorPage(), {
 			status: 500,
 			headers: { "content-type": "text/html; charset=utf-8" }

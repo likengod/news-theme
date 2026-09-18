@@ -21,6 +21,11 @@ import {
   getRedirectRulesServer,
   incrementRedirectHitServer,
   defaultSettings,
+  defaultAdSlides,
+  defaultAdSlidesHome2,
+  defaultAdSlidesAd3,
+  defaultAdSlidesPopup,
+  defaultAdSlidesLeaderboard,
 } from "@/lib/site-content";
 import { getHomepageConfigServer, defaultHomepageConfig } from "@/lib/homepage-config";
 import {
@@ -500,39 +505,77 @@ function RootComponent() {
     return () => window.removeEventListener("nt:fonts-updated", handleFontUpdate);
   }, []);
 
+  // Auto-recover if browser holds stale client JS and receives unexpected HTML / 404 on server functions
+  useEffect(() => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      const reason = event?.reason;
+      const msg = String(reason?.message || reason || "");
+      if (
+        msg.includes("Unexpected token '<'") ||
+        msg.includes("<!DOCTYPE") ||
+        msg.includes("is not valid JSON")
+      ) {
+        console.warn(
+          "[App Auto-Recovery] Stale bundle / server response mismatch detected. Reloading page...",
+        );
+        const lastReload = sessionStorage.getItem("app_cache_bust_reload");
+        const now = Date.now();
+        if (!lastReload || now - parseInt(lastReload, 10) > 8000) {
+          sessionStorage.setItem("app_cache_bust_reload", now.toString());
+          window.location.reload();
+        }
+      }
+    };
+
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+    return () => window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+  }, []);
+
+  const defaultSlots = {
+    home1: defaultAdSlides,
+    home2: defaultAdSlidesHome2,
+    ad3: defaultAdSlidesAd3,
+    popup: defaultAdSlidesPopup,
+    leaderboard: defaultAdSlidesLeaderboard,
+    hero_showcase: defaultAdSlidesHome2,
+    reel_ads: [],
+  };
+
+  const adConfigData = loaderData?.adsConfig
+    ? {
+        ...loaderData.adsConfig,
+        slots: {
+          ...defaultSlots,
+          ...(loaderData.adsConfig.slots || {}),
+        },
+      }
+    : {
+        slots: defaultSlots,
+        modes: {
+          home1: "image",
+          home2: "image",
+          ad3: "image",
+          popup: "image",
+          leaderboard: "image",
+          hero_showcase: "image",
+          reel_ads: "image",
+        },
+        scripts: { home1: "", home2: "", ad3: "", popup: "", leaderboard: "", hero_showcase: "", reel_ads: "" },
+        rotations: {
+          home1: 5,
+          home2: 5,
+          ad3: 5,
+          popup: 6,
+          leaderboard: 5,
+          hero_showcase: 5,
+          reel_ads: 5,
+        },
+      };
+
   const contextValue = {
     settings: loaderData?.settings ?? defaultSettings,
     homepageConfig: loaderData?.homepageConfig ?? defaultHomepageConfig,
-    adConfig: (loaderData?.adsConfig ?? {
-      slots: {
-        home1: [],
-        home2: [],
-        ad3: [],
-        popup: [],
-        leaderboard: [],
-        hero_showcase: [],
-        reel_ads: [],
-      },
-      modes: {
-        home1: "image",
-        home2: "image",
-        ad3: "image",
-        popup: "image",
-        leaderboard: "image",
-        hero_showcase: "image",
-        reel_ads: "image",
-      },
-      scripts: { home1: "", home2: "", ad3: "", popup: "", leaderboard: "", hero_showcase: "", reel_ads: "" },
-      rotations: {
-        home1: 5,
-        home2: 5,
-        ad3: 5,
-        popup: 6,
-        leaderboard: 5,
-        hero_showcase: 5,
-        reel_ads: 5,
-      },
-    }) as any,
+    adConfig: adConfigData as any,
     fontConfig: fontConfig,
     categories: loaderData?.categories ?? [],
   };

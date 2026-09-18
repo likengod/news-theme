@@ -230,14 +230,29 @@ export const gitPull = createServerFn({ method: "POST" }).handler(async () => {
     pullResult = git("reset --hard origin/main");
   }
 
+  // 3. Automatically run build so compiled .output matches the new server functions
+  let buildLog = "";
+  let buildSuccess = true;
+  try {
+    buildLog = execSync("npm run build 2>&1", {
+      cwd: ROOT,
+      encoding: "utf-8",
+      timeout: 120000,
+    });
+  } catch (bErr: any) {
+    buildLog = bErr.stdout || bErr.stderr || bErr.message || "";
+    buildSuccess = false;
+    console.error("[Deploy] Build after pull error:", bErr);
+  }
+
   const afterHash = git("rev-parse --short HEAD");
   const commitMessage = git("log -1 --pretty=%s");
 
   // Log to deployments table
   await query(
     `INSERT INTO deployments (commit_hash, commit_message, branch, status, triggered_by, build_log, finished_at)
-       VALUES (?, ?, 'main', 'Pulled', 'admin', ?, NOW())`,
-    [afterHash, commitMessage, pullResult],
+       VALUES (?, ?, 'main', ?, 'admin', ?, NOW())`,
+    [afterHash, commitMessage, buildSuccess ? "Success" : "Pulled", `${pullResult}\n\n=== BUILD LOG ===\n${buildLog.slice(-3000)}`],
   );
 
   // Auto-restart server process to pick up new bundles (works with PM2, systemd, nohup, CloudPanel)

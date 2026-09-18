@@ -6,10 +6,25 @@ import {
   loadAdRotation,
   loadAdSlotMode,
   loadAdSlotScript,
+  defaultAdSlides,
+  defaultAdSlidesHome2,
+  defaultAdSlidesAd3,
+  defaultAdSlidesPopup,
+  defaultAdSlidesLeaderboard,
   type AdSlot,
   type AdSlotMode,
   type AdSlideItem,
 } from "@/lib/site-content";
+
+const SLOT_DEFAULTS: Record<AdSlot, AdSlideItem[]> = {
+  home1: defaultAdSlides,
+  home2: defaultAdSlidesHome2,
+  ad3: defaultAdSlidesAd3,
+  popup: defaultAdSlidesPopup,
+  leaderboard: defaultAdSlidesLeaderboard,
+  hero_showcase: defaultAdSlidesHome2,
+  reel_ads: [],
+};
 
 export type AdSlide = {
   type?: "image" | "script";
@@ -69,12 +84,14 @@ export default function Advertisement({
   const initialScript =
     slot && ctx?.adConfig ? ctx.adConfig.scripts[slot] || "" : slot ? loadAdSlotScript(slot) : "";
   const configSlides = slot && ctx?.adConfig?.slots ? ctx.adConfig.slots[slot] : undefined;
+  const slotFallback = slot ? SLOT_DEFAULTS[slot] || [] : [];
+  const localSlides = slot ? loadAds(slot) : [];
   const initialSlides =
     configSlides && configSlides.length > 0
       ? configSlides
-      : slot
-        ? loadAds(slot)
-        : [];
+      : localSlides.length > 0
+        ? localSlides
+        : slotFallback;
   const initialInterval =
     slot && ctx?.adConfig
       ? (ctx.adConfig.rotations[slot] || 5) * 1000
@@ -96,7 +113,8 @@ export default function Advertisement({
       if (s && s.length > 0) {
         setDbSlides(s);
       } else {
-        setDbSlides(loadAds(slot));
+        const local = loadAds(slot);
+        setDbSlides(local.length > 0 ? local : (SLOT_DEFAULTS[slot] || []));
       }
       setDbInterval((ctx.adConfig.rotations[slot] || 5) * 1000);
     }
@@ -108,17 +126,25 @@ export default function Advertisement({
       let mode = loadAdSlotMode(slot);
       setSlotMode(mode);
       setSlotScript(loadAdSlotScript(slot));
-      setDbSlides(loadAds(slot));
+      const local = loadAds(slot);
+      setDbSlides(local.length > 0 ? local : (SLOT_DEFAULTS[slot] || []));
       setDbInterval(loadAdRotation(slot) * 1000);
     };
     window.addEventListener("nt:ads-updated", sync);
     return () => window.removeEventListener("nt:ads-updated", sync);
   }, [slot]);
 
+  const effectiveSlides =
+    dbSlides.length > 0
+      ? dbSlides
+      : slot
+        ? SLOT_DEFAULTS[slot] || []
+        : [];
+
   const items: AdSlide[] = slot
     ? slotMode === "script"
       ? [{ type: "script", scriptCode: slotScript }]
-      : dbSlides
+      : effectiveSlides
           .map((s) => {
             let img = s.image;
             if (slot === "home1" || slot === "ad3" || slot === "popup" || slot === "reel_ads") {

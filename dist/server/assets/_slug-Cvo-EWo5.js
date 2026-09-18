@@ -1,0 +1,36 @@
+import { i as getCategoryData } from "./taxonomy.functions-BttjdV_k.js";
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
+//#region src/routes/$slug.tsx
+var $$splitComponentImporter = () => import("./_slug-8H1epln9.js");
+var Route = createFileRoute("/$slug")({
+	validateSearch: (raw) => {
+		const p = Number(raw.page);
+		return { page: p > 0 ? p : void 0 };
+	},
+	loaderDeps: ({ search }) => ({ page: search.page ?? 1 }),
+	loader: async ({ params, deps }) => {
+		try {
+			return await getCategoryData({ data: {
+				slug: params.slug,
+				page: deps.page || 1,
+				limit: 10
+			} });
+		} catch (err) {
+			console.warn("[Category loader] Error:", err);
+			return null;
+		}
+	},
+	head: ({ params }) => {
+		const title = decodeURIComponent(params.slug).replace(/-/g, " ");
+		const cap = title.charAt(0).toUpperCase() + title.slice(1);
+		return { meta: [{ title: `${cap} – News Theme` }, {
+			name: "description",
+			content: `Latest ${cap} news, analysis and reports from News Theme.`
+		}] };
+	},
+	component: lazyRouteComponent($$splitComponentImporter, "component")
+});
+//#endregion
+export { Route as t };
+
+//# sourceMappingURL=_slug-Cvo-EWo5.js.map
