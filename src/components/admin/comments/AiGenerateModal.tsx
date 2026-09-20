@@ -405,33 +405,16 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess, replyTarget }: AiG
               onChange={(e) => setAiTimeSpread(e.target.value)}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white font-medium text-slate-800"
             >
-              <option value="past_1_hour">
-                ⚡ Past 1 Hour (e.g. 5 mins ago, 20 mins ago, 35 mins ago, 52 mins ago)
-              </option>
-              <option value="past_2_hours">
-                🕐 Past 2 Hours (e.g. 8 mins ago, 35 mins ago, 1.2 hours ago, 1.8 hours ago)
-              </option>
-              <option value="past_6_hours">
-                🕒 Past 6 Hours (e.g. 25 mins ago, 1.5 hours ago, 3 hours ago, 5 hours ago)
-              </option>
-              <option value="past_12_hours">
-                🕕 Past 12 Hours (e.g. 40 mins ago, 2 hours ago, 6 hours ago, 10 hours ago)
-              </option>
-              <option value="past_24_hours">
-                ⏱️ Past 24 Hours (e.g. 20 mins ago, 3 hours ago, 11 hours ago)
-              </option>
-              <option value="past_3_days">
-                📅 Past 3 Days (e.g. 2 hours ago, 1 day ago, 2 days ago) [Recommended]
-              </option>
-              <option value="past_7_days">
-                🗓️ Past 7 Days (e.g. 6 hours ago, 2 days ago, 5 days ago)
-              </option>
-              <option value="past_30_days">
-                📆 Past 30 Days (older historical reader discussions)
-              </option>
-              <option value="just_now">
-                ⚡ Just Now (all comments posted at current timestamp)
-              </option>
+              <option value="past_30_mins">⚡ Last 30 Minutes</option>
+              <option value="past_1_hour">⚡ Last 1 Hour</option>
+              <option value="past_2_hours">🕐 Last 2 Hours</option>
+              <option value="past_6_hours">🕒 Last 6 Hours</option>
+              <option value="past_12_hours">🕕 Last 12 Hours</option>
+              <option value="past_24_hours">⏱️ Last 24 Hours</option>
+              <option value="past_3_days">📅 Last 3 Days [Recommended]</option>
+              <option value="past_7_days">🗓️ Last 7 Days</option>
+              <option value="past_30_days">📆 Last 30 Days</option>
+              <option value="just_now">⚡ Just Now</option>
             </select>
             <p className="mt-1 text-[11px] text-slate-500">
               Staggers timestamps naturally across the past so comments show as "1 day ago", "8 hours ago", or "20 mins ago" instead of all at the exact same minute.

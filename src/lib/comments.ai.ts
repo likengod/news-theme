@@ -27,7 +27,10 @@ function generateStaggeredDates(
   let maxMinutes = 72 * 60; // default 3 days
   let minAgeMs = 3 * 60 * 1000;
 
-  if (timeSpread === "past_1_hour") {
+  if (timeSpread === "past_30_mins") {
+    maxMinutes = 30;
+    minAgeMs = 1 * 60 * 1000; // at least 1 min ago
+  } else if (timeSpread === "past_1_hour") {
     maxMinutes = 60;
     minAgeMs = 2 * 60 * 1000; // at least 2 mins ago
   } else if (timeSpread === "past_2_hours") {
@@ -406,7 +409,9 @@ Return ONLY a valid JSON array of strings, e.g. ["Comment 1", "Comment 2"]. No m
         const parentDate = staggeredDates[item.replyToIndex];
         if (commentDate.getTime() <= parentDate.getTime()) {
           const replyDelayMs =
-            timeSpread === "past_1_hour"
+            timeSpread === "past_30_mins"
+              ? (1 + Math.random() * 4) * 60 * 1000 // 1 to 5 mins after parent
+              : timeSpread === "past_1_hour"
               ? (2 + Math.random() * 8) * 60 * 1000 // 2 to 10 mins after parent
               : timeSpread === "past_2_hours"
               ? (4 + Math.random() * 15) * 60 * 1000 // 4 to 19 mins after parent
