@@ -139,6 +139,23 @@ function VerifyImagePage() {
       <Header />
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 flex-1 w-full space-y-6">
+        {/* Page Header */}
+        <div className="flex items-center justify-between border-b border-border pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <ShieldCheck className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground font-serif">
+                Forensic Image Authentication
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                Dual-Layer Protection: Cryptographic EXIF &amp; Pixel DNA Steganography
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Upload & Drop Zone */}
         {!imageSrc ? (
           <div className="space-y-6">
