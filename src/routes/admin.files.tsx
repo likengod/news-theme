@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Upload } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Upload, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { mediaLibrary, trackUpload, formatBytes, type MediaItem } from "@/lib/media-library";
 import { MediaGrid } from "@/components/admin/files/MediaGrid";
@@ -118,6 +118,15 @@ function FileManagerPage() {
               }
             }}
           />
+          <Link
+            to="/verify-image"
+            target="_blank"
+            title="Scan any image for Layer 1 EXIF signature and Layer 2 pixel steganography DNA"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/80 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition whitespace-nowrap shadow-2xs"
+          >
+            <ShieldCheck className="h-3.5 w-3.5 text-indigo-600" />
+            Verify Scanner
+          </Link>
           <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 whitespace-nowrap">
             {items.length} files ({formatBytes(totalSize)})
           </span>

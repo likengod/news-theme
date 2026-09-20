@@ -128,6 +128,92 @@ export function ProtectionSettingsForm({ s, update }: Props) {
           </div>
         </div>
       </section>
+
+      {/* Dual-Layer Image Protection Engine */}
+      <section className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+        <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-5 py-3.5">
+          <div className="flex items-center gap-2.5">
+            <ShieldAlert className="h-4 w-4 text-indigo-600" />
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-700">
+              Dual-Layer Image Protection & Forensic Watermarking
+            </h2>
+          </div>
+          <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-bold uppercase text-indigo-800">
+            Active Protection
+          </span>
+        </div>
+
+        <div className="p-5 sm:p-6 space-y-6">
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Every image uploaded to your media library and article editor is automatically fortified with a
+            two-tier anti-theft defense system. Even if pirates screenshot your content or strip file metadata,
+            ownership can be mathematically proven.
+          </p>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Layer 1 Card */}
+            <div className="rounded-xl border border-blue-200/80 bg-blue-50/40 p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-100 px-2 py-0.5 text-[11px] font-bold text-blue-800">
+                  Layer 1
+                </span>
+                <span className="text-[11px] font-semibold text-blue-600">The Surface Protection</span>
+              </div>
+              <h3 className="text-sm font-bold text-slate-900">Cryptographic EXIF Signature</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Embeds hidden, encrypted text data directly into the image file&apos;s metadata (EXIF/XMP tags)
+                behind the scenes.
+              </p>
+              <ul className="text-[11px] text-slate-500 space-y-1 list-disc list-inside">
+                <li><strong className="text-slate-700">Ownership Details:</strong> Encrypts domain ownership and copyright.</li>
+                <li><strong className="text-slate-700">Social Media Linking:</strong> Embeds official social usernames from admin.</li>
+                <li><strong className="text-slate-700">Digital Certificate:</strong> Instantly verified by the <code className="text-blue-700">/verify-image</code> scanner.</li>
+              </ul>
+            </div>
+
+            {/* Layer 2 Card */}
+            <div className="rounded-xl border border-purple-200/80 bg-purple-50/40 p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-100 px-2 py-0.5 text-[11px] font-bold text-purple-800">
+                  Layer 2
+                </span>
+                <span className="text-[11px] font-semibold text-purple-600">The Deep Protection</span>
+              </div>
+              <h3 className="text-sm font-bold text-slate-900">Forensic Pixel Watermarking (Steganography)</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Invisibly weaves watermark DNA directly into the actual color pixels of the image using
+                differential spatial-frequency steganography.
+              </p>
+              <ul className="text-[11px] text-slate-500 space-y-1 list-disc list-inside">
+                <li><strong className="text-slate-700">Screenshot Proof:</strong> Survives phone/PC screen captures and clips.</li>
+                <li><strong className="text-slate-700">Tamper Resistant:</strong> Resists cropping, resizing, and JPEG compression.</li>
+                <li><strong className="text-slate-700">Automatic Fallback:</strong> Proves authentic derivative even if metadata is stripped.</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Scanner Tool Action Box */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div>
+              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                Forensic Verification Scanner Tool
+              </h4>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Inspect any suspicious image or screenshot to extract Layer 1 signatures and Layer 2 pixel DNA.
+              </p>
+            </div>
+            <a
+              href="/verify-image"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 transition shadow-xs shrink-0"
+            >
+              <ShieldAlert className="h-4 w-4" />
+              Open /verify-image Scanner
+            </a>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

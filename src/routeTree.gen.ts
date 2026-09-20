@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkWithUsRouteImport } from './routes/work-with-us'
 import { Route as WithdrawPointsRouteImport } from './routes/withdraw-points'
 import { Route as WatchRouteImport } from './routes/watch'
+import { Route as VerifyImageRouteImport } from './routes/verify-image'
 import { Route as VerifiedJournalistRouteImport } from './routes/verified-journalist'
 import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
 import { Route as SubscriptionRouteImport } from './routes/subscription'
@@ -80,6 +81,11 @@ const WithdrawPointsRoute = WithdrawPointsRouteImport.update({
 const WatchRoute = WatchRouteImport.update({
   id: '/watch',
   path: '/watch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyImageRoute = VerifyImageRouteImport.update({
+  id: '/verify-image',
+  path: '/verify-image',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VerifiedJournalistRoute = VerifiedJournalistRouteImport.update({
@@ -386,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/subscription': typeof SubscriptionRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/verified-journalist': typeof VerifiedJournalistRoute
+  '/verify-image': typeof VerifyImageRoute
   '/watch': typeof WatchRoute
   '/withdraw-points': typeof WithdrawPointsRoute
   '/work-with-us': typeof WorkWithUsRoute
@@ -444,6 +451,7 @@ export interface FileRoutesByTo {
   '/subscription': typeof SubscriptionRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/verified-journalist': typeof VerifiedJournalistRoute
+  '/verify-image': typeof VerifyImageRoute
   '/watch': typeof WatchRoute
   '/withdraw-points': typeof WithdrawPointsRoute
   '/work-with-us': typeof WorkWithUsRoute
@@ -504,6 +512,7 @@ export interface FileRoutesById {
   '/subscription': typeof SubscriptionRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/verified-journalist': typeof VerifiedJournalistRoute
+  '/verify-image': typeof VerifyImageRoute
   '/watch': typeof WatchRoute
   '/withdraw-points': typeof WithdrawPointsRoute
   '/work-with-us': typeof WorkWithUsRoute
@@ -565,6 +574,7 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/terms-and-conditions'
     | '/verified-journalist'
+    | '/verify-image'
     | '/watch'
     | '/withdraw-points'
     | '/work-with-us'
@@ -623,6 +633,7 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/terms-and-conditions'
     | '/verified-journalist'
+    | '/verify-image'
     | '/watch'
     | '/withdraw-points'
     | '/work-with-us'
@@ -682,6 +693,7 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/terms-and-conditions'
     | '/verified-journalist'
+    | '/verify-image'
     | '/watch'
     | '/withdraw-points'
     | '/work-with-us'
@@ -742,6 +754,7 @@ export interface RootRouteChildren {
   SubscriptionRoute: typeof SubscriptionRoute
   TermsAndConditionsRoute: typeof TermsAndConditionsRoute
   VerifiedJournalistRoute: typeof VerifiedJournalistRoute
+  VerifyImageRoute: typeof VerifyImageRoute
   WatchRoute: typeof WatchRoute
   WithdrawPointsRoute: typeof WithdrawPointsRoute
   WorkWithUsRoute: typeof WorkWithUsRoute
@@ -773,6 +786,13 @@ declare module '@tanstack/react-router' {
       path: '/watch'
       fullPath: '/watch'
       preLoaderRoute: typeof WatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-image': {
+      id: '/verify-image'
+      path: '/verify-image'
+      fullPath: '/verify-image'
+      preLoaderRoute: typeof VerifyImageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/verified-journalist': {
@@ -1231,6 +1251,7 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionRoute: SubscriptionRoute,
   TermsAndConditionsRoute: TermsAndConditionsRoute,
   VerifiedJournalistRoute: VerifiedJournalistRoute,
+  VerifyImageRoute: VerifyImageRoute,
   WatchRoute: WatchRoute,
   WithdrawPointsRoute: WithdrawPointsRoute,
   WorkWithUsRoute: WorkWithUsRoute,

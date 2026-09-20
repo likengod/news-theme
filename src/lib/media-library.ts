@@ -27,6 +27,12 @@ import {
   updateMediaServer,
   deleteMediaServer,
 } from "./media.functions";
+import {
+  protectCanvasAndExport,
+  embedLayer1Signature,
+  type ProtectedImagePayload,
+} from "./image-protection";
+
 
 let memoryCache: MediaItem[] = [];
 
@@ -100,28 +106,29 @@ export const mediaLibrary = {
 };
 
 /**
- * Injects a hidden watermark directly into the binary file data (Metadata Injection).
- * This works with WebP and keeps file sizes tiny.
+ * Retrieves current site settings for image protection branding
  */
-function injectMetadata(dataUrl: string, text: string): string {
-  // Extract base64 part
-  const base64 = dataUrl.split(",")[1];
-  const mime = dataUrl.split(",")[0];
+function getProtectionConfig() {
+  let domain = typeof window !== "undefined" ? window.location.hostname : "todaytripura.com";
+  let siteName = "Today Tripura";
+  let socials: ProtectedImagePayload["socials"] = {};
 
-  // Convert base64 to binary string
-  const binaryString = atob(base64);
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("nt:site-settings");
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s.siteName) siteName = s.siteName;
+        if (s.facebook) socials.facebook = s.facebook;
+        if (s.twitter) socials.twitter = s.twitter;
+        if (s.instagram) socials.instagram = s.instagram;
+        if (s.youtube) socials.youtube = s.youtube;
+        if (s.telegram) socials.telegram = s.telegram;
+      }
+    } catch {}
+  }
 
-  // Create a payload that we will append to the end of the file.
-  const payload = "\n---WATERMARK_START---\n" + text + "\n---WATERMARK_END---\n";
-
-  // Safely encode UTF-8 characters (like Bengali) so btoa doesn't crash
-  const utf8Payload = unescape(encodeURIComponent(payload));
-
-  // Append our invisible metadata payload to the end of the image binary
-  const newBinaryString = binaryString + utf8Payload;
-
-  // Convert back to base64
-  return mime + "," + btoa(newBinaryString);
+  return { domain, siteName, socials };
 }
 
 export function fileToDataUrl(
@@ -164,7 +171,7 @@ export function fileToDataUrl(
         const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
         if (!ctx) {
           resolve(rawDataUrl);
           return;
@@ -174,36 +181,28 @@ export function fileToDataUrl(
         ctx.imageSmoothingQuality = "high";
         ctx.drawImage(img, 0, 0, width, height);
 
-        let finalDataUrl = rawDataUrl;
+        // Apply Dual-Layer Image Protection:
+        // Layer 2: Forensic Pixel Watermarking (weaves invisible DNA into pixels)
+        // Layer 1: Cryptographic EXIF Signature (embeds certified metadata)
+        const { domain, siteName, socials } = getProtectionConfig();
+        const ownershipText =
+          watermarkData ||
+          `This image belongs to ${domain}. All rights reserved. Registered with ${siteName}.`;
 
-        // Compress as WebP to save space
-        try {
-          const webp = canvas.toDataURL("image/webp", quality);
-          if (webp.startsWith("data:image/webp") && webp.length < rawDataUrl.length) {
-            finalDataUrl = webp;
-          }
-        } catch {}
+        const protectedDataUrl = protectCanvasAndExport(
+          canvas,
+          {
+            domain,
+            siteName,
+            ownershipText,
+            socials,
+            strength: 3,
+          },
+          "image/webp",
+          quality,
+        );
 
-        // Fallback to JPEG if WebP fails or is larger
-        if (finalDataUrl === rawDataUrl) {
-          try {
-            const jpeg = canvas.toDataURL("image/jpeg", quality);
-            if (jpeg.length < rawDataUrl.length) {
-              finalDataUrl = jpeg;
-            }
-          } catch {}
-        }
-
-        // Inject the invisible metadata watermark at the end of the binary file
-        if (watermarkData) {
-          try {
-            finalDataUrl = injectMetadata(finalDataUrl, watermarkData);
-          } catch (err) {
-            console.error("Watermark injection failed", err);
-          }
-        }
-
-        resolve(finalDataUrl);
+        resolve(protectedDataUrl);
       };
       img.onerror = () => resolve(rawDataUrl);
       img.src = rawDataUrl;
@@ -230,7 +229,7 @@ export async function trackUpload(
   const dataUrl = await fileToDataUrl(file, watermarkData);
   return await mediaLibrary.add({
     name: customName || file.name,
-    type: watermarkData ? "image/png" : file.type || "application/octet-stream",
+    type: file.type.startsWith("image/") ? "image/webp" : file.type || "application/octet-stream",
     size: Math.round(dataUrl.length * 0.75),
     dataUrl,
     usage,
