@@ -52,6 +52,7 @@ function VerifyImagePage() {
   const [scanStep, setScanStep] = useState<string>("");
   const [result, setResult] = useState<VerificationResult | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [activeTab, setActiveTab] = useState<"upload" | "url">("upload");
   const [inputUrl, setInputUrl] = useState("");
   const [isFetchingUrl, setIsFetchingUrl] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
@@ -173,130 +174,206 @@ function VerifyImagePage() {
       {/* Site Header */}
       <Header />
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 flex-1 w-full space-y-6">
-        {/* Page Header */}
-        <div className="flex items-center justify-between border-b border-border pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <ShieldCheck className="h-6 w-6" />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground font-serif">
-                Forensic Image Authentication
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Dual-Layer Protection: Cryptographic EXIF &amp; Pixel DNA Steganography
-              </p>
-            </div>
+      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 flex-1 w-full space-y-6">
+        {/* Redesigned Centered Page Header */}
+        <div className="text-center max-w-2xl mx-auto space-y-2.5 pb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold tracking-wide">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            <span>Digital Provenance &amp; Copyright Guard</span>
           </div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground font-serif">
+            Forensic Image Authentication
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            Scan any photograph, article image, or screenshot to authenticate its cryptographic EXIF signature and forensic pixel steganography DNA.
+          </p>
         </div>
 
-        {/* Upload & Drop Zone */}
+        {/* Unified Modern Forensic Scanner Card */}
         {!imageSrc ? (
-          <div className="space-y-6">
-            <div
-              onDragOver={(e) => {
-                e.preventDefault();
-                setIsDragging(true);
-              }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-10 sm:p-14 text-center transition-all bg-card ${
-                isDragging
-                  ? "border-primary bg-primary/5 scale-[1.01]"
-                  : "border-border hover:border-primary/60 hover:bg-muted/30"
-              }`}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-              />
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 shadow-xs">
-                <Upload className="h-8 w-8" />
-              </div>
-              <h2 className="text-xl font-bold text-foreground">
-                Drop an image here, click to browse, or paste from clipboard
-              </h2>
-              <p className="mx-auto mt-2 max-w-lg text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Supports original files (JPEG, PNG, WebP, AVIF) as well as cropped or full-screen captures.
-              </p>
-
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <div className="space-y-5">
+            <div className="rounded-2xl sm:rounded-3xl border border-border bg-card shadow-sm p-4 sm:p-6 space-y-5">
+              {/* Sleek Segmented Switcher */}
+              <div className="flex items-center justify-center p-1 bg-muted/60 rounded-xl max-w-sm mx-auto border border-border/40">
                 <button
                   type="button"
-                  className="rounded-lg bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition"
+                  onClick={() => setActiveTab("upload")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                    activeTab === "upload"
+                      ? "bg-background text-foreground shadow-xs ring-1 ring-border/40 font-bold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  Browse Image File
+                  <Upload className="h-3.5 w-3.5" />
+                  <span>Upload Image</span>
                 </button>
-                <div className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/50 px-3.5 py-2 text-xs text-muted-foreground font-medium">
-                  <Clipboard className="h-3.5 w-3.5 text-primary" />
-                  <span>Take a screenshot and press <kbd className="font-mono font-bold text-foreground bg-background px-1.5 py-0.5 rounded border border-border">Ctrl+V</kbd></span>
-                </div>
-              </div>
-            </div>
-
-            {/* Or Verify by URL Section */}
-            <div className="relative flex items-center justify-center my-2">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <span className="relative bg-background px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Or Verify With Image URL
-              </span>
-            </div>
-
-            <form
-              onSubmit={handleUrlSubmit}
-              className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-xs space-y-3"
-            >
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-foreground">
-                    <Globe className="h-4 w-4" />
-                  </div>
-                  <input
-                    type="url"
-                    value={inputUrl}
-                    onChange={(e) => setInputUrl(e.target.value)}
-                    placeholder="Paste image link (e.g. https://... or /uploads/...)"
-                    className="w-full rounded-xl border border-border bg-background pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
-                    disabled={isFetchingUrl}
-                  />
-                </div>
                 <button
-                  type="submit"
-                  disabled={!inputUrl.trim() || isFetchingUrl}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 disabled:opacity-50 transition shrink-0"
+                  type="button"
+                  onClick={() => setActiveTab("url")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                    activeTab === "url"
+                      ? "bg-background text-foreground shadow-xs ring-1 ring-border/40 font-bold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  {isFetchingUrl ? (
-                    <>
-                      <Sparkles className="h-4 w-4 animate-spin" />
-                      <span>Fetching Image...</span>
-                    </>
-                  ) : (
-                    <>
-                      <LinkIcon className="h-4 w-4" />
-                      <span>Verify Image URL</span>
-                    </>
-                  )}
+                  <Globe className="h-3.5 w-3.5" />
+                  <span>Image Web Link</span>
                 </button>
               </div>
 
-              {urlError && (
-                <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-400 font-medium">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  <span>{urlError}</span>
+              {/* Tab 1: Upload / Drag & Drop */}
+              {activeTab === "upload" && (
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`group relative cursor-pointer rounded-2xl border-2 border-dashed p-8 sm:p-12 text-center transition-all ${
+                    isDragging
+                      ? "border-primary bg-primary/5 scale-[1.005]"
+                      : "border-border/80 hover:border-primary/60 bg-muted/20 hover:bg-muted/35"
+                  }`}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+                  />
+
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3.5 group-hover:scale-105 transition-transform">
+                    <Upload className="h-7 w-7" />
+                  </div>
+
+                  <h3 className="text-base sm:text-lg font-bold text-foreground">
+                    Drop an image here, or{" "}
+                    <span className="text-primary underline underline-offset-4 decoration-primary/40 group-hover:decoration-primary">
+                      browse files
+                    </span>
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    You can also copy an image or take a screenshot and press{" "}
+                    <kbd className="px-1.5 py-0.5 font-mono text-[11px] font-bold bg-background border border-border rounded text-foreground">
+                      Ctrl+V
+                    </kbd>{" "}
+                    anywhere
+                  </p>
+
+                  <div className="mt-5 flex flex-wrap items-center justify-center gap-1.5 text-[11px] text-muted-foreground font-medium">
+                    <span className="px-2.5 py-1 rounded-md bg-background border border-border/60">JPEG</span>
+                    <span className="px-2.5 py-1 rounded-md bg-background border border-border/60">PNG</span>
+                    <span className="px-2.5 py-1 rounded-md bg-background border border-border/60">WEBP</span>
+                    <span className="px-2.5 py-1 rounded-md bg-background border border-border/60">AVIF</span>
+                    <span className="px-2.5 py-1 rounded-md bg-primary/10 text-primary border border-primary/20 flex items-center gap-1 font-semibold">
+                      <Clipboard className="h-3 w-3" /> Clipboard Ready
+                    </span>
+                  </div>
                 </div>
               )}
 
-              <p className="text-xs text-muted-foreground">
-                Enter any public image URL from our site, news sources, or web articles to analyze its cryptographic EXIF and forensic pixel DNA.
-              </p>
-            </form>
+              {/* Tab 2: Image Web Link */}
+              {activeTab === "url" && (
+                <form
+                  onSubmit={handleUrlSubmit}
+                  className="rounded-2xl border border-border/60 bg-muted/20 p-6 sm:p-10 space-y-4 text-center"
+                >
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-2">
+                    <Globe className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-bold text-foreground">
+                      Verify Remote Image by Web Link
+                    </h3>
+                    <p className="mt-1 text-xs text-muted-foreground max-w-md mx-auto">
+                      Paste any direct image URL from news articles, social media posts, or CDNs to inspect its forensic provenance.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2 max-w-xl mx-auto pt-2">
+                    <div className="relative flex-1">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-foreground">
+                        <LinkIcon className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="url"
+                        value={inputUrl}
+                        onChange={(e) => setInputUrl(e.target.value)}
+                        placeholder="https://example.com/photo.jpg or /uploads/..."
+                        className="w-full rounded-xl border border-border bg-background pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition text-left"
+                        disabled={isFetchingUrl}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={!inputUrl.trim() || isFetchingUrl}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 disabled:opacity-50 transition shrink-0"
+                    >
+                      {isFetchingUrl ? (
+                        <>
+                          <Sparkles className="h-4 w-4 animate-spin" />
+                          <span>Fetching...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck className="h-4 w-4" />
+                          <span>Verify Link</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {urlError && (
+                    <div className="max-w-xl mx-auto flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-400 font-medium text-left">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      <span>{urlError}</span>
+                    </div>
+                  )}
+                </form>
+              )}
+            </div>
+
+            {/* 3 Pillar Features Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="flex items-start gap-3 rounded-2xl border border-border/70 bg-card p-4 shadow-2xs">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                  <Layers className="h-5 w-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="text-xs font-bold text-foreground">Layer 1: EXIF Metadata</h4>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Cryptographic signature linking digital certificate, domain ownership, and timestamp.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-2xl border border-border/70 bg-card p-4 shadow-2xs">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                  <Dna className="h-5 w-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="text-xs font-bold text-foreground">Layer 2: Pixel Stego DNA</h4>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Deep pixel steganography that survives metadata wiping, crops, and screenshot re-compression.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-2xl border border-border/70 bg-card p-4 shadow-2xs">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="text-xs font-bold text-foreground">In-Memory Privacy</h4>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Decoded in-memory on demand without storing or logging your media on external servers.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
