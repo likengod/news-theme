@@ -239,10 +239,14 @@ function VerifyImagePage() {
                 >
                   <input
                     ref={fileInputRef}
+                    id="verify-image-file-input"
+                    name="verify-image-file-input"
+                    aria-label="Upload image file for forensic verification"
                     type="file"
                     accept="image/*"
                     className="hidden"
                     onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+                    suppressHydrationWarning
                   />
 
                   <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3.5 group-hover:scale-105 transition-transform">
@@ -299,12 +303,17 @@ function VerifyImagePage() {
                         <LinkIcon className="h-4 w-4" />
                       </div>
                       <input
+                        id="verify-image-url-input"
+                        name="verify-image-url-input"
+                        aria-label="Paste image web URL for forensic verification"
                         type="url"
                         value={inputUrl}
                         onChange={(e) => setInputUrl(e.target.value)}
                         placeholder="https://example.com/photo.jpg or /uploads/..."
                         className="w-full rounded-xl border border-border bg-background pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition text-left"
                         disabled={isFetchingUrl}
+                        autoComplete="off"
+                        suppressHydrationWarning
                       />
                     </div>
                     <button

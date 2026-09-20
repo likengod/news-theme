@@ -134,34 +134,44 @@ export function initFormAccessibility(): () => void {
     } catch {}
   }
 
-  // Run on current DOM
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", patchAll);
-  } else {
+  // Defer DOM patching until after React hydration has fully settled
+  let timer: any = null;
+  let observer: MutationObserver | null = null;
+
+  const startPatching = () => {
     patchAll();
+
+    // MutationObserver for SPA navigation, modals, and dynamic forms
+    try {
+      observer = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          if (m.type === "childList") {
+            m.addedNodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                const el = node as HTMLElement;
+                patchElement(el);
+                el.querySelectorAll?.<HTMLElement>("input, textarea, select").forEach(patchElement);
+              }
+            });
+          }
+        }
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+    } catch {}
+  };
+
+  // Run asynchronously after initial hydration completes
+  if (typeof window !== "undefined") {
+    if ("requestIdleCallback" in window) {
+      (window as any).requestIdleCallback(startPatching, { timeout: 1500 });
+    } else {
+      timer = setTimeout(startPatching, 800);
+    }
   }
 
-  // MutationObserver for SPA navigation, modals, and dynamic forms
-  let observer: MutationObserver | null = null;
-  try {
-    observer = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        if (m.type === "childList") {
-          m.addedNodes.forEach((node) => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              const el = node as HTMLElement;
-              patchElement(el);
-              el.querySelectorAll?.<HTMLElement>("input, textarea, select").forEach(patchElement);
-            }
-          });
-        }
-      }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-  } catch {}
-
   return () => {
+    if (timer) clearTimeout(timer);
     observer?.disconnect();
     initialized = false;
   };
