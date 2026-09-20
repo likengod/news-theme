@@ -15,7 +15,6 @@ import {
 import { toast } from "sonner";
 import {
   generateDummyCommentsFn,
-  getRecentArticlesForCommentsFn,
   lookupArticleByUrlOrSlugFn,
   extractSlugFromUrl,
   type CommentRow,
@@ -57,10 +56,8 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess, replyTarget }: AiG
   const [aiIncludeReplies, setAiIncludeReplies] = useState(true);
   const [targetReplyComment, setTargetReplyComment] = useState<CommentRow | null>(replyTarget || null);
   const [aiGenerating, setAiGenerating] = useState(false);
-  const [recentArticles, setRecentArticles] = useState<{ id: number; title: string; slug: string }[]>([]);
 
   const generateAiComments = useServerFn(generateDummyCommentsFn);
-  const getRecentArticlesFn = useServerFn(getRecentArticlesForCommentsFn);
   const lookupArticleFn = useServerFn(lookupArticleByUrlOrSlugFn);
 
   // Sync replyTarget when modal opens
@@ -120,18 +117,6 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess, replyTarget }: AiG
     }, 450);
     return () => clearTimeout(timer);
   }, [aiArticleInput, isOpen]);
-
-  useEffect(() => {
-    if (isOpen && recentArticles.length === 0) {
-      getRecentArticlesFn()
-        .then((res) => {
-          if (res && res.length > 0) {
-            setRecentArticles(res);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [isOpen]);
 
   const resetForm = () => {
     setAiPublicUserId("");
@@ -330,38 +315,6 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess, replyTarget }: AiG
               <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2.5">
                 <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
                 <span>{fetchError}</span>
-              </div>
-            )}
-
-            {/* Optional recent articles selector */}
-            {recentArticles.length > 0 && !targetReplyComment && (
-              <div className="pt-1">
-                <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
-                  <span>Or pick from recent articles:</span>
-                </div>
-                <select
-                  value={aiArticleSlug}
-                  onChange={(e) => {
-                    const selSlug = e.target.value;
-                    if (selSlug) {
-                      setAiArticleInput(selSlug);
-                      handleFetchArticle(selSlug);
-                    } else {
-                      setAiArticleInput("");
-                      setAiArticleSlug("");
-                      setResolvedArticle(null);
-                      setFetchError("");
-                    }
-                  }}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-700 focus:border-blue-500 focus:outline-none"
-                >
-                  <option value="">-- Choose from recent articles (optional) --</option>
-                  {recentArticles.map((art) => (
-                    <option key={art.id} value={art.slug}>
-                      {art.title.length > 65 ? art.title.slice(0, 65) + "…" : art.title}
-                    </option>
-                  ))}
-                </select>
               </div>
             )}
           </div>
