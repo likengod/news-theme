@@ -16,11 +16,14 @@ import {
   FileCheck,
   RotateCcw,
   Info,
+  Link as LinkIcon,
+  AlertCircle,
 } from "lucide-react";
 import {
   verifyImage,
   type VerificationResult,
 } from "@/lib/image-protection";
+import { fetchRemoteImageForVerification } from "@/lib/verify-image.functions";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
@@ -49,6 +52,9 @@ function VerifyImagePage() {
   const [scanStep, setScanStep] = useState<string>("");
   const [result, setResult] = useState<VerificationResult | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [inputUrl, setInputUrl] = useState("");
+  const [isFetchingUrl, setIsFetchingUrl] = useState(false);
+  const [urlError, setUrlError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const runVerification = useCallback(async (dataUrl: string) => {
@@ -96,6 +102,33 @@ function VerifyImagePage() {
     reader.readAsDataURL(file);
   }, [runVerification]);
 
+  const handleUrlSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const url = inputUrl.trim();
+    if (!url) return;
+
+    setUrlError(null);
+    setIsFetchingUrl(true);
+
+    try {
+      const res = await fetchRemoteImageForVerification({ data: { imageUrl: url } });
+      if (res && res.dataUrl) {
+        setFileName(res.fileName || url);
+        setFileSize(res.fileSize || 0);
+        setImageSrc(res.dataUrl);
+        setResult(null);
+        runVerification(res.dataUrl);
+      } else {
+        setUrlError("Could not retrieve image data from this URL.");
+      }
+    } catch (err: any) {
+      console.error("URL fetch error:", err);
+      setUrlError(err.message || "Failed to load image from URL. Please check the link.");
+    } finally {
+      setIsFetchingUrl(false);
+    }
+  };
+
   // Global paste handler to support pasting screenshots directly
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
@@ -130,6 +163,8 @@ function VerifyImagePage() {
     setFileName("");
     setFileSize(0);
     setResult(null);
+    setInputUrl("");
+    setUrlError(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -203,6 +238,65 @@ function VerifyImagePage() {
                 </div>
               </div>
             </div>
+
+            {/* Or Verify by URL Section */}
+            <div className="relative flex items-center justify-center my-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border" />
+              </div>
+              <span className="relative bg-background px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Or Verify With Image URL
+              </span>
+            </div>
+
+            <form
+              onSubmit={handleUrlSubmit}
+              className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-xs space-y-3"
+            >
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-foreground">
+                    <Globe className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="url"
+                    value={inputUrl}
+                    onChange={(e) => setInputUrl(e.target.value)}
+                    placeholder="Paste image link (e.g. https://... or /uploads/...)"
+                    className="w-full rounded-xl border border-border bg-background pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
+                    disabled={isFetchingUrl}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={!inputUrl.trim() || isFetchingUrl}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 disabled:opacity-50 transition shrink-0"
+                >
+                  {isFetchingUrl ? (
+                    <>
+                      <Sparkles className="h-4 w-4 animate-spin" />
+                      <span>Fetching Image...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LinkIcon className="h-4 w-4" />
+                      <span>Verify Image URL</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {urlError && (
+                <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-400 font-medium">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>{urlError}</span>
+                </div>
+              )}
+
+              <p className="text-xs text-muted-foreground">
+                Enter any public image URL from our site, news sources, or web articles to analyze its cryptographic EXIF and forensic pixel DNA.
+              </p>
+            </form>
           </div>
         ) : (
           <div className="space-y-6">
