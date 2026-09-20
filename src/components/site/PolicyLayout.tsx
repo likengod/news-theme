@@ -29,6 +29,7 @@ type Props = {
   contactEmail?: string;
   hideDivider?: boolean;
   dropCapIntro?: boolean;
+  headerAction?: ReactNode;
 };
 
 const POLICIES = [
@@ -62,6 +63,7 @@ export function PolicyLayout({
   contactEmail,
   hideDivider,
   dropCapIntro,
+  headerAction,
 }: Props) {
   const s = useSiteSettings();
   const actualEmail = contactEmail || s?.contactEmail || "legal@northeasttimeline.com";
@@ -179,16 +181,28 @@ export function PolicyLayout({
           {/* ───────── Right: Document Card ───────── */}
           <article className="rounded-2xl border border-border bg-card/30 p-6 shadow-sm md:p-10">
             <header>
-              <div className="flex items-center gap-4">
-                <span className="grid h-12 w-12 place-items-center rounded-xl bg-foreground text-background">
-                  <ShieldCheck className="h-6 w-6" />
-                </span>
-                <h1
-                  className="headline text-3xl md:text-4xl"
-                  style={{ WebkitLineClamp: "unset" as never }}
-                >
-                  {title}
-                </h1>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <span className="grid h-12 w-12 place-items-center rounded-xl bg-foreground text-background">
+                    <ShieldCheck className="h-6 w-6" />
+                  </span>
+                  <h1
+                    className="headline text-3xl md:text-4xl"
+                    style={{ WebkitLineClamp: "unset" as never }}
+                  >
+                    {title}
+                  </h1>
+                </div>
+
+                {headerAction || (pathname === "/dmca" ? (
+                  <Link
+                    to="/verify-image"
+                    className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3.5 py-2 text-xs sm:text-sm font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-2xs group"
+                  >
+                    <ShieldCheck className="h-4 w-4 text-primary group-hover:text-primary-foreground transition-colors" />
+                    <span>Forensic Image</span>
+                  </Link>
+                ) : null)}
               </div>
               {eyebrow && eyebrow !== "Narrative Sync" ? (
                 <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
