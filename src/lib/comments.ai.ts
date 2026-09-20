@@ -86,9 +86,9 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
       positivity: number;
       language: string;
       customPrompt?: string;
-      allowSlang?: boolean;
-      timeSpread?: string; // "past_24_hours" | "past_3_days" | "past_7_days" | "past_30_days" | "just_now"
+      timeSpread?: string;
       includeReplies?: boolean;
+      replyCount?: number;
       replyToCommentId?: number | null;
     }) => d,
   )
@@ -103,6 +103,7 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
       allowSlang,
       timeSpread = "past_3_days",
       includeReplies = false,
+      replyCount = 1,
       replyToCommentId = null,
     } = data;
 
@@ -231,6 +232,10 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
     // Build the AI Prompt based on mode (Direct reply vs Threaded bulk vs Top-level)
     let prompt = "";
     const isThreadedBulk = !parentComment && includeReplies && count >= 2;
+    const targetReplyCount = isThreadedBulk
+      ? Math.min(Math.max(1, replyCount), Math.max(1, count - 1))
+      : 0;
+    const mainCommentCount = count - targetReplyCount;
 
     if (parentComment) {
       prompt = `You are generating ${count} realistic, completely human-sounding reader replies on a Tripura news portal responding specifically to this comment by "${parentComment.user_name}":
@@ -248,10 +253,14 @@ ${customPromptInstruction}
 Format Requirement:
 Return ONLY a valid JSON array of strings, e.g. ["Reply 1", "Reply 2"]. No markdown fences, no backticks, no explanatory text.`;
     } else if (isThreadedBulk) {
-      prompt = `You are generating ${count} realistic reader comments for a news portal in Tripura (Northeast India) on an article titled "${article.title}".
+      prompt = `You are generating exactly ${count} realistic reader comments for a news portal in Tripura (Northeast India) on an article titled "${article.title}".
 Create an authentic, lively reader comment section with natural conversational replies between users:
-- The majority of comments should be original reactions to the news article.
-- Approximately 25% to 40% of comments should be natural, conversational replies to earlier comments (agreeing, debating, asking a question, or following up on what an earlier commenter said).
+
+STRICT COMMENT BREAKDOWN REQUIREMENT:
+- Total comments to generate: EXACTLY ${count}
+- Main Top-Level Comments: EXACTLY ${mainCommentCount} (these MUST have "replyToIndex": null and react directly to the news article).
+- Threaded Reply Comments: EXACTLY ${targetReplyCount} (these MUST have "replyToIndex" set to the integer index of an earlier top-level comment they are replying to, e.g. index 0 or 1).
+- CRITICAL: DO NOT make all comments replies! There must be exactly ${mainCommentCount} main comments and ${targetReplyCount} replies.
 
 Rules:
 ${languageInstruction}
@@ -264,14 +273,13 @@ ${customPromptInstruction}
 Format Requirement:
 Return ONLY a valid JSON array of objects with fields:
 - "text": The comment body string
-- "replyToIndex": null if this is a top-level comment, OR the 0-based integer index of an earlier comment in this array that it is replying to (MUST be strictly less than the current item's index, e.g. index 1 can reply to 0; index 3 can reply to 0 or 2).
+- "replyToIndex": null if this is a top-level comment, OR the 0-based integer index of an earlier comment in this array that it is replying to (strictly less than current item's index).
 
-Example format:
+Example format for ${count} comments (${mainCommentCount} main + ${targetReplyCount} replies):
 [
   { "text": "Khub bhalo udyog, sorkar ke dhonnobad.", "replyToIndex": null },
-  { "text": "Ekdom shothik kotha bolechhen dada, shomoy moto complete hole bhalo.", "replyToIndex": 0 },
   { "text": "Ground reality check kora dorkar.", "replyToIndex": null },
-  { "text": "Right, AMC er negligence er karonei delay hoy.", "replyToIndex": 2 }
+  { "text": "Ekdom shothik kotha bolechhen dada, shomoy moto complete hole bhalo.", "replyToIndex": 0 }
 ]
 No markdown fences, no backticks, no explanatory text.`;
     } else {
@@ -365,6 +373,32 @@ Return ONLY a valid JSON array of strings, e.g. ["Comment 1", "Comment 2"]. No m
             ? item.replyToIndex
             : null;
         normalizedComments.push({ text: item.text, replyToIndex: rIdx });
+      }
+    }
+
+    // Strict enforcement: ensure exactly targetReplyCount replies exist if isThreadedBulk, else 0
+    if (isThreadedBulk && targetReplyCount > 0) {
+      let replyCountSoFar = 0;
+      for (let i = 0; i < normalizedComments.length; i++) {
+        if (normalizedComments[i].replyToIndex !== null) {
+          if (replyCountSoFar < targetReplyCount) {
+            replyCountSoFar++;
+          } else {
+            normalizedComments[i].replyToIndex = null;
+          }
+        }
+      }
+      if (replyCountSoFar < targetReplyCount) {
+        for (let i = normalizedComments.length - 1; i > 0 && replyCountSoFar < targetReplyCount; i--) {
+          if (normalizedComments[i].replyToIndex === null) {
+            normalizedComments[i].replyToIndex = Math.floor(Math.random() * Math.min(i, 2));
+            replyCountSoFar++;
+          }
+        }
+      }
+    } else if (!parentComment) {
+      for (const item of normalizedComments) {
+        item.replyToIndex = null;
       }
     }
 
