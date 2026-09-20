@@ -12,12 +12,22 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { useAdSettings } from "@/components/site/AdSettingsContext";
-import { loadAds, loadAdSlotMode, loadAdSlotScript } from "@/lib/site-content";
+import {
+  loadAds,
+  loadAdSlotMode,
+  loadAdSlotScript,
+  defaultAdSlidesHome2,
+  type AdSlideItem,
+} from "@/lib/site-content";
 import { ScriptAdRenderer } from "@/components/site/ScriptAdRenderer";
 
 export function HeroMain({ activeLeads, cfg }: any) {
   const ctx = useAdSettings();
-  const [featuredAds, setFeaturedAds] = React.useState(ctx?.adConfig?.slots?.hero_showcase || []);
+  const configSlides = ctx?.adConfig?.slots?.hero_showcase;
+  const initialAds =
+    configSlides && configSlides.length > 0 ? configSlides : defaultAdSlidesHome2;
+
+  const [featuredAds, setFeaturedAds] = React.useState<AdSlideItem[]>(initialAds);
   const [featuredAdMode, setFeaturedAdMode] = React.useState(
     ctx?.adConfig?.modes?.hero_showcase || "image",
   );
@@ -26,15 +36,35 @@ export function HeroMain({ activeLeads, cfg }: any) {
   );
 
   React.useEffect(() => {
+    if (ctx?.adConfig) {
+      const s = ctx.adConfig.slots?.hero_showcase;
+      if (s && s.length > 0) {
+        setFeaturedAds(s);
+      } else {
+        const local = loadAds("hero_showcase");
+        setFeaturedAds(local && local.length > 0 ? local : defaultAdSlidesHome2);
+      }
+      setFeaturedAdMode(ctx.adConfig.modes?.hero_showcase || "image");
+      setFeaturedAdScript(ctx.adConfig.scripts?.hero_showcase || "");
+    }
+  }, [ctx?.adConfig]);
+
+  React.useEffect(() => {
     const sync = () => {
-      setFeaturedAds(loadAds("hero_showcase"));
+      const local = loadAds("hero_showcase");
+      if (local && local.length > 0) {
+        setFeaturedAds(local);
+      } else if (ctx?.adConfig?.slots?.hero_showcase && ctx.adConfig.slots.hero_showcase.length > 0) {
+        setFeaturedAds(ctx.adConfig.slots.hero_showcase);
+      } else {
+        setFeaturedAds(defaultAdSlidesHome2);
+      }
       setFeaturedAdMode(loadAdSlotMode("hero_showcase"));
       setFeaturedAdScript(loadAdSlotScript("hero_showcase"));
     };
-    sync();
     window.addEventListener("nt:ads-updated", sync);
     return () => window.removeEventListener("nt:ads-updated", sync);
-  }, []);
+  }, [ctx?.adConfig]);
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [count, setCount] = React.useState(0);
@@ -184,9 +214,9 @@ export function HeroMain({ activeLeads, cfg }: any) {
   return (
     <div className="flex flex-col gap-8 lg:col-span-8 lg:border-l lg:border-border lg:pl-8">
       <article>
-        <div className="relative group/carousel">
+        <div className="relative group/carousel" suppressHydrationWarning>
           <Carousel setApi={setApi} plugins={plugins} className="w-full" opts={{ loop: true }}>
-            <CarouselContent>{carouselItems}</CarouselContent>
+            <CarouselContent suppressHydrationWarning>{carouselItems}</CarouselContent>
 
             {/* Arrows Overlaid on Image */}
             {count > 1 && (

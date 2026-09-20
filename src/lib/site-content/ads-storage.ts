@@ -372,7 +372,7 @@ const DEFAULTS: Record<AdSlot, AdSlideItem[]> = {
   ad3: defaultAdSlidesAd3,
   popup: defaultAdSlidesPopup,
   leaderboard: defaultAdSlidesLeaderboard,
-  hero_showcase: [],
+  hero_showcase: defaultAdSlidesHome2,
   reel_ads: [],
 };
 
