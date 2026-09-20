@@ -24,23 +24,46 @@ function generateStaggeredDates(
     return Array.from({ length: count }, () => new Date());
   }
 
-  let maxHours = 72; // default 3 days
-  if (timeSpread === "past_24_hours") maxHours = 24;
-  else if (timeSpread === "past_3_days") maxHours = 72;
-  else if (timeSpread === "past_7_days") maxHours = 168;
-  else if (timeSpread === "past_30_days") maxHours = 720;
+  let maxMinutes = 72 * 60; // default 3 days
+  let minAgeMs = 3 * 60 * 1000;
 
-  const minAgeMs = 3 * 60 * 1000; // at least 3 minutes ago
+  if (timeSpread === "past_1_hour") {
+    maxMinutes = 60;
+    minAgeMs = 2 * 60 * 1000; // at least 2 mins ago
+  } else if (timeSpread === "past_2_hours") {
+    maxMinutes = 120;
+    minAgeMs = 3 * 60 * 1000; // at least 3 mins ago
+  } else if (timeSpread === "past_6_hours") {
+    maxMinutes = 360;
+    minAgeMs = 5 * 60 * 1000;
+  } else if (timeSpread === "past_12_hours") {
+    maxMinutes = 720;
+    minAgeMs = 5 * 60 * 1000;
+  } else if (timeSpread === "past_24_hours") {
+    maxMinutes = 24 * 60;
+    minAgeMs = 5 * 60 * 1000;
+  } else if (timeSpread === "past_3_days") {
+    maxMinutes = 72 * 60;
+    minAgeMs = 10 * 60 * 1000;
+  } else if (timeSpread === "past_7_days") {
+    maxMinutes = 168 * 60;
+    minAgeMs = 15 * 60 * 1000;
+  } else if (timeSpread === "past_30_days") {
+    maxMinutes = 720 * 60;
+    minAgeMs = 30 * 60 * 1000;
+  }
+
   const startMs = baseStartTime
-    ? baseStartTime.getTime() + 5 * 60 * 1000
-    : now - maxHours * 60 * 60 * 1000;
+    ? baseStartTime.getTime() + 2 * 60 * 1000
+    : now - maxMinutes * 60 * 1000;
   const effectiveStart = Math.min(startMs, now - minAgeMs);
-  const availableSpan = Math.max(10 * 60 * 1000, now - minAgeMs - effectiveStart);
+  const availableSpan = Math.max(2 * 60 * 1000, now - minAgeMs - effectiveStart);
 
   const timestamps: number[] = [];
   for (let i = 0; i < count; i++) {
     const stepRatio = count <= 1 ? 0.5 : i / (count - 1);
-    const jitter = (Math.random() - 0.5) * (availableSpan / Math.max(1, count * 1.5));
+    const maxJitter = availableSpan / Math.max(1, count * 1.4);
+    const jitter = (Math.random() - 0.5) * maxJitter;
     const offset = availableSpan * stepRatio + jitter;
     const t = Math.min(now - minAgeMs, Math.max(effectiveStart, effectiveStart + offset));
     timestamps.push(t);
@@ -382,7 +405,13 @@ Return ONLY a valid JSON array of strings, e.g. ["Comment 1", "Comment 2"]. No m
       if (targetParentId && item.replyToIndex !== null && staggeredDates[item.replyToIndex]) {
         const parentDate = staggeredDates[item.replyToIndex];
         if (commentDate.getTime() <= parentDate.getTime()) {
-          commentDate = new Date(parentDate.getTime() + 15 * 60 * 1000 + Math.random() * 45 * 60 * 1000);
+          const replyDelayMs =
+            timeSpread === "past_1_hour"
+              ? (2 + Math.random() * 8) * 60 * 1000 // 2 to 10 mins after parent
+              : timeSpread === "past_2_hours"
+              ? (4 + Math.random() * 15) * 60 * 1000 // 4 to 19 mins after parent
+              : (15 + Math.random() * 45) * 60 * 1000;
+          commentDate = new Date(Math.min(Date.now() - 60 * 1000, parentDate.getTime() + replyDelayMs));
         }
       }
 

@@ -405,17 +405,29 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess, replyTarget }: AiG
               onChange={(e) => setAiTimeSpread(e.target.value)}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white font-medium text-slate-800"
             >
-              <option value="past_3_days">
-                📅 Spread over past 3 days (e.g. 2 hrs ago, 1 day ago, 2 days ago) [Recommended]
+              <option value="past_1_hour">
+                ⚡ Past 1 Hour (e.g. 5 mins ago, 20 mins ago, 35 mins ago, 52 mins ago)
+              </option>
+              <option value="past_2_hours">
+                🕐 Past 2 Hours (e.g. 8 mins ago, 35 mins ago, 1.2 hours ago, 1.8 hours ago)
+              </option>
+              <option value="past_6_hours">
+                🕒 Past 6 Hours (e.g. 25 mins ago, 1.5 hours ago, 3 hours ago, 5 hours ago)
+              </option>
+              <option value="past_12_hours">
+                🕕 Past 12 Hours (e.g. 40 mins ago, 2 hours ago, 6 hours ago, 10 hours ago)
               </option>
               <option value="past_24_hours">
-                ⏱️ Spread over past 24 hours (e.g. 20 mins ago, 3 hrs ago, 11 hrs ago)
+                ⏱️ Past 24 Hours (e.g. 20 mins ago, 3 hours ago, 11 hours ago)
+              </option>
+              <option value="past_3_days">
+                📅 Past 3 Days (e.g. 2 hours ago, 1 day ago, 2 days ago) [Recommended]
               </option>
               <option value="past_7_days">
-                🗓️ Spread over past 7 days (e.g. 6 hrs ago, 2 days ago, 5 days ago)
+                🗓️ Past 7 Days (e.g. 6 hours ago, 2 days ago, 5 days ago)
               </option>
               <option value="past_30_days">
-                📆 Spread over past 30 days (older historical reader discussions)
+                📆 Past 30 Days (older historical reader discussions)
               </option>
               <option value="just_now">
                 ⚡ Just Now (all comments posted at current timestamp)

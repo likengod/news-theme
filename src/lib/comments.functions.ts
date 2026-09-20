@@ -24,9 +24,15 @@ export function formatCommentTimeAgo(dateInput: string | Date | undefined | null
   if (diffSec < 45) return "Just now";
   const diffMin = Math.floor(diffSec / 60);
   if (diffMin < 60) return `${diffMin} ${diffMin === 1 ? "min" : "mins"} ago`;
-  const diffHours = Math.floor(diffMin / 60);
-  if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
-  const diffDays = Math.floor(diffHours / 24);
+  const diffHours = diffMin / 60;
+  if (diffHours < 2.5) {
+    const rounded = Math.round(diffHours * 10) / 10;
+    const text = rounded % 1 === 0 ? `${rounded}` : rounded.toFixed(1);
+    return `${text} ${text === "1" ? "hour" : "hours"} ago`;
+  }
+  const wholeHours = Math.floor(diffHours);
+  if (wholeHours < 24) return `${wholeHours} ${wholeHours === 1 ? "hour" : "hours"} ago`;
+  const diffDays = Math.floor(wholeHours / 24);
   if (diffDays === 1) return "1 day ago";
   if (diffDays < 30) return `${diffDays} days ago`;
   const diffMonths = Math.floor(diffDays / 30);
