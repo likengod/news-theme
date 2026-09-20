@@ -7,7 +7,9 @@ import {
   Loader2,
   Calendar,
   ShieldCheck,
-  Sparkles,
+  Eye,
+  EyeOff,
+  Lock,
 } from "lucide-react";
 import { type SiteSettings, saveSettings } from "@/lib/site-content";
 import { Card } from "@/components/admin/settings/SettingsHelpers";
@@ -21,7 +23,10 @@ export function ActivateWebsiteTab({
   s: SiteSettings;
   update: (k: keyof SiteSettings, v: any) => void;
 }) {
-  const [inputValue, setInputValue] = useState(s.licenseKey || "");
+  // Never expose or pre-fill existing license key into input
+  const [inputValue, setInputValue] = useState("");
+  const [showKey, setShowKey] = useState(false);
+  const [isEnteringNewKey, setIsEnteringNewKey] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
 
@@ -97,8 +102,11 @@ export function ActivateWebsiteTab({
         console.warn("[Activation] Could not auto-save:", e);
       }
 
-      toast.success(`${plan} License activated successfully! (Valid for ${months} months)`);
+      setInputValue("");
+      setShowKey(false);
+      setIsEnteringNewKey(false);
       setIsActivating(false);
+      toast.success(`${plan} License activated successfully! (Valid for ${months} months)`);
       return;
     }
 
@@ -133,6 +141,9 @@ export function ActivateWebsiteTab({
         if (data.license.licenseType) update("licenseType", data.license.licenseType);
         if (data.license.role) update("licenseRole", data.license.role);
         if (data.license.expiresAt) update("licenseExpiresAt", data.license.expiresAt);
+        setInputValue("");
+        setShowKey(false);
+        setIsEnteringNewKey(false);
       } else {
         throw new Error(data.error || data.message || "Invalid license");
       }
@@ -144,9 +155,11 @@ export function ActivateWebsiteTab({
   };
 
   const handleDeactivate = async () => {
-    if (!window.confirm("Are you sure you want to change or deactivate your license? This will restrict your website features.")) return;
-    
-    setInputValue(s.licenseKey || "");
+    if (!window.confirm("Are you sure you want to deactivate your license? This will restrict premium features.")) return;
+
+    setInputValue("");
+    setShowKey(false);
+    setIsEnteringNewKey(false);
     const updatedSettings = {
       ...s,
       licenseKey: "",
@@ -175,7 +188,7 @@ export function ActivateWebsiteTab({
 
   return (
     <div className="space-y-6">
-      {isValid ? (
+      {isValid && !isEnteringNewKey ? (
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6 space-y-4">
           <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
             <div className="shrink-0 max-w-lg">
@@ -208,10 +221,20 @@ export function ActivateWebsiteTab({
                 </span>
               )}
               <button
-                onClick={handleDeactivate}
-                className="shrink-0 text-xs font-medium text-slate-400 hover:text-slate-600 underline underline-offset-2 transition"
+                onClick={() => {
+                  setInputValue("");
+                  setShowKey(false);
+                  setIsEnteringNewKey(true);
+                }}
+                className="shrink-0 text-xs font-medium text-slate-500 hover:text-slate-800 underline underline-offset-2 transition"
               >
                 Enter new key
+              </button>
+              <button
+                onClick={handleDeactivate}
+                className="shrink-0 text-xs font-medium text-red-400 hover:text-red-600 underline underline-offset-2 transition"
+              >
+                Deactivate
               </button>
             </div>
           </div>
@@ -237,7 +260,7 @@ export function ActivateWebsiteTab({
               </span>
               <div className="mt-1 flex items-center gap-1.5 text-xs font-bold text-emerald-600">
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
-                <span>Active & Verified</span>
+                <span>Active &amp; Verified</span>
               </div>
             </div>
 
@@ -252,22 +275,26 @@ export function ActivateWebsiteTab({
             </div>
 
             <div className="rounded-lg bg-slate-50 p-3 border border-slate-100">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                License Key
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                <Lock className="h-3 w-3 text-slate-400" /> License Key
               </span>
               <div
-                className="mt-1 font-mono text-xs font-bold text-slate-700 truncate"
-                title="Hidden for security"
+                className="mt-1 font-mono text-xs font-bold text-slate-500 tracking-widest select-none"
+                title="Protected and bound to this domain"
               >
-                {s.licenseKey ? `••••••••••••••••${s.licenseKey.slice(-4)}` : "Hidden"}
+                ••••••••••••••••••••••••
               </div>
             </div>
           </div>
         </div>
       ) : (
         <Card
-          title="Software Activation"
-          subtitle="Enter your license key to activate your website and unlock premium features or support."
+          title={isEnteringNewKey ? "Update Software License" : "Software Activation"}
+          subtitle={
+            isEnteringNewKey
+              ? "Enter your new license key to update your plan. For anti-theft security, keys are masked."
+              : "Enter your license key to activate your website and unlock premium features or support."
+          }
         >
           <div className="flex flex-col md:flex-row items-start gap-6">
             <div className="flex-1 space-y-4 w-full">
@@ -277,12 +304,23 @@ export function ActivateWebsiteTab({
                   <div className="relative flex-1 w-full">
                     <Key className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
-                      type="text"
+                      type={showKey ? "text" : "password"}
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
-                      placeholder="Enter your license key (e.g. XXXX-XXXX-XXXX-XXXX)"
-                      className="w-full rounded-md border border-slate-300 py-2.5 pl-9 pr-4 text-sm focus:border-slate-900 focus:outline-none"
+                      placeholder="Paste your license key (hidden for security)"
+                      autoComplete="new-password"
+                      spellCheck={false}
+                      className="w-full rounded-md border border-slate-300 py-2.5 pl-9 pr-10 text-sm font-mono tracking-wider focus:border-slate-900 focus:outline-none"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowKey(!showKey)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1"
+                      title={showKey ? "Hide key" : "Show key"}
+                      tabIndex={-1}
+                    >
+                      {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
                   <div className="flex gap-3 w-full sm:w-auto">
                     <button
@@ -293,23 +331,36 @@ export function ActivateWebsiteTab({
                       {isActivating ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                       {isActivating ? "Verifying..." : "Activate"}
                     </button>
-                    <button
-                      onClick={() => setIsPricingModalOpen(true)}
-                      className="flex-1 sm:flex-none shrink-0 flex items-center justify-center gap-2 rounded bg-[#34c759] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2eaa4c]"
-                    >
-                      <ShoppingCart className="h-4 w-4 text-white" />
-                      Buy License
-                    </button>
+                    {isEnteringNewKey ? (
+                      <button
+                        onClick={() => {
+                          setInputValue("");
+                          setShowKey(false);
+                          setIsEnteringNewKey(false);
+                        }}
+                        className="flex-1 sm:flex-none shrink-0 rounded border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setIsPricingModalOpen(true)}
+                        className="flex-1 sm:flex-none shrink-0 flex items-center justify-center gap-2 rounded bg-[#34c759] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2eaa4c]"
+                      >
+                        <ShoppingCart className="h-4 w-4 text-white" />
+                        Buy License
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 flex items-start gap-3">
-                <ShieldAlert className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 flex items-start gap-3">
+                <Lock className="h-5 w-5 text-slate-500 mt-0.5 shrink-0" />
                 <div>
-                  <h4 className="text-sm font-semibold text-amber-800">Activation Required</h4>
-                  <p className="text-xs text-amber-600 mt-1">
-                    Please provide a valid license key to activate your website.
+                  <h4 className="text-sm font-semibold text-slate-800">Anti-Theft Protection Active</h4>
+                  <p className="text-xs text-slate-600 mt-1">
+                    License keys are masked as dots and cryptographically bound to your website domain so unauthorized users or staff cannot view, copy, or reuse your license on other websites.
                   </p>
                 </div>
               </div>
