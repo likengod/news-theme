@@ -39,7 +39,7 @@ export const Route = createFileRoute("/verify-image")({
   component: VerifyImagePage,
 });
 
-export function VerifyImagePage() {
+function VerifyImagePage() {
   const s = useSiteSettings();
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>("");
