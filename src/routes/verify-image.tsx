@@ -138,29 +138,7 @@ function VerifyImagePage() {
       {/* Site Header */}
       <Header />
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 flex-1 w-full space-y-8">
-        {/* Page Title & Editorial Header */}
-        <header className="border-b border-border pb-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-0.5 text-xs font-bold tracking-wide uppercase">
-                  <ShieldCheck className="h-3.5 w-3.5" />
-                  Forensic Media Authentication
-                </span>
-                <span className="text-xs text-muted-foreground">• Dual-Layer Protection</span>
-              </div>
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-                Image Verification Scanner
-              </h1>
-              <p className="mt-2 text-sm text-muted-foreground max-w-2xl leading-relaxed">
-                Scan any suspected image, article photo, or screenshot to authenticate its digital provenance using
-                Cryptographic EXIF Signatures (Layer 1) and Forensic Pixel Watermarking DNA (Layer 2).
-              </p>
-            </div>
-          </div>
-        </header>
-
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 flex-1 w-full space-y-6">
         {/* Upload & Drop Zone */}
         {!imageSrc ? (
           <div className="space-y-6">
