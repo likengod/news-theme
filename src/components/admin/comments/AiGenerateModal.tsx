@@ -9,6 +9,8 @@ import {
   AlertCircle,
   ExternalLink,
   Loader2,
+  Clock,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -16,6 +18,7 @@ import {
   getRecentArticlesForCommentsFn,
   lookupArticleByUrlOrSlugFn,
   extractSlugFromUrl,
+  type CommentRow,
 } from "@/lib/comments.functions";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 
@@ -23,9 +26,10 @@ interface AiGenerateModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  replyTarget?: CommentRow | null;
 }
 
-export function AiGenerateModal({ isOpen, onClose, onSuccess }: AiGenerateModalProps) {
+export function AiGenerateModal({ isOpen, onClose, onSuccess, replyTarget }: AiGenerateModalProps) {
   const siteSettings = useSiteSettings();
   const planType = (siteSettings?.licenseType || "").toLowerCase();
   const isEnterprisePlus =
@@ -49,12 +53,27 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess }: AiGenerateModalP
   const [aiLanguage, setAiLanguage] = useState("random_mix");
   const [aiCustomPrompt, setAiCustomPrompt] = useState("");
   const [aiAllowSlang, setAiAllowSlang] = useState(true);
+  const [aiTimeSpread, setAiTimeSpread] = useState("past_3_days");
+  const [aiIncludeReplies, setAiIncludeReplies] = useState(true);
+  const [targetReplyComment, setTargetReplyComment] = useState<CommentRow | null>(replyTarget || null);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [recentArticles, setRecentArticles] = useState<{ id: number; title: string; slug: string }[]>([]);
 
   const generateAiComments = useServerFn(generateDummyCommentsFn);
   const getRecentArticlesFn = useServerFn(getRecentArticlesForCommentsFn);
   const lookupArticleFn = useServerFn(lookupArticleByUrlOrSlugFn);
+
+  // Sync replyTarget when modal opens
+  useEffect(() => {
+    if (isOpen && replyTarget) {
+      setTargetReplyComment(replyTarget);
+      setAiArticleInput(replyTarget.articleSlug);
+      handleFetchArticle(replyTarget.articleSlug);
+      setAiCount(2); // default 2 replies when targeting a comment
+    } else if (isOpen && !replyTarget) {
+      setTargetReplyComment(null);
+    }
+  }, [isOpen, replyTarget]);
 
   // Auto fetch article by URL or slug
   const handleFetchArticle = async (rawInput: string) => {
@@ -124,6 +143,9 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess }: AiGenerateModalP
     setAiCount(5);
     setAiPositivity(80);
     setAiLanguage("random_mix");
+    setAiTimeSpread("past_3_days");
+    setAiIncludeReplies(true);
+    setTargetReplyComment(null);
   };
 
   const handleGenerateAi = async (e: React.FormEvent) => {
@@ -148,9 +170,14 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess }: AiGenerateModalP
           language: aiLanguage,
           customPrompt: aiCustomPrompt,
           allowSlang: aiAllowSlang,
+          timeSpread: aiTimeSpread,
+          includeReplies: !targetReplyComment && aiIncludeReplies,
+          replyToCommentId: targetReplyComment?.id ?? null,
         },
       });
-      toast.success(`Successfully generated ${res.count} realistic comments!`);
+      toast.success(
+        `Successfully generated ${res.count} realistic ${targetReplyComment ? "replies" : "comments"}!`,
+      );
       resetForm();
       onClose();
       onSuccess();
@@ -169,10 +196,13 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess }: AiGenerateModalP
         <div className="flex items-center justify-between border-b border-slate-100 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 px-6 py-4">
           <div>
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-blue-600" /> Generate AI Comments
+              <Sparkles className="h-5 w-5 text-blue-600" />
+              {targetReplyComment
+                ? `Generate AI Reply to Comment #${targetReplyComment.id}`
+                : "Generate AI Comments"}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Simulate realistic Tripura reader reactions with Bengali, Banglish & Indian English
+              Simulate realistic Tripura reader reactions with Bengali, Banglish &amp; Indian English
             </p>
           </div>
           <button
@@ -184,6 +214,36 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess }: AiGenerateModalP
         </div>
 
         <form onSubmit={handleGenerateAi} className="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
+          {/* Direct Reply Target Banner (if replying to a specific comment) */}
+          {targetReplyComment && (
+            <div className="rounded-xl border border-sky-200 bg-sky-50/80 p-3 flex items-start justify-between gap-3 animate-in fade-in duration-150">
+              <div className="flex items-start gap-2.5">
+                <MessageSquare className="h-4 w-4 text-sky-600 mt-0.5 shrink-0" />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-sky-800 bg-sky-100 px-2 py-0.5 rounded-full">
+                      Replying to #{targetReplyComment.id}
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">
+                      {targetReplyComment.user || "Anonymous"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-700 mt-1 line-clamp-2 italic bg-white/80 p-1.5 rounded border border-sky-100">
+                    "{targetReplyComment.body}"
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTargetReplyComment(null)}
+                className="text-xs text-slate-400 hover:text-slate-600 p-1 rounded transition shrink-0"
+                title="Cancel reply mode and generate top-level comments"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+
           {/* Target Article URL / Slug & Auto Fetch */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -274,7 +334,7 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess }: AiGenerateModalP
             )}
 
             {/* Optional recent articles selector */}
-            {recentArticles.length > 0 && (
+            {recentArticles.length > 0 && !targetReplyComment && (
               <div className="pt-1">
                 <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
                   <span>Or pick from recent articles:</span>
@@ -310,10 +370,10 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess }: AiGenerateModalP
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label htmlFor="ai-comment-count" className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                Number of Comments
+                Number of {targetReplyComment ? "Replies" : "Comments"}
               </label>
               <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                {aiCount} Comments
+                {aiCount} {targetReplyComment ? "Replies" : "Comments"}
               </span>
             </div>
             <input
@@ -325,14 +385,82 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess }: AiGenerateModalP
               value={aiCount}
               onChange={(e) => setAiCount(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Enter number of comments (1 - 50)"
+              placeholder="Enter count (1 - 50)"
             />
           </div>
+
+          {/* Comment Timing / Age Spread */}
+          <div>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 text-blue-600" />
+                Comment Timing / Age Spread
+              </span>
+              <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-full">
+                Realistic Timestamps
+              </span>
+            </label>
+            <select
+              value={aiTimeSpread}
+              onChange={(e) => setAiTimeSpread(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white font-medium text-slate-800"
+            >
+              <option value="past_3_days">
+                📅 Spread over past 3 days (e.g. 2 hrs ago, 1 day ago, 2 days ago) [Recommended]
+              </option>
+              <option value="past_24_hours">
+                ⏱️ Spread over past 24 hours (e.g. 20 mins ago, 3 hrs ago, 11 hrs ago)
+              </option>
+              <option value="past_7_days">
+                🗓️ Spread over past 7 days (e.g. 6 hrs ago, 2 days ago, 5 days ago)
+              </option>
+              <option value="past_30_days">
+                📆 Spread over past 30 days (older historical reader discussions)
+              </option>
+              <option value="just_now">
+                ⚡ Just Now (all comments posted at current timestamp)
+              </option>
+            </select>
+            <p className="mt-1 text-[11px] text-slate-500">
+              Staggers timestamps naturally across the past so comments show as "1 day ago", "8 hours ago", or "20 mins ago" instead of all at the exact same minute.
+            </p>
+          </div>
+
+          {/* Conversational Replies Toggle (When generating multiple comments) */}
+          {!targetReplyComment && aiCount >= 2 && (
+            <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-3.5 flex items-start justify-between gap-3">
+              <div>
+                <label
+                  onClick={() => setAiIncludeReplies(!aiIncludeReplies)}
+                  className="text-xs font-bold text-indigo-950 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <MessageSquare className="h-4 w-4 text-indigo-600 shrink-0" />
+                  Include Conversational Replies (Threaded Comments)
+                </label>
+                <p className="text-[11px] text-indigo-800 mt-0.5 leading-relaxed">
+                  AI will naturally generate realistic nested replies where readers debate, agree, or follow up with each other under the article with staggered reply times.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAiIncludeReplies(!aiIncludeReplies)}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition mt-0.5 ${
+                  aiIncludeReplies ? "bg-indigo-600" : "bg-slate-300"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${
+                    aiIncludeReplies ? "translate-x-4" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+          )}
 
           {/* Language & Dialect Mode */}
           <div>
             <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Language & Dialect Mode
+              Language &amp; Dialect Mode
             </label>
             <select
               value={aiLanguage}
@@ -358,7 +486,7 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess }: AiGenerateModalP
             <p className="mt-1 text-[11px] text-slate-500">
               {aiLanguage === "random_mix"
                 ? "Randomly distributes comments: one in Bengali script, one in Banglish, one in Indian English, and one code-mixed for total realism."
-                : "Generates all comments in this specific linguistic style."}
+                : "Generates comments in this specific linguistic style."}
             </p>
           </div>
 
@@ -420,7 +548,7 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess }: AiGenerateModalP
                 className="text-xs font-bold text-amber-950 flex items-center gap-1.5 cursor-pointer"
               >
                 <Flame className="h-4 w-4 text-amber-600 shrink-0" />
-                Tripura Street Slang & Sharp Dialect (আঞ্চলিক স্ল্যাং ও ক্ষোভপূর্ণ ভাষা)
+                Tripura Street Slang &amp; Sharp Dialect (আঞ্চলিক স্ল্যাং ও ক্ষোভপূর্ণ ভাষা)
               </label>
               <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
                 Allows authentic local expressions in critical comments:{" "}
@@ -479,11 +607,11 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess }: AiGenerateModalP
               {aiGenerating ? (
                 <>
                   <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Generating {aiCount} Comments...
+                  Generating {aiCount} {targetReplyComment ? "Replies" : "Comments"}...
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4" /> Generate {aiCount} Comments
+                  <Sparkles className="h-4 w-4" /> Generate {aiCount} {targetReplyComment ? "Replies" : "Comments"}
                 </>
               )}
             </button>

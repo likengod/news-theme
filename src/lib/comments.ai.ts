@@ -3,6 +3,53 @@ import { requireAdmin } from "@/lib/auth-middleware";
 import { query } from "./db.server";
 import { getSiteSettingsServer } from "./site-content";
 
+function toMysqlDatetime(date: Date): string {
+  const pad = (n: number) => (n < 10 ? "0" + n : n);
+  const y = date.getFullYear();
+  const m = pad(date.getMonth() + 1);
+  const d = pad(date.getDate());
+  const h = pad(date.getHours());
+  const min = pad(date.getMinutes());
+  const s = pad(date.getSeconds());
+  return `${y}-${m}-${d} ${h}:${min}:${s}`;
+}
+
+function generateStaggeredDates(
+  count: number,
+  timeSpread: string = "past_3_days",
+  baseStartTime?: Date,
+): Date[] {
+  const now = Date.now();
+  if (timeSpread === "just_now") {
+    return Array.from({ length: count }, () => new Date());
+  }
+
+  let maxHours = 72; // default 3 days
+  if (timeSpread === "past_24_hours") maxHours = 24;
+  else if (timeSpread === "past_3_days") maxHours = 72;
+  else if (timeSpread === "past_7_days") maxHours = 168;
+  else if (timeSpread === "past_30_days") maxHours = 720;
+
+  const minAgeMs = 3 * 60 * 1000; // at least 3 minutes ago
+  const startMs = baseStartTime
+    ? baseStartTime.getTime() + 5 * 60 * 1000
+    : now - maxHours * 60 * 60 * 1000;
+  const effectiveStart = Math.min(startMs, now - minAgeMs);
+  const availableSpan = Math.max(10 * 60 * 1000, now - minAgeMs - effectiveStart);
+
+  const timestamps: number[] = [];
+  for (let i = 0; i < count; i++) {
+    const stepRatio = count <= 1 ? 0.5 : i / (count - 1);
+    const jitter = (Math.random() - 0.5) * (availableSpan / Math.max(1, count * 1.5));
+    const offset = availableSpan * stepRatio + jitter;
+    const t = Math.min(now - minAgeMs, Math.max(effectiveStart, effectiveStart + offset));
+    timestamps.push(t);
+  }
+
+  timestamps.sort((a, b) => a - b);
+  return timestamps.map((t) => new Date(t));
+}
+
 export const generateDummyCommentsFn = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .validator(
@@ -14,14 +61,30 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
       language: string;
       customPrompt?: string;
       allowSlang?: boolean;
+      timeSpread?: string; // "past_24_hours" | "past_3_days" | "past_7_days" | "past_30_days" | "just_now"
+      includeReplies?: boolean;
+      replyToCommentId?: number | null;
     }) => d,
   )
   .handler(async ({ data }) => {
-    const { publicUserIds, articleSlug, count, positivity, language, customPrompt, allowSlang } =
-      data;
+    const {
+      publicUserIds,
+      articleSlug,
+      count,
+      positivity,
+      language,
+      customPrompt,
+      allowSlang,
+      timeSpread = "past_3_days",
+      includeReplies = false,
+      replyToCommentId = null,
+    } = data;
 
     // 1. Validate / retrieve Profiles
-    const rawIds = (publicUserIds || "").split(",").map((s) => s.trim()).filter(Boolean);
+    const rawIds = (publicUserIds || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
     let profiles: any[] = [];
     if (rawIds.length > 0) {
       const placeholders = rawIds.map(() => "?").join(",");
@@ -34,7 +97,7 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
     // If no public IDs provided or not found, automatically pick random existing users from DB
     if (profiles.length === 0) {
       profiles = await query(
-        "SELECT public_user_id, display_name, email FROM profiles ORDER BY RAND() LIMIT 25",
+        "SELECT public_user_id, display_name, email FROM profiles ORDER BY RAND() LIMIT 30",
       );
     }
 
@@ -45,6 +108,8 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
         { public_user_id: "1000000003", display_name: "Priyanka Saha", email: "user3@example.com" },
         { public_user_id: "1000000004", display_name: "Animesh Bhowmik", email: "user4@example.com" },
         { public_user_id: "1000000005", display_name: "Raju Sarkar", email: "user5@example.com" },
+        { public_user_id: "1000000006", display_name: "Tanmoy Das", email: "user6@example.com" },
+        { public_user_id: "1000000007", display_name: "Mousumi Chakraborty", email: "user7@example.com" },
       ];
     }
 
@@ -63,7 +128,19 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
     }
     const article = articles[0];
 
-    // 3. Generate Comments via AI
+    // Check if replying to an existing comment
+    let parentComment: { id: number; user_name: string; body: string; created_at: Date } | null = null;
+    if (replyToCommentId) {
+      const pRows = await query(
+        "SELECT id, user_name, body, created_at FROM comments WHERE id = ?",
+        [replyToCommentId],
+      );
+      if (pRows.length > 0) {
+        parentComment = pRows[0];
+      }
+    }
+
+    // 3. Check Settings & License
     const settings = await getSiteSettingsServer();
     const planType = (settings.licenseType || "").toLowerCase();
     const isEnterprisePlus =
@@ -86,7 +163,7 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
     if (language === "random_mix" || language.toLowerCase().includes("mix")) {
       languageInstruction = `
 - Language & Linguistic Variety (MANDATORY VARIATION):
-  Randomly and naturally vary the languages and dialects across the ${count} comments so they read 100% genuine, like real readers in Tripura / Northeast India:
+  Randomly and naturally vary the languages and dialects across comments so they read 100% genuine, like real readers in Tripura / Northeast India:
   * Style 1 (Tripura Spoken Bengali in Bengali script): Natural spoken Bengali as used in Agartala and across Tripura (e.g., "দারুণ খবর!", "কাজটা ঠিকমতো হলে সাধারণ মানুষের খুব উপকার হবে।", "প্রশাসনের নজর দেওয়া উচিত যাতে দ্রুত শেষ হয়।").
   * Style 2 (Banglish - Bengali in Roman English alphabet): Real casual Banglish (e.g., "Khub bhalo udyog, kintu somoy moto shesh kora dorkar bhai", "Sotti kotha bolte ki, ground reality r ekta checking dorkar", "Agartala te aro emon step dorkar").
   * Style 3 (Local Indian English): Natural Indian news reader reaction (e.g., "Good step by authorities, hope it gets completed on ground.", "Very much needed for our state.", "Strict action should be taken against negligent staff.").
@@ -125,7 +202,54 @@ export const generateDummyCommentsFn = createServerFn({ method: "POST" })
   Incorporate these specific focus words, themes, questions, or sentiments naturally into the comments across different reader perspectives.`
         : "";
 
-    const prompt = `You are generating realistic reader comments for a news portal in Tripura (Northeast India) on an article titled "${article.title}".
+    // Build the AI Prompt based on mode (Direct reply vs Threaded bulk vs Top-level)
+    let prompt = "";
+    const isThreadedBulk = !parentComment && includeReplies && count >= 2;
+
+    if (parentComment) {
+      prompt = `You are generating ${count} realistic, completely human-sounding reader replies on a Tripura news portal responding specifically to this comment by "${parentComment.user_name}":
+"${parentComment.body}"
+under the news article "${article.title}".
+
+Replies should sound like distinct real readers directly responding, debating, agreeing, asking follow-ups, or chiming in.
+Rules:
+${languageInstruction}
+${slangInstruction}
+${customPromptInstruction}
+- Length: 1 to 2 sentences max.
+- Realism: Natural colloquial flow, direct tone, occasional emoji.
+
+Format Requirement:
+Return ONLY a valid JSON array of strings, e.g. ["Reply 1", "Reply 2"]. No markdown fences, no backticks, no explanatory text.`;
+    } else if (isThreadedBulk) {
+      prompt = `You are generating ${count} realistic reader comments for a news portal in Tripura (Northeast India) on an article titled "${article.title}".
+Create an authentic, lively reader comment section with natural conversational replies between users:
+- The majority of comments should be original reactions to the news article.
+- Approximately 25% to 40% of comments should be natural, conversational replies to earlier comments (agreeing, debating, asking a question, or following up on what an earlier commenter said).
+
+Rules:
+${languageInstruction}
+${slangInstruction}
+- Tone / Sentiment Distribution:
+  Approximately ${posRatio}% positive/supportive, and ${negRatio}% critical/questioning.
+- Realism: Brief, emotional, direct, occasional emojis (👏, 👍, 🙏, 💔, 😡). 1 to 3 sentences max.
+${customPromptInstruction}
+
+Format Requirement:
+Return ONLY a valid JSON array of objects with fields:
+- "text": The comment body string
+- "replyToIndex": null if this is a top-level comment, OR the 0-based integer index of an earlier comment in this array that it is replying to (MUST be strictly less than the current item's index, e.g. index 1 can reply to 0; index 3 can reply to 0 or 2).
+
+Example format:
+[
+  { "text": "Khub bhalo udyog, sorkar ke dhonnobad.", "replyToIndex": null },
+  { "text": "Ekdom shothik kotha bolechhen dada, shomoy moto complete hole bhalo.", "replyToIndex": 0 },
+  { "text": "Ground reality check kora dorkar.", "replyToIndex": null },
+  { "text": "Right, AMC er negligence er karonei delay hoy.", "replyToIndex": 2 }
+]
+No markdown fences, no backticks, no explanatory text.`;
+    } else {
+      prompt = `You are generating realistic reader comments for a news portal in Tripura (Northeast India) on an article titled "${article.title}".
 Generate exactly ${count} distinct, completely human-sounding reader comments.
 
 Rules:
@@ -136,14 +260,15 @@ ${slangInstruction}
   Approximately ${negRatio}% should be skeptical, questioning, raising concerns, or critical.
 - Realism:
   * Comments must sound like REAL social media / news portal users: brief, direct, emotional, sometimes using emojis (👏, 👍, 🙏, 💔, 😡).
-  * Length: 1 to 3 sentences max (some short like "Ekdom thik kotha!", some 2 sentences with genuine thoughts).
-  * NEVER sound like an AI assistant, essay, or corporate spokesperson. Avoid robotic lines like "I agree with the author's analysis".
+  * Length: 1 to 3 sentences max.
+  * NEVER sound like an AI assistant or essay.
 ${customPromptInstruction}
 
 Format Requirement:
 Return ONLY a valid JSON array of strings, e.g. ["Comment 1", "Comment 2"]. No markdown fences, no backticks, no explanatory text.`;
+    }
 
-    let generatedComments: string[] = [];
+    let rawParsed: any = null;
     try {
       const payload = {
         contents: [{ parts: [{ text: prompt }] }],
@@ -194,33 +319,94 @@ Return ONLY a valid JSON array of strings, e.g. ["Comment 1", "Comment 2"]. No m
 
       const text = resData.candidates?.[0]?.content?.parts?.[0]?.text || "";
       const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      generatedComments = JSON.parse(cleaned);
-      if (!Array.isArray(generatedComments)) {
+      rawParsed = JSON.parse(cleaned);
+      if (!Array.isArray(rawParsed)) {
         throw new Error("Invalid format returned by AI");
       }
     } catch (err: any) {
       throw new Error("AI Generation failed: " + err.message);
     }
 
-    // 4. Insert into database
-    let inserted = 0;
-    for (const commentBody of generatedComments) {
-      if (typeof commentBody !== "string" || !commentBody.trim()) continue;
+    // Normalize output format to: Array of { text: string; replyToIndex: number | null }
+    const normalizedComments: Array<{ text: string; replyToIndex: number | null }> = [];
+    for (let i = 0; i < rawParsed.length; i++) {
+      const item = rawParsed[i];
+      if (typeof item === "string") {
+        normalizedComments.push({ text: item, replyToIndex: null });
+      } else if (item && typeof item.text === "string") {
+        const rIdx =
+          typeof item.replyToIndex === "number" && item.replyToIndex >= 0 && item.replyToIndex < i
+            ? item.replyToIndex
+            : null;
+        normalizedComments.push({ text: item.text, replyToIndex: rIdx });
+      }
+    }
 
-      // Pick a random profile from the pool
+    if (normalizedComments.length === 0) {
+      throw new Error("No comments were generated.");
+    }
+
+    // 4. Generate Staggered Past Timestamps ("1 day ago", "8 hours ago", etc.)
+    const baseDate = parentComment ? new Date(parentComment.created_at) : undefined;
+    const staggeredDates = generateStaggeredDates(
+      normalizedComments.length,
+      timeSpread,
+      baseDate,
+    );
+
+    // 5. Insert into database with staggered timestamps & parent_id linking
+    let inserted = 0;
+    const insertedIdMap: Record<number, number> = {};
+
+    for (let i = 0; i < normalizedComments.length; i++) {
+      const item = normalizedComments[i];
+      if (!item.text || !item.text.trim()) continue;
+
+      // Pick a random profile from the pool (avoiding repeating the exact same profile for immediate reply)
       const profile = profiles[Math.floor(Math.random() * profiles.length)];
 
-      await query(
-        "INSERT INTO comments (article_slug, article_title, user_name, user_email, body, status) VALUES (?, ?, ?, ?, ?, ?)",
+      // Determine parent_id:
+      // A) Direct reply to an existing comment: parentComment.id
+      // B) Conversational threaded reply to an earlier generated comment: insertedIdMap[item.replyToIndex]
+      // C) Top-level comment: null
+      let targetParentId: number | null = null;
+      if (parentComment) {
+        targetParentId = parentComment.id;
+      } else if (item.replyToIndex !== null && insertedIdMap[item.replyToIndex]) {
+        targetParentId = insertedIdMap[item.replyToIndex];
+      }
+
+      // Determine creation date:
+      let commentDate = staggeredDates[i] || new Date();
+      // If it's a reply to an earlier generated comment, ensure timestamp is after the parent comment
+      if (targetParentId && item.replyToIndex !== null && staggeredDates[item.replyToIndex]) {
+        const parentDate = staggeredDates[item.replyToIndex];
+        if (commentDate.getTime() <= parentDate.getTime()) {
+          commentDate = new Date(parentDate.getTime() + 15 * 60 * 1000 + Math.random() * 45 * 60 * 1000);
+        }
+      }
+
+      const mysqlDateStr = toMysqlDatetime(commentDate);
+
+      const insertRes: any = await query(
+        `INSERT INTO comments 
+         (article_slug, article_title, user_name, user_email, body, status, created_at, parent_id) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           finalSlug,
           article.title,
           profile.display_name || "Tripura Reader",
           profile.email || "reader@todaytripura.com",
-          commentBody.substring(0, 1000).trim(),
+          item.text.substring(0, 1000).trim(),
           "Approved",
+          mysqlDateStr,
+          targetParentId,
         ],
       );
+
+      if (insertRes?.insertId) {
+        insertedIdMap[i] = insertRes.insertId;
+      }
       inserted++;
     }
 

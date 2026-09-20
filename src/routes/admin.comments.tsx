@@ -48,6 +48,7 @@ function CommentsPage() {
   const [total, setTotal] = useState(0);
 
   const [showAiModal, setShowAiModal] = useState(false);
+  const [replyTargetComment, setReplyTargetComment] = useState<CommentRow | null>(null);
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
 
   const loadComments = async () => {
@@ -119,7 +120,10 @@ function CommentsPage() {
           />
           {isEnterprisePlus && (
             <button
-              onClick={() => setShowAiModal(true)}
+              onClick={() => {
+                setReplyTargetComment(null);
+                setShowAiModal(true);
+              }}
               title="AI Generate Comments"
               aria-label="AI Generate Comments"
               className="h-9 w-9 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition shadow-xs shrink-0"
@@ -159,7 +163,19 @@ function CommentsPage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-900 border-t-transparent"></div>
         </div>
       ) : (
-        <CommentTable comments={rows} onSetStatus={setStatus} onDelete={remove} />
+        <CommentTable
+          comments={rows}
+          onSetStatus={setStatus}
+          onDelete={remove}
+          onAiReply={
+            isEnterprisePlus
+              ? (c) => {
+                  setReplyTargetComment(c);
+                  setShowAiModal(true);
+                }
+              : undefined
+          }
+        />
       )}
 
       {/* Server Pagination */}
@@ -192,7 +208,11 @@ function CommentsPage() {
       {isEnterprisePlus && (
         <AiGenerateModal
           isOpen={showAiModal}
-          onClose={() => setShowAiModal(false)}
+          onClose={() => {
+            setShowAiModal(false);
+            setReplyTargetComment(null);
+          }}
+          replyTarget={replyTargetComment}
           onSuccess={loadComments}
         />
       )}

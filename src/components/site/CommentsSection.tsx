@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { MessageSquare, Loader2, Reply, ChevronDown, Feather } from "lucide-react";
 import { toast } from "sonner";
-import { getArticleComments, postArticleComment } from "@/lib/comments.functions";
+import { getArticleComments, postArticleComment, formatCommentTimeAgo } from "@/lib/comments.functions";
 import { authClient } from "@/lib/auth-client";
 import { trackComment } from "@/lib/user-actions-tracker";
 
@@ -12,6 +12,7 @@ type Comment = {
   email: string;
   body: string;
   date: string;
+  createdAt?: string;
   parentId: number | null;
 };
 
@@ -104,6 +105,7 @@ export function CommentsSection({
         email: r.email,
         body: r.body,
         date: r.date,
+        createdAt: r.createdAt,
         parentId: r.parentId ?? null,
       })));
     } catch (err: any) {
@@ -301,9 +303,16 @@ export function CommentsSection({
             const isReplyingThis = replyingTo?.id === c.id;
             return (
               <li key={c.id} className="py-2.5 first:pt-2 last:pb-0">
-                {/* Author Info */}
-                <div className="text-xs font-semibold text-[#141414] tracking-tight">
-                  {c.user}
+                {/* Author Info & Relative Time */}
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="font-semibold text-[#141414] tracking-tight">{c.user}</span>
+                  <span className="text-[10px] text-muted-foreground/50">&bull;</span>
+                  <span
+                    className="text-[11px] text-muted-foreground font-normal"
+                    title={c.createdAt ? new Date(c.createdAt).toLocaleString() : c.date}
+                  >
+                    {formatCommentTimeAgo(c.createdAt || c.date)}
+                  </span>
                 </div>
 
                 {/* Comment Body - reduced text size with comfortable reading */}
@@ -331,11 +340,18 @@ export function CommentsSection({
                   <ul className="mt-2 ml-3 space-y-1.5 border-l-2 border-slate-200 pl-3">
                     {replies.map((r) => (
                       <li key={r.id} className="bg-slate-50/70 border border-slate-100 rounded-md px-2.5 py-1.5">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           <span className="text-[11px] font-bold text-[#141414]">{r.user}</span>
                           {r.user.toLowerCase() === "admin" && (
                             <span className="bg-slate-900 text-white text-[9px] font-bold uppercase px-1 py-0.2 rounded tracking-wide">Staff</span>
                           )}
+                          <span className="text-[10px] text-muted-foreground/50">&bull;</span>
+                          <span
+                            className="text-[10px] text-muted-foreground font-normal"
+                            title={r.createdAt ? new Date(r.createdAt).toLocaleString() : r.date}
+                          >
+                            {formatCommentTimeAgo(r.createdAt || r.date)}
+                          </span>
                         </div>
                         <p className="mt-0.5 text-xs text-[#2b2b2b] leading-relaxed whitespace-pre-line">{r.body}</p>
                       </li>

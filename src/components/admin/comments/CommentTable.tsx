@@ -1,10 +1,11 @@
-import { Check, Trash2, X } from "lucide-react";
-import type { CommentRow } from "@/lib/comments.functions";
+import { Check, Trash2, X, Sparkles } from "lucide-react";
+import { type CommentRow, formatCommentTimeAgo } from "@/lib/comments.functions";
 
 type Props = {
   comments: CommentRow[];
   onSetStatus: (id: number, status: "Approved" | "Pending" | "Spam") => void;
   onDelete: (id: number) => void;
+  onAiReply?: (comment: CommentRow) => void;
 };
 
 const badge: Record<CommentRow["status"], string> = {
@@ -13,13 +14,13 @@ const badge: Record<CommentRow["status"], string> = {
   Spam: "bg-red-50 text-red-700 border-red-200",
 };
 
-export function CommentTable({ comments, onSetStatus, onDelete }: Props) {
+export function CommentTable({ comments, onSetStatus, onDelete, onAiReply }: Props) {
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
       <table className="w-full min-w-[650px] text-left text-sm">
         <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
           <tr>
-            <th className="px-4 sm:px-5 py-3">User</th>
+            <th className="px-4 sm:px-5 py-3">User &amp; Time</th>
             <th className="px-4 sm:px-5 py-3">Comment Body</th>
             <th className="px-4 sm:px-5 py-3">Article</th>
             <th className="px-4 sm:px-5 py-3">Status</th>
@@ -32,8 +33,21 @@ export function CommentTable({ comments, onSetStatus, onDelete }: Props) {
               <td className="px-5 py-3">
                 <p className="font-semibold text-slate-900">{c.user || "Anonymous"}</p>
                 <p className="text-xs text-slate-500">{c.email}</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span
+                    className="text-[11px] font-medium text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded"
+                    title={c.createdAt ? new Date(c.createdAt).toLocaleString() : c.date}
+                  >
+                    {formatCommentTimeAgo(c.createdAt || c.date)}
+                  </span>
+                  {c.parentId && (
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      ↳ reply to #{c.parentId}
+                    </span>
+                  )}
+                </div>
               </td>
-              <td className="px-5 py-3 text-xs text-slate-700 max-w-sm">{c.body}</td>
+              <td className="px-5 py-3 text-xs text-slate-700 max-w-sm whitespace-pre-line">{c.body}</td>
               <td className="px-5 py-3 text-xs text-slate-600 font-medium max-w-xs truncate">
                 <a
                   href={`/news/${c.articleSlug}`}
@@ -52,7 +66,17 @@ export function CommentTable({ comments, onSetStatus, onDelete }: Props) {
                 </span>
               </td>
               <td className="px-5 py-3 text-right">
-                <div className="inline-flex gap-1">
+                <div className="inline-flex items-center gap-1.5">
+                  {onAiReply && (
+                    <button
+                      onClick={() => onAiReply(c)}
+                      title="Generate AI Reply to this comment"
+                      className="rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 flex items-center gap-1 transition"
+                    >
+                      <Sparkles className="h-3 w-3 text-blue-600" />
+                      <span>AI Reply</span>
+                    </button>
+                  )}
                   {c.status !== "Approved" && (
                     <button
                       onClick={() => onSetStatus(c.id, "Approved")}

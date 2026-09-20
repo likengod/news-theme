@@ -11,7 +11,30 @@ export type CommentRow = {
   body: string;
   status: "Pending" | "Approved" | "Spam";
   date: string;
+  createdAt?: string;
+  parentId?: number | null;
 };
+
+export function formatCommentTimeAgo(dateInput: string | Date | undefined | null): string {
+  if (!dateInput) return "";
+  const now = Date.now();
+  const past = new Date(dateInput).getTime();
+  if (isNaN(past)) return "";
+  const diffSec = Math.max(0, Math.floor((now - past) / 1000));
+  if (diffSec < 45) return "Just now";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} ${diffMin === 1 ? "min" : "mins"} ago`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return "1 day ago";
+  if (diffDays < 30) return `${diffDays} days ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths === 1) return "1 month ago";
+  if (diffMonths < 12) return `${diffMonths} months ago`;
+  const diffYears = Math.floor(diffDays / 365);
+  return `${diffYears} ${diffYears === 1 ? "year" : "years"} ago`;
+}
 
 // Admin only: Get comments with server-side pagination & status filtering
 export const getAdminComments = createServerFn({ method: "GET" })
@@ -40,7 +63,7 @@ export const getAdminComments = createServerFn({ method: "GET" })
     const [countRes, rows] = await Promise.all([
       query(`SELECT COUNT(*) AS total FROM comments${filterSql}`, params),
       query(
-        `SELECT id, article_slug, article_title, user_name, user_email, body, status, created_at
+        `SELECT id, article_slug, article_title, user_name, user_email, body, status, created_at, parent_id
          FROM comments${filterSql} 
          ORDER BY created_at DESC, id DESC 
          LIMIT ? OFFSET ?`,
@@ -60,6 +83,8 @@ export const getAdminComments = createServerFn({ method: "GET" })
       body: r.body,
       status: r.status,
       date: new Date(r.created_at).toISOString().slice(0, 10),
+      createdAt: r.created_at ? new Date(r.created_at).toISOString() : undefined,
+      parentId: r.parent_id ?? null,
     }));
 
     return { rows: mappedRows, total, totalPages };
@@ -157,6 +182,7 @@ export const getArticleComments = createServerFn({ method: "GET" })
       status: r.status,
       parentId: r.parent_id ?? null,
       date: new Date(r.created_at).toLocaleDateString(),
+      createdAt: r.created_at ? new Date(r.created_at).toISOString() : undefined,
     }));
   });
 
