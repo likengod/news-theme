@@ -41,10 +41,11 @@ export function AdminTopBar({
         {hasUpdate && !pathname?.startsWith("/admin/updates") && (
           <Link
             to="/admin/updates"
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-700 transition"
+            className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-red-600 px-2 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold text-white hover:bg-red-700 transition shrink-0 whitespace-nowrap"
           >
-            <Rocket className="h-3.5 w-3.5 animate-pulse" />
-            <span>Update Available ({latestVersion || "New"})</span>
+            <Rocket className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-pulse shrink-0" />
+            <span className="hidden sm:inline">Update Available ({latestVersion || "New"})</span>
+            <span className="sm:hidden">Update ({latestVersion || "New"})</span>
           </Link>
         )}
 

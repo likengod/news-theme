@@ -27,29 +27,29 @@ export function AdminUpdatePrompt({
           <span>Update Required</span>
         </div>
 
-        <h1 className="text-3xl font-extrabold text-slate-900 sm:text-4xl tracking-tight">
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
           Dear <span className="text-red-600">{firstName}</span>,
         </h1>
 
-        <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed">
+        <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-600 leading-relaxed">
           Without update you can't use the website. A new version is available, please
           update website.
         </p>
 
-        <div className="mt-6 flex items-center justify-center gap-3 text-sm font-semibold text-slate-500">
-          <span className="font-mono text-slate-700 bg-slate-200/70 px-3 py-1 rounded-full text-xs">
+        <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm font-semibold text-slate-500">
+          <span className="font-mono text-slate-700 bg-slate-200/70 px-2.5 py-1 rounded-full text-[11px] sm:text-xs">
             Current: {currentVersion || "v1.0.55"}
           </span>
           <span>➔</span>
-          <span className="font-mono text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full text-xs font-bold">
+          <span className="font-mono text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold">
             Available: {latestVersion || "Latest"}
           </span>
         </div>
 
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5">
+        <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             to="/admin/updates"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl bg-red-600 px-7 py-3.5 text-sm font-bold text-white shadow-md hover:bg-red-700 transition active:scale-[0.98]"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 sm:px-7 sm:py-3.5 text-xs sm:text-sm font-bold text-white shadow-md hover:bg-red-700 transition active:scale-[0.98]"
           >
             <Rocket className="h-4 w-4" />
             Update Website Now
@@ -57,7 +57,7 @@ export function AdminUpdatePrompt({
 
           <button
             onClick={onDismiss}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-[0.98] shadow-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 sm:px-6 sm:py-3.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-[0.98] shadow-xs"
           >
             Continue to Admin Panel
           </button>

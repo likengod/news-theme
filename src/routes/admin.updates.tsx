@@ -187,46 +187,47 @@ function UpdatesPage() {
     gitStatus?.behind && gitStatus.behind > 0 ? gitStatus.behind : hasNewVersion ? 1 : 0;
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-6 sm:space-y-8 pb-12">
       {/* Top Header Label */}
-      <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
-        <div className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-widest text-slate-500">
-          <Layers className="h-4 w-4 text-slate-600" />
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 pb-3 sm:pb-4">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600">
+          <Layers className="h-4 w-4 text-slate-500 shrink-0" />
           <span>System Core Update</span>
         </div>
 
-          <div className="flex items-center gap-3">
-            {updatesAvailable ? (
-              <button
-                onClick={handlePullAndUpdate}
-                disabled={pulling || building}
-                className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700 active:bg-red-800 disabled:opacity-60 cursor-pointer"
-              >
-                {pulling ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-white" />
-                ) : (
-                  <Zap className="h-4 w-4 fill-white text-white" />
-                )}
-                <span>
-                  {pulling ? "Updating System..." : `Update to ${latestVersion}`}
-                </span>
-              </button>
-            ) : (
-              <div className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-500 border border-slate-200">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                <span>Updated ({currentVersion})</span>
-              </div>
-            )}
-
-
+        <div className="flex items-center gap-2 shrink-0">
+          {updatesAvailable ? (
             <button
-              onClick={refresh}
-              disabled={loading}
-              className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white p-2 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+              onClick={handlePullAndUpdate}
+              disabled={pulling || building}
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg sm:rounded-xl bg-red-600 px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-bold text-white shadow-xs transition hover:bg-red-700 active:bg-red-800 disabled:opacity-60 cursor-pointer whitespace-nowrap"
             >
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+              {pulling ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-white shrink-0" />
+              ) : (
+                <Zap className="h-3.5 w-3.5 fill-white text-white shrink-0" />
+              )}
+              <span>
+                {pulling ? "Updating System..." : `Update to ${latestVersion}`}
+              </span>
             </button>
-          </div>
+          ) : (
+            <div className="inline-flex items-center gap-1.5 rounded-lg sm:rounded-xl bg-slate-100 px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-bold text-slate-600 border border-slate-200 whitespace-nowrap">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+              <span>Updated ({currentVersion})</span>
+            </div>
+          )}
+
+          <button
+            onClick={refresh}
+            disabled={loading}
+            title="Refresh status"
+            aria-label="Refresh status"
+            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg sm:rounded-full border border-slate-200 bg-white text-slate-600 shadow-xs transition hover:bg-slate-50 disabled:opacity-50 cursor-pointer shrink-0"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+          </button>
+        </div>
       </div>
 
       {/* Build Terminal Output */}
@@ -245,8 +246,8 @@ function UpdatesPage() {
       )}
 
       {/* Deployment & Update History */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-slate-100 px-6 py-4">
+      <div className="rounded-xl sm:rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+        <div className="border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4">
           <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600">
             <Clock className="h-4 w-4 text-slate-500" />
             Deployment & Patch History
@@ -254,7 +255,7 @@ function UpdatesPage() {
         </div>
 
         {deployments.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+          <div className="flex flex-col items-center justify-center py-10 sm:py-12 text-slate-400">
             <Rocket className="mb-2 h-8 w-8 opacity-30" />
             <p className="text-sm font-semibold">No deployments recorded</p>
             <p className="text-xs">
@@ -271,7 +272,7 @@ function UpdatesPage() {
               return (
                 <li key={d.id}>
                   <div
-                    className="flex cursor-pointer items-center gap-4 px-6 py-4 transition hover:bg-slate-50/80"
+                    className="flex cursor-pointer items-center gap-3 sm:gap-4 px-4 py-3 sm:px-6 sm:py-4 transition hover:bg-slate-50/80"
                     onClick={() => viewLog(d.id)}
                   >
                     <span
@@ -283,16 +284,16 @@ function UpdatesPage() {
                     </span>
 
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                         <span className="font-mono text-xs font-bold text-slate-800">
                           {d.commit_hash}
                         </span>
                         <span
-                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase ${style.bg} ${style.text}`}
+                          className={`rounded-full px-2 sm:px-2.5 py-0.5 text-[9px] sm:text-[10px] font-extrabold uppercase ${style.bg} ${style.text}`}
                         >
                           {d.status}
                         </span>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] sm:text-[10px] font-medium text-slate-600">
                           {d.branch}
                         </span>
                       </div>
@@ -312,14 +313,14 @@ function UpdatesPage() {
                     </div>
 
                     {isExpanded ? (
-                      <ChevronUp className="h-4 w-4 text-slate-400" />
+                      <ChevronUp className="h-4 w-4 text-slate-400 shrink-0" />
                     ) : (
-                      <ChevronDown className="h-4 w-4 text-slate-400" />
+                      <ChevronDown className="h-4 w-4 text-slate-400 shrink-0" />
                     )}
                   </div>
 
                   {isExpanded && (
-                    <div className="border-t border-slate-800 bg-slate-950 px-6 py-4">
+                    <div className="border-t border-slate-800 bg-slate-950 px-4 py-3 sm:px-6 sm:py-4">
                       <pre className="max-h-64 overflow-auto whitespace-pre-wrap font-mono text-xs text-emerald-400 leading-relaxed">
                         {logContent}
                       </pre>
