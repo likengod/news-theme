@@ -40,6 +40,7 @@ const POLICIES = [
   { label: "Disclaimer", to: "/disclaimer" as const },
   { label: "Editorial Policy", to: "/editorial-policy" as const },
   { label: "Fact-Checking Policy", to: "/fact-checking-policy" as const },
+  { label: "Fact Check", to: "/fact-check" as const },
   { label: "DMCA", to: "/dmca" as const },
   { label: "About", to: "/about" as const },
   { label: "Submit News", to: "/submit-news" as const },
