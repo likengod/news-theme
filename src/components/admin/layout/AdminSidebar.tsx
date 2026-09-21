@@ -8,7 +8,7 @@ interface AdminSidebarProps {
   open: boolean;
   onClose: () => void;
   pathname: string;
-  isEnterprisePlus: boolean;
+  isEnterprisePlus?: boolean;
   hasUpdate: boolean;
   siteSettings: any;
   onLogout: () => void;
@@ -24,6 +24,7 @@ export function AdminSidebar({
   onLogout,
 }: AdminSidebarProps) {
   const safeSecondaryColor = getAccessibleLogoColor(s?.logoColorSecondary || "#dc2626", false, 4.5);
+  const isEnterprise = (s?.licenseType || "").toLowerCase().includes("enterprise");
   return (
     <>
       <aside
@@ -43,25 +44,19 @@ export function AdminSidebar({
                     {s.logoTextPrimary || "News"}
                   </span>{" "}
                   <span style={{ color: safeSecondaryColor }}>
-                    {s.logoTextSecondary || "Theme"}
+                    {s.logoTextSecondary || "Timeline"}
                   </span>
                 </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-600">
-                  Admin Panel
-                </div>
+                <div className="text-[10px] text-slate-400">Control Panel</div>
               </div>
             </Link>
-            <button className="lg:hidden" onClick={onClose} aria-label="Close menu">
+            <button
+              onClick={onClose}
+              className="rounded-md p-1 text-slate-400 hover:bg-slate-100 lg:hidden"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>
-          <Link
-            to="/"
-            className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-500 hover:text-slate-900"
-          >
-            <HomeIcon className="h-3.5 w-3.5" />
-            Back to screen
-          </Link>
         </div>
 
         <nav className="p-3">
@@ -70,8 +65,8 @@ export function AdminSidebar({
           </p>
           <ul className="space-y-1">
             {ADMIN_NAV_ITEMS.map((item) => {
-              // Reward feature is exclusively visible for Enterprise Plus licenses
-              if (item.to === "/admin/rewards" && !isEnterprisePlus) {
+              // Reward feature is visible for Enterprise licenses
+              if (item.to === "/admin/rewards" && !isEnterprise) {
                 return null;
               }
 
