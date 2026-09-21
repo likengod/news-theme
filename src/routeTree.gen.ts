@@ -29,6 +29,7 @@ import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as NewsSitemapDotxmlRouteImport } from './routes/news-sitemap[.]xml'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FactCheckingPolicyRouteImport } from './routes/fact-checking-policy'
+import { Route as FactCheckRouteImport } from './routes/fact-check'
 import { Route as EventRouteImport } from './routes/event'
 import { Route as EditorialPolicyRouteImport } from './routes/editorial-policy'
 import { Route as EarnPointsRouteImport } from './routes/earn-points'
@@ -166,6 +167,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const FactCheckingPolicyRoute = FactCheckingPolicyRouteImport.update({
   id: '/fact-checking-policy',
   path: '/fact-checking-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FactCheckRoute = FactCheckRouteImport.update({
+  id: '/fact-check',
+  path: '/fact-check',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventRoute = EventRouteImport.update({
@@ -376,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/earn-points': typeof EarnPointsRoute
   '/editorial-policy': typeof EditorialPolicyRoute
   '/event': typeof EventRoute
+  '/fact-check': typeof FactCheckRoute
   '/fact-checking-policy': typeof FactCheckingPolicyRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/news-sitemap.xml': typeof NewsSitemapDotxmlRoute
@@ -435,6 +442,7 @@ export interface FileRoutesByTo {
   '/earn-points': typeof EarnPointsRoute
   '/editorial-policy': typeof EditorialPolicyRoute
   '/event': typeof EventRoute
+  '/fact-check': typeof FactCheckRoute
   '/fact-checking-policy': typeof FactCheckingPolicyRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/news-sitemap.xml': typeof NewsSitemapDotxmlRoute
@@ -496,6 +504,7 @@ export interface FileRoutesById {
   '/earn-points': typeof EarnPointsRoute
   '/editorial-policy': typeof EditorialPolicyRoute
   '/event': typeof EventRoute
+  '/fact-check': typeof FactCheckRoute
   '/fact-checking-policy': typeof FactCheckingPolicyRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/news-sitemap.xml': typeof NewsSitemapDotxmlRoute
@@ -558,6 +567,7 @@ export interface FileRouteTypes {
     | '/earn-points'
     | '/editorial-policy'
     | '/event'
+    | '/fact-check'
     | '/fact-checking-policy'
     | '/forgot-password'
     | '/news-sitemap.xml'
@@ -617,6 +627,7 @@ export interface FileRouteTypes {
     | '/earn-points'
     | '/editorial-policy'
     | '/event'
+    | '/fact-check'
     | '/fact-checking-policy'
     | '/forgot-password'
     | '/news-sitemap.xml'
@@ -677,6 +688,7 @@ export interface FileRouteTypes {
     | '/earn-points'
     | '/editorial-policy'
     | '/event'
+    | '/fact-check'
     | '/fact-checking-policy'
     | '/forgot-password'
     | '/news-sitemap.xml'
@@ -738,6 +750,7 @@ export interface RootRouteChildren {
   EarnPointsRoute: typeof EarnPointsRoute
   EditorialPolicyRoute: typeof EditorialPolicyRoute
   EventRoute: typeof EventRoute
+  FactCheckRoute: typeof FactCheckRoute
   FactCheckingPolicyRoute: typeof FactCheckingPolicyRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   NewsSitemapDotxmlRoute: typeof NewsSitemapDotxmlRoute
@@ -905,6 +918,13 @@ declare module '@tanstack/react-router' {
       path: '/fact-checking-policy'
       fullPath: '/fact-checking-policy'
       preLoaderRoute: typeof FactCheckingPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fact-check': {
+      id: '/fact-check'
+      path: '/fact-check'
+      fullPath: '/fact-check'
+      preLoaderRoute: typeof FactCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/event': {
@@ -1235,6 +1255,7 @@ const rootRouteChildren: RootRouteChildren = {
   EarnPointsRoute: EarnPointsRoute,
   EditorialPolicyRoute: EditorialPolicyRoute,
   EventRoute: EventRoute,
+  FactCheckRoute: FactCheckRoute,
   FactCheckingPolicyRoute: FactCheckingPolicyRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   NewsSitemapDotxmlRoute: NewsSitemapDotxmlRoute,

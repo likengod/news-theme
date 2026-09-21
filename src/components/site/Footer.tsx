@@ -49,6 +49,7 @@ export function Footer() {
       { label: t("footer.editorialPolicy"), to: "/editorial-policy" },
     ],
     [
+      { label: "Fact Check Scanner", to: "/fact-check" },
       { label: "Fact-Checking Policy", to: "/fact-checking-policy" },
       { label: "Data Deletion Policy", to: "/data-deletion-policy" },
       { label: t("footer.dmca"), to: "/dmca" },
