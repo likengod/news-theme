@@ -61,7 +61,7 @@ function getPoints(userId: string): number {
 export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile" }) {
   const s = useSiteSettings();
   const planType = (s.licenseType || "").toLowerCase();
-  const isEnterprise = planType.includes("enterprise");
+  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
 
   const [user, setUser] = useState<User | null>(null);
   const [points, setPoints] = useState<number>(0);
@@ -184,12 +184,12 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
           </span>
           <div className="flex flex-col text-xs">
             <span className="font-semibold">{name}</span>
-            {isEarningUser && isEnterprise && <span className="text-muted-foreground">Wallet: ₹{points}</span>}
+            {isEarningUser && isEnterprisePlus && <span className="text-muted-foreground">Wallet: ₹{points}</span>}
           </div>
         </div>
         {isEarningUser && (
           <>
-            {isEnterprise && (
+            {isEnterprisePlus && (
               <>
                 <Link to="/earn-points" className="hover:text-foreground">
                   Wallet
@@ -249,7 +249,7 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
         {/* Earning Users Only: Wallet & Earn Points & Profile */}
         {isEarningUser && (
           <>
-            {isEnterprise && (
+            {isEnterprisePlus && (
               <>
                 <DropdownMenuItem
                   onSelect={() => navigate({ to: "/earn-points" })}

@@ -110,7 +110,6 @@ function VerifiedPage() {
   const [settings, setSettings] = useState(() => loadSettings());
   const siteSettings = useSiteSettings();
   const planType = (siteSettings?.licenseType || settings?.licenseType || "").toLowerCase();
-  const isEnterprise = planType.includes("enterprise");
   const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
 
   useEffect(() => {
@@ -366,8 +365,8 @@ function VerifiedPage() {
                       </span>
                     </div>
 
-                    {/* Wallet (Visible when website license is Enterprise) */}
-                    {isEnterprise && (
+                    {/* Wallet (Only when website license is Enterprise Plus) */}
+                    {isEnterprisePlus && (
                       <div className="col-span-2 sm:col-span-1 rounded-lg border border-amber-200/80 bg-white/95 px-2 py-1.5 shadow-2xs">
                         <span className="block text-[9px] font-semibold text-amber-900">
                           Wallet

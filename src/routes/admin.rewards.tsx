@@ -41,14 +41,16 @@ function RewardsPage() {
   const navigate = useNavigate();
   const s = useSiteSettings();
   const planType = (s.licenseType || "").toLowerCase();
-  const isEnterprise = planType.includes("enterprise");
+  const isEnterprisePlus =
+    planType.includes("enterprise+") ||
+    planType.includes("enterprise plus");
 
   useEffect(() => {
-    if (!isEnterprise) {
-      toast.error("Rewards & Points feature is exclusively available on Enterprise licenses.");
+    if (!isEnterprisePlus) {
+      toast.error("Rewards & Points feature is exclusively available on Enterprise Plus licenses.");
       navigate({ to: "/admin", replace: true });
     }
-  }, [isEnterprise, navigate]);
+  }, [isEnterprisePlus, navigate]);
 
   const [groups, setGroups] = useState<RewardGroup[]>(() => loadRewards());
   const [active, setActive] = useState<string>("all");
@@ -56,7 +58,7 @@ function RewardsPage() {
   const [claims, setClaims] = useState<PendingClaim[]>(() => loadAllPendingClaims());
 
   useEffect(() => {
-    if (!isEnterprise) return;
+    if (!isEnterprisePlus) return;
     // Sync from MySQL server on mount
     getRewardsServer()
       .then((r) => setGroups(r))
@@ -67,17 +69,17 @@ function RewardsPage() {
     getPendingClaimsServer()
       .then((c) => setClaims(c))
       .catch(() => {});
-  }, [isEnterprise]);
+  }, [isEnterprisePlus]);
 
-  if (!isEnterprise) {
+  if (!isEnterprisePlus) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 mb-4">
           <Lock className="h-8 w-8 text-slate-400" />
         </div>
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Enterprise Feature Locked</h2>
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Enterprise Plus Feature Locked</h2>
         <p className="text-slate-500 max-w-md mb-6">
-          The Rewards & Points Engine is exclusively available on Enterprise licenses. Please upgrade your license to unlock this feature.
+          The Rewards & Points Engine is exclusively available on Enterprise Plus licenses. Please upgrade your license to unlock this feature.
         </p>
         <Link
           to="/admin/settings"

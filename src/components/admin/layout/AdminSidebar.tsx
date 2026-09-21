@@ -24,7 +24,6 @@ export function AdminSidebar({
   onLogout,
 }: AdminSidebarProps) {
   const safeSecondaryColor = getAccessibleLogoColor(s?.logoColorSecondary || "#dc2626", false, 4.5);
-  const isEnterprise = (s?.licenseType || "").toLowerCase().includes("enterprise");
   return (
     <>
       <aside
@@ -65,8 +64,8 @@ export function AdminSidebar({
           </p>
           <ul className="space-y-1">
             {ADMIN_NAV_ITEMS.map((item) => {
-              // Reward feature is visible for Enterprise licenses
-              if (item.to === "/admin/rewards" && !isEnterprise) {
+              // Reward feature is visible for Enterprise Plus licenses only
+              if (item.to === "/admin/rewards" && !isEnterprisePlus) {
                 return null;
               }
 

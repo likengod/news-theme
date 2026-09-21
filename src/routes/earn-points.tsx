@@ -134,7 +134,7 @@ function saveState(userId: string, state: State) {
 function EarnPointsPage() {
   const settings = useSiteSettings();
   const planType = (settings.licenseType || "").toLowerCase();
-  const isEnterprise = planType.includes("enterprise");
+  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
 
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -151,8 +151,8 @@ function EarnPointsPage() {
   const [dailyTasks, setDailyTasks] = useState<RecurringReward[]>([]);
 
   useEffect(() => {
-    // Only load if enterprise
-    if (!isEnterprise) return;
+    // Only load if premium
+    if (!isEnterprisePlus) return;
 
     // Read rewards from admin config
     const groups = loadRewards();
@@ -277,7 +277,7 @@ function EarnPointsPage() {
     return { text: "", ok: true };
   };
 
-  if (!isEnterprise) {
+  if (!isEnterprisePlus) {
     return (
       <div className="min-h-screen bg-background text-foreground flex flex-col">
         <Header showTicker={false} showBreakingBar={false} />
@@ -286,9 +286,9 @@ function EarnPointsPage() {
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
               <Lock className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h1 className="mt-6 text-xl font-bold text-card-foreground">Enterprise Feature</h1>
+            <h1 className="mt-6 text-xl font-bold text-card-foreground">Enterprise Plus Feature Locked</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              The Wallet and Rewards system is exclusively available on Enterprise plans.
+              The Wallet and Rewards system is exclusively available on Enterprise Plus plans.
               Please ask the site administrator to upgrade their license to unlock this feature.
             </p>
             <Link
