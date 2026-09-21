@@ -141,6 +141,87 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
           </span>
         </div>
 
+        {/* Prominent Header Display Mode Selector (Only Logo / Logo + Site Name / Only Site Name) */}
+        <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                Header Display Mode
+              </span>
+              <span className="text-[11px] text-slate-500">
+                Choose what to display in your header: only logo, logo + site name, or only site name
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                id="logoFitScreenQuick"
+                type="checkbox"
+                checked={!!settings.logoFitScreen}
+                onChange={(e) => update("logoFitScreen", e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+              />
+              <label htmlFor="logoFitScreenQuick" className="text-xs font-medium text-slate-700 cursor-pointer">
+                Fit logo to screen width
+              </label>
+            </div>
+          </div>
+
+          {/* Quick Option Buttons */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button
+              type="button"
+              onClick={() => update("logoDisplayMode", "both")}
+              className={`flex flex-col items-center justify-center p-2.5 rounded-lg border text-center transition-all ${
+                (!settings.logoDisplayMode || settings.logoDisplayMode === "both")
+                  ? "border-blue-600 bg-blue-50/80 text-blue-900 font-bold shadow-xs ring-1 ring-blue-600"
+                  : "border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700"
+              }`}
+            >
+              <span className="text-xs">Logo + Site Name</span>
+              <span className="text-[10px] text-slate-400 font-normal">Side-by-Side</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => update("logoDisplayMode", "logo_only")}
+              className={`flex flex-col items-center justify-center p-2.5 rounded-lg border text-center transition-all ${
+                settings.logoDisplayMode === "logo_only"
+                  ? "border-blue-600 bg-blue-50/80 text-blue-900 font-bold shadow-xs ring-1 ring-blue-600"
+                  : "border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700"
+              }`}
+            >
+              <span className="text-xs">Only Logo</span>
+              <span className="text-[10px] text-slate-400 font-normal">Image Only</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => update("logoDisplayMode", "text_only")}
+              className={`flex flex-col items-center justify-center p-2.5 rounded-lg border text-center transition-all ${
+                settings.logoDisplayMode === "text_only"
+                  ? "border-blue-600 bg-blue-50/80 text-blue-900 font-bold shadow-xs ring-1 ring-blue-600"
+                  : "border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700"
+              }`}
+            >
+              <span className="text-xs">Only Site Name</span>
+              <span className="text-[10px] text-slate-400 font-normal">Text Only</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => update("logoDisplayMode", "logo_fit")}
+              className={`flex flex-col items-center justify-center p-2.5 rounded-lg border text-center transition-all ${
+                settings.logoDisplayMode === "logo_fit"
+                  ? "border-blue-600 bg-blue-50/80 text-blue-900 font-bold shadow-xs ring-1 ring-blue-600"
+                  : "border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700"
+              }`}
+            >
+              <span className="text-xs">Fit Screen Banner</span>
+              <span className="text-[10px] text-slate-400 font-normal">Full Width Logo</span>
+            </button>
+          </div>
+        </div>
+
         {/* Live Header Preview */}
         <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50/90 p-5 text-center shadow-inner overflow-hidden">
           <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 block mb-3">
