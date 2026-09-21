@@ -22,6 +22,7 @@ export function Footer() {
     : `https://${s.builtByUrl || "GorillaTechsolution.com"}`;
 
   const planType = (s.licenseType || "").toLowerCase();
+  const isEnterprise = planType.includes("enterprise");
   const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
   const showEventLink = s.eventFooterLinkEnabled !== false;
 
@@ -33,7 +34,7 @@ export function Footer() {
     ],
     [
       { label: t("footer.submitNews"), to: "/submit-news" },
-      { label: t("footer.factCheck", "Fact Check"), to: "/fact-check" },
+      ...(isEnterprise ? [{ label: t("footer.factCheck", "Fact Check"), to: "/fact-check" }] : []),
       ...(showEventLink
         ? [{ label: t("footer.event", "Event"), to: "/event" }]
         : [{ label: "Reels", to: "/reels" }]),

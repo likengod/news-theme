@@ -199,6 +199,20 @@ export const checkNewsFactServer = createServerFn({ method: "POST" })
     }
 
     const settings = await getSiteSettingsServer().catch(() => ({} as any));
+    const planType = (settings.licenseType || "").toLowerCase();
+    const isEnterprise = planType.includes("enterprise");
+
+    if (!isEnterprise) {
+      return {
+        query: input,
+        isUrl: false,
+        claims: [],
+        status: "error",
+        message:
+          "The Live Fact-Check Scanner is exclusively available on Enterprise and Enterprise Plus licenses.",
+      };
+    }
+
     const googleApiKey =
       settings.googleFactCheckApiKey ||
       settings.geminiApiKey ||

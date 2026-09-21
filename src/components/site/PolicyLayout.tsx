@@ -67,12 +67,15 @@ export function PolicyLayout({
   headerAction,
 }: Props) {
   const s = useSiteSettings();
+  const planType = (s?.licenseType || "").toLowerCase();
+  const isEnterprise = planType.includes("enterprise");
+  const availablePolicies = POLICIES.filter((p) => isEnterprise || p.to !== "/fact-check");
   const actualEmail = contactEmail || s?.contactEmail || "legal@northeasttimeline.com";
   const actualPhone = s?.contactPhone || "+91 99999 99999";
   const actualAddress = s?.address || "Agartala, Tripura (W) India";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const active = POLICIES.find((p) => p.to === pathname);
-  const others = POLICIES.filter((p) => p.to !== pathname);
+  const active = availablePolicies.find((p) => p.to === pathname);
+  const others = availablePolicies.filter((p) => p.to !== pathname);
   const [othersOpen, setOthersOpen] = useState(false);
   const [connectOpen, setConnectOpen] = useState(false);
 

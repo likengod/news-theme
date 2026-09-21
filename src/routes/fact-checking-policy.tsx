@@ -3,6 +3,8 @@ import { ShieldCheck, Search } from "lucide-react";
 import { PolicyLayout } from "@/components/site/PolicyLayout";
 import { getCustomPagesServer, buildPageHead } from "@/lib/site-content";
 
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
+
 export const Route = createFileRoute("/fact-checking-policy")({
   loader: async () => {
     const pages = await getCustomPagesServer().catch(() => []);
@@ -21,6 +23,9 @@ export const Route = createFileRoute("/fact-checking-policy")({
 
 function FactCheckingPage() {
   const page = Route.useLoaderData();
+  const s = useSiteSettings();
+  const planType = (s?.licenseType || "").toLowerCase();
+  const isEnterprise = planType.includes("enterprise");
 
   return (
     <PolicyLayout
@@ -30,27 +35,31 @@ function FactCheckingPage() {
         "Our editorial commitment to accuracy, transparent sourcing, multi-point verification, and combating misinformation across all reporting."
       }
       headerAction={
-        <Link
-          to="/fact-check"
-          className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3.5 py-2 text-xs sm:text-sm font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-2xs group"
-        >
-          <Search className="h-4 w-4 text-primary group-hover:text-primary-foreground transition-colors" />
-          <span>Live Fact-Check Scanner →</span>
-        </Link>
-      }
-      notice={
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <span>
-            Want to verify a suspicious news article, WhatsApp forward, or viral claim right now?
-          </span>
+        isEnterprise ? (
           <Link
             to="/fact-check"
-            className="inline-flex items-center gap-1.5 font-semibold text-primary underline underline-offset-2 hover:opacity-80"
+            className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3.5 py-2 text-xs sm:text-sm font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-2xs group"
           >
-            <span>Open Fact-Check Scanner</span>
-            <span>→</span>
+            <Search className="h-4 w-4 text-primary group-hover:text-primary-foreground transition-colors" />
+            <span>Live Fact-Check Scanner →</span>
           </Link>
-        </div>
+        ) : undefined
+      }
+      notice={
+        isEnterprise ? (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span>
+              Want to verify a suspicious news article, WhatsApp forward, or viral claim right now?
+            </span>
+            <Link
+              to="/fact-check"
+              className="inline-flex items-center gap-1.5 font-semibold text-primary underline underline-offset-2 hover:opacity-80"
+            >
+              <span>Open Fact-Check Scanner</span>
+              <span>→</span>
+            </Link>
+          </div>
+        ) : undefined
       }
       sections={
         page?.sections && page.sections.length > 0

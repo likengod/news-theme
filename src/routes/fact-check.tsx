@@ -10,7 +10,9 @@ import {
   ExternalLink,
   BookOpen,
   ArrowRight,
+  Lock,
 } from "lucide-react";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 
 export const Route = createFileRoute("/fact-check")({
   head: () => ({
@@ -34,6 +36,37 @@ export const Route = createFileRoute("/fact-check")({
 });
 
 function FactCheckPage() {
+  const s = useSiteSettings();
+  const planType = (s?.licenseType || "").toLowerCase();
+  const isEnterprise = planType.includes("enterprise");
+
+  if (!isEnterprise) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex flex-col justify-between">
+        <Header showTicker={false} showBreakingBar={false} />
+        <main className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md w-full rounded-2xl border border-border bg-card p-8 text-center shadow-lg">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <Lock className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h1 className="mt-6 text-xl font-bold text-card-foreground">Enterprise Feature Locked</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              The Live News & Claim Fact-Check Scanner is exclusively available on Enterprise and Enterprise Plus licenses.
+              Please ask your site administrator to upgrade their license to unlock this feature.
+            </p>
+            <Link
+              to="/"
+              className="mt-6 inline-flex w-full items-center justify-center rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Return Home
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-between">
       <Header showTicker={false} showBreakingBar={false} />
