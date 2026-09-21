@@ -59,80 +59,189 @@ export function Masthead() {
   }
 
   const hasLogo = !!(s.logoLight || s.logoDark);
-  const mode = s.logoDisplayMode || (hasLogo ? "logo_only" : "text_only");
+  const mode = s.logoDisplayMode || (hasLogo ? "both" : "text_only");
+  const isFitScreen = !!s.logoFitScreen || mode === "logo_fit";
 
-  const showLogo = hasLogo && (mode === "logo_only" || mode === "both");
-  const showText = !hasLogo || mode === "text_only" || mode === "both";
+  const showLogo =
+    hasLogo &&
+    (mode === "logo_only" || mode === "both" || mode === "both_stacked" || mode === "logo_fit");
+  const showText =
+    !hasLogo || mode === "text_only" || mode === "both" || mode === "both_stacked";
+  const isSideBySide = mode === "both" && showLogo && showText;
+  const isStacked = mode === "both_stacked" && showLogo && showText;
+
+  const primaryWord =
+    s.logoTextPrimary !== undefined && s.logoTextPrimary !== ""
+      ? s.logoTextPrimary
+      : s.logoText
+        ? s.logoText.split(" ")[0]
+        : "Today";
+
+  const secondaryWord =
+    s.logoTextSecondary !== undefined && s.logoTextSecondary !== ""
+      ? s.logoTextSecondary
+      : s.logoText && s.logoText.split(" ").length > 1
+        ? s.logoText.split(" ").slice(1).join(" ")
+        : "Tripura";
+
+  const taglineContent = s.tagline ? (
+    <span className="break-words">{s.tagline}</span>
+  ) : (
+    <span className="inline-flex flex-wrap items-center gap-x-1.5 sm:gap-x-2">
+      <span className="text-[#1d4ed8] dark:text-blue-400">Breaking News</span>
+      <span className="text-muted-foreground">•</span>
+      <span className="text-[#b91c1c] dark:text-red-400">Finance</span>
+      <span className="text-muted-foreground">•</span>
+      <span className="text-[#15803d] dark:text-emerald-400">Business</span>
+      <span className="text-muted-foreground">•</span>
+      <span className="text-[#c2410c] dark:text-orange-400">Market</span>
+    </span>
+  );
 
   return (
     <>
       <header className="border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 py-5 text-center md:py-6">
-          <Link to="/" className="block">
-            {showLogo && s.logoLight && (
-              <img
-                src={s.logoLight}
-                alt={s.logoText || "Logo"}
-                className={`mx-auto h-16 object-contain ${s.logoDark ? "dark:hidden" : ""} ${showText ? "mb-2" : ""}`}
-              />
-            )}
-            {showLogo && s.logoDark && (
-              <img
-                src={s.logoDark}
-                alt={s.logoText || "Logo"}
-                className={`mx-auto h-16 object-contain ${s.logoLight ? "hidden dark:block" : ""} ${showText ? "mb-2" : ""}`}
-              />
-            )}
-            {showText ? (
-              <h1
-                className="leading-none text-3xl sm:text-5xl md:text-6xl lg:text-7xl uppercase"
-                style={{
-                  fontFamily: '"Inter", system-ui, sans-serif',
-                  fontWeight: 800,
-                  letterSpacing: "0.05em",
-                }}
-              >
-                <span
-                  style={safePrimaryColor ? { color: safePrimaryColor } : undefined}
-                  className={
-                    !s.logoColorPrimary || s.logoColorPrimary === "#000000"
-                      ? "text-foreground dark:text-white"
-                      : ""
-                  }
-                >
-                  {s.logoTextPrimary !== undefined && s.logoTextPrimary !== ""
-                    ? s.logoTextPrimary
-                    : s.logoText
-                      ? s.logoText.split(" ")[0]
-                      : "Today"}
-                </span>{" "}
-                <span style={{ color: safeSecondaryColor }}>
-                  {s.logoTextSecondary !== undefined && s.logoTextSecondary !== ""
-                    ? s.logoTextSecondary
-                    : s.logoText && s.logoText.split(" ").length > 1
-                      ? s.logoText.split(" ").slice(1).join(" ")
-                      : "Tripura"}
-                </span>
-              </h1>
-            ) : (
-              <h1 className="sr-only">{s.logoText || "Today Tripura"}</h1>
-            )}
-          </Link>
-          <p className="mt-2.5 sm:mt-3 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.25em] md:tracking-[0.35em] text-muted-foreground">
-            {s.tagline ? (
-              <span className="break-words">{s.tagline}</span>
-            ) : (
-              <span className="inline-flex flex-wrap items-center justify-center gap-x-1.5 sm:gap-x-2">
-                <span className="text-[#1d4ed8] dark:text-blue-400">Breaking News</span>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-[#b91c1c] dark:text-red-400">Finance</span>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-[#15803d] dark:text-emerald-400">Business</span>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-[#c2410c] dark:text-orange-400">Market</span>
-              </span>
-            )}
-          </p>
+        <div className="mx-auto max-w-7xl px-4 py-5 text-center md:py-6 overflow-hidden">
+          {/* 1. Side-by-Side Brand Lockup (Matches Reference Image) */}
+          {isSideBySide && (
+            <Link to="/" className="inline-block max-w-full">
+              <div className="inline-flex items-center justify-center gap-3 sm:gap-4 md:gap-5 text-left max-w-full">
+                {/* Logo Mark on the Left */}
+                <div className="shrink-0 flex items-center justify-center">
+                  {s.logoLight && (
+                    <img
+                      src={s.logoLight}
+                      alt={s.logoText || "Logo"}
+                      className={`h-11 sm:h-16 md:h-20 lg:h-22 w-auto max-w-[80px] sm:max-w-[120px] md:max-w-[160px] object-contain ${
+                        s.logoDark ? "dark:hidden" : ""
+                      }`}
+                    />
+                  )}
+                  {s.logoDark && (
+                    <img
+                      src={s.logoDark}
+                      alt={s.logoText || "Logo"}
+                      className={`h-11 sm:h-16 md:h-20 lg:h-22 w-auto max-w-[80px] sm:max-w-[120px] md:max-w-[160px] object-contain ${
+                        s.logoLight ? "hidden dark:block" : ""
+                      }`}
+                    />
+                  )}
+                </div>
+
+                {/* Brand Title (Two-tone) & Tagline on the Right */}
+                <div className="flex flex-col justify-center min-w-0">
+                  <h1
+                    className="leading-none text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase font-extrabold"
+                    style={{
+                      fontFamily: '"Inter", system-ui, sans-serif',
+                      fontWeight: 800,
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    <span
+                      style={safePrimaryColor ? { color: safePrimaryColor } : undefined}
+                      className={
+                        !s.logoColorPrimary || s.logoColorPrimary === "#000000"
+                          ? "text-foreground dark:text-white"
+                          : ""
+                      }
+                    >
+                      {primaryWord}
+                    </span>{" "}
+                    <span style={{ color: safeSecondaryColor }}>
+                      {secondaryWord}
+                    </span>
+                  </h1>
+                  <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[11px] md:text-xs font-semibold uppercase tracking-[0.16em] sm:tracking-[0.24em] md:tracking-[0.32em] text-muted-foreground">
+                    {taglineContent}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          )}
+
+          {/* 2. Fit Screen / Full Banner Logo */}
+          {((mode === "logo_fit" || (mode === "logo_only" && isFitScreen)) && !isSideBySide) && (
+            <Link to="/" className="block w-full">
+              <div className="w-full flex items-center justify-center">
+                {s.logoLight && (
+                  <img
+                    src={s.logoLight}
+                    alt={s.logoText || "Logo"}
+                    className={`w-full max-w-5xl h-auto max-h-36 sm:max-h-48 md:max-h-60 object-contain mx-auto ${
+                      s.logoDark ? "dark:hidden" : ""
+                    }`}
+                  />
+                )}
+                {s.logoDark && (
+                  <img
+                    src={s.logoDark}
+                    alt={s.logoText || "Logo"}
+                    className={`w-full max-w-5xl h-auto max-h-36 sm:max-h-48 md:max-h-60 object-contain mx-auto ${
+                      s.logoLight ? "hidden dark:block" : ""
+                    }`}
+                  />
+                )}
+              </div>
+            </Link>
+          )}
+
+          {/* 3. Stacked Logo + Text or Logo Only (Standard) or Text Only */}
+          {!isSideBySide && mode !== "logo_fit" && !(mode === "logo_only" && isFitScreen) && (
+            <div>
+              <Link to="/" className="block">
+                {showLogo && s.logoLight && (
+                  <img
+                    src={s.logoLight}
+                    alt={s.logoText || "Logo"}
+                    className={`mx-auto h-16 object-contain ${
+                      s.logoDark ? "dark:hidden" : ""
+                    } ${showText ? "mb-2" : ""}`}
+                  />
+                )}
+                {showLogo && s.logoDark && (
+                  <img
+                    src={s.logoDark}
+                    alt={s.logoText || "Logo"}
+                    className={`mx-auto h-16 object-contain ${
+                      s.logoLight ? "hidden dark:block" : ""
+                    } ${showText ? "mb-2" : ""}`}
+                  />
+                )}
+                {showText ? (
+                  <h1
+                    className="leading-none text-3xl sm:text-5xl md:text-6xl lg:text-7xl uppercase"
+                    style={{
+                      fontFamily: '"Inter", system-ui, sans-serif',
+                      fontWeight: 800,
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    <span
+                      style={safePrimaryColor ? { color: safePrimaryColor } : undefined}
+                      className={
+                        !s.logoColorPrimary || s.logoColorPrimary === "#000000"
+                          ? "text-foreground dark:text-white"
+                          : ""
+                      }
+                    >
+                      {primaryWord}
+                    </span>{" "}
+                    <span style={{ color: safeSecondaryColor }}>
+                      {secondaryWord}
+                    </span>
+                  </h1>
+                ) : (
+                  <h1 className="sr-only">{s.logoText || "Today Tripura"}</h1>
+                )}
+              </Link>
+              {showText && (
+                <p className="mt-2.5 sm:mt-3 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.25em] md:tracking-[0.35em] text-muted-foreground">
+                  {taglineContent}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </header>
 

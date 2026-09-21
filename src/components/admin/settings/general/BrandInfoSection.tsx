@@ -81,10 +81,24 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
             onChange={(e) => update("logoDisplayMode", e.target.value)}
             className="h-10 w-full rounded-lg border border-slate-200 px-3 bg-white text-sm focus:border-slate-900 focus:outline-none"
           >
-            <option value="logo_only">Logo Only</option>
+            <option value="both">Both: Logo + Text (Side-by-Side — Reference Style)</option>
+            <option value="both_stacked">Both: Logo + Text (Stacked Vertical)</option>
+            <option value="logo_fit">Logo: Fit Screen (Full Width Banner)</option>
+            <option value="logo_only">Logo Only (Standard)</option>
             <option value="text_only">Text Only</option>
-            <option value="both">Both (Logo + Text)</option>
           </select>
+          <div className="mt-2.5 flex items-center gap-2">
+            <input
+              id="logoFitScreen"
+              type="checkbox"
+              checked={!!settings.logoFitScreen}
+              onChange={(e) => update("logoFitScreen", e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+            />
+            <label htmlFor="logoFitScreen" className="text-xs font-medium text-slate-700 cursor-pointer">
+              Logo must fit the screen (Responsive full-width scaling)
+            </label>
+          </div>
         </div>
 
         <div>
@@ -128,28 +142,149 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
         </div>
 
         {/* Live Header Preview */}
-        <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50/90 p-5 text-center shadow-inner">
-          <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 block mb-2">
+        <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50/90 p-5 text-center shadow-inner overflow-hidden">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 block mb-3">
             Live Header Preview
           </span>
-          <div
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-wide inline-block"
-            style={{
-              fontFamily: '"Inter", system-ui, sans-serif',
-              letterSpacing: "0.05em",
-            }}
-          >
-            <span style={{ color: settings.logoColorPrimary || "#000000" }}>
-              {settings.logoTextPrimary !== undefined && settings.logoTextPrimary !== ""
-                ? settings.logoTextPrimary
-                : "NEWS"}
-            </span>{" "}
-            <span style={{ color: settings.logoColorSecondary || "#dc2626" }}>
-              {settings.logoTextSecondary !== undefined && settings.logoTextSecondary !== ""
-                ? settings.logoTextSecondary
-                : "THEME"}
-            </span>
-          </div>
+
+          {/* Side by Side Mode (Matches Reference Image) */}
+          {(!settings.logoDisplayMode || settings.logoDisplayMode === "both") && (
+            <div className="inline-flex items-center justify-center gap-3 sm:gap-4 md:gap-5 text-left max-w-full">
+              {/* Logo / Icon on the left */}
+              <div className="shrink-0 flex items-center justify-center">
+                {settings.logoLight ? (
+                  <img
+                    src={settings.logoLight}
+                    alt="Logo preview"
+                    className="h-12 sm:h-14 md:h-16 w-auto max-w-[80px] sm:max-w-[110px] object-contain rounded-xs"
+                  />
+                ) : (
+                  <div
+                    className="h-11 w-11 sm:h-13 sm:w-13 rounded-md flex items-center justify-center shadow-xs border-2"
+                    style={{
+                      backgroundColor: settings.logoColorSecondary || "#dc2626",
+                      borderColor: "#cbd5e1",
+                    }}
+                  >
+                    <span className="text-white font-black text-lg">
+                      {(settings.logoTextPrimary || "N").charAt(0)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Text + Tagline on the right */}
+              <div className="flex flex-col justify-center min-w-0">
+                <div
+                  className="text-2xl sm:text-3xl md:text-4xl font-extrabold uppercase tracking-wide leading-none"
+                  style={{
+                    fontFamily: '"Inter", system-ui, sans-serif',
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  <span style={{ color: settings.logoColorPrimary || "#000000" }}>
+                    {settings.logoTextPrimary !== undefined && settings.logoTextPrimary !== ""
+                      ? settings.logoTextPrimary
+                      : "NEWS"}
+                  </span>{" "}
+                  <span style={{ color: settings.logoColorSecondary || "#dc2626" }}>
+                    {settings.logoTextSecondary !== undefined && settings.logoTextSecondary !== ""
+                      ? settings.logoTextSecondary
+                      : "THEME"}
+                  </span>
+                </div>
+                <div className="mt-1 text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  {settings.tagline || "BREAKING NEWS · FINANCE · BUSINESS · MARKETS"}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Stacked Vertical Mode */}
+          {settings.logoDisplayMode === "both_stacked" && (
+            <div className="flex flex-col items-center justify-center text-center">
+              {settings.logoLight ? (
+                <img
+                  src={settings.logoLight}
+                  alt="Logo preview"
+                  className="h-12 object-contain mb-2"
+                />
+              ) : (
+                <div
+                  className="h-11 w-11 rounded-md mb-2 flex items-center justify-center shadow-xs border-2"
+                  style={{
+                    backgroundColor: settings.logoColorSecondary || "#dc2626",
+                    borderColor: "#cbd5e1",
+                  }}
+                >
+                  <span className="text-white font-black text-lg">
+                    {(settings.logoTextPrimary || "N").charAt(0)}
+                  </span>
+                </div>
+              )}
+              <div
+                className="text-2xl sm:text-3xl font-extrabold uppercase tracking-wide leading-tight"
+                style={{
+                  fontFamily: '"Inter", system-ui, sans-serif',
+                  letterSpacing: "0.05em",
+                }}
+              >
+                <span style={{ color: settings.logoColorPrimary || "#000000" }}>
+                  {settings.logoTextPrimary || "NEWS"}
+                </span>{" "}
+                <span style={{ color: settings.logoColorSecondary || "#dc2626" }}>
+                  {settings.logoTextSecondary || "THEME"}
+                </span>
+              </div>
+              <div className="mt-1 text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                {settings.tagline || "BREAKING NEWS · FINANCE · BUSINESS · MARKETS"}
+              </div>
+            </div>
+          )}
+
+          {/* Fit Screen or Logo Only Mode */}
+          {(settings.logoDisplayMode === "logo_fit" || settings.logoDisplayMode === "logo_only") && (
+            <div className="flex items-center justify-center">
+              {settings.logoLight ? (
+                <img
+                  src={settings.logoLight}
+                  alt="Logo preview"
+                  className={
+                    settings.logoDisplayMode === "logo_fit" || settings.logoFitScreen
+                      ? "w-full max-w-md h-auto max-h-24 object-contain mx-auto"
+                      : "h-14 object-contain mx-auto"
+                  }
+                />
+              ) : (
+                <div className="text-xs text-slate-400 italic py-2">
+                  Upload a logo image in Logo Uploaders to preview {settings.logoDisplayMode === "logo_fit" ? "Fit Screen" : "Logo Only"}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Text Only Mode */}
+          {settings.logoDisplayMode === "text_only" && (
+            <div className="flex flex-col items-center justify-center text-center">
+              <div
+                className="text-3xl sm:text-4xl font-extrabold uppercase tracking-wide"
+                style={{
+                  fontFamily: '"Inter", system-ui, sans-serif',
+                  letterSpacing: "0.05em",
+                }}
+              >
+                <span style={{ color: settings.logoColorPrimary || "#000000" }}>
+                  {settings.logoTextPrimary || "NEWS"}
+                </span>{" "}
+                <span style={{ color: settings.logoColorSecondary || "#dc2626" }}>
+                  {settings.logoTextSecondary || "THEME"}
+                </span>
+              </div>
+              <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                {settings.tagline || "BREAKING NEWS · FINANCE · BUSINESS · MARKETS"}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">

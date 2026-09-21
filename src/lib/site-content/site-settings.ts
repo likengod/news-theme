@@ -36,7 +36,8 @@ export type SiteSettings = {
   footerLogoLight: string;
   footerLogoDark: string;
   favicon: string;
-  logoDisplayMode: "logo_only" | "text_only" | "both";
+  logoDisplayMode: "logo_only" | "text_only" | "both" | "both_stacked" | "logo_fit";
+  logoFitScreen?: boolean;
   logoTextPrimary?: string; // e.g. "News"
   logoColorPrimary?: string; // e.g. "#000000"
   logoTextSecondary?: string; // e.g. "Theme"
@@ -250,6 +251,7 @@ export const defaultSettings: SiteSettings = {
   footerLogoDark: "",
   favicon: "",
   logoDisplayMode: "both",
+  logoFitScreen: false,
   logoTextPrimary: "Today",
   logoColorPrimary: "#000000",
   logoTextSecondary: "Tripura",

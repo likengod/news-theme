@@ -67,8 +67,11 @@ export function Footer() {
   const hasLogo = !!(footerLight || footerDark);
   const mode = s.logoDisplayMode || (hasLogo ? "logo_only" : "text_only");
 
-  const showLogo = hasLogo && (mode === "logo_only" || mode === "both");
-  const showText = !hasLogo || mode === "text_only" || mode === "both";
+  const showLogo =
+    hasLogo &&
+    (mode === "logo_only" || mode === "both" || mode === "both_stacked" || mode === "logo_fit");
+  const showText =
+    !hasLogo || mode === "text_only" || mode === "both" || mode === "both_stacked";
 
   return (
     <footer className="border-t border-border bg-card/40">
