@@ -35,7 +35,10 @@ export default function ArticleEditor({
   onSave: (r: Row) => void;
 }) {
   const s = useSiteSettings();
-  const isEnterprise = (s.licenseType || "").toLowerCase().includes("enterprise");
+  const planType = (s.licenseType || "").toLowerCase();
+  const isEnterprisePlus =
+    planType.includes("enterprise+") ||
+    planType.includes("enterprise plus");
 
   // Normalize initial data to handle null database values
   const normalizedInitial: Row = {
@@ -225,7 +228,7 @@ export default function ArticleEditor({
             <ArticleSettingsTab
               row={r}
               onChange={set}
-              isEnterprise={isEnterprise}
+              isEnterprisePlus={isEnterprisePlus}
             />
           )}
         </div>

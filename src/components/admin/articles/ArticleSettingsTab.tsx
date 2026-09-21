@@ -4,13 +4,13 @@ import { formatDateTimeLocal, type Row } from "./types";
 interface ArticleSettingsTabProps {
   row: Row;
   onChange: <K extends keyof Row>(field: K, value: Row[K]) => void;
-  isEnterprise?: boolean;
+  isEnterprisePlus?: boolean;
 }
 
 export default function ArticleSettingsTab({
   row,
   onChange,
-  isEnterprise,
+  isEnterprisePlus,
 }: ArticleSettingsTabProps) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -86,7 +86,7 @@ export default function ArticleSettingsTab({
           />
         </Field>
 
-        {isEnterprise && (
+        {isEnterprisePlus && (
           <Field label="Post Views">
             <input
               id="article-views"
