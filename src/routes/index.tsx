@@ -131,9 +131,7 @@ function Home() {
         </LazySection>
       </main>
 
-      <LazySection minHeight={400}>
-        <Footer />
-      </LazySection>
+      <Footer />
     </div>
   );
 }
