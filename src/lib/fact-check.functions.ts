@@ -100,6 +100,31 @@ function categorizeRating(ratingStr: string): "false" | "misleading" | "true" | 
   return "unverified";
 }
 
+/* ──────── In-Memory Cache for Instant Responses (30-min TTL) ──────── */
+const CACHE_TTL_MS = 30 * 60 * 1000;
+const factCheckCache = new Map<string, { timestamp: number; data: FactCheckResponse }>();
+
+function getFromCache(key: string): FactCheckResponse | null {
+  const normalized = key.toLowerCase().trim();
+  const cached = factCheckCache.get(normalized);
+  if (!cached) return null;
+  if (Date.now() - cached.timestamp > CACHE_TTL_MS) {
+    factCheckCache.delete(normalized);
+    return null;
+  }
+  return cached.data;
+}
+
+function setToCache(key: string, data: FactCheckResponse) {
+  const normalized = key.toLowerCase().trim();
+  if (factCheckCache.size > 200) {
+    const oldest = factCheckCache.keys().next().value;
+    if (oldest) factCheckCache.delete(oldest);
+  }
+  factCheckCache.set(normalized, { timestamp: Date.now(), data });
+}
+
+/* ──────── High-Speed URL Metadata Extractor (Reads only first 64KB) ──────── */
 async function extractUrlMetadata(urlStr: string): Promise<{
   title?: string;
   description?: string;
@@ -108,23 +133,44 @@ async function extractUrlMetadata(urlStr: string): Promise<{
   try {
     const parsed = new URL(urlStr);
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6500);
+    const timeout = setTimeout(() => controller.abort(), 3500);
 
     const res = await fetch(urlStr, {
       signal: controller.signal,
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9",
+        Range: "bytes=0-65535",
       },
     });
     clearTimeout(timeout);
 
-    if (!res.ok) {
+    if (!res.ok && res.status !== 206) {
       return { domain: parsed.hostname };
     }
 
-    const html = await res.text();
+    let html = "";
+    if (res.body) {
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let bytesRead = 0;
+      while (bytesRead < 65536) {
+        const { done, value } = await reader.read();
+        if (done || !value) break;
+        bytesRead += value.length;
+        html += decoder.decode(value, { stream: true });
+        // Stop early if we have passed the document head or found both og:title and og:description
+        if (html.includes("</head>") || (html.includes("og:title") && html.includes("og:description"))) {
+          try {
+            reader.cancel();
+          } catch {}
+          break;
+        }
+      }
+    } else {
+      html = await res.text();
+    }
 
     // Extract OpenGraph or Twitter or standard title
     const ogTitle =
@@ -145,7 +191,6 @@ async function extractUrlMetadata(urlStr: string): Promise<{
       domain: parsed.hostname,
     };
   } catch (err) {
-    console.error("[extractUrlMetadata] Failed:", err);
     try {
       return { domain: new URL(urlStr).hostname };
     } catch {
@@ -204,13 +249,19 @@ export const checkNewsFactServer = createServerFn({ method: "POST" })
 
     if (!isEnterprise) {
       return {
-        query: input,
+        query: rawInput,
         isUrl: false,
         claims: [],
         status: "error",
         message:
           "The Live Fact-Check Scanner is exclusively available on Enterprise and Enterprise Plus licenses.",
       };
+    }
+
+    // 0. High-speed cache check (instant return for repeated queries/URLs)
+    const cached = getFromCache(rawInput);
+    if (cached) {
+      return cached;
     }
 
     const googleApiKey =
@@ -278,9 +329,9 @@ export const checkNewsFactServer = createServerFn({ method: "POST" })
       }
     }
 
-    // 2. If claims were found in Google's database, return them
+    // 2. If claims were found in Google's database, cache and return immediately
     if (claims.length > 0) {
-      return {
+      const result: FactCheckResponse = {
         query: rawInput,
         isUrl,
         extractedTitle,
@@ -289,6 +340,8 @@ export const checkNewsFactServer = createServerFn({ method: "POST" })
         claims,
         status: "found",
       };
+      setToCache(rawInput, result);
+      return result;
     }
 
     // 3. Fallback / AI-Powered Fact-Checking & Credibility Verification
@@ -298,7 +351,6 @@ export const checkNewsFactServer = createServerFn({ method: "POST" })
         "gemini-flash-latest",
         "gemini-3.8-flash",
         "gemini-3.6-flash",
-        "gemini-3-flash-preview",
       ];
 
       const prompt = `You are an expert news fact-checker and investigative journalist cross-referencing accredited fact-checking registries (such as PIB Fact Check, AFP Fact Check, Boom Live, Snopes, PolitiFact, Vishvas News, Alt News).
@@ -310,7 +362,7 @@ ${sourceDomain ? `Source Domain: "${sourceDomain}"` : ""}
 Check if this is a known viral hoax, fake government scheme, clickbait/misleading claim, or authentic news.
 Identify any accredited fact-checkers who have investigated or debunked this or similar claims.
 
-Return ONLY a valid JSON object without markdown code blocks, with this exact schema:
+Return ONLY a valid JSON object with this exact schema:
 {
   "verdict": "FALSE" | "MISLEADING" | "LIKELY TRUE" | "UNVERIFIED",
   "confidence": <integer between 50 and 99>,
@@ -324,17 +376,26 @@ Return ONLY a valid JSON object without markdown code blocks, with this exact sc
 
       for (const model of modelsToTry) {
         try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 4500);
+
           const geminiRes = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${settings.geminiApiKey}`,
             {
               method: "POST",
+              signal: controller.signal,
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.1 },
+                generationConfig: {
+                  temperature: 0.1,
+                  maxOutputTokens: 350,
+                  responseMimeType: "application/json",
+                },
               }),
             },
           );
+          clearTimeout(timer);
 
           if (geminiRes.ok) {
             const gJson = (await geminiRes.json()) as any;
@@ -380,7 +441,7 @@ Return ONLY a valid JSON object without markdown code blocks, with this exact sc
       }
     }
 
-    return {
+    const finalResult: FactCheckResponse = {
       query: rawInput,
       isUrl,
       extractedTitle,
@@ -394,4 +455,7 @@ Return ONLY a valid JSON object without markdown code blocks, with this exact sc
           ? "No accredited fact-check match found in the database. Please verify with official press releases."
           : undefined,
     };
+
+    setToCache(rawInput, finalResult);
+    return finalResult;
   });

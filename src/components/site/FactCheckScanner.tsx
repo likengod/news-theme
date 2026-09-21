@@ -48,17 +48,26 @@ export function FactCheckScanner() {
 
     const isUrl = /^https?:\/\//i.test(textToSearch);
 
-    try {
-      if (isUrl) {
-        setScanStep("Extracting article title, OpenGraph metadata & key claims...");
-        await new Promise((r) => setTimeout(r, 600));
+    setScanStep(
+      isUrl
+        ? "Extracting article title & OpenGraph metadata..."
+        : "Querying Google Fact Check Tools API & international registries...",
+    );
+
+    const steps = [
+      "Cross-referencing accredited debunk registries (PIB, Boom Live, AFP)...",
+      "Analyzing editorial ratings & linguistic credibility signals...",
+      "Synthesizing investigative verdict & primary sources...",
+    ];
+    let stepIdx = 0;
+    const interval = setInterval(() => {
+      if (stepIdx < steps.length) {
+        setScanStep(steps[stepIdx]);
+        stepIdx++;
       }
+    }, 600);
 
-      setScanStep("Querying Google Fact Check Tools API & international debunk registries...");
-      await new Promise((r) => setTimeout(r, 600));
-
-      setScanStep("Analyzing accredited ratings & credibility signals...");
-
+    try {
       const res = await checkNewsFactServer({ data: { query: textToSearch } });
       setResult(res);
     } catch (err: any) {
@@ -67,6 +76,7 @@ export function FactCheckScanner() {
         err?.message || "Failed to scan news. Please check your connection and try again.",
       );
     } finally {
+      clearInterval(interval);
       setIsScanning(false);
       setScanStep("");
     }
