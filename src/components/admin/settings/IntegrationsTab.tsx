@@ -64,6 +64,12 @@ const aiFields: FieldDef[] = [
     guideUrl: "https://aistudio.google.com/",
   },
   {
+    key: "googleFactCheckApiKey",
+    label: "Google Fact Check Tools API Key",
+    hint: "For /fact-checking-policy Live News Scanner. (Defaults to Gemini API Key if left blank).",
+    guideUrl: "https://console.cloud.google.com/apis/library/factchecktools.googleapis.com",
+  },
+  {
     key: "openAiApiKey",
     label: "OpenAI API Key (Optional fallback)",
     hint: "Get from platform.openai.com.",

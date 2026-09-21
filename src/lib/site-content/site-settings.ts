@@ -48,8 +48,9 @@ export type SiteSettings = {
   facebookPixelId: string;
   firebaseConfigJson: string; // raw JSON pasted from Firebase
 
-  // AI API Keys
+  // AI & Verification API Keys
   geminiApiKey?: string;
+  googleFactCheckApiKey?: string;
   openAiApiKey?: string;
   deepseekApiKey?: string;
   kimiApiKey?: string;
@@ -260,6 +261,7 @@ export const defaultSettings: SiteSettings = {
   firebaseConfigJson: "",
 
   geminiApiKey: "",
+  googleFactCheckApiKey: "",
   openAiApiKey: "",
   deepseekApiKey: "",
   kimiApiKey: "",
