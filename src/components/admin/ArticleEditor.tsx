@@ -36,6 +36,7 @@ export default function ArticleEditor({
 }) {
   const s = useSiteSettings();
   const planType = (s.licenseType || "").toLowerCase();
+  const isEnterprise = planType.includes("enterprise");
   const isEnterprisePlus =
     planType.includes("enterprise+") ||
     planType.includes("enterprise plus");
