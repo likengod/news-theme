@@ -21,6 +21,7 @@ const MarketsMagazine = lazy(() =>
 );
 const Footer = lazy(() => import("@/components/site/Footer").then((m) => ({ default: m.Footer })));
 
+const SITE_URL = "/";
 const HOME_IMG = heroMarkets;
 const HOME_TITLE = "News Theme – Breaking News | Finance | Business | Market";
 const HOME_DESC =
