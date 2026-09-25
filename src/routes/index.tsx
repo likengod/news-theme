@@ -21,7 +21,6 @@ const MarketsMagazine = lazy(() =>
 );
 const Footer = lazy(() => import("@/components/site/Footer").then((m) => ({ default: m.Footer })));
 
-const SITE_URL = "/";
 const HOME_IMG = heroMarkets;
 const HOME_TITLE = "News Theme – Breaking News | Finance | Business | Market";
 const HOME_DESC =
@@ -56,7 +55,7 @@ export const Route = createFileRoute("/")({
   head: ({ loaderData }: any) => {
     const firstArticle = loaderData?.articles?.[0];
     const heroImage = firstArticle ? getArticleImage(firstArticle.featuredImage, 0) : HOME_IMG;
-    const links: Array<Record<string, any>> = [{ rel: "canonical", href: SITE_URL }];
+    const links: Array<Record<string, any>> = [{ rel: "canonical", href: "/" }];
     if (heroImage) {
       links.push({
         rel: "preload",
@@ -73,7 +72,7 @@ export const Route = createFileRoute("/")({
         { property: "og:title", content: HOME_TITLE },
         { property: "og:description", content: HOME_DESC },
         { property: "og:type", content: "website" },
-        { property: "og:url", content: SITE_URL },
+        { property: "og:url", content: "/" },
         { property: "og:image", content: heroImage || HOME_IMG },
         { property: "og:image:width", content: "1200" },
         { property: "og:image:height", content: "630" },

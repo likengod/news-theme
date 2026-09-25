@@ -178,7 +178,9 @@ const server = createServer(async (req, res) => {
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         res.setHeader("X-Cache", "HIT");
-        res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
         res.setHeader("X-Content-Type-Options", "nosniff");
         res.setHeader("X-Frame-Options", "SAMEORIGIN");
 
@@ -223,6 +225,11 @@ const server = createServer(async (req, res) => {
 
     const contentType = response.headers.get("content-type") || "";
     const isHtml = contentType.includes("text/html");
+    if (isHtml) {
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+    }
 
     // Read full response body
     let bodyBuffer = Buffer.alloc(0);
