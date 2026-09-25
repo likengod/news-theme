@@ -117,7 +117,9 @@ export const Route = createFileRoute("/news/$slug")({
       ],
       links: [
         { rel: "canonical", href: url },
-        { rel: "preload", as: "image", href: data.hero, fetchPriority: "high" },
+        ...(data.hero && typeof data.hero === "string" && data.hero.trim()
+          ? [{ rel: "preload", as: "image", href: absImg, fetchPriority: "high" }]
+          : []),
       ],
       scripts: [
         {
