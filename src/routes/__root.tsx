@@ -320,10 +320,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       });
     }
 
-    if (canonicalBase) {
-      links.push({ rel: "canonical", href: canonicalBase });
-    }
-
     return {
       meta: metaTags,
       links: links,

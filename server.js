@@ -160,6 +160,7 @@ const server = createServer(async (req, res) => {
     const host = req.headers.host || "127.0.0.1:3000";
     const proto = req.headers["x-forwarded-proto"] || "http";
     const url = new URL(rawUrl, `${proto}://${host}`);
+    process.env.APP_ORIGIN = `${proto}://${host}`;
 
     // Fast-path: SSR In-Memory Micro-Cache for public anonymous HTML GET requests
     const isPublicGet =

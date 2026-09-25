@@ -7,6 +7,7 @@ import { Columnists } from "@/components/site/Columnists";
 import { LazySection } from "@/components/site/LazySection";
 import { getHomepageArticles } from "@/lib/articles.functions";
 import { getTags } from "@/lib/taxonomy.functions";
+import { getSiteSettingsServer } from "@/lib/site-content";
 import { getArticleImage } from "@/lib/news-data";
 
 // Below-the-fold sections: code-split so they aren't in the initial JS bundle.
@@ -30,7 +31,7 @@ const HOME_DESC =
 export const Route = createFileRoute("/")({
   loader: async () => {
     try {
-      const [articles, tags] = await Promise.all([
+      const [articles, tags, settings] = await Promise.all([
         getHomepageArticles({ data: 25 }).catch((err) => {
           console.warn(
             "[Homepage Loader] getHomepageArticles fallback to empty:",
@@ -42,20 +43,34 @@ export const Route = createFileRoute("/")({
           console.warn("[Homepage Loader] getTags fallback to empty:", err?.message || err);
           return [];
         }),
+        getSiteSettingsServer().catch(() => null),
       ]);
       return {
         articles: Array.isArray(articles) ? articles : [],
         tags: Array.isArray(tags) ? tags : [],
+        settings,
       };
     } catch (err) {
       console.error("[Homepage Loader] Top-level error, rendering fallback:", err);
-      return { articles: [], tags: [] };
+      return { articles: [], tags: [], settings: null };
     }
   },
   head: ({ loaderData }: any) => {
+    const s = loaderData?.settings;
     const firstArticle = loaderData?.articles?.[0];
     const heroImage = firstArticle ? getArticleImage(firstArticle.featuredImage, 0) : HOME_IMG;
-    const links: Array<Record<string, any>> = [{ rel: "canonical", href: "/" }];
+    const canonicalBase =
+      s?.seoCanonicalBaseUrl?.trim()?.replace(/\/$/, "") ||
+      (typeof process !== "undefined" && process.env?.APP_ORIGIN
+        ? process.env.APP_ORIGIN.replace(/\/$/, "")
+        : "") ||
+      (typeof window !== "undefined" && window.location?.origin
+        ? window.location.origin
+        : "https://todaytripura.com");
+
+    const canonicalUrl = `${canonicalBase}/`;
+
+    const links: Array<Record<string, any>> = [{ rel: "canonical", href: canonicalUrl }];
     if (heroImage) {
       links.push({
         rel: "preload",
@@ -65,21 +80,27 @@ export const Route = createFileRoute("/")({
       });
     }
 
+    const siteTitle = s?.siteName || "News Theme";
+    const title = s?.siteName
+      ? `${s.siteName} – ${s.tagline || "Breaking News"}`
+      : HOME_TITLE;
+    const desc = s?.metaDescription || HOME_DESC;
+
     return {
       meta: [
-        { title: HOME_TITLE },
-        { name: "description", content: HOME_DESC },
-        { property: "og:title", content: HOME_TITLE },
-        { property: "og:description", content: HOME_DESC },
+        { title: title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
         { property: "og:type", content: "website" },
-        { property: "og:url", content: "/" },
+        { property: "og:url", content: canonicalUrl },
         { property: "og:image", content: heroImage || HOME_IMG },
         { property: "og:image:width", content: "1200" },
         { property: "og:image:height", content: "630" },
-        { property: "og:site_name", content: "News Theme" },
+        { property: "og:site_name", content: siteTitle },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: HOME_TITLE },
-        { name: "twitter:description", content: HOME_DESC },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: desc },
         { name: "twitter:image", content: heroImage || HOME_IMG },
       ],
       links,
