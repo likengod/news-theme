@@ -28,6 +28,8 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
                 alt=""
                 loading="lazy"
                 decoding="async"
+                width={56}
+                height={56}
                 className="h-14 w-14 shrink-0 object-cover"
               />
               <div>
@@ -67,6 +69,8 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
                   alt=""
                   loading="lazy"
                   decoding="async"
+                  width={56}
+                  height={56}
                   className="h-14 w-14 shrink-0 object-cover"
                 />
                 <div>

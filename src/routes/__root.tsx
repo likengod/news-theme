@@ -310,14 +310,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ];
 
     if (googleFontsUrl) {
-      links.push({
-        rel: "preload",
-        as: "style",
-        href: googleFontsUrl,
-      });
-      scripts.push({
-        children: `(function(){var l=document.createElement('link');l.rel='stylesheet';l.href=${JSON.stringify(googleFontsUrl)};l.media='print';l.onload=function(){this.media='all'};document.head.appendChild(l);})();`,
-      });
+      links.push(
+        {
+          rel: "preload",
+          as: "style",
+          href: googleFontsUrl,
+        },
+        {
+          rel: "stylesheet",
+          href: googleFontsUrl,
+          media: "print",
+        },
+      );
     }
 
     return {
@@ -375,11 +379,16 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        <script dangerouslySetInnerHTML={{ __html: chunkRecoveryScript }} />
         <HeadContent />
       </head>
       <body>
         {children}
+        <script dangerouslySetInnerHTML={{ __html: chunkRecoveryScript }} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var ls=document.querySelectorAll('link[media="print"]');for(var i=0;i<ls.length;i++){ls[i].media='all';}})();`,
+          }}
+        />
         <Scripts />
       </body>
     </html>

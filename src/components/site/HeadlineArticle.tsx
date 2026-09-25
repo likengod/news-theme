@@ -50,9 +50,9 @@ export function HeadlineArticle({
           <img
             src={item.img}
             alt={item.title}
-            loading={priority ? "eager" : "lazy"}
-            fetchPriority={priority ? "high" : "auto"}
-            decoding={priority ? "sync" : "async"}
+            loading="lazy"
+            fetchPriority="auto"
+            decoding="async"
             width={400}
             height={250}
             className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-105"

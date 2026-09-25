@@ -71,14 +71,6 @@ export const Route = createFileRoute("/")({
     const canonicalUrl = `${canonicalBase}/`;
 
     const links: Array<Record<string, any>> = [{ rel: "canonical", href: canonicalUrl }];
-    if (heroImage) {
-      links.push({
-        rel: "preload",
-        as: "image",
-        href: heroImage,
-        fetchPriority: "high",
-      });
-    }
 
     const siteTitle = s?.siteName || "News Theme";
     const title = s?.siteName

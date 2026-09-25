@@ -205,6 +205,12 @@ export default function Advertisement({
   const isScriptAd =
     slotMode === "script" || currentItem?.type === "script" || !!currentItem?.scriptCode;
 
+  const [wRatio, hRatio] = (aspectRatio || "3 / 4")
+    .split("/")
+    .map((v) => parseFloat(v.trim()) || 1);
+  const imgWidth = Math.round(((wRatio || 3) / (hRatio || 4)) * 600) || 600;
+  const imgHeight = 600;
+
   if (items.length === 0 && !isScriptAd) return null;
 
   return (
@@ -256,6 +262,8 @@ export default function Advertisement({
                       alt="Advertisement"
                       loading="lazy"
                       decoding="async"
+                      width={imgWidth}
+                      height={imgHeight}
                       className={`h-full w-full ${slot === "home1" || slot === "ad3" ? "object-cover" : "object-contain"}`}
                     />
                   ) : null

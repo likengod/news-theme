@@ -191,6 +191,8 @@ export const NewsGrid = React.memo(function NewsGrid({
                     alt={col.lead}
                     loading="lazy"
                     decoding="async"
+                    width={400}
+                    height={300}
                     className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   {col.hasVideo && (

@@ -91,10 +91,12 @@ export function ReelsSection() {
                     <img
                       src={thumb}
                       alt={it.title ?? "Reel"}
+                      width={180}
+                      height={320}
                       className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading={idx < 2 ? "eager" : "lazy"}
-                      fetchPriority={idx === 0 ? "high" : "auto"}
-                      decoding={idx === 0 ? "sync" : "async"}
+                      loading="lazy"
+                      fetchPriority="low"
+                      decoding="async"
                     />
 
                     {/* Dark gradient overlay at bottom for clean text legibility */}

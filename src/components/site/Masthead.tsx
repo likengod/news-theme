@@ -112,6 +112,9 @@ export function Masthead() {
                     <img
                       src={s.logoLight}
                       alt={s.logoText || "Logo"}
+                      width={160}
+                      height={80}
+                      decoding="async"
                       className={`h-11 sm:h-16 md:h-20 lg:h-22 w-auto max-w-[80px] sm:max-w-[120px] md:max-w-[160px] object-contain ${
                         s.logoDark ? "dark:hidden" : ""
                       }`}
@@ -121,6 +124,9 @@ export function Masthead() {
                     <img
                       src={s.logoDark}
                       alt={s.logoText || "Logo"}
+                      width={160}
+                      height={80}
+                      decoding="async"
                       className={`h-11 sm:h-16 md:h-20 lg:h-22 w-auto max-w-[80px] sm:max-w-[120px] md:max-w-[160px] object-contain ${
                         s.logoLight ? "hidden dark:block" : ""
                       }`}
@@ -168,6 +174,9 @@ export function Masthead() {
                   <img
                     src={s.logoLight}
                     alt={s.logoText || "Logo"}
+                    width={800}
+                    height={160}
+                    decoding="async"
                     className={`w-full max-w-5xl h-auto max-h-36 sm:max-h-48 md:max-h-60 object-contain mx-auto ${
                       s.logoDark ? "dark:hidden" : ""
                     }`}
@@ -177,6 +186,9 @@ export function Masthead() {
                   <img
                     src={s.logoDark}
                     alt={s.logoText || "Logo"}
+                    width={800}
+                    height={160}
+                    decoding="async"
                     className={`w-full max-w-5xl h-auto max-h-36 sm:max-h-48 md:max-h-60 object-contain mx-auto ${
                       s.logoLight ? "hidden dark:block" : ""
                     }`}
@@ -194,6 +206,9 @@ export function Masthead() {
                   <img
                     src={s.logoLight}
                     alt={s.logoText || "Logo"}
+                    width={200}
+                    height={64}
+                    decoding="async"
                     className={`mx-auto h-16 object-contain ${
                       s.logoDark ? "dark:hidden" : ""
                     } ${showText ? "mb-2" : ""}`}
@@ -203,6 +218,9 @@ export function Masthead() {
                   <img
                     src={s.logoDark}
                     alt={s.logoText || "Logo"}
+                    width={200}
+                    height={64}
+                    decoding="async"
                     className={`mx-auto h-16 object-contain ${
                       s.logoLight ? "hidden dark:block" : ""
                     } ${showText ? "mb-2" : ""}`}

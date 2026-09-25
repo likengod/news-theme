@@ -82,6 +82,10 @@ export function Footer() {
               <img
                 src={footerLight}
                 alt={s.logoText || "Logo"}
+                width={180}
+                height={48}
+                loading="lazy"
+                decoding="async"
                 className={`h-12 object-contain ${footerDark ? "dark:hidden" : ""} ${showText ? "mb-3" : ""}`}
               />
             )}
@@ -89,6 +93,10 @@ export function Footer() {
               <img
                 src={footerDark}
                 alt={s.logoText || "Logo"}
+                width={180}
+                height={48}
+                loading="lazy"
+                decoding="async"
                 className={`h-12 object-contain ${footerLight ? "hidden dark:block" : ""} ${showText ? "mb-3" : ""}`}
               />
             )}

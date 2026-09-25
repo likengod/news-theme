@@ -29,6 +29,8 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                   alt={activeBottomItems[0].title}
                   loading="lazy"
                   decoding="async"
+                  width={400}
+                  height={300}
                   className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
@@ -56,6 +58,8 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                   alt={activeBottomItems[1].title}
                   loading="lazy"
                   decoding="async"
+                  width={400}
+                  height={300}
                   className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>

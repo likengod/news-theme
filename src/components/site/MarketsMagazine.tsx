@@ -187,9 +187,10 @@ export function MarketsMagazine({
             <img
               src={leadArt ? getArticleImage(leadArt.featuredImage, 0) : artImg}
               alt="Lead Article"
-              loading="eager"
-              // @ts-ignore
-              fetchPriority="high"
+              loading="lazy"
+              decoding="async"
+              width={354}
+              height={235}
               className="h-[235px] w-full object-cover"
             />
             <figcaption className="mt-1 text-right font-sans text-[10px] leading-tight text-muted-foreground">
@@ -242,6 +243,8 @@ export function MarketsMagazine({
                   alt=""
                   loading="lazy"
                   decoding="async"
+                  width={406}
+                  height={196}
                   className="h-full w-full object-cover"
                 />
               </a>
@@ -264,6 +267,8 @@ export function MarketsMagazine({
               alt="Pension Fund"
               loading="lazy"
               decoding="async"
+              width={194}
+              height={130}
               className="h-[130px] w-full object-cover md:w-[194px]"
             />
             <div>
