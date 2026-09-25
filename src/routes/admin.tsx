@@ -9,6 +9,7 @@ import {
 import { authClient as supabase } from "@/lib/auth-client";
 import { getUserServer, getCurrentUserRole } from "@/lib/auth.functions";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { isEnterprisePlusLicense } from "@/lib/site-content";
 import { getGitStatus } from "@/lib/deploy.functions";
 import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
 import { AdminTopBar } from "@/components/admin/layout/AdminTopBar";
@@ -78,10 +79,7 @@ function AdminLayout() {
   const [open, setOpen] = useState(false);
 
   const s = useSiteSettings();
-  const planType = (s.licenseType || "").toLowerCase();
-  const isEnterprisePlus =
-    planType.includes("enterprise+") ||
-    planType.includes("enterprise plus");
+  const isEnterprisePlus = isEnterprisePlusLicense(s);
 
   // Force light theme inside admin only
   useEffect(() => {

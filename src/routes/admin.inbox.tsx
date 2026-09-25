@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Inbox, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { isEnterprisePlusLicense } from "@/lib/site-content";
 import {
   adminGetInboxRequests,
   adminGetInboxSummary,
@@ -29,8 +30,7 @@ export const Route = createFileRoute("/admin/inbox")({
 
 function AdminInboxPage() {
   const s = useSiteSettings();
-  const planType = (s.licenseType || "").toLowerCase();
-  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
+  const isEnterprisePlus = isEnterprisePlusLicense(s);
 
   const [requests, setRequests] = useState<InboxRequest[]>([]);
   const visibleRequests = requests.filter((req) => isEnterprisePlus || req.type !== "withdraw");

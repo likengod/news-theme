@@ -139,5 +139,3 @@ function persistAllAdConfiguration(config) {
 }
 //#endregion
 export { persistAllAdConfiguration, persistBase64Image, persistDocumentImage };
-
-//# sourceMappingURL=ad-storage.server-B8sKpu9k.js.map

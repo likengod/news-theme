@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router"
 import { toast } from "sonner";
 import { Save, Lock } from "lucide-react";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
 import {
   loadAds,
   saveAds,
@@ -65,10 +66,8 @@ function AdvertisementsPage() {
   const navigate = useNavigate();
   const router = useRouter();
   const s = useSiteSettings();
-  const planType = (s.licenseType || "").toLowerCase();
-  
-  const isEnterprise = planType.includes("enterprise");
-  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
+  const isEnterprise = isEnterpriseLicense(s);
+  const isEnterprisePlus = isEnterprisePlusLicense(s);
 
   const [tab, setTab] = useState<Tab>("home1");
   const [ads, setAds] = useState<AdSlideItem[]>([]);

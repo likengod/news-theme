@@ -37,5 +37,3 @@ function ArticleError({ error, reset }) {
 }
 //#endregion
 export { ArticleError as errorComponent };
-
-//# sourceMappingURL=news._slug-Cxd2LUsz.js.map

@@ -16,5 +16,3 @@ var attachAuth = createMiddleware({ type: "function" }).client(async ({ next }) 
 });
 //#endregion
 export { attachAuth as t };
-
-//# sourceMappingURL=auth-attacher-BdoDOpyC.js.map

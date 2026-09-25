@@ -29,7 +29,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { roleBadgeClass } from "@/lib/roles";
 import { loadAuthorized, type AuthorizedSettings } from "@/lib/authorized-settings";
-import { loadSettings } from "@/lib/site-content";
+import { loadSettings, isEnterprisePlusLicense } from "@/lib/site-content";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { Footer } from "@/components/site/Footer";
 
@@ -109,8 +109,7 @@ function VerifiedPage() {
   const [notFound, setNotFound] = useState(initialResult?.found === false);
   const [settings, setSettings] = useState(() => loadSettings());
   const siteSettings = useSiteSettings();
-  const planType = (siteSettings?.licenseType || settings?.licenseType || "").toLowerCase();
-  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
+  const isEnterprisePlus = isEnterprisePlusLicense(siteSettings || settings);
 
   useEffect(() => {
     setSettings(loadSettings());

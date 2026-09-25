@@ -19,5 +19,3 @@ function useServerFn(serverFn) {
 }
 //#endregion
 export { useServerFn as t };
-
-//# sourceMappingURL=useServerFn-BqzygRuj.js.map

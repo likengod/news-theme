@@ -386,5 +386,3 @@ var adminApproveJournalistApplication = createServerFn({ method: "POST" }).middl
 });
 //#endregion
 export { adminApproveAccountDeletion_createServerFn_handler, adminApproveJournalistApplication_createServerFn_handler, adminDeleteInboxRequest_createServerFn_handler, adminGetInboxRequests_createServerFn_handler, adminGetInboxSummary_createServerFn_handler, adminUpdateInboxStatus_createServerFn_handler, submitContactMessage_createServerFn_handler, submitDeleteAccountRequest_createServerFn_handler, submitEventRegistration_createServerFn_handler, submitJournalistApplication_createServerFn_handler, submitWithdrawRequest_createServerFn_handler, submitWorkWithUs_createServerFn_handler };
-
-//# sourceMappingURL=inbox.functions-DjBDZmrE.js.map

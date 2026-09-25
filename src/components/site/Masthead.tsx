@@ -152,7 +152,7 @@ export function Masthead() {
                       {secondaryWord}
                     </span>
                   </h1>
-                  <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[11px] md:text-xs font-semibold uppercase tracking-[0.16em] sm:tracking-[0.24em] md:tracking-[0.32em] text-muted-foreground">
+                  <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[11px] md:text-xs font-semibold uppercase tracking-[0.16em] sm:tracking-[0.24em] md:tracking-[0.32em] text-foreground/80 dark:text-foreground/85">
                     {taglineContent}
                   </div>
                 </div>
@@ -236,7 +236,7 @@ export function Masthead() {
                 )}
               </Link>
               {showText && (
-                <p className="mt-2.5 sm:mt-3 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.25em] md:tracking-[0.35em] text-muted-foreground">
+                <p className="mt-2.5 sm:mt-3 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.25em] md:tracking-[0.35em] text-foreground/80 dark:text-foreground/85">
                   {taglineContent}
                 </p>
               )}
@@ -245,7 +245,7 @@ export function Masthead() {
         </div>
       </header>
 
-      <nav className="hidden border-t border-border md:block md:sticky md:top-11 md:z-30 md:bg-background/90 md:backdrop-blur-md md:border-b h-11">
+      <nav className="hidden border-t border-border md:block md:sticky md:top-11 md:z-30 md:bg-background md:border-b h-11">
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-4 px-4">
           <div className="flex flex-1 flex-wrap items-center justify-center gap-1 text-sm font-semibold uppercase tracking-wider">
             <Link

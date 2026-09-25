@@ -15,6 +15,7 @@ import { authClient as supabase } from "@/lib/auth-client";
 import { getCurrentUserRole } from "@/lib/auth.functions";
 import { setCurrentRoleId } from "@/lib/roles";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { isEnterprisePlusLicense } from "@/lib/site-content";
 import { useTheme } from "@/lib/theme";
 
 type User = { id: string; email?: string; user_metadata?: Record<string, unknown> };
@@ -60,8 +61,7 @@ function getPoints(userId: string): number {
 
 export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile" }) {
   const s = useSiteSettings();
-  const planType = (s.licenseType || "").toLowerCase();
-  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
+  const isEnterprisePlus = isEnterprisePlusLicense(s);
 
   const [user, setUser] = useState<User | null>(null);
   const [points, setPoints] = useState<number>(0);

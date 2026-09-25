@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Gift, Award, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { isEnterprisePlusLicense } from "@/lib/site-content";
 import {
   loadRewards,
   saveRewards,
@@ -40,10 +41,7 @@ export const Route = createFileRoute("/admin/rewards")({
 function RewardsPage() {
   const navigate = useNavigate();
   const s = useSiteSettings();
-  const planType = (s.licenseType || "").toLowerCase();
-  const isEnterprisePlus =
-    planType.includes("enterprise+") ||
-    planType.includes("enterprise plus");
+  const isEnterprisePlus = isEnterprisePlusLicense(s);
 
   useEffect(() => {
     if (!isEnterprisePlus) {

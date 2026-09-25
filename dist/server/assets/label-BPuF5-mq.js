@@ -13,5 +13,3 @@ var Label = React$1.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */
 Label.displayName = LabelPrimitive.Root.displayName;
 //#endregion
 export { Label as t };
-
-//# sourceMappingURL=label-BPuF5-mq.js.map

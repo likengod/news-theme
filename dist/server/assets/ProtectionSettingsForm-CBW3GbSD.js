@@ -246,5 +246,3 @@ function ProtectionSettingsForm({ s, update }) {
 }
 //#endregion
 export { ProtectionSettingsForm };
-
-//# sourceMappingURL=ProtectionSettingsForm-CBW3GbSD.js.map

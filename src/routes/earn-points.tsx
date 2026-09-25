@@ -15,6 +15,7 @@ import { FaFacebookF, FaInstagram, FaYoutube, FaWhatsapp } from "react-icons/fa6
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { isEnterprisePlusLicense } from "@/lib/site-content";
 import { authClient as supabase } from "@/lib/auth-client";
 import {
   getUniqueSharesCount,
@@ -133,8 +134,7 @@ function saveState(userId: string, state: State) {
 
 function EarnPointsPage() {
   const settings = useSiteSettings();
-  const planType = (settings.licenseType || "").toLowerCase();
-  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
+  const isEnterprisePlus = isEnterprisePlusLicense(settings);
 
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);

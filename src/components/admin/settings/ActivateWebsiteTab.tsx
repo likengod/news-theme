@@ -246,7 +246,7 @@ export function ActivateWebsiteTab({
               </span>
               <div className="mt-1 flex items-center gap-1.5">
                 <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-extrabold text-emerald-800">
-                  {s.licenseType || "Enterprise Plus"}
+                  {s.licenseType || "Standard"}
                 </span>
                 <span className="rounded-full bg-slate-900 px-2.5 py-0.5 text-[10px] font-bold text-white">
                   {s.licenseRole || "VIP"}

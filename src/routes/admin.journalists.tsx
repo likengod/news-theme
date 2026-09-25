@@ -35,6 +35,7 @@ import type { EditForm } from "@/components/admin/journalists/JournalistFormModa
 import { JournalistsListTab } from "@/components/admin/journalists/JournalistsListTab";
 import { RanksTab } from "@/components/admin/journalists/RanksTab";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { isEnterprisePlusLicense } from "@/lib/site-content";
 
 function emptyForm(): EditForm {
   return {
@@ -92,10 +93,7 @@ type TabKey = "journalists" | "ranks" | "authorized";
 function JournalistsPage() {
   const qc = useQueryClient();
   const siteSettings = useSiteSettings();
-  const planType = (siteSettings?.licenseType || "").toLowerCase();
-  const isEnterprisePlus =
-    planType.includes("enterprise+") ||
-    planType.includes("enterprise plus");
+  const isEnterprisePlus = isEnterprisePlusLicense(siteSettings);
 
   const [tab, setTab] = useState<TabKey>("journalists");
   const effectiveTab = !isEnterprisePlus && tab === "ranks" ? "journalists" : tab;

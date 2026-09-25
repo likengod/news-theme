@@ -1,19 +1,15 @@
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import heroMarkets from "@/assets/hero-markets.webp";
 import { Header } from "@/components/site/Header";
 import { HeroBoard } from "@/components/site/HeroBoard";
+import { Columnists } from "@/components/site/Columnists";
 import { LazySection } from "@/components/site/LazySection";
-import { useQuery } from "@tanstack/react-query";
 import { getHomepageArticles } from "@/lib/articles.functions";
 import { getTags } from "@/lib/taxonomy.functions";
 import { getArticleImage } from "@/lib/news-data";
-import { Newspaper } from "lucide-react";
 
 // Below-the-fold sections: code-split so they aren't in the initial JS bundle.
-const Columnists = lazy(() =>
-  import("@/components/site/Columnists").then((m) => ({ default: m.Columnists })),
-);
 const NewsGrid = lazy(() =>
   import("@/components/site/NewsGrid").then((m) => ({ default: m.NewsGrid })),
 );
@@ -25,11 +21,11 @@ const MarketsMagazine = lazy(() =>
 );
 const Footer = lazy(() => import("@/components/site/Footer").then((m) => ({ default: m.Footer })));
 
-const SITE_URL = "https://gorillatechsolution.com";
-const HOME_IMG = `${SITE_URL}${heroMarkets}`;
+const HOME_IMG = heroMarkets;
 const HOME_TITLE = "News Theme – Breaking News | Finance | Business | Market";
 const HOME_DESC =
   "Breaking news, market intelligence, and sharp business analysis from News Theme.";
+
 
 export const Route = createFileRoute("/")({
   loader: async () => {
@@ -104,9 +100,7 @@ function Home() {
       <main className="mx-auto max-w-7xl px-4 py-4 md:py-10">
         {/* On Mobile Devices (< md): Render Watch section directly below Header */}
         <div className="block md:hidden border-b border-border mb-2 pb-2">
-          <Suspense fallback={<div className="min-h-[130px] w-full" />}>
-            <Columnists hideTitle />
-          </Suspense>
+          <Columnists hideTitle />
         </div>
 
         <HeroBoard articles={dbArticles} tags={dbTags} />

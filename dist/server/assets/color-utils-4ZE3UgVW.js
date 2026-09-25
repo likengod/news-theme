@@ -75,5 +75,3 @@ function getAccessibleLogoColor(color = "#dc2626", isDark = false, minRatio = 4.
 }
 //#endregion
 export { getAccessibleLogoColor as n, getContrastRatio as r, ensureAccessibleColor as t };
-
-//# sourceMappingURL=color-utils-4ZE3UgVW.js.map

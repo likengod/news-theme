@@ -52,5 +52,3 @@ var initializeGitRepo = createServerFn({ method: "POST" }).handler(initializeGit
 });
 //#endregion
 export { buildProject_createServerFn_handler, getDeployHistory_createServerFn_handler, getDeployLog_createServerFn_handler, getGitStatus_createServerFn_handler, gitPull_createServerFn_handler, initializeGitRepo_createServerFn_handler };
-
-//# sourceMappingURL=deploy.functions-C0rgJZP5.js.map

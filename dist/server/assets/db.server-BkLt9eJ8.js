@@ -152,5 +152,3 @@ if (loadDbConfig()) initializeDatabase().then(() => cleanupExpiredSessions()).ca
 });
 //#endregion
 export { initializeDatabase as a, safeCreateIndex as c, hashPassword as i, testDbConnection as l, closePool as n, loadDbConfig as o, getPool as r, query as s, cleanupExpiredSessions as t };
-
-//# sourceMappingURL=db.server-BkLt9eJ8.js.map

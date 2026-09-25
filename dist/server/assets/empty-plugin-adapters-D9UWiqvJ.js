@@ -3,5 +3,3 @@ var pluginSerializationAdapters = [];
 var hasPluginAdapters = false;
 //#endregion
 export { hasPluginAdapters, pluginSerializationAdapters };
-
-//# sourceMappingURL=empty-plugin-adapters-D9UWiqvJ.js.map

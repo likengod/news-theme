@@ -15,10 +15,13 @@ export default defineConfig({
     allowedHosts: ["todaytripura.com", "www.todaytripura.com", "localhost"],
   },
   build: {
-    emptyOutDir: false,
-    sourcemap: true,
-    modulePreload: false,
+    emptyOutDir: true,
+    sourcemap: false,
+    modulePreload: true,
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 1000,
   },
+
   plugins: [
     tailwindcss(),
     tsconfigPaths({ projects: ["./tsconfig.json"] }),

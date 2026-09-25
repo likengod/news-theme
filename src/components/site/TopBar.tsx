@@ -132,15 +132,17 @@ export function TopBar() {
 
   return (
     <div
-      className="sticky top-0 z-45 h-11 border-b border-border bg-background/90 backdrop-blur-md transition-colors duration-300"
+      className="sticky top-0 z-45 h-11 border-b border-border bg-background transition-colors duration-300"
       style={{
         backgroundColor: (mounted && settings.topBarBgColor) || undefined,
         borderColor: mounted && settings.topBarBgColor ? "transparent" : undefined,
       }}
     >
       <div
-        className={`mx-auto flex h-full max-w-7xl items-center justify-between gap-2 px-4 text-[11px] uppercase tracking-widest ${
-          mounted && settings.topBarTextColor ? "" : "text-muted-foreground"
+        className={`mx-auto flex h-full max-w-7xl items-center justify-between gap-2 px-4 text-[11px] font-medium uppercase tracking-widest ${
+          mounted && settings.topBarTextColor
+            ? ""
+            : "text-foreground"
         }`}
         style={{ color: (mounted && settings.topBarTextColor) || undefined }}
       >
@@ -153,7 +155,7 @@ export function TopBar() {
 
         <div className="relative hidden h-4 flex-1 min-w-0 overflow-hidden md:block">
           <div
-            className={`absolute inset-y-0 left-0 flex items-center gap-4 transition-all duration-500 ${showCustom && hasCustomRight ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}
+            className={`absolute inset-y-0 left-0 flex items-center gap-4 transition-[transform,opacity] duration-500 will-change-transform ${showCustom && hasCustomRight ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}
           >
             <span>{localAqi}</span>
             <span>MUM 82 AQI</span>
@@ -161,7 +163,7 @@ export function TopBar() {
           </div>
           {hasCustomRight && (
             <span
-              className={`absolute inset-y-0 left-0 flex items-center font-bold transition-all duration-500 ${showCustom ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
+              className={`absolute inset-y-0 left-0 flex items-center font-bold transition-[transform,opacity] duration-500 will-change-transform ${showCustom ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
               style={{
                 ...gradientStyle,
                 fontFamily:
@@ -178,7 +180,7 @@ export function TopBar() {
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <LanguageSwitcher />
-          <Link to="/subscription" className="hidden hover:text-foreground sm:inline">
+          <Link to="/subscription" className="hidden text-foreground hover:underline sm:inline">
             {t("nav.subscribe")}
           </Link>
           <span aria-hidden="true" className="hidden text-muted-foreground/40 sm:inline select-none">|</span>

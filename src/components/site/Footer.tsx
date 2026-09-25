@@ -4,14 +4,14 @@ import { SocialIcons } from "@/components/site/SocialIcons";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { AttributionGuard } from "@/components/site/AttributionGuard";
 import { useTranslation } from "react-i18next";
-import { cleanCopyright } from "@/lib/site-content";
+import { cleanCopyright, isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
 import { useTheme } from "@/lib/theme";
 import { getAccessibleLogoColor } from "@/lib/color-utils";
 
 export function Footer() {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const isDark = theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const isDark = (theme as string) === "dark" || ((theme as string) === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   const s = useSiteSettings();
   const safeSecondaryColor = getAccessibleLogoColor(s.logoColorSecondary || "#dc2626", isDark, 4.5);
   const year = new Date().getFullYear();
@@ -21,9 +21,8 @@ export function Footer() {
     ? s.builtByUrl
     : `https://${s.builtByUrl || "GorillaTechsolution.com"}`;
 
-  const planType = (s.licenseType || "").toLowerCase();
-  const isEnterprise = planType.includes("enterprise");
-  const isEnterprisePlus = planType.includes("enterprise+") || planType.includes("enterprise plus");
+  const isEnterprise = isEnterpriseLicense(s);
+  const isEnterprisePlus = isEnterprisePlusLicense(s);
   const showEventLink = s.eventFooterLinkEnabled !== false;
 
   const quickLinks: { label: string; to?: string }[][] = [

@@ -114,5 +114,3 @@ var executeSetup = createServerFn({ method: "POST" }).validator((data) => data).
 });
 //#endregion
 export { checkSetupStatus_createServerFn_handler, executeSetup_createServerFn_handler, testDatabaseConnection_createServerFn_handler };
-
-//# sourceMappingURL=setup.functions-CTfUx942.js.map

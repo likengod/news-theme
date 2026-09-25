@@ -271,20 +271,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const links: Array<Record<string, any>> = [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "preload",
-        href: "/fonts/solaimanlipi-normal.woff2",
-        as: "font",
-        type: "font/woff2",
-        crossOrigin: "anonymous",
-      },
-      {
-        rel: "preload",
-        href: "/fonts/solaimanlipi-bold.woff2",
-        as: "font",
-        type: "font/woff2",
-        crossOrigin: "anonymous",
-      },
       { rel: "stylesheet", href: appCss },
       {
         rel: "alternate",
@@ -294,16 +280,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ];
 
-    if (googleFontsUrl) {
-      links.push({
-        rel: "stylesheet",
-        href: googleFontsUrl,
-      });
-    }
-
-    if (canonicalBase) {
-      links.push({ rel: "canonical", href: canonicalBase });
-    }
 
     const orgSchema: Record<string, any> = {
       "@context": "https://schema.org",
@@ -332,6 +308,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify(orgSchema),
       },
     ];
+
+    if (googleFontsUrl) {
+      links.push({
+        rel: "preload",
+        as: "style",
+        href: googleFontsUrl,
+      });
+      scripts.push({
+        children: `(function(){var l=document.createElement('link');l.rel='stylesheet';l.href=${JSON.stringify(googleFontsUrl)};l.media='print';l.onload=function(){this.media='all'};document.head.appendChild(l);})();`,
+      });
+    }
+
+    if (canonicalBase) {
+      links.push({ rel: "canonical", href: canonicalBase });
+    }
 
     return {
       meta: metaTags,

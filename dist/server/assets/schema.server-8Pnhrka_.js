@@ -231,5 +231,3 @@ async function createTablesAndIndexes(query) {
 }
 //#endregion
 export { createTablesAndIndexes };
-
-//# sourceMappingURL=schema.server-8Pnhrka_.js.map

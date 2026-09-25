@@ -66,5 +66,3 @@ var requireAdmin = createMiddleware({ type: "function" }).server(async ({ next }
 });
 //#endregion
 export { requireAuth as n, requireAdmin as t };
-
-//# sourceMappingURL=auth-middleware-BNC9rUei.js.map

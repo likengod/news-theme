@@ -219,6 +219,33 @@ export function normalizeLicenseType(type?: string): string {
   return trimmed;
 }
 
+export function isLicenseActive(s?: SiteSettings | null): boolean {
+  if (!s || !s.licenseKey || s.licenseKey.trim().length <= 10) return false;
+  if (s.licenseExpiresAt) {
+    const expiry = new Date(s.licenseExpiresAt).getTime();
+    if (isNaN(expiry) || expiry <= Date.now()) return false;
+  }
+  return true;
+}
+
+export function isEnterpriseLicense(s?: SiteSettings | null): boolean {
+  if (!isLicenseActive(s)) return false;
+  const plan = (s?.licenseType || "").toLowerCase().trim();
+  return plan.includes("enterprise");
+}
+
+export function isEnterprisePlusLicense(s?: SiteSettings | null): boolean {
+  if (!isLicenseActive(s)) return false;
+  const plan = (s?.licenseType || "").toLowerCase().trim();
+  return (
+    plan === "enterprise plus" ||
+    plan === "enterprise+" ||
+    plan === "enterprise-plus" ||
+    plan.includes("enterprise plus") ||
+    plan.includes("enterprise+")
+  );
+}
+
 export const defaultSettings: SiteSettings = {
   siteName: "Today Tripura",
   tagline: "Your daily window to the world — unfiltered, insightful, and always ahead.",

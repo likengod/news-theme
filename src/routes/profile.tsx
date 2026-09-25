@@ -33,6 +33,8 @@ import {
 import { submitDeleteAccountRequest } from "@/lib/inbox.functions";
 import { loadRanks, rankForCount, nextRank } from "@/lib/journalist-ranks";
 import { useNavigate } from "@tanstack/react-router";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { isEnterprisePlusLicense } from "@/lib/site-content";
 
 export const Route = createFileRoute("/profile")({
   ssr: false,
@@ -81,6 +83,9 @@ function ProfilePage() {
   const doChangePassword = useServerFn(changeMyPassword);
   const doUpdateProfile = useServerFn(updateCurrentUserProfile);
   const doDeleteRequest = useServerFn(submitDeleteAccountRequest);
+
+  const siteSettings = useSiteSettings();
+  const isEnterprisePlus = isEnterprisePlusLicense(siteSettings);
 
   const [tab, setTab] = useState<Tab>("overview");
   const [loading, setLoading] = useState(true);
@@ -296,14 +301,16 @@ function ProfilePage() {
                 </span>
 
                 {/* Wallet */}
-                <Link
-                  to="/earn-points"
-                  className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-100 transition-colors"
-                >
-                  <span>₹{points}</span>
-                  <span className="text-xs font-normal text-emerald-600">Wallet</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </Link>
+                {isEnterprisePlus && (
+                  <Link
+                    to="/earn-points"
+                    className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-100 transition-colors"
+                  >
+                    <span>₹{points}</span>
+                    <span className="text-xs font-normal text-emerald-600">Wallet</span>
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Link>
+                )}
 
                 {/* Subscription */}
                 {!isPremium && (

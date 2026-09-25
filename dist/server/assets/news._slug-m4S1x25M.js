@@ -26,5 +26,3 @@ function ArticleNotFound() {
 }
 //#endregion
 export { ArticleNotFound as t };
-
-//# sourceMappingURL=news._slug-m4S1x25M.js.map

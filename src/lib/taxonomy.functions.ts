@@ -27,6 +27,11 @@ export function clearTagsCache() {
   cachedTags = null;
 }
 
+let cachedCategories: { data: CategoryRow[]; expiry: number } | null = null;
+export function clearCategoriesCache() {
+  cachedCategories = null;
+}
+
 // --- Category Functions ---
 
 export const getCategories = createServerFn({ method: "GET" })
@@ -34,6 +39,10 @@ export const getCategories = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<CategoryRow[]> => {
     try {
       const q = data?.q ? `%${data.q}%` : null;
+      if (!q && cachedCategories && cachedCategories.expiry > Date.now()) {
+        return cachedCategories.data;
+      }
+
       let sql = `
         SELECT c.*, COUNT(a.id) as count 
         FROM categories c 
@@ -48,7 +57,7 @@ export const getCategories = createServerFn({ method: "GET" })
 
       const rows = await query(sql, params);
       if (!Array.isArray(rows)) return [];
-      return rows.map((r: any) => ({
+      const mapped = rows.map((r: any) => ({
         id: r.id,
         name: r.name,
         slug: r.slug,
@@ -59,6 +68,15 @@ export const getCategories = createServerFn({ method: "GET" })
         sortOrder: Number(r.sort_order || 0),
         count: Number(r.count || 0),
       }));
+
+      if (!q) {
+        cachedCategories = {
+          data: mapped,
+          expiry: Date.now() + 60 * 1000,
+        };
+      }
+
+      return mapped;
     } catch (err: any) {
       console.warn("[getCategories] Query warning:", err?.message || err);
       return [];
@@ -70,6 +88,7 @@ export const saveCategory = createServerFn({ method: "POST" })
   .validator((data: any) => data)
   .handler(async ({ data }): Promise<CategoryRow> => {
     clearTagsCache();
+    clearCategoriesCache();
     const c = data;
     const slug = c.slug || slugify(c.name);
     const sortOrder = c.sortOrder || 0;
@@ -114,6 +133,7 @@ export const deleteCategory = createServerFn({ method: "POST" })
   .validator((id: number) => id)
   .handler(async ({ data: id }) => {
     clearTagsCache();
+    clearCategoriesCache();
     await query("DELETE FROM categories WHERE id = ?", [id]);
     return { success: true };
   });
@@ -123,6 +143,8 @@ export const importCategories = createServerFn({ method: "POST" })
   .validator((cats: any[]) => cats)
   .handler(async ({ data: cats }) => {
     clearTagsCache();
+    clearCategoriesCache();
+
     if (!cats || cats.length === 0) return { success: true };
     for (const c of cats) {
       if (!c.name) continue;

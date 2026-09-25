@@ -180,5 +180,3 @@ function getArticleImage(img, index) {
 }
 //#endregion
 export { sections as a, top as c, news_wallstreet_default as d, news_crypto_default as f, hero_markets_default as g, news_fed_default as h, lead as i, viewsFor as l, news_tech_default as m, getArticleImage as n, slugify as o, news_oil_default as p, grid as r, tickers as s, formatViews as t, news_trade_default as u };
-
-//# sourceMappingURL=news-data-CFwG4BZ_.js.map

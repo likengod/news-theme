@@ -381,5 +381,3 @@ async function verifyImage(source, knownDomain) {
 }
 //#endregion
 export { verifyImage as n, protectCanvasAndExport as t };
-
-//# sourceMappingURL=image-protection-BvTFVLZp.js.map

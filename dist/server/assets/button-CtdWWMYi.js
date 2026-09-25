@@ -40,5 +40,3 @@ var Button = React$1.forwardRef(({ className, variant, size, asChild = false, ..
 Button.displayName = "Button";
 //#endregion
 export { Button as t };
-
-//# sourceMappingURL=button-CtdWWMYi.js.map

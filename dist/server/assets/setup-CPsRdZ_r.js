@@ -23,5 +23,3 @@ var SplitErrorComponent = ({ error }) => /* @__PURE__ */ jsx("div", {
 });
 //#endregion
 export { SplitErrorComponent as errorComponent };
-
-//# sourceMappingURL=setup-CPsRdZ_r.js.map

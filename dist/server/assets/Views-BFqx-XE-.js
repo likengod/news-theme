@@ -10,5 +10,3 @@ function Views({ count, className = "" }) {
 }
 //#endregion
 export { Views as t };
-
-//# sourceMappingURL=Views-BFqx-XE-.js.map

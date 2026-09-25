@@ -43,5 +43,3 @@ var updateClaimStatusServer = createServerFn({ method: "POST" }).middleware([req
 });
 //#endregion
 export { getPendingClaimsServer_createServerFn_handler, updateClaimStatusServer_createServerFn_handler };
-
-//# sourceMappingURL=pending-claims-g7wFhSS4.js.map

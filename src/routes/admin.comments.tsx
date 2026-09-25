@@ -17,6 +17,7 @@ import { AiGenerateModal } from "@/components/admin/comments/AiGenerateModal";
 import { DeleteAllModal } from "@/components/admin/comments/DeleteAllModal";
 import { CsvImportExport } from "@/components/admin/CsvImportExport";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { isEnterprisePlusLicense } from "@/lib/site-content";
 
 export const Route = createFileRoute("/admin/comments")({
   component: CommentsPage,
@@ -28,10 +29,7 @@ const tabs: Array<C["status"] | "All"> = ["All", "Pending", "Approved", "Spam"];
 
 function CommentsPage() {
   const siteSettings = useSiteSettings();
-  const planType = (siteSettings?.licenseType || "").toLowerCase();
-  const isEnterprisePlus =
-    planType.includes("enterprise plus") ||
-    planType.includes("enterprise+");
+  const isEnterprisePlus = isEnterprisePlusLicense(siteSettings);
 
   const getCommentsFn = useServerFn(getAdminComments);
   const updateStatusFn = useServerFn(updateCommentStatus);

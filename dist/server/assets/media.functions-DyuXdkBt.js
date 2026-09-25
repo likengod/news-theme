@@ -79,5 +79,3 @@ var deleteMediaServer = createServerFn({ method: "POST" }).validator((data) => d
 });
 //#endregion
 export { deleteMediaServer_createServerFn_handler, getMediaListServer_createServerFn_handler, updateMediaServer_createServerFn_handler, uploadMediaServer_createServerFn_handler };
-
-//# sourceMappingURL=media.functions-DyuXdkBt.js.map

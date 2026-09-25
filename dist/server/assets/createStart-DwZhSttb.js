@@ -107,5 +107,3 @@ var createStart = (getOptions) => {
 };
 //#endregion
 export { createCsrfMiddleware as n, createMiddleware as r, createStart as t };
-
-//# sourceMappingURL=createStart-DwZhSttb.js.map

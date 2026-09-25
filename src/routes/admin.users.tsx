@@ -28,6 +28,7 @@ import { UserActionModal } from "@/components/admin/users/UserActionModal";
 import { CreateUserModal } from "@/components/admin/users/CreateUserModal";
 import { CsvImportExport } from "@/components/admin/CsvImportExport";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { isEnterprisePlusLicense } from "@/lib/site-content";
 
 export const Route = createFileRoute("/admin/users")({
   component: UsersPage,
@@ -61,10 +62,7 @@ function UsersPage() {
   }, []);
 
   const siteSettings = useSiteSettings();
-  const planType = (siteSettings?.licenseType || "").toLowerCase();
-  const isEnterprisePlus =
-    planType.includes("enterprise+") ||
-    planType.includes("enterprise plus");
+  const isEnterprisePlus = isEnterprisePlusLicense(siteSettings);
 
   const [q, setQ] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | AppRole>("all");

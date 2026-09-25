@@ -12,5 +12,3 @@ var Switch = React$1.forwardRef(({ className, ...props }, ref) => /* @__PURE__ *
 Switch.displayName = SwitchPrimitives.Root.displayName;
 //#endregion
 export { Switch as t };
-
-//# sourceMappingURL=switch-C_mzcXif.js.map

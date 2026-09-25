@@ -29,7 +29,10 @@ const MIME_TYPES = {
   ".map": "application/json",
 };
 
+const SSR_CACHE = new Map();
+
 const server = createServer(async (req, res) => {
+
   try {
     const rawUrl = req.url || "/";
     const parsedPath = rawUrl.split("?")[0];
@@ -158,6 +161,41 @@ const server = createServer(async (req, res) => {
     const proto = req.headers["x-forwarded-proto"] || "http";
     const url = new URL(rawUrl, `${proto}://${host}`);
 
+    // Fast-path: SSR In-Memory Micro-Cache for public anonymous HTML GET requests
+    const isPublicGet =
+      req.method === "GET" &&
+      !parsedPath.startsWith("/api/") &&
+      !parsedPath.startsWith("/_serverFn") &&
+      !parsedPath.startsWith("/admin") &&
+      !parsedPath.startsWith("/setup") &&
+      !(req.headers.cookie && (req.headers.cookie.includes("nt_session") || req.headers.cookie.includes("session_token")));
+
+    const cacheKey = parsedPath;
+    const now = Date.now();
+    if (isPublicGet && SSR_CACHE.has(cacheKey)) {
+      const cached = SSR_CACHE.get(cacheKey);
+      if (cached && now < cached.expiry) {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.setHeader("X-Cache", "HIT");
+        res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+        res.setHeader("X-Content-Type-Options", "nosniff");
+        res.setHeader("X-Frame-Options", "SAMEORIGIN");
+
+        const acceptEncoding = (req.headers["accept-encoding"] || "").toLowerCase();
+        if (acceptEncoding.includes("gzip") && cached.gzipped) {
+          res.setHeader("Content-Encoding", "gzip");
+          res.setHeader("Vary", "Accept-Encoding");
+          res.end(cached.gzipped);
+          return;
+        }
+        res.end(cached.html);
+        return;
+      } else {
+        SSR_CACHE.delete(cacheKey);
+      }
+    }
+
     const init = {
       method: req.method,
       headers: req.headers,
@@ -183,12 +221,37 @@ const server = createServer(async (req, res) => {
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
     res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 
-    // Ensure HTML documents are never cached so visitors always receive fresh chunk manifests
     const contentType = response.headers.get("content-type") || "";
-    if (contentType.includes("text/html")) {
-      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-      res.setHeader("Pragma", "no-cache");
-      res.setHeader("Expires", "0");
+    const isHtml = contentType.includes("text/html");
+
+    // Read full response body
+    let bodyBuffer = Buffer.alloc(0);
+    if (response.body) {
+      const reader = response.body.getReader();
+      const chunks = [];
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(Buffer.from(value));
+      }
+      bodyBuffer = Buffer.concat(chunks);
+    }
+
+    // Save to SSR Micro-Cache if eligible (30-second TTL)
+    if (isPublicGet && response.status === 200 && isHtml && bodyBuffer.length > 0) {
+      try {
+        const gzipped = zlib.gzipSync(bodyBuffer, { level: 6 });
+        SSR_CACHE.set(cacheKey, {
+          html: bodyBuffer,
+          gzipped,
+          expiry: now + 30 * 1000,
+        });
+        if (SSR_CACHE.size > 200) {
+          // Prune oldest
+          const firstKey = SSR_CACHE.keys().next().value;
+          if (firstKey) SSR_CACHE.delete(firstKey);
+        }
+      } catch {}
     }
 
     const acceptEncoding = (req.headers["accept-encoding"] || "").toLowerCase();
@@ -200,30 +263,14 @@ const server = createServer(async (req, res) => {
     if (isCompressible && acceptEncoding.includes("gzip")) {
       res.setHeader("Content-Encoding", "gzip");
       res.removeHeader("Content-Length");
-      const gzip = zlib.createGzip({ level: 6 });
-      gzip.pipe(res);
-      if (response.body) {
-        const reader = response.body.getReader();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          gzip.write(value);
-        }
-        gzip.end();
-      } else {
-        gzip.end();
-      }
+      const gzipped = zlib.gzipSync(bodyBuffer, { level: 6 });
+      res.end(gzipped);
+      return;
     } else {
-      if (response.body) {
-        const reader = response.body.getReader();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          res.write(value);
-        }
-      }
-      res.end();
+      res.end(bodyBuffer);
+      return;
     }
+
   } catch (err) {
     console.error("[Server Error]", err);
     if (!res.headersSent) {

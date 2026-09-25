@@ -18,5 +18,3 @@ var Input = React$1.forwardRef(({ className, type, id, name, placeholder, ...pro
 Input.displayName = "Input";
 //#endregion
 export { Input as t };
-
-//# sourceMappingURL=input-DgJyHn1-.js.map

@@ -122,5 +122,3 @@ var saveRewardsServer = createServerFn({ method: "POST" }).middleware([requireAu
 });
 //#endregion
 export { getRewardsServer_createServerFn_handler, saveRewardsServer_createServerFn_handler };
-
-//# sourceMappingURL=rewards-BOzIgQ9_.js.map
