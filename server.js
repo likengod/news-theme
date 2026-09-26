@@ -211,7 +211,10 @@ const server = createServer(async (req, res) => {
     }
 
     const request = new Request(url, init);
+    const t0 = Date.now();
     const response = await serverModule.fetch(request, process.env, {});
+    const t1 = Date.now();
+    console.log(`[Perf] serverModule.fetch took ${t1 - t0}ms`);
 
     res.statusCode = response.status;
     response.headers.forEach((value, key) => {
@@ -225,6 +228,7 @@ const server = createServer(async (req, res) => {
     res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 
     const contentType = response.headers.get("content-type") || "";
+    console.log(`[SSR] Content-Type: "${contentType}", Status: ${response.status}, isPublicGet: ${isPublicGet}`);
     const isHtml = contentType.includes("text/html");
     if (isHtml) {
       res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
