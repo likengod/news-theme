@@ -579,3 +579,5 @@ function ArticlesPage() {
 }
 //#endregion
 export { ArticlesPage as component };
+
+//# sourceMappingURL=admin.articles-DmMLBbwJ.js.map

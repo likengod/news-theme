@@ -10,3 +10,5 @@ var createServerRpc = (serverFnMeta, splitImportFn) => {
 };
 //#endregion
 export { createServerRpc as t };
+
+//# sourceMappingURL=createServerRpc-BbGffMfs.js.map

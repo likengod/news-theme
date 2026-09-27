@@ -18,3 +18,5 @@ function RefundPage() {
 }
 //#endregion
 export { RefundPage as component };
+
+//# sourceMappingURL=refund-policy-Cm5tJ-5L.js.map

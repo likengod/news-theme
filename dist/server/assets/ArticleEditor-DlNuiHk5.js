@@ -1458,3 +1458,5 @@ function ArticleEditor({ initial, onClose, onSave }) {
 }
 //#endregion
 export { ArticleEditor as default, statusStyle };
+
+//# sourceMappingURL=ArticleEditor-DlNuiHk5.js.map

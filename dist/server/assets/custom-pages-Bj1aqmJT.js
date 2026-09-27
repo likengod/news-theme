@@ -45,3 +45,5 @@ function savePages(p) {
 }
 //#endregion
 export { savePages as i, loadPages as n, saveCustomPageServer as r, getCustomPagesServer as t };
+
+//# sourceMappingURL=custom-pages-Bj1aqmJT.js.map

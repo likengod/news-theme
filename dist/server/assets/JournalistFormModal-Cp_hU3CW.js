@@ -352,3 +352,5 @@ function JournalistFormModal({ form, setForm, saving, submitForm }) {
 }
 //#endregion
 export { JournalistFormModal };
+
+//# sourceMappingURL=JournalistFormModal-Cp_hU3CW.js.map

@@ -269,3 +269,5 @@ Return ONLY a valid JSON object with this exact schema:
 });
 //#endregion
 export { checkNewsFactServer_createServerFn_handler };
+
+//# sourceMappingURL=fact-check.functions-uma2iQXO.js.map

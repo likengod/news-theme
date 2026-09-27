@@ -27,3 +27,5 @@ function AboutPage() {
 }
 //#endregion
 export { AboutPage as component };
+
+//# sourceMappingURL=about-CS9KcZZG.js.map

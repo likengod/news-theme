@@ -75,3 +75,5 @@ function buildPageHead({ page, defaultTitle, defaultDescription, slug, siteName 
 }
 //#endregion
 export { buildPageHead as t };
+
+//# sourceMappingURL=page-seo-DqfajxWt.js.map

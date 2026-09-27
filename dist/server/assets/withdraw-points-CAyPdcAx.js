@@ -273,3 +273,5 @@ function WithdrawPointsPage() {
 }
 //#endregion
 export { WithdrawPointsPage as component };
+
+//# sourceMappingURL=withdraw-points-CAyPdcAx.js.map

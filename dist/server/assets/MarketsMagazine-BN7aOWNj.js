@@ -262,3 +262,5 @@ function MarketsMagazine({ articles = [], usedIds }) {
 }
 //#endregion
 export { MarketsMagazine };
+
+//# sourceMappingURL=MarketsMagazine-BN7aOWNj.js.map

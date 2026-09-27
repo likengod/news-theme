@@ -1,1 +1,2 @@
 import{t as e}from"./createLucideIcon-Dzj9kKH1.js";var t=e(`chevron-up`,[[`path`,{d:`m18 15-6-6-6 6`,key:`153udz`}]]);export{t};
+//# sourceMappingURL=chevron-up-B2WM4kDp.js.map

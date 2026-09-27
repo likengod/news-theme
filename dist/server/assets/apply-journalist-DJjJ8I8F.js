@@ -678,3 +678,5 @@ function ApplyJournalistPage() {
 }
 //#endregion
 export { ApplyJournalistPage as component };
+
+//# sourceMappingURL=apply-journalist-DJjJ8I8F.js.map

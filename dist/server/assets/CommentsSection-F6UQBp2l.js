@@ -427,3 +427,5 @@ function CommentsSection({ articleSlug, articleTitle }) {
 }
 //#endregion
 export { CommentsSection, CommentsSection as default };
+
+//# sourceMappingURL=CommentsSection-F6UQBp2l.js.map

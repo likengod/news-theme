@@ -173,3 +173,5 @@ function Advertisement({ slot, href = "#", label = "Sponsored", image, video, po
 }
 //#endregion
 export { Advertisement_exports as n, Advertisement as t };
+
+//# sourceMappingURL=Advertisement-CA-CJkV_.js.map

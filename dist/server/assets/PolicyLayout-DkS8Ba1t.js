@@ -302,3 +302,5 @@ function PolicyLayout({ eyebrow = "", title, intro, content, notice, sections, l
 }
 //#endregion
 export { PolicyLayout as t };
+
+//# sourceMappingURL=PolicyLayout-DkS8Ba1t.js.map

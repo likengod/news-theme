@@ -10,3 +10,5 @@ var Route = createFileRoute("/admin/")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=admin.index-7-jhW33r.js.map

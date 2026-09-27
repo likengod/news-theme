@@ -8,3 +8,5 @@ var generatePageSeoServer = createServerFn({ method: "POST" }).middleware([requi
 var generateCategoryDescriptionServer = createServerFn({ method: "POST" }).middleware([requireAdmin]).validator((d) => d).handler(createSsrRpc("d40db31842ef69c32ee11b885c847a349426926025e989432dc9f235693a7f8f"));
 //#endregion
 export { generateSectionHtmlServer as i, generateCategoryDescriptionServer as n, generatePageSeoServer as r, generateArticleContentServer as t };
+
+//# sourceMappingURL=ai.functions-CoeexRYF.js.map

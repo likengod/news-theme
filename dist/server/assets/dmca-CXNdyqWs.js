@@ -17,3 +17,5 @@ var Route = createFileRoute("/dmca")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=dmca-CXNdyqWs.js.map

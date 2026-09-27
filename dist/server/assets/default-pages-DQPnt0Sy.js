@@ -274,3 +274,5 @@ var defaultPages = [
 ];
 //#endregion
 export { defaultPages as t };
+
+//# sourceMappingURL=default-pages-DQPnt0Sy.js.map

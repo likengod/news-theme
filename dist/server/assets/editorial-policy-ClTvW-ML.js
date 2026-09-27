@@ -17,3 +17,5 @@ var Route = createFileRoute("/editorial-policy")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=editorial-policy-ClTvW-ML.js.map

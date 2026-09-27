@@ -235,3 +235,5 @@ function UpdatesPage() {
 }
 //#endregion
 export { UpdatesPage as component };
+
+//# sourceMappingURL=admin.updates-ByxykIIt.js.map

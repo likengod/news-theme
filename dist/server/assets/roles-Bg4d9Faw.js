@@ -123,3 +123,5 @@ function currentRoleSeesPopups() {
 }
 //#endregion
 export { loadRoles as a, saveRolesServer as c, upgradeToPremiumServer as d, getRolesServer as i, setCurrentRoleId as l, currentRoleSeesPopups as n, roleBadgeClass as o, getCurrentRoleId as r, saveRoles as s, ROLE_COLORS as t, slugify as u };
+
+//# sourceMappingURL=roles-Bg4d9Faw.js.map

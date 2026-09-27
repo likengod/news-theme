@@ -16,7 +16,7 @@ export default defineConfig({
   },
   build: {
     emptyOutDir: true,
-    sourcemap: false,
+    sourcemap: true,
     modulePreload: true,
     cssCodeSplit: true,
     chunkSizeWarningLimit: 1000,

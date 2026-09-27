@@ -277,3 +277,5 @@ function Footer() {
 }
 //#endregion
 export { Footer_exports as n, Footer as t };
+
+//# sourceMappingURL=Footer-C0wd5Tvp.js.map

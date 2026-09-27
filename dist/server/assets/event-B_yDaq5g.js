@@ -437,3 +437,5 @@ function EventPage() {
 }
 //#endregion
 export { EventPage as component };
+
+//# sourceMappingURL=event-B_yDaq5g.js.map

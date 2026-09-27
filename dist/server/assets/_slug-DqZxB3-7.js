@@ -400,3 +400,5 @@ function CategoryPage() {
 }
 //#endregion
 export { CategoryPage as component };
+
+//# sourceMappingURL=_slug-DqZxB3-7.js.map

@@ -1074,3 +1074,5 @@ function PressCard({ data, settings }) {
 }
 //#endregion
 export { VerifiedPage as component };
+
+//# sourceMappingURL=verified-journalist-DGmdLXaB.js.map

@@ -111,3 +111,5 @@ var Route = createFileRoute("/")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=routes-BYv6ncYk.js.map

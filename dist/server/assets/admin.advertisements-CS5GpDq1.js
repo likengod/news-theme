@@ -1464,3 +1464,5 @@ function AdvertisementsPage() {
 }
 //#endregion
 export { AdvertisementsPage as component };
+
+//# sourceMappingURL=admin.advertisements-CS5GpDq1.js.map

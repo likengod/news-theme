@@ -17,3 +17,5 @@ var Route = createFileRoute("/privacy-policy")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=privacy-policy-nFmCJ26h.js.map

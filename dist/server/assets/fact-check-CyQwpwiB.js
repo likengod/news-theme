@@ -559,3 +559,5 @@ function FactCheckPage() {
 }
 //#endregion
 export { FactCheckPage as component };
+
+//# sourceMappingURL=fact-check-CyQwpwiB.js.map

@@ -35,3 +35,5 @@ function FactCheckingPage() {
 }
 //#endregion
 export { FactCheckingPage as component };
+
+//# sourceMappingURL=fact-checking-policy-xkirkmjA.js.map

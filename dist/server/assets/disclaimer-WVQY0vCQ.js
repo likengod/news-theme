@@ -17,3 +17,5 @@ var Route = createFileRoute("/disclaimer")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=disclaimer-WVQY0vCQ.js.map

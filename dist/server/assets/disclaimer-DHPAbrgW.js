@@ -18,3 +18,5 @@ function DisclaimerPage() {
 }
 //#endregion
 export { DisclaimerPage as component };
+
+//# sourceMappingURL=disclaimer-DHPAbrgW.js.map

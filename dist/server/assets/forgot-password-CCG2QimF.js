@@ -89,3 +89,5 @@ function ForgotPasswordPage() {
 }
 //#endregion
 export { ForgotPasswordPage as component };
+
+//# sourceMappingURL=forgot-password-CCG2QimF.js.map

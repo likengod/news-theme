@@ -13,3 +13,5 @@ var Route = createFileRoute("/admin/settings")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=admin.settings-B15l6bkA.js.map

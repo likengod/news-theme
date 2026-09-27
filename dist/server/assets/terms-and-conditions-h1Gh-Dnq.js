@@ -17,3 +17,5 @@ var Route = createFileRoute("/terms-and-conditions")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=terms-and-conditions-h1Gh-Dnq.js.map

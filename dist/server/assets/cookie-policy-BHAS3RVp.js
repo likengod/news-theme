@@ -18,3 +18,5 @@ function CookiePage() {
 }
 //#endregion
 export { CookiePage as component };
+
+//# sourceMappingURL=cookie-policy-BHAS3RVp.js.map

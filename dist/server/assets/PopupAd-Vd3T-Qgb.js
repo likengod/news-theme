@@ -223,3 +223,5 @@ function CountdownDot({ seconds }) {
 }
 //#endregion
 export { PopupAd, PopupAd as default };
+
+//# sourceMappingURL=PopupAd-Vd3T-Qgb.js.map

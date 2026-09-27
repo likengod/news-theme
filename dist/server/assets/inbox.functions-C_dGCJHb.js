@@ -122,3 +122,5 @@ var adminDeleteInboxRequest = createServerFn({ method: "POST" }).middleware([req
 var adminApproveJournalistApplication = createServerFn({ method: "POST" }).middleware([requireAdmin]).validator((data) => z.object({ requestId: z.number() }).parse(data)).handler(createSsrRpc("1ef32f84e1de0f5e22e29eb24ba235da8be53f367660995e70160ae1013b1e13"));
 //#endregion
 export { adminGetInboxSummary as a, submitDeleteAccountRequest as c, submitWithdrawRequest as d, submitWorkWithUs as f, adminGetInboxRequests as i, submitEventRegistration as l, adminApproveJournalistApplication as n, adminUpdateInboxStatus as o, adminDeleteInboxRequest as r, submitContactMessage as s, adminApproveAccountDeletion as t, submitJournalistApplication as u };
+
+//# sourceMappingURL=inbox.functions-C_dGCJHb.js.map

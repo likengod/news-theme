@@ -47,3 +47,5 @@ var Route = createFileRoute("/admin")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=admin-B4iJQ_za.js.map

@@ -54,3 +54,5 @@ var Route = createFileRoute("/verified-journalist")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=verified-journalist-P2nHBPjq.js.map

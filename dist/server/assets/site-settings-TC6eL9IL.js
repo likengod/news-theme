@@ -225,3 +225,5 @@ var getSiteSettingsServer = createServerFn({ method: "GET" }).handler(createSsrR
 var saveSiteSettingsServer = createServerFn({ method: "POST" }).middleware([attachAuth, requireAdmin]).validator((settings) => settings).handler(createSsrRpc("d5830d251ab2f9747dda53ce45f1285e09274b9a75417b75378eaeb555e1b2f2"));
 //#endregion
 export { isEnterprisePlusLicense as a, isEnterpriseLicense as i, defaultSettings as n, loadSettings as o, getSiteSettingsServer as r, saveSettings as s, cleanCopyright as t };
+
+//# sourceMappingURL=site-settings-TC6eL9IL.js.map

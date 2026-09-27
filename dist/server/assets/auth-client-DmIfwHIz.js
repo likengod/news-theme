@@ -195,3 +195,5 @@ var authClient = { auth: {
 } };
 //#endregion
 export { getUserServer as a, getCurrentUserRole as i, changeMyPassword as n, updateCurrentUserProfile as o, getCurrentUserProfile as r, authClient as t };
+
+//# sourceMappingURL=auth-client-DmIfwHIz.js.map

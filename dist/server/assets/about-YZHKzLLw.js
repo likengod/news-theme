@@ -17,3 +17,5 @@ var Route = createFileRoute("/about")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=about-YZHKzLLw.js.map

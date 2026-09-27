@@ -826,3 +826,5 @@ function ArticlePage() {
 }
 //#endregion
 export { ArticlePage as component };
+
+//# sourceMappingURL=news._slug-G9N9Yua_.js.map

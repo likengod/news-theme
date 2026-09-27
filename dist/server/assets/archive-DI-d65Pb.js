@@ -41,3 +41,5 @@ var Route = createFileRoute("/archive")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=archive-DI-d65Pb.js.map

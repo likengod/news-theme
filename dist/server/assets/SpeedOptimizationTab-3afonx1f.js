@@ -145,3 +145,5 @@ function SpeedOptimizationTab({ s, update, isPremium, onNavigateActivate }) {
 }
 //#endregion
 export { SpeedOptimizationTab, SpeedOptimizationTab as default };
+
+//# sourceMappingURL=SpeedOptimizationTab-3afonx1f.js.map

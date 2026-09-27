@@ -18,3 +18,5 @@ function DataDeletionPolicyPage() {
 }
 //#endregion
 export { DataDeletionPolicyPage as component };
+
+//# sourceMappingURL=data-deletion-policy-B9l09pZ4.js.map

@@ -257,3 +257,5 @@ async function seedDefaultData(query, customAdmin) {
 }
 //#endregion
 export { seedDefaultData };
+
+//# sourceMappingURL=seed.server-CXkqzl1z.js.map

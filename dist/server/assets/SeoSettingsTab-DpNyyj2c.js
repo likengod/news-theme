@@ -477,3 +477,5 @@ function SeoSettingsTab({ s, update }) {
 }
 //#endregion
 export { SeoSettingsTab, SeoSettingsTab as default };
+
+//# sourceMappingURL=SeoSettingsTab-DpNyyj2c.js.map

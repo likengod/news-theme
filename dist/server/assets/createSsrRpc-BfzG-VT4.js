@@ -15,3 +15,5 @@ var createSsrRpc = (functionId) => {
 };
 //#endregion
 export { createSsrRpc as t };
+
+//# sourceMappingURL=createSsrRpc-BfzG-VT4.js.map

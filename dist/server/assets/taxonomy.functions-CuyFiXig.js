@@ -14,3 +14,5 @@ var getCategoryData = createServerFn({ method: "GET" }).validator((data) => data
 var getTopTags = createServerFn({ method: "GET" }).handler(createSsrRpc("0d3e907d8ae66780e1453f78ed08c9c482ba98198c822ff82e6767a06b7a2599"));
 //#endregion
 export { getTags as a, importTags as c, getCategoryData as i, saveCategory as l, deleteTag as n, getTopTags as o, getCategories as r, importCategories as s, deleteCategory as t, saveTag as u };
+
+//# sourceMappingURL=taxonomy.functions-CuyFiXig.js.map

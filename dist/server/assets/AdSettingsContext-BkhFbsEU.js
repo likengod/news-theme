@@ -60,3 +60,5 @@ function useCategories() {
 }
 //#endregion
 export { useSiteSettings as a, useFontConfig as i, useAdSettings as n, useCategories as r, AdSettingsProvider as t };
+
+//# sourceMappingURL=AdSettingsContext-BkhFbsEU.js.map

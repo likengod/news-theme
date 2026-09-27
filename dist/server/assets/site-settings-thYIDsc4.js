@@ -212,3 +212,5 @@ var saveSiteSettingsServer = createServerFn({ method: "POST" }).middleware([atta
 });
 //#endregion
 export { getSiteSettingsServer_createServerFn_handler, saveSiteSettingsServer_createServerFn_handler };
+
+//# sourceMappingURL=site-settings-thYIDsc4.js.map

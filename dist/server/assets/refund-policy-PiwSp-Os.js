@@ -17,3 +17,5 @@ var Route = createFileRoute("/refund-policy")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=refund-policy-PiwSp-Os.js.map

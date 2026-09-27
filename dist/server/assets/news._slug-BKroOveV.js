@@ -224,3 +224,5 @@ var Route = createFileRoute("/news/$slug")({
 });
 //#endregion
 export { articleQueryOptions as n, Route as t };
+
+//# sourceMappingURL=news._slug-BKroOveV.js.map

@@ -17,3 +17,5 @@ var Route = createFileRoute("/cookie-policy")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=cookie-policy-BxcqWdtc.js.map

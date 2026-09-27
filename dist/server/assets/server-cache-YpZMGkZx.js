@@ -21,3 +21,5 @@ function clearCache(key) {
 var clearAllCachesServer = createServerFn({ method: "POST" }).middleware([requireAdmin]).handler(createSsrRpc("17ad32ca11729c5f8dffda03c1b99d6a512f4d059ddd194f58f3eef91d3a6485"));
 //#endregion
 export { setCached as i, clearCache as n, getCached as r, clearAllCachesServer as t };
+
+//# sourceMappingURL=server-cache-YpZMGkZx.js.map

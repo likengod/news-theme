@@ -81,3 +81,5 @@ var deleteJournalist = createServerFn({ method: "POST" }).middleware([requireAut
 }).handler(createSsrRpc("038d145f9e0f2fc7deb5d774c689275e369c15a619a4098bc7ba48b9425491b3"));
 //#endregion
 export { lookupJournalist as a, listJournalists as i, deleteJournalist as n, searchJournalists as o, getJournalistPrivateStats as r, upsertJournalist as s, awardJournalistPoints as t };
+
+//# sourceMappingURL=journalist.functions-Dd9Vnm8d.js.map

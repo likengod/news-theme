@@ -17,3 +17,5 @@ var Route = createFileRoute("/fact-checking-policy")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=fact-checking-policy-CiGsTKxK.js.map

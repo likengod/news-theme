@@ -18,3 +18,5 @@ function EditorialPage() {
 }
 //#endregion
 export { EditorialPage as component };
+
+//# sourceMappingURL=editorial-policy-DQUXJk7F.js.map

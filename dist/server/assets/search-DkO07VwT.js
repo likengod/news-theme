@@ -38,3 +38,5 @@ var Route = createFileRoute("/search")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=search-DkO07VwT.js.map

@@ -170,3 +170,5 @@ function useTheme() {
 var themeInitScript = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}')||'light';var r=document.documentElement;if(t==='dark')r.classList.add('dark');r.style.colorScheme=t;}catch(e){}})();`;
 //#endregion
 export { SocialIcons as i, themeInitScript as n, useTheme as r, ThemeProvider as t };
+
+//# sourceMappingURL=theme-Dgo_akud.js.map

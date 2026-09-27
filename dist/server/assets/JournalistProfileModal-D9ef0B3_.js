@@ -353,3 +353,5 @@ function JournalistProfileModal({ viewTarget, setViewTarget, handleToggleBan }) 
 }
 //#endregion
 export { JournalistProfileModal };
+
+//# sourceMappingURL=JournalistProfileModal-D9ef0B3_.js.map

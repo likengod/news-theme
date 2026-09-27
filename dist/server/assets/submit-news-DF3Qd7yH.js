@@ -578,3 +578,5 @@ function Check$1({ ok, children }) {
 }
 //#endregion
 export { SubmitPage as component };
+
+//# sourceMappingURL=submit-news-DF3Qd7yH.js.map

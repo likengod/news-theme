@@ -539,3 +539,5 @@ function CategoriesPage() {
 }
 //#endregion
 export { CategoriesPage as component };
+
+//# sourceMappingURL=admin.categories-DostRst8.js.map

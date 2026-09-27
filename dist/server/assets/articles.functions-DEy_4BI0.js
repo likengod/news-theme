@@ -15,3 +15,5 @@ var getHomepageArticles = createServerFn({ method: "GET" }).validator((limit) =>
 var getAdminDashboardStats = createServerFn({ method: "GET" }).middleware([requireAdmin]).handler(createSsrRpc("39a765bff09432b08654ad197bb7c4ff2cace5fec784cae9e7166ef73e28b0ba"));
 //#endregion
 export { getAllAdminArticles as a, getPublicArticleBySlug as c, searchPublicArticles as d, getAdminDashboardStats as i, importAdminArticles as l, deleteAdminArticlesBulk as n, getHomepageArticles as o, getAdminArticles as r, getPublicArchiveArticles as s, deleteAdminArticle as t, saveAdminArticle as u };
+
+//# sourceMappingURL=articles.functions-DEy_4BI0.js.map

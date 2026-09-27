@@ -713,3 +713,5 @@ function AdminInboxPage() {
 }
 //#endregion
 export { AdminInboxPage as component };
+
+//# sourceMappingURL=admin.inbox-D8SyPg_N.js.map

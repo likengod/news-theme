@@ -542,3 +542,5 @@ function generateFontId() {
 }
 //#endregion
 export { buildGoogleFontsUrl as a, generateFontId as c, loadFontConfig as d, saveFontConfig as f, buildFontFaceCss as i, getFontById as l, FONT_SECTIONS as n, buildSectionCssVars as o, GOOGLE_FONTS_CATALOG as r, defaultFontConfig as s, FONT_CONFIG_KEY as t, getFontConfigServer as u };
+
+//# sourceMappingURL=font-config-C9llQoA8.js.map

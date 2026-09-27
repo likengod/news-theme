@@ -17,3 +17,5 @@ var Route = createFileRoute("/data-deletion-policy")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=data-deletion-policy-BpSHL7LG.js.map

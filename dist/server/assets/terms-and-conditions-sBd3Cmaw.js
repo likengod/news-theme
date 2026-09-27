@@ -18,3 +18,5 @@ function TermsPage() {
 }
 //#endregion
 export { TermsPage as component };
+
+//# sourceMappingURL=terms-and-conditions-sBd3Cmaw.js.map

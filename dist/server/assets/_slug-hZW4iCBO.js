@@ -32,3 +32,5 @@ var Route = createFileRoute("/$slug")({
 });
 //#endregion
 export { Route as t };
+
+//# sourceMappingURL=_slug-hZW4iCBO.js.map

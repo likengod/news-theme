@@ -2068,3 +2068,5 @@ var getRouter = () => {
 };
 //#endregion
 export { getRouter };
+
+//# sourceMappingURL=router-lZ5YjvM_.js.map

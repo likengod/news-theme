@@ -1028,3 +1028,5 @@ function JournalistsPage() {
 }
 //#endregion
 export { JournalistsPage as component };
+
+//# sourceMappingURL=admin.journalists-BnBVaYNm.js.map

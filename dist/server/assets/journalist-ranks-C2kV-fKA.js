@@ -68,3 +68,5 @@ function nextRank(published, ranks = loadRanks()) {
 }
 //#endregion
 export { rankForCount as a, nextRank as i, getJournalistRanksServer as n, saveRanks as o, loadRanks as r, DEFAULT_RANKS as t };
+
+//# sourceMappingURL=journalist-ranks-C2kV-fKA.js.map

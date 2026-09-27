@@ -18,3 +18,5 @@ function PrivacyPage() {
 }
 //#endregion
 export { PrivacyPage as component };
+
+//# sourceMappingURL=privacy-policy-B-mdN1EL.js.map

@@ -6,3 +6,5 @@ var testDatabaseConnection = createServerFn({ method: "POST" }).validator((data)
 var executeSetup = createServerFn({ method: "POST" }).validator((data) => data).handler(createSsrRpc("424c41ecfd6de125add850459642fbb101dfbf9443245c9923f618fb115e3edc"));
 //#endregion
 export { executeSetup as n, testDatabaseConnection as r, checkSetupStatus as t };
+
+//# sourceMappingURL=setup.functions-DojKd-OC.js.map

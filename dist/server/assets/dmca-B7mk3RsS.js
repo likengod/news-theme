@@ -25,3 +25,5 @@ function DmcaPage() {
 }
 //#endregion
 export { DmcaPage as component };
+
+//# sourceMappingURL=dmca-B7mk3RsS.js.map
