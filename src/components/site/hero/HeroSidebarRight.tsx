@@ -8,7 +8,7 @@ import { viewsFor } from "@/lib/news-data";
 
 export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, tags }: any) {
   return (
-    <aside className="space-y-6 lg:col-span-3 lg:border-l lg:border-border lg:pl-6">
+    <aside className="space-y-6 lg:col-span-3 lg:border-l lg:border-border lg:pl-6 w-full max-w-full min-w-0">
       <h2
         className="rule-top font-bold uppercase tracking-[0.25em]"
         style={{ color: cfg.heroOpinion.color, fontSize: `${cfg.heroOpinion.fontSize}px` }}
@@ -45,7 +45,7 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
         ))}
       </ul>
 
-      <div style={{ width: 384, maxWidth: "100%" }}>
+      <div className="w-full max-w-[384px] mx-auto min-w-0">
         <Advertisement slot="home1" label="Sponsored" aspectRatio="3 / 4" />
       </div>
 

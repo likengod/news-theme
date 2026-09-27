@@ -161,10 +161,10 @@ export const HeroBoard = React.memo(function HeroBoard({
   }, [articles, cfg]);
 
   return (
-    <AnimatedContainer className="border-b border-border py-4 md:py-8">
-      <div className="grid gap-8 lg:grid-cols-12">
-        <div className="lg:col-span-9">
-          <div className="grid gap-8 lg:grid-cols-12">
+    <AnimatedContainer className="border-b border-border py-4 md:py-8 w-full max-w-full min-w-0 overflow-hidden">
+      <div className="grid gap-8 lg:grid-cols-12 w-full max-w-full min-w-0">
+        <div className="lg:col-span-9 w-full max-w-full min-w-0">
+          <div className="grid gap-8 lg:grid-cols-12 w-full max-w-full min-w-0">
             <HeroMain
               hasDbArticles={hasDbArticles}
               activeLeads={activeLeads}

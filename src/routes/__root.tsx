@@ -369,12 +369,12 @@ const chunkRecoveryScript = `
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="overflow-x-hidden max-w-full">
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <HeadContent />
       </head>
-      <body>
+      <body className="overflow-x-hidden max-w-full min-h-screen">
         {children}
         <script dangerouslySetInnerHTML={{ __html: chunkRecoveryScript }} />
         <script

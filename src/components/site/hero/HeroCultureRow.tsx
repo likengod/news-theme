@@ -4,7 +4,7 @@ import { formatViews, viewsFor } from "@/lib/news-data";
 
 export function HeroCultureRow({ cfg, activeCultureItems }: any) {
   return (
-    <div className="mt-10 border-t border-border pt-6">
+    <div className="mt-10 border-t border-border pt-6 w-full max-w-full min-w-0 overflow-hidden">
       <h2
         className="mb-6 font-bold uppercase tracking-[0.25em]"
         style={{
@@ -14,15 +14,15 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
       >
         {cfg.heroCultureMusic.title}
       </h2>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 w-full max-w-full min-w-0">
         {activeCultureItems.map((c: any, i: number) => (
           <Link
             key={`${c?.title || "culture"}-${i}`}
             to="/news/$slug"
             params={{ slug: c?.slug || "sample" }}
-            className="group block"
+            className="group block w-full max-w-full min-w-0"
           >
-            <div className="relative overflow-hidden">
+            <div className="relative overflow-hidden rounded-lg">
               <img
                 src={c.img}
                 alt={c.title}
@@ -43,10 +43,10 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
                 {formatViews(c.views || viewsFor(c.title))} views
               </span>
             </div>
-            <h3 className="headline mt-3 text-lg leading-tight text-foreground group-hover:underline">
+            <h3 className="headline mt-3 text-lg leading-tight text-foreground group-hover:underline break-words">
               {c.title}
             </h3>
-            <p className="mt-2 line-clamp-3 text-sm leading-snug text-muted-foreground">
+            <p className="mt-2 line-clamp-3 text-sm leading-snug text-muted-foreground break-words">
               {c.excerpt}
             </p>
             <p className="mt-3 flex items-center gap-2 text-[11px] uppercase tracking-wider text-muted-foreground">

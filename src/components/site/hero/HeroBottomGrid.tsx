@@ -8,14 +8,14 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
   }
 
   return (
-    <div className="mt-10 border-t border-border pt-6">
+    <div className="mt-10 border-t border-border pt-6 w-full max-w-full min-w-0 overflow-hidden">
       <h2
         className="mb-6 font-bold uppercase tracking-[0.25em]"
         style={{ color: cfg.heroTopStories.color, fontSize: `${cfg.heroTopStories.fontSize}px` }}
       >
         {cfg.heroTopStories.title}
       </h2>
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 w-full max-w-full min-w-0">
         {activeBottomItems[0] && (
           <Link
             to="/news/$slug"

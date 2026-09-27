@@ -106,13 +106,13 @@ function Home() {
   const usedIds = new Set<number>();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden w-full max-w-full">
       {/* Above-the-fold: render immediately for fastest first paint */}
       <Header breakingArticles={dbArticles} />
 
-      <main className="mx-auto max-w-7xl px-4 py-4 md:py-10">
+      <main className="mx-auto max-w-7xl px-4 py-4 md:py-10 w-full max-w-full min-w-0 overflow-x-clip">
         {/* On Mobile Devices (< md): Render Watch section directly below Header */}
-        <div className="block md:hidden border-b border-border mb-2 pb-2">
+        <div className="block md:hidden border-b border-border mb-2 pb-2 overflow-hidden">
           <Columnists hideTitle />
         </div>
 

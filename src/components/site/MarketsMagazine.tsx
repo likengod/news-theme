@@ -164,7 +164,7 @@ export function MarketsMagazine({
       : cfg.marketsMagazine.title;
 
   return (
-    <section className="border border-border bg-background px-6 py-8 font-sans md:px-9">
+    <section className="border border-border bg-background px-4 py-6 font-sans sm:px-6 md:px-9 w-full max-w-full min-w-0 overflow-hidden">
       <div className="mb-5 inline-block">
         <span
           key={showCustomText ? "custom" : "default"}
@@ -175,7 +175,7 @@ export function MarketsMagazine({
         </span>
       </div>
 
-      <div className="grid items-start gap-5 lg:grid-cols-[354px_minmax(340px,1fr)_406px]">
+      <div className="grid items-start gap-5 lg:grid-cols-[354px_minmax(0,1fr)_406px] w-full max-w-full min-w-0">
         <Link
           to="/news/$slug"
           params={{
@@ -253,13 +253,13 @@ export function MarketsMagazine({
         </aside>
       </div>
 
-      <div className="mt-3 grid gap-8 border-t border-border pt-3 lg:grid-cols-[minmax(585px,1.62fr)_minmax(240px,0.7fr)_minmax(300px,0.86fr)]">
+      <div className="mt-3 grid gap-8 border-t border-border pt-3 lg:grid-cols-[minmax(0,1.62fr)_minmax(0,0.7fr)_minmax(0,0.86fr)] w-full max-w-full min-w-0">
         <Link
           to="/news/$slug"
           params={{
             slug: p1?.slug || "a-600-billion-experiment-kicks-off-at-the-biggest-us-pension-fund",
           }}
-          className="group block"
+          className="group block w-full max-w-full min-w-0"
         >
           <div className="grid gap-4 md:grid-cols-[194px_1fr]">
             <img

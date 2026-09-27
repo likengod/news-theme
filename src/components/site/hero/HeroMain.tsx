@@ -212,10 +212,10 @@ export function HeroMain({ activeLeads, cfg }: any) {
   });
 
   return (
-    <div className="flex flex-col gap-8 lg:col-span-8 lg:border-l lg:border-border lg:pl-8">
-      <article>
-        <div className="relative group/carousel" suppressHydrationWarning>
-          <Carousel setApi={setApi} plugins={plugins} className="w-full" opts={{ loop: true }}>
+    <div className="flex flex-col gap-8 lg:col-span-8 lg:border-l lg:border-border lg:pl-8 w-full max-w-full min-w-0 overflow-hidden">
+      <article className="w-full max-w-full min-w-0 overflow-hidden">
+        <div className="relative group/carousel w-full max-w-full min-w-0 overflow-hidden" suppressHydrationWarning>
+          <Carousel setApi={setApi} plugins={plugins} className="w-full max-w-full" opts={{ loop: true }}>
             <CarouselContent suppressHydrationWarning>{carouselItems}</CarouselContent>
 
             {/* Arrows Overlaid on Image */}

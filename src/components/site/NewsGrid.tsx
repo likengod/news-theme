@@ -168,12 +168,12 @@ export const NewsGrid = React.memo(function NewsGrid({
   }, [articles, cfg.newsGridColumns, hasDbArticles, articlesByCategoryName, usedIds]);
 
   return (
-    <section className="border-t border-border py-10">
-      <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
+    <section className="border-t border-border py-10 w-full max-w-full min-w-0 overflow-hidden">
+      <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-5 w-full max-w-full min-w-0">
         {columns.map((col, i) => {
           const colCfg = cfg.newsGridColumns[i];
           return (
-            <div key={i} className="flex flex-col">
+            <div key={i} className="flex flex-col w-full max-w-full min-w-0">
               <h2
                 className="mb-3 font-extrabold uppercase tracking-widest"
                 style={{ color: colCfg.color, fontSize: `${colCfg.fontSize}px` }}
@@ -183,7 +183,7 @@ export const NewsGrid = React.memo(function NewsGrid({
               <Link
                 to="/news/$slug"
                 params={{ slug: col?.slug || "sample" }}
-                className="group block"
+                className="group block w-full max-w-full min-w-0"
               >
                 <div className="relative overflow-hidden">
                   <img

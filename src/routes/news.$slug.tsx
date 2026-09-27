@@ -201,12 +201,12 @@ function ArticlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden w-full max-w-full">
       <ContentProtectionGuard />
       <ReadingProgress />
       <Header />
 
-      <main className="mx-auto max-w-6xl px-4 pt-2 pb-8">
+      <main className="mx-auto max-w-6xl px-4 pt-2 pb-8 w-full max-w-full min-w-0 overflow-x-clip">
         <ArticleHeader
           title={data.title}
           author={data.author}
@@ -215,8 +215,8 @@ function ArticlePage() {
           category={data.category}
         />
 
-        <div className="grid grid-cols-1 gap-10 pt-8 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <article className="relative">
+        <div className="grid grid-cols-1 gap-10 pt-8 lg:grid-cols-[minmax(0,1fr)_300px] w-full max-w-full min-w-0">
+          <article className="relative w-full max-w-full min-w-0 overflow-hidden">
             <ArticleHero
               src={data.hero}
               alt={data.title}
