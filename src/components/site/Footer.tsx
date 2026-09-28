@@ -25,43 +25,36 @@ export function Footer() {
   const isEnterprisePlus = isEnterprisePlusLicense(s);
   const showEventLink = s.eventFooterLinkEnabled !== false;
 
-  const quickLinks: { label: string; to?: string }[][] = [
-    [
-      { label: t("footer.about"), to: "/about" },
-      { label: t("footer.contact"), to: "/contact" },
-      { label: t("footer.workWithUs"), to: "/work-with-us" },
-    ],
-    [
-      { label: t("footer.submitNews"), to: "/submit-news" },
-      ...(isEnterprise ? [{ label: t("footer.factCheck", "Fact Check"), to: "/fact-check" }] : []),
-      ...(showEventLink
-        ? [{ label: t("footer.event", "Event"), to: "/event" }]
-        : [{ label: "Reels", to: "/reels" }]),
-      ...(isEnterprise
-        ? [{ label: t("footer.verifiedJournalist"), to: "/verified-journalist" }]
-        : []),
-    ],
-    [
-      { label: t("footer.privacyPolicy"), to: "/privacy-policy" },
-      { label: t("footer.terms"), to: "/terms-and-conditions" },
-      { label: t("footer.cookiePolicy"), to: "/cookie-policy" },
-    ],
-    [
-      { label: t("footer.refundPolicy"), to: "/refund-policy" },
-      { label: t("footer.disclaimer"), to: "/disclaimer" },
-      { label: t("footer.editorialPolicy"), to: "/editorial-policy" },
-    ],
-    [
-      { label: t("footer.factCheckingPolicy", "Fact-Checking Policy"), to: "/fact-checking-policy" },
-      { label: "Data Deletion Policy", to: "/data-deletion-policy" },
-      { label: t("footer.dmca"), to: "/dmca" },
-    ],
-    [
-      { label: t("footer.subscription"), to: "/subscription" },
-      { label: t("footer.archive"), to: "/archive" },
-      ...(isEnterprisePlus ? [{ label: t("footer.earnPoints"), to: "/earn-points" }] : []),
-    ],
+  const allAvailableLinks: { label: string; to?: string }[] = [
+    { label: t("footer.about"), to: "/about" },
+    { label: t("footer.contact"), to: "/contact" },
+    { label: t("footer.workWithUs"), to: "/work-with-us" },
+    { label: t("footer.submitNews"), to: "/submit-news" },
+    ...(showEventLink ? [{ label: t("footer.event", "Event"), to: "/event" }] : []),
+    { label: "Reels", to: "/reels" },
+    ...(isEnterprise ? [{ label: t("footer.factCheck", "Fact Check"), to: "/fact-check" }] : []),
+    ...(isEnterprise
+      ? [{ label: t("footer.verifiedJournalist"), to: "/verified-journalist" }]
+      : []),
+    { label: t("footer.privacyPolicy"), to: "/privacy-policy" },
+    { label: t("footer.terms"), to: "/terms-and-conditions" },
+    { label: t("footer.cookiePolicy"), to: "/cookie-policy" },
+    { label: t("footer.refundPolicy"), to: "/refund-policy" },
+    { label: t("footer.disclaimer"), to: "/disclaimer" },
+    { label: t("footer.editorialPolicy"), to: "/editorial-policy" },
+    { label: t("footer.factCheckingPolicy", "Fact-Checking Policy"), to: "/fact-checking-policy" },
+    { label: "Data Deletion Policy", to: "/data-deletion-policy" },
+    { label: t("footer.dmca"), to: "/dmca" },
+    { label: t("footer.subscription"), to: "/subscription" },
+    { label: t("footer.archive"), to: "/archive" },
+    ...(isEnterprisePlus ? [{ label: t("footer.earnPoints"), to: "/earn-points" }] : []),
   ];
+
+  // Dynamically group all permitted links so each row contains 3 links per line
+  const quickLinks: { label: string; to?: string }[][] = [];
+  for (let i = 0; i < allAvailableLinks.length; i += 3) {
+    quickLinks.push(allAvailableLinks.slice(i, i + 3));
+  }
 
   const footerLight = s.footerLogoLight || s.logoLight;
   const footerDark = s.footerLogoDark || s.logoDark;
