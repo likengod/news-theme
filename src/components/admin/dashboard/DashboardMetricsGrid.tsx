@@ -15,8 +15,8 @@ export function DashboardMetricsGrid({ data }: DashboardMetricsGridProps) {
       title: "Total Post Number",
       value: data.totalArticles.toLocaleString(),
       subtitle: "Published news stories & articles",
-      delta: "+14.2%",
-      isPositive: true,
+      delta: data.totalArticles > 0 ? "Published" : "0 Posts",
+      isPositive: data.totalArticles > 0,
       icon: Newspaper,
       badgeColor: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border-blue-200/60 dark:border-blue-800",
       accentBg: "from-blue-500/10 to-indigo-500/5",
@@ -26,8 +26,8 @@ export function DashboardMetricsGrid({ data }: DashboardMetricsGridProps) {
       title: "Total Journalists",
       value: data.totalJournalists.toLocaleString(),
       subtitle: "Verified field reporters & authors",
-      delta: "+8.5%",
-      isPositive: true,
+      delta: data.totalJournalists > 0 ? "Active" : "0 Active",
+      isPositive: data.totalJournalists > 0,
       icon: UserCheck,
       badgeColor: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border-emerald-200/60 dark:border-emerald-800",
       accentBg: "from-emerald-500/10 to-teal-500/5",
@@ -37,8 +37,8 @@ export function DashboardMetricsGrid({ data }: DashboardMetricsGridProps) {
       title: "Total Subscribed Users",
       value: data.totalSubscribers.toLocaleString(),
       subtitle: "Active premium paid readers",
-      delta: "+22.8%",
-      isPositive: true,
+      delta: data.totalSubscribers > 0 ? "Active" : "0 Active",
+      isPositive: data.totalSubscribers > 0,
       icon: Crown,
       badgeColor: "bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border-amber-200/60 dark:border-amber-800",
       accentBg: "from-amber-500/10 to-orange-500/5",
@@ -48,8 +48,8 @@ export function DashboardMetricsGrid({ data }: DashboardMetricsGridProps) {
       title: "Total Revenue",
       value: `${currency}${data.totalRevenue.toLocaleString()}`,
       subtitle: "Subscriptions & media earnings",
-      delta: "+18.4%",
-      isPositive: true,
+      delta: data.totalRevenue > 0 ? "Earned" : `${currency}0`,
+      isPositive: data.totalRevenue > 0,
       icon: TrendingUp,
       badgeColor: "bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border-purple-200/60 dark:border-purple-800",
       accentBg: "from-purple-500/10 to-pink-500/5",
@@ -87,10 +87,9 @@ export function DashboardMetricsGrid({ data }: DashboardMetricsGridProps) {
               </span>
               <span
                 className={`inline-flex items-center font-bold ${
-                  c.isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                  c.isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"
                 }`}
               >
-                {c.isPositive ? <ArrowUpRight className="h-3.5 w-3.5 mr-0.5" /> : <ArrowDownRight className="h-3.5 w-3.5 mr-0.5" />}
                 {c.delta}
               </span>
             </div>

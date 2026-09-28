@@ -12,22 +12,22 @@ export function AudienceChartCard({ totalViews, totalUsers }: AudienceChartCardP
   // Dynamic values scaled properly per timeframe relative to database totals
   const stats = {
     Day: {
-      users: totalUsers > 0 ? (totalUsers * 12 + 14232).toLocaleString() : "14,232",
-      bounce: "33.50%",
-      views: totalViews > 0 ? (Math.round(totalViews * 0.15) + 44565).toLocaleString() : "44,565",
-      sessions: totalViews > 0 ? (Math.round(totalViews * 0.10) + 29347).toLocaleString() : "29,347",
+      users: totalUsers > 0 ? Math.max(1, Math.round(totalUsers * 0.4)).toLocaleString() : "0",
+      bounce: totalViews > 0 ? "24.50%" : "0.00%",
+      views: totalViews > 0 ? Math.max(1, Math.round(totalViews * 0.25)).toLocaleString() : "0",
+      sessions: totalViews > 0 ? Math.max(1, Math.round(totalViews * 0.20)).toLocaleString() : "0",
     },
     Week: {
-      users: totalUsers > 0 ? (totalUsers * 75 + 98450).toLocaleString() : "98,450",
-      bounce: "31.20%",
-      views: totalViews > 0 ? (Math.round(totalViews * 0.9) + 312200).toLocaleString() : "312,200",
-      sessions: totalViews > 0 ? (Math.round(totalViews * 0.6) + 205400).toLocaleString() : "205,400",
+      users: totalUsers > 0 ? Math.max(1, Math.round(totalUsers * 0.8)).toLocaleString() : "0",
+      bounce: totalViews > 0 ? "26.20%" : "0.00%",
+      views: totalViews > 0 ? Math.max(1, Math.round(totalViews * 0.65)).toLocaleString() : "0",
+      sessions: totalViews > 0 ? Math.max(1, Math.round(totalViews * 0.50)).toLocaleString() : "0",
     },
     Month: {
-      users: totalUsers > 0 ? (totalUsers * 310 + 421800).toLocaleString() : "421,800",
-      bounce: "29.80%",
-      views: totalViews > 0 ? (Math.round(totalViews * 3.8) + 1340500).toLocaleString() : "1,340,500",
-      sessions: totalViews > 0 ? (Math.round(totalViews * 2.5) + 882100).toLocaleString() : "882,100",
+      users: totalUsers > 0 ? totalUsers.toLocaleString() : "0",
+      bounce: totalViews > 0 ? "28.80%" : "0.00%",
+      views: totalViews > 0 ? totalViews.toLocaleString() : "0",
+      sessions: totalViews > 0 ? Math.max(1, Math.round(totalViews * 0.75)).toLocaleString() : "0",
     },
   };
 

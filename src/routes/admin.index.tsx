@@ -27,10 +27,13 @@ function DashboardPage() {
   const data = Route.useLoaderData();
 
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
-  const [startDate, setStartDate] = useState("2026-09-01");
-  const [endDate, setEndDate] = useState("2026-09-18");
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const startOfMonthStr = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10);
 
-  const isDateFiltered = startDate !== "2026-09-01" || endDate !== "2026-09-18";
+  const [startDate, setStartDate] = useState(startOfMonthStr);
+  const [endDate, setEndDate] = useState(todayStr);
+
+  const isDateFiltered = startDate !== startOfMonthStr || endDate !== todayStr;
 
   const filteredArticles = isDateFiltered
     ? data.topArticles.filter((a) => {
@@ -49,9 +52,9 @@ function DashboardPage() {
     : data.featuredArticles;
 
   const handleResetDates = () => {
-    setStartDate("2026-09-01");
-    setEndDate("2026-09-18");
-    toast.info("Date range reset to default");
+    setStartDate(startOfMonthStr);
+    setEndDate(todayStr);
+    toast.info("Date range reset to current month");
   };
 
   const handleExport = () => {

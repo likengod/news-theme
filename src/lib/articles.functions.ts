@@ -534,11 +534,9 @@ export const getAdminDashboardStats = createServerFn({ method: "GET" })
       } catch {}
     }
 
-    // Realistic monthly subscription baseline (e.g. ₹149/mo per subscriber or ad rev)
+    // Subscription revenue: monthlyRate per subscriber
     const monthlyRate = 149;
-    const totalRevenue = totalSubscribers > 0 
-      ? totalSubscribers * monthlyRate 
-      : Math.round(totalViews * 0.08) + 1490; // Fallback estimate based on views CPM + base
+    const totalRevenue = totalSubscribers > 0 ? totalSubscribers * monthlyRate : 0;
 
     const featuredArticles = (topArticles || []).filter(
       (a: any) => Boolean(a.featured) || a.newsType === "Featured" || a.newsType === "Exclusive"
@@ -549,8 +547,8 @@ export const getAdminDashboardStats = createServerFn({ method: "GET" })
       totalViews,
       totalUsers,
       totalComments,
-      totalSubscribers: totalSubscribers || 18,
-      totalJournalists: totalJournalists || 6,
+      totalSubscribers,
+      totalJournalists,
       totalRevenue,
       recentArticles: recentArticles || [],
       topArticles: topArticles || [],
