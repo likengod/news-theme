@@ -12,12 +12,14 @@ import {
   ChevronRight,
   Award,
   Eye,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { roleBadgeClass } from "@/lib/roles";
 import { rankForCount, type JournalistRank } from "@/lib/journalist-ranks";
 import type { JournalistListRow } from "@/lib/journalist.functions";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
 
 const PAGE_SIZE = 20;
 type SortKey = "name" | "points_desc" | "points_asc" | "articles_desc" | "articles_asc" | "rank";
@@ -48,10 +50,8 @@ export function JournalistsListTab({
   setViewTarget,
 }: JournalistsListTabProps) {
   const siteSettings = useSiteSettings();
-  const planType = (siteSettings?.licenseType || "").toLowerCase();
-  const isEnterprisePlus =
-    planType.includes("enterprise+") ||
-    planType.includes("enterprise plus");
+  const isEnterprise = isEnterpriseLicense(siteSettings);
+  const isEnterprisePlus = isEnterprisePlusLicense(siteSettings);
 
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>(isEnterprisePlus ? "points_desc" : "articles_desc");
@@ -274,6 +274,18 @@ export function JournalistsListTab({
                           >
                             <Copy className="h-3 w-3" />
                           </button>
+                          {isEnterprise && (
+                            <button
+                              onClick={() => {
+                                const url = `${window.location.origin}/verified-journalist?id=${encodeURIComponent(j.journalistId || j.publicUserId)}`;
+                                copy(url);
+                              }}
+                              className="grid h-6 w-6 place-items-center rounded border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-emerald-700"
+                              title="Copy Verified Journalist Link (/verified-journalist?id=...)"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                            </button>
+                          )}
                         </div>
                       ) : (
                         <span className="text-xs text-slate-400">&mdash;</span>
@@ -330,6 +342,17 @@ export function JournalistsListTab({
                     </td>
                     <td className="px-5 py-3 text-right">
                       <div className="inline-flex items-center gap-1.5">
+                        {isEnterprise && (j.journalistId || j.publicUserId) && (
+                          <a
+                            href={`/verified-journalist?id=${encodeURIComponent(j.journalistId || j.publicUserId)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="rounded-md border border-slate-200 p-1.5 text-xs text-slate-600 hover:bg-slate-100 hover:text-emerald-700 hover:border-emerald-300 transition"
+                            title="Open Verified Press Card (/verified-journalist?id=...)"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        )}
                         <button
                           onClick={() => setViewTarget(j)}
                           className="rounded-md border border-slate-200 p-1.5 text-xs text-slate-600 hover:bg-slate-100"

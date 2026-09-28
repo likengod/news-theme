@@ -35,7 +35,7 @@ import type { EditForm } from "@/components/admin/journalists/JournalistFormModa
 import { JournalistsListTab } from "@/components/admin/journalists/JournalistsListTab";
 import { RanksTab } from "@/components/admin/journalists/RanksTab";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
-import { isEnterprisePlusLicense } from "@/lib/site-content";
+import { isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
 
 function emptyForm(): EditForm {
   return {
@@ -93,10 +93,14 @@ type TabKey = "journalists" | "ranks" | "authorized";
 function JournalistsPage() {
   const qc = useQueryClient();
   const siteSettings = useSiteSettings();
+  const isEnterprise = isEnterpriseLicense(siteSettings);
   const isEnterprisePlus = isEnterprisePlusLicense(siteSettings);
 
   const [tab, setTab] = useState<TabKey>("journalists");
-  const effectiveTab = !isEnterprisePlus && tab === "ranks" ? "journalists" : tab;
+  const effectiveTab =
+    (!isEnterprisePlus && tab === "ranks") || (!isEnterprise && tab === "authorized")
+      ? "journalists"
+      : tab;
 
   const [ranks, setRanks] = useState<JournalistRank[]>(() => loadRanks());
   const [authorized, setAuthorized] = useState<AuthorizedSettings>(() => loadAuthorized());
@@ -294,6 +298,19 @@ function JournalistsPage() {
             <span>Open Form</span>
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
+
+          {isEnterprise && (
+            <a
+              href="/verified-journalist"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:border-slate-400 transition cursor-pointer"
+              title="Open public journalist verification registry in a new tab"
+            >
+              <Shield className="h-3.5 w-3.5 text-slate-500" />
+              <span>Verify Registry</span>
+            </a>
+          )}
         </div>
       </div>
 
@@ -305,7 +322,9 @@ function JournalistsPage() {
             ...(isEnterprisePlus
               ? [{ id: "ranks" as const, label: "Rank tiers & points", icon: Award }]
               : []),
-            { id: "authorized" as const, label: "Authorized", icon: Shield },
+            ...(isEnterprise
+              ? [{ id: "authorized" as const, label: "Authorized", icon: Shield }]
+              : []),
           ]
         ).map((t) => {
           const Icon = t.icon;
@@ -349,7 +368,7 @@ function JournalistsPage() {
         />
       )}
 
-      {effectiveTab === "authorized" && (
+      {effectiveTab === "authorized" && isEnterprise && (
         <AuthorizedPanel
           value={authorized}
           onChange={setAuthorized}

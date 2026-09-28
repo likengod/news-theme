@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { query, hashPassword } from "./db.server";
 import { persistDocumentImage } from "./ad-storage.server";
 import { DEFAULT_RANKS, rankForCount } from "./journalist-ranks";
+import { getSiteSettingsServer, isEnterpriseLicense } from "./site-content";
 import crypto from "crypto";
 
 export type JournalistListRow = {
@@ -144,7 +145,7 @@ export const listJournalists = createServerFn({ method: "GET" })
   });
 
 export type JournalistLookup =
-  | { found: false }
+  | { found: false; licenseLocked?: boolean }
   | {
       found: true;
       userId: string;
@@ -183,6 +184,11 @@ export const lookupJournalist = createServerFn({ method: "POST" })
     return { publicUserId: id };
   })
   .handler(async ({ data }): Promise<JournalistLookup> => {
+    const settings = await getSiteSettingsServer().catch(() => ({} as any));
+    if (!isEnterpriseLicense(settings)) {
+      return { found: false, licenseLocked: true };
+    }
+
     const q = data.publicUserId;
     const cleanId = q.toUpperCase().replace(/-/g, "");
     const cleanDigits = q.replace(/\D/g, "");
@@ -268,6 +274,11 @@ export const getJournalistPrivateStats = createServerFn({ method: "POST" })
     };
   })
   .handler(async ({ data }): Promise<JournalistPrivateStats> => {
+    const settings = await getSiteSettingsServer().catch(() => ({} as any));
+    if (!isEnterpriseLicense(settings)) {
+      return { authorized: false };
+    }
+
     // 1. Determine viewer's identity and authenticate session
     let token = data.sessionToken;
     if (!token) {

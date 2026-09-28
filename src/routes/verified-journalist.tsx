@@ -29,7 +29,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { roleBadgeClass } from "@/lib/roles";
 import { loadAuthorized, type AuthorizedSettings } from "@/lib/authorized-settings";
-import { loadSettings, isEnterprisePlusLicense } from "@/lib/site-content";
+import { loadSettings, isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { Footer } from "@/components/site/Footer";
 
@@ -109,11 +109,38 @@ function VerifiedPage() {
   const [notFound, setNotFound] = useState(initialResult?.found === false);
   const [settings, setSettings] = useState(() => loadSettings());
   const siteSettings = useSiteSettings();
+  const isEnterprise = isEnterpriseLicense(siteSettings || settings);
   const isEnterprisePlus = isEnterprisePlusLicense(siteSettings || settings);
 
   useEffect(() => {
     setSettings(loadSettings());
   }, []);
+
+  if (!isEnterprise) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col justify-between">
+        <main className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md w-full rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-lg">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+              <Lock className="h-8 w-8 text-slate-600" />
+            </div>
+            <h1 className="mt-6 text-xl font-bold text-slate-900">Enterprise Feature Locked</h1>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              The Official Verified Journalist &amp; Press Card Verification system is exclusively available on <strong>Enterprise</strong> and <strong>Enterprise Plus</strong> licenses.
+              Please ask your site administrator to upgrade their license to unlock this feature.
+            </p>
+            <a
+              href="/"
+              className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Return to Homepage
+            </a>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   const doLookup = async (searchId: string) => {
     const target = searchId.trim();

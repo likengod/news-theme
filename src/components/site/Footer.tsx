@@ -37,7 +37,9 @@ export function Footer() {
       ...(showEventLink
         ? [{ label: t("footer.event", "Event"), to: "/event" }]
         : [{ label: "Reels", to: "/reels" }]),
-      { label: t("footer.verifiedJournalist"), to: "/verified-journalist" },
+      ...(isEnterprise
+        ? [{ label: t("footer.verifiedJournalist"), to: "/verified-journalist" }]
+        : []),
     ],
     [
       { label: t("footer.privacyPolicy"), to: "/privacy-policy" },
