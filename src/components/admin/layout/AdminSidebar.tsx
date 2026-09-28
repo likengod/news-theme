@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { Home as HomeIcon, X, LogOut } from "lucide-react";
+import { Home as HomeIcon, X, LogOut, ExternalLink } from "lucide-react";
 import { ADMIN_NAV_ITEMS } from "./navItems";
 import { getAccessibleLogoColor } from "@/lib/color-utils";
 
@@ -33,22 +33,32 @@ export function AdminSidebar({
       >
         <div className="border-b border-slate-200 px-5 py-3">
           <div className="flex items-center justify-between">
-            <Link to="/admin" className="flex items-center gap-2">
-              <div className="grid h-8 w-8 place-items-center rounded-md bg-slate-900 text-sm font-bold text-white">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Link
+                to="/admin"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-slate-900 text-sm font-bold text-white hover:opacity-90 transition"
+              >
                 {(s.logoTextPrimary || s.siteName || "N").charAt(0).toUpperCase()}
-              </div>
-              <div className="leading-tight">
-                <div className="text-sm font-bold">
+              </Link>
+              <div className="leading-tight min-w-0">
+                <Link to="/admin" className="text-sm font-bold block truncate hover:opacity-80 transition">
                   <span style={{ color: s.logoColorPrimary || "#000000" }}>
                     {s.logoTextPrimary || "News"}
                   </span>{" "}
                   <span style={{ color: safeSecondaryColor }}>
                     {s.logoTextSecondary || "Timeline"}
                   </span>
-                </div>
-                <div className="text-[10px] text-slate-400">Control Panel</div>
+                </Link>
+                <Link
+                  to="/"
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 hover:text-indigo-600 hover:underline transition"
+                  title="Visit Website (Home Page)"
+                >
+                  <span>Visit Site</span>
+                  <ExternalLink className="h-2.5 w-2.5 opacity-70" />
+                </Link>
               </div>
-            </Link>
+            </div>
             <button
               onClick={onClose}
               className="rounded-md p-1 text-slate-400 hover:bg-slate-100 lg:hidden"
