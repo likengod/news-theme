@@ -160,6 +160,15 @@ export const HeroBoard = React.memo(function HeroBoard({
     };
   }, [articles, cfg]);
 
+  if (articles.length === 0) {
+    return (
+      <div className="py-16 text-center text-muted-foreground border-b border-border">
+        <p className="text-lg font-medium">No published articles yet.</p>
+        <p className="text-sm mt-1">Articles published in the Admin Panel will appear here.</p>
+      </div>
+    );
+  }
+
   return (
     <AnimatedContainer className="border-b border-border py-4 md:py-8 w-full max-w-full min-w-0 overflow-hidden">
       <div className="grid gap-8 lg:grid-cols-12 w-full max-w-full min-w-0">

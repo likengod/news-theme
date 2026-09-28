@@ -167,6 +167,10 @@ export const NewsGrid = React.memo(function NewsGrid({
     });
   }, [articles, cfg.newsGridColumns, hasDbArticles, articlesByCategoryName, usedIds]);
 
+  if (!hasDbArticles) {
+    return null;
+  }
+
   return (
     <section className="border-t border-border py-10 w-full max-w-full min-w-0 overflow-hidden">
       <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-5 w-full max-w-full min-w-0">

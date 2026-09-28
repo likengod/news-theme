@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Plus, Search, ChevronLeft, ChevronRight, GripVertical, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/admin/categories")({
 type Cat = CategoryRow;
 
 function CategoriesPage() {
+  const router = useRouter();
   const fetchCatsFn = useServerFn(getCategories);
   const saveCatFn = useServerFn(saveCategory);
   const deleteCatFn = useServerFn(deleteCategory);
@@ -103,6 +104,7 @@ function CategoriesPage() {
       await importCatsFn({ data });
       toast.success("Categories imported successfully");
       await loadCategories();
+      router.invalidate();
     } catch (err: any) {
       toast.error(err.message || "Failed to import categories");
     } finally {
@@ -122,6 +124,7 @@ function CategoriesPage() {
       setEditing(null);
       setName("");
       loadCategories();
+      router.invalidate();
     } catch (err: any) {
       toast.error(err.message || "Failed to save category");
     }
@@ -133,6 +136,7 @@ function CategoriesPage() {
       await deleteCatFn({ data: c.id });
       toast.success("Category deleted");
       loadCategories();
+      router.invalidate();
     } catch (err: any) {
       toast.error(err.message || "Failed to delete category");
     }
@@ -145,6 +149,7 @@ function CategoriesPage() {
       toast.success("Category order saved successfully");
       setReordering(false);
       loadCategories();
+      router.invalidate();
     } catch (err: any) {
       toast.error(err.message || "Failed to save category order");
     }

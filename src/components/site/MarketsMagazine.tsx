@@ -163,6 +163,10 @@ export function MarketsMagazine({
       ? settings.topBarWeatherCustomText
       : cfg.marketsMagazine.title;
 
+  if (articles.length === 0) {
+    return null;
+  }
+
   return (
     <section className="border border-border bg-background px-4 py-6 font-sans sm:px-6 md:px-9 w-full max-w-full min-w-0 overflow-hidden">
       <div className="mb-5 inline-block">
