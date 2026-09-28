@@ -172,7 +172,7 @@ function CategoriesPage() {
         </div>
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <CsvImportExport data={paged} getData={async () => allCats} filename="categories" onImport={handleImport} />
-          {allCats.filter(c => c.showInHeader).length > 0 && (
+          {allCats.length > 0 && (
             <button
               onClick={() => setReordering(true)}
               className="inline-flex items-center gap-1.5 sm:gap-2 rounded-md bg-white border border-slate-200 px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-xs whitespace-nowrap transition"
