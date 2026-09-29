@@ -11,21 +11,31 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { useAdSettings } from "@/components/site/AdSettingsContext";
+import { useAdSettings, useSiteSettings } from "@/components/site/AdSettingsContext";
 import {
   loadAds,
   loadAdSlotMode,
   loadAdSlotScript,
-  defaultAdSlidesHome2,
+  isEnterprisePlusLicense,
   type AdSlideItem,
 } from "@/lib/site-content";
 import { ScriptAdRenderer } from "@/components/site/ScriptAdRenderer";
 
+const isRealAd = (ad: AdSlideItem) => {
+  const img = ad?.imageLandscape || ad?.image || ad?.imagePortrait || "";
+  return !!img && !img.includes("placehold.co");
+};
+
 export function HeroMain({ activeLeads, cfg }: any) {
   const ctx = useAdSettings();
+  const siteSettings = useSiteSettings();
+  const isEnterprisePlus = isEnterprisePlusLicense(siteSettings || ctx?.settings);
+
   const configSlides = ctx?.adConfig?.slots?.hero_showcase;
   const initialAds =
-    configSlides && configSlides.length > 0 ? configSlides : defaultAdSlidesHome2;
+    isEnterprisePlus && configSlides && configSlides.length > 0
+      ? configSlides.filter(isRealAd)
+      : [];
 
   const [featuredAds, setFeaturedAds] = React.useState<AdSlideItem[]>(initialAds);
   const [featuredAdMode, setFeaturedAdMode] = React.useState(
@@ -36,35 +46,40 @@ export function HeroMain({ activeLeads, cfg }: any) {
   );
 
   React.useEffect(() => {
+    if (!isEnterprisePlus) {
+      setFeaturedAds([]);
+      return;
+    }
     if (ctx?.adConfig) {
       const s = ctx.adConfig.slots?.hero_showcase;
       if (s && s.length > 0) {
-        setFeaturedAds(s);
+        setFeaturedAds(s.filter(isRealAd));
       } else {
         const local = loadAds("hero_showcase");
-        setFeaturedAds(local && local.length > 0 ? local : defaultAdSlidesHome2);
+        setFeaturedAds(local && local.length > 0 ? local.filter(isRealAd) : []);
       }
       setFeaturedAdMode(ctx.adConfig.modes?.hero_showcase || "image");
       setFeaturedAdScript(ctx.adConfig.scripts?.hero_showcase || "");
     }
-  }, [ctx?.adConfig]);
+  }, [ctx?.adConfig, isEnterprisePlus]);
 
   React.useEffect(() => {
+    if (!isEnterprisePlus) return;
     const sync = () => {
       const local = loadAds("hero_showcase");
       if (local && local.length > 0) {
-        setFeaturedAds(local);
+        setFeaturedAds(local.filter(isRealAd));
       } else if (ctx?.adConfig?.slots?.hero_showcase && ctx.adConfig.slots.hero_showcase.length > 0) {
-        setFeaturedAds(ctx.adConfig.slots.hero_showcase);
+        setFeaturedAds(ctx.adConfig.slots.hero_showcase.filter(isRealAd));
       } else {
-        setFeaturedAds(defaultAdSlidesHome2);
+        setFeaturedAds([]);
       }
       setFeaturedAdMode(loadAdSlotMode("hero_showcase"));
       setFeaturedAdScript(loadAdSlotScript("hero_showcase"));
     };
     window.addEventListener("nt:ads-updated", sync);
     return () => window.removeEventListener("nt:ads-updated", sync);
-  }, [ctx?.adConfig]);
+  }, [ctx?.adConfig, isEnterprisePlus]);
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [count, setCount] = React.useState(0);
@@ -160,8 +175,8 @@ export function HeroMain({ activeLeads, cfg }: any) {
       </CarouselItem>,
     );
 
-    // 2. If sliding is enabled, push an ad right after it
-    if (showMultiple) {
+    // 2. If sliding is enabled, push an ad right after it (Enterprise Plus only)
+    if (showMultiple && isEnterprisePlus) {
       if (featuredAdMode === "script" && featuredAdScript) {
         carouselItems.push(
           <CarouselItem key={`slide-script-${index}`}>
@@ -179,34 +194,36 @@ export function HeroMain({ activeLeads, cfg }: any) {
       } else if (featuredAdMode === "image" && featuredAds.length > 0) {
         const ad = featuredAds[index % featuredAds.length];
         const adImg = ad.imageLandscape || ad.image;
-        carouselItems.push(
-          <CarouselItem key={`showcase-${index}`}>
-            <a
-              href={ad.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group/showcase block w-full"
-            >
-              <div className="relative overflow-hidden bg-amber-500 min-h-[200px]">
-                <img
-                  src={adImg}
-                  alt={ad.label || "Featured Content"}
-                  loading="lazy"
-                  decoding="async"
-                  width={800}
-                  height={500}
-                  className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover/showcase:scale-105"
-                />
-                {/* PROMOTED Tag */}
-                <div className="absolute top-3 left-3 z-20 pointer-events-none">
-                  <span className="inline-flex items-center rounded-md bg-black/80 px-2.5 py-1 text-[10px] md:text-xs font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-xs border border-white/20">
-                    {ad.label ? ad.label.toUpperCase() : "PROMOTED"}
-                  </span>
+        if (adImg && !adImg.includes("placehold.co")) {
+          carouselItems.push(
+            <CarouselItem key={`showcase-${index}`}>
+              <a
+                href={ad.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group/showcase block w-full"
+              >
+                <div className="relative overflow-hidden bg-amber-500 min-h-[200px]">
+                  <img
+                    src={adImg}
+                    alt={ad.label || "Featured Content"}
+                    loading="lazy"
+                    decoding="async"
+                    width={800}
+                    height={500}
+                    className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover/showcase:scale-105"
+                  />
+                  {/* PROMOTED Tag */}
+                  <div className="absolute top-3 left-3 z-20 pointer-events-none">
+                    <span className="inline-flex items-center rounded-md bg-black/80 px-2.5 py-1 text-[10px] md:text-xs font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-xs border border-white/20">
+                      {ad.label ? ad.label.toUpperCase() : "PROMOTED"}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </a>
-          </CarouselItem>,
-        );
+              </a>
+            </CarouselItem>,
+          );
+        }
       }
     }
   });

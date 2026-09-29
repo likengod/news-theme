@@ -372,7 +372,7 @@ const DEFAULTS: Record<AdSlot, AdSlideItem[]> = {
   ad3: defaultAdSlidesAd3,
   popup: defaultAdSlidesPopup,
   leaderboard: defaultAdSlidesLeaderboard,
-  hero_showcase: defaultAdSlidesHome2,
+  hero_showcase: [],
   reel_ads: [],
 };
 
@@ -725,7 +725,12 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         let parsed = JSON.parse(rows[0].value) as AdConfiguration;
         if (parsed?.slots) {
           parsed.slots.reel_ads = parsed.slots.reel_ads || [];
-          parsed.slots.hero_showcase = parsed.slots.hero_showcase || [];
+          parsed.slots.hero_showcase = (parsed.slots.hero_showcase || []).filter(
+            (ad: any) => {
+              const img = ad?.imageLandscape || ad?.image || ad?.imagePortrait || "";
+              return !!img && !img.includes("placehold.co");
+            }
+          );
         }
         if (parsed?.modes) {
           parsed.modes.reel_ads = parsed.modes.reel_ads || "image";
@@ -764,7 +769,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         ad3: defaultAdSlidesAd3,
         popup: defaultAdSlidesPopup,
         leaderboard: defaultAdSlidesLeaderboard,
-        hero_showcase: defaultAdSlidesHome2,
+        hero_showcase: [],
         reel_ads: [],
       },
       modes: {
