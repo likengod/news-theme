@@ -570,19 +570,21 @@ export function getAllReels(): WatchItem[] {
       cfg.urls.forEach((url, i) => {
         const embed = toEmbedSrc(cfg.provider, url);
         if (embed) {
+          const ytId = cfg.provider === "youtube" ? url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([a-zA-Z0-9_-]{11})/)?.[1] : null;
+          const thumb = ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : stockImages[i % stockImages.length];
           customItems.push({
-            title: "Featured Reel #" + (i + 1),
+            title: "Featured Shorts #" + (i + 1),
             duration: "1:00",
-            img: stockImages[i % stockImages.length],
-            kicker: "Featured",
+            img: thumb,
+            kicker: "Shorts",
             embedSrc: embed,
             views: 50000 + i * 1234,
           });
         }
       });
     }
-    return [...customItems, ...baseWatchItems];
+    return customItems;
   } catch {
-    return baseWatchItems;
+    return [];
   }
 }

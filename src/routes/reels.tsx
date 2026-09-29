@@ -80,8 +80,16 @@ function ReelsPage() {
           </div>
         </div>
 
-        {/* Reels Grid: exactly 4 columns on mobile, 5 columns on desktop */}
-        <div className="grid grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
+        {totalItems === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <Film className="h-12 w-12 text-muted-foreground/30 mb-3" />
+            <h3 className="text-base font-semibold text-foreground">No Reels Published Yet</h3>
+            <p className="text-xs text-muted-foreground max-w-sm mt-1">
+              Add YouTube Shorts or Facebook Reels in the Admin Panel to display videos here.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
           {displayReels.map((entry, index) => {
             if (entry.isAd) {
               const ad = entry.ad;
@@ -182,6 +190,7 @@ function ReelsPage() {
             );
           })}
         </div>
+        )}
 
         {/* Pagination Controls */}
         {totalPages > 1 && (

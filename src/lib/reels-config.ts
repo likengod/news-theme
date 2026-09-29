@@ -48,8 +48,58 @@ export const defaultReelsConfig: ReelsConfig = {
   facebook: { accessToken: "", pageId: "", maxResults: 8 },
 };
 
+import { createServerFn } from "@tanstack/react-start";
+import { requireAuth } from "./auth-middleware";
+import { query } from "./db.server";
+
 const KEY = "nt:reels-config:v2";
 const EVENT = "nt:reels-updated";
+
+let reelsConfigCache: { data: ReelsConfig; expiry: number } | null = null;
+const CACHE_TTL_MS = 60 * 1000;
+
+export const getReelsConfigServer = createServerFn({ method: "GET" }).handler(
+  async (): Promise<ReelsConfig> => {
+    if (reelsConfigCache && reelsConfigCache.expiry > Date.now()) {
+      return reelsConfigCache.data;
+    }
+    try {
+      const rows = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'reels_config'",
+      );
+      if (rows.length > 0 && rows[0].value) {
+        const parsed = JSON.parse(rows[0].value);
+        const res: ReelsConfig = {
+          ...defaultReelsConfig,
+          ...parsed,
+          urls: Array.isArray(parsed.urls)
+            ? parsed.urls.filter((u: unknown) => typeof u === "string")
+            : [],
+          youtube: { ...defaultReelsConfig.youtube, ...(parsed.youtube ?? {}) },
+          facebook: { ...defaultReelsConfig.facebook, ...(parsed.facebook ?? {}) },
+        };
+        reelsConfigCache = { data: res, expiry: Date.now() + CACHE_TTL_MS };
+        return res;
+      }
+    } catch {}
+    reelsConfigCache = { data: defaultReelsConfig, expiry: Date.now() + CACHE_TTL_MS };
+    return defaultReelsConfig;
+  },
+);
+
+export const saveReelsConfigServer = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator((cfg: ReelsConfig) => cfg)
+  .handler(async ({ data }) => {
+    const json = JSON.stringify(data);
+    await query(
+      `INSERT INTO site_settings (setting_key, value) VALUES ('reels_config', ?)
+       ON DUPLICATE KEY UPDATE value = ?`,
+      [json, json],
+    );
+    reelsConfigCache = null;
+    return { success: true };
+  });
 
 export function loadReelsConfig(): ReelsConfig {
   if (typeof window === "undefined") return defaultReelsConfig;
@@ -72,8 +122,11 @@ export function loadReelsConfig(): ReelsConfig {
 }
 
 export function saveReelsConfig(cfg: ReelsConfig) {
-  localStorage.setItem(KEY, JSON.stringify(cfg));
-  window.dispatchEvent(new Event(EVENT));
+  if (typeof window !== "undefined") {
+    localStorage.setItem(KEY, JSON.stringify(cfg));
+    window.dispatchEvent(new Event(EVENT));
+  }
+  saveReelsConfigServer({ data: cfg }).catch(() => {});
 }
 
 export function onReelsConfigChange(cb: () => void): () => void {
@@ -91,12 +144,34 @@ export function onReelsConfigChange(cb: () => void): () => void {
 
 export function extractYouTubeId(url: string): string | null {
   try {
-    const u = new URL(url.trim());
-    if (u.hostname === "youtu.be") return u.pathname.slice(1) || null;
-    if (u.pathname.startsWith("/shorts/")) return u.pathname.split("/")[2] || null;
-    if (u.pathname.startsWith("/embed/")) return u.pathname.split("/")[2] || null;
-    if (u.pathname === "/watch") return u.searchParams.get("v");
-    return null;
+    let clean = (url || "").trim();
+    if (!clean) return null;
+    if (!/^https?:\/\//i.test(clean)) {
+      clean = "https://" + clean;
+    }
+    const u = new URL(clean);
+    if (u.hostname === "youtu.be" || u.hostname.endsWith(".youtu.be")) {
+      return u.pathname.slice(1).split("/")[0] || null;
+    }
+    if (u.pathname.includes("/shorts/")) {
+      const parts = u.pathname.split("/shorts/");
+      if (parts[1]) {
+        return parts[1].split("/")[0].split("?")[0] || null;
+      }
+    }
+    if (u.pathname.includes("/embed/")) {
+      const parts = u.pathname.split("/embed/");
+      if (parts[1]) {
+        return parts[1].split("/")[0].split("?")[0] || null;
+      }
+    }
+    if (u.searchParams.has("v")) {
+      return u.searchParams.get("v");
+    }
+    const match = clean.match(
+      /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([a-zA-Z0-9_-]{11})/,
+    );
+    return match ? match[1] : null;
   } catch {
     return null;
   }
@@ -109,7 +184,8 @@ export function toEmbedSrc(provider: ReelsProvider, url: string): string | null 
       ? `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1&autoplay=1`
       : null;
   }
-  const trimmed = url.trim();
+  let trimmed = url.trim();
+  if (!/^https?:\/\//i.test(trimmed)) trimmed = "https://" + trimmed;
   if (!/^https?:\/\/(www\.)?facebook\.com\//i.test(trimmed)) return null;
   const href = encodeURIComponent(trimmed);
   return `https://www.facebook.com/plugins/video.php?href=${href}&show_text=false&autoplay=1`;

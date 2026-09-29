@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, lazy, Suspense } from "react";
+import { useState, useRef, useMemo, useEffect, lazy, Suspense } from "react";
 import {
   Play,
   ChevronLeft,
@@ -6,9 +6,11 @@ import {
   ExternalLink,
   Sparkles,
 } from "lucide-react";
-import { grid, top, lead, viewsFor } from "@/lib/news-data";
+import { viewsFor } from "@/lib/news-data";
 import { Views } from "./Views";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
+import { useReelsConfig } from "@/hooks/use-reels-config";
+import { loadReels, extractYouTubeId } from "@/lib/reels-config";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAdSettings } from "./AdSettingsContext";
 import { loadAds, injectReelAds } from "@/lib/site-content";
@@ -17,79 +19,41 @@ import type { WatchItem } from "./ReelViewerModal";
 
 const ReelViewerModal = lazy(() => import("./ReelViewerModal"));
 
-const watchItems: WatchItem[] = [
-  {
-    title: "Where to Invest 10 Lakh Rupees Amid a Fragile Recovery",
-    duration: "1:08",
-    img: grid[0].img,
-    kicker: null,
-    embedSrc:
-      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
-  },
-  {
-    title: "Iran's Leaders Are in No Hurry to Get a Peace Deal",
-    duration: "1:16",
-    img: top[0].img,
-    kicker: null,
-    embedSrc:
-      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
-  },
-  {
-    title: "A Heartless Supreme Court Decision",
-    duration: "2:12",
-    img: grid[1].img,
-    kicker: "Opinion",
-    embedSrc:
-      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
-  },
-  {
-    title: "Apple's Sweeping Price Hikes Hit iPads and Macs",
-    duration: "1:21",
-    img: grid[2].img,
-    kicker: null,
-    embedSrc:
-      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
-  },
-  {
-    title: "How the 1994 World Cup Changed the Business of Football Forever",
-    duration: "1:39",
-    img: lead.img,
-    kicker: null,
-    embedSrc:
-      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
-  },
-  {
-    title: "Tesla's New Factory Sparks Environmental Concerns",
-    duration: "2:45",
-    img: top[1].img,
-    kicker: "Tech",
-    embedSrc:
-      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
-  },
-  {
-    title: "The Rise of AI in Modern Healthcare",
-    duration: "1:55",
-    img: grid[0].img,
-    kicker: "Health",
-    embedSrc:
-      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
-  },
-  {
-    title: "Global Supply Chain Disruptions Continue to Plague Retailers",
-    duration: "3:10",
-    img: grid[1].img,
-    kicker: "Business",
-    embedSrc:
-      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1&playsinline=1",
-  },
-];
-
-
 export function Columnists({ hideTitle }: { hideTitle?: boolean } = {}) {
   const cfg = useHomepageConfig();
+  const reelsCfg = useReelsConfig();
   const adCtx = useAdSettings();
   const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [items, setItems] = useState<WatchItem[]>([]);
+
+  useEffect(() => {
+    if (!reelsCfg?.enabled) {
+      setItems([]);
+      return;
+    }
+    let cancelled = false;
+    loadReels(reelsCfg).then((reelsList) => {
+      if (cancelled) return;
+      const mapped: WatchItem[] = (reelsList || []).map((r, i) => {
+        const ytId = extractYouTubeId(r.url);
+        const thumb =
+          r.thumbnail ||
+          (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : "");
+        return {
+          title: r.title || `Shorts #${i + 1}`,
+          duration: "1:00",
+          img: thumb,
+          kicker: r.source === "manual" ? "Shorts" : "Reels",
+          embedSrc: r.embedSrc,
+        };
+      });
+      setItems(mapped);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [reelsCfg]);
 
   const isMobile = useIsMobile();
   const reelAds = useMemo(() => {
@@ -97,8 +61,13 @@ export function Columnists({ hideTitle }: { hideTitle?: boolean } = {}) {
   }, [adCtx?.adConfig?.slots]);
 
   const displayItems = useMemo(() => {
-    return injectReelAds(watchItems, reelAds, isMobile ? { firstAfter: 1, interval: 2 } : 3);
-  }, [reelAds, isMobile]);
+    return injectReelAds(items, reelAds, isMobile ? { firstAfter: 1, interval: 2 } : 3);
+  }, [items, reelAds, isMobile]);
+
+  // Hide the section completely if reels are disabled or if there are no reels added!
+  if (!reelsCfg?.enabled || items.length === 0) {
+    return null;
+  }
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -245,7 +214,7 @@ export function Columnists({ hideTitle }: { hideTitle?: boolean } = {}) {
         <Suspense fallback={null}>
           <ReelViewerModal
             initialIndex={activeReelIndex}
-            items={watchItems}
+            items={items}
             onClose={() => setActiveReelIndex(null)}
           />
         </Suspense>

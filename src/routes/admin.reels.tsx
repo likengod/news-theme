@@ -16,6 +16,8 @@ import {
   defaultReelsConfig,
   loadReelsConfig,
   saveReelsConfig,
+  getReelsConfigServer,
+  saveReelsConfigServer,
   toEmbedSrc,
   fetchYouTubeShorts,
   fetchFacebookReels,
@@ -34,8 +36,22 @@ function ReelsEditor() {
   const [dirty, setDirty] = useState(false);
   const [newUrl, setNewUrl] = useState("");
   const [testing, setTesting] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => setCfg(loadReelsConfig()), []);
+  useEffect(() => {
+    getReelsConfigServer()
+      .then((serverCfg) => {
+        if (serverCfg) {
+          setCfg(serverCfg);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("nt:reels-config:v2", JSON.stringify(serverCfg));
+          }
+        } else {
+          setCfg(loadReelsConfig());
+        }
+      })
+      .catch(() => setCfg(loadReelsConfig()));
+  }, []);
 
   const update = <K extends keyof ReelsConfig>(key: K, value: ReelsConfig[K]) => {
     setCfg((p) => ({ ...p, [key]: value }));
@@ -54,7 +70,8 @@ function ReelsEditor() {
       return;
     }
     if (cfg.urls.includes(trimmed)) return toast.error("Already added");
-    update("urls", [...cfg.urls, trimmed]);
+    const updatedUrls = [...cfg.urls, trimmed];
+    update("urls", updatedUrls);
     setNewUrl("");
   };
 
@@ -64,15 +81,26 @@ function ReelsEditor() {
       cfg.urls.filter((x) => x !== u),
     );
 
-  const onSave = () => {
+  const onSave = async () => {
+    setSaving(true);
     saveReelsConfig(cfg);
+    try {
+      await saveReelsConfigServer({ data: cfg });
+    } catch (e: any) {
+      console.warn("[reels] server save notice:", e);
+    } finally {
+      setSaving(false);
+    }
     setDirty(false);
-    toast.success("Reels updated");
+    toast.success("Reels updated and saved successfully");
   };
 
-  const onReset = () => {
+  const onReset = async () => {
     setCfg(defaultReelsConfig);
     saveReelsConfig(defaultReelsConfig);
+    try {
+      await saveReelsConfigServer({ data: defaultReelsConfig });
+    } catch {}
     setDirty(false);
     toast.success("Reset to defaults");
   };
