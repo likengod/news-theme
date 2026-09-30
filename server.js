@@ -63,15 +63,36 @@ const server = createServer(async (req, res) => {
       path.join(__dirname, "uploads"),
       path.join(__dirname, "assets"),
     ];
+
+    let safeParsedPath = "";
+    try {
+      safeParsedPath = path.normalize(decodeURIComponent(parsedPath)).replace(/\0/g, "");
+    } catch {
+      safeParsedPath = path.normalize(parsedPath).replace(/\0/g, "");
+    }
+
     for (const baseDir of staticDirs) {
-      let filePath = path.join(baseDir, parsedPath);
+      const safeBase = path.resolve(baseDir);
+      let filePath = path.resolve(
+        safeBase,
+        "." + (safeParsedPath.startsWith(path.sep) ? safeParsedPath : path.sep + safeParsedPath),
+      );
+
+      // Path traversal containment check
+      if (!filePath.startsWith(safeBase + path.sep) && filePath !== safeBase) {
+        continue;
+      }
+
       // If looking for /assets/<filename>, also check baseDir directly if baseDir is assets
       if (
         !fs.existsSync(filePath) &&
         parsedPath.startsWith("/assets/") &&
         path.basename(baseDir) === "assets"
       ) {
-        filePath = path.join(baseDir, path.basename(parsedPath));
+        const directAssetPath = path.resolve(safeBase, path.basename(safeParsedPath));
+        if (directAssetPath.startsWith(safeBase + path.sep)) {
+          filePath = directAssetPath;
+        }
       }
 
       if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {

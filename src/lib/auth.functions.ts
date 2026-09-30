@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import crypto from "crypto";
-import { query, hashPassword, cleanupExpiredSessions } from "./db.server";
+import { query, hashPassword, verifyPassword, cleanupExpiredSessions } from "./db.server";
 import { z } from "zod";
 import disposableDomains from "disposable-email-domains";
 
@@ -149,15 +149,16 @@ export const signInServer = createServerFn({ method: "POST" })
 
     const user = users[0];
 
-    // Support lazy migration for legacy passwords
-    const passHash = hashPassword(password, user.salt || undefined);
-    if (user.password_hash !== passHash)
+    // Constant-time, backward-compatible verification supporting auto-migration
+    const verification = verifyPassword(password, user.password_hash, user.salt || undefined);
+    if (!verification.valid) {
       throw new Error("Invalid email, username, phone or password");
+    }
 
-    // Retroactive secure migration for users missing a salt
-    if (!user.salt) {
-      const newSalt = crypto.randomBytes(16).toString("hex");
-      const newPassHash = hashPassword(password, newSalt);
+    // Retroactive secure migration for users missing a salt or using legacy weak hash
+    if (!user.salt || verification.needsRehash) {
+      const newSalt = verification.newSalt || crypto.randomBytes(16).toString("hex");
+      const newPassHash = verification.newHash || hashPassword(password, newSalt, 100000);
       await query("UPDATE users SET password_hash = ?, salt = ? WHERE id = ?", [
         newPassHash,
         newSalt,

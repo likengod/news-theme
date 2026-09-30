@@ -244,14 +244,16 @@ export const createAdminUser = createServerFn({ method: "POST" })
     if (check.length > 0) throw new Error("User already exists");
 
     const uid = crypto.randomUUID();
-    const passHash = hashPassword(data.password);
+    const salt = crypto.randomBytes(16).toString("hex");
+    const passHash = hashPassword(data.password, salt, 100000);
     const name = data.displayName || data.email.split("@")[0];
 
     // Insert user
-    await query("INSERT INTO users (id, email, password_hash, display_name) VALUES (?, ?, ?, ?)", [
+    await query("INSERT INTO users (id, email, password_hash, salt, display_name) VALUES (?, ?, ?, ?, ?)", [
       uid,
       data.email,
       passHash,
+      salt,
       name,
     ]);
 
@@ -447,8 +449,9 @@ export const updateAdminUserPassword = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
 
-    const passHash = hashPassword(data.password);
-    await query("UPDATE users SET password_hash = ? WHERE id = ?", [passHash, data.userId]);
+    const salt = crypto.randomBytes(16).toString("hex");
+    const passHash = hashPassword(data.password, salt, 100000);
+    await query("UPDATE users SET password_hash = ?, salt = ? WHERE id = ?", [passHash, salt, data.userId]);
 
     // Invalidate all active sessions for the user except the currently active admin session token
     // (so the admin is not logged out if they change their own password, but other devices are logged out)

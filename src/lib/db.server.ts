@@ -4,10 +4,48 @@ import fs from "fs";
 import path from "path";
 
 // Hash password with native crypto pbkdf2
-export function hashPassword(password: string, salt?: string): string {
+export function hashPassword(password: string, salt?: string, iterations?: number): string {
   const activeSalt = salt || "northeast_timeline_salt_2026";
-  const iterations = salt ? 100000 : 1000;
-  return crypto.pbkdf2Sync(password, activeSalt, iterations, 64, "sha512").toString("hex");
+  const iters = iterations || (salt ? 100000 : 1000);
+  return crypto.pbkdf2Sync(password, activeSalt, iters, 64, "sha512").toString("hex");
+}
+
+// Constant-time string matching to prevent timing side-channel attacks
+export function timingSafeMatch(a: string, b: string): boolean {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const bufA = Buffer.from(a, "utf-8");
+  const bufB = Buffer.from(b, "utf-8");
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
+// Verifies password against legacy and modern iterations with silent auto-migration
+export function verifyPassword(
+  password: string,
+  storedHash: string,
+  salt?: string | null,
+): { valid: boolean; needsRehash: boolean; newSalt?: string; newHash?: string } {
+  if (!storedHash || !password) {
+    return { valid: false, needsRehash: false };
+  }
+
+  // 1. Try modern salt + 100,000 iterations
+  if (salt) {
+    const hash100k = hashPassword(password, salt, 100000);
+    if (timingSafeMatch(storedHash, hash100k)) {
+      return { valid: true, needsRehash: false };
+    }
+  }
+
+  // 2. Try legacy fallback salt (1,000 iterations)
+  const legacyHash = hashPassword(password, undefined, 1000);
+  if (timingSafeMatch(storedHash, legacyHash)) {
+    const newSalt = crypto.randomBytes(16).toString("hex");
+    const newHash = hashPassword(password, newSalt, 100000);
+    return { valid: true, needsRehash: true, newSalt, newHash };
+  }
+
+  return { valid: false, needsRehash: false };
 }
 
 let pool: mysql.Pool | null = null;
