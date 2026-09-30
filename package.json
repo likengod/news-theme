@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "node -e \"if (!require('fs').existsSync('./dist/client')) { require('child_process').execSync('npx vite build', {stdio: 'inherit'}); } else { console.log('Pre-built dist found, skipping build.'); }\"",
+    "build:clean": "vite build",
     "build:dev": "vite build --mode development",
     "start": "node server.js",
     "preview": "vite preview",
