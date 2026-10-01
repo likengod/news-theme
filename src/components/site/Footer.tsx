@@ -59,13 +59,14 @@ export function Footer() {
   const footerLight = s.footerLogoLight || s.logoLight;
   const footerDark = s.footerLogoDark || s.logoDark;
   const hasLogo = !!(footerLight || footerDark);
-  const mode = s.logoDisplayMode || (hasLogo ? "logo_only" : "text_only");
+  const mode = s.logoDisplayMode || (hasLogo ? "both" : "text_only");
 
   const showLogo =
     hasLogo &&
     (mode === "logo_only" || mode === "both" || mode === "both_stacked" || mode === "logo_fit");
   const showText =
     !hasLogo || mode === "text_only" || mode === "both" || mode === "both_stacked";
+  const isSideBySide = mode === "both" && showLogo && showText;
 
   return (
     <footer className="border-t border-border bg-card/40">
@@ -73,60 +74,74 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-3">
           {/* Brand */}
           <div className="flex flex-col items-center text-center md:items-start md:text-left">
-            {showLogo && footerLight && (
-              <img
-                src={footerLight}
-                alt={s.logoText || "Logo"}
-                width={180}
-                height={48}
-                loading="lazy"
-                decoding="async"
-                className={`h-12 object-contain ${footerDark ? "dark:hidden" : ""} ${showText ? "mb-3" : ""}`}
-              />
-            )}
-            {showLogo && footerDark && (
-              <img
-                src={footerDark}
-                alt={s.logoText || "Logo"}
-                width={180}
-                height={48}
-                loading="lazy"
-                decoding="async"
-                className={`h-12 object-contain ${footerLight ? "hidden dark:block" : ""} ${showText ? "mb-3" : ""}`}
-              />
-            )}
-            {showText && (
-              <div
-                className="text-2xl uppercase leading-none"
-                style={{
-                  fontFamily: '"Inter", system-ui, sans-serif',
-                  fontWeight: 800,
-                  letterSpacing: "0.05em",
-                }}
-              >
-                <span
-                  style={s.logoColorPrimary ? { color: s.logoColorPrimary } : undefined}
-                  className={
-                    !s.logoColorPrimary || s.logoColorPrimary === "#000000"
-                      ? "text-foreground dark:text-white"
-                      : ""
-                  }
+            <Link
+              to="/"
+              aria-label={s.siteName || "Home"}
+              className={`inline-flex max-w-full ${
+                isSideBySide
+                  ? "flex-row items-center gap-3 text-left"
+                  : "flex-col items-center text-center md:items-start md:text-left"
+              }`}
+            >
+              {showLogo && footerLight && (
+                <img
+                  src={footerLight}
+                  alt={s.logoText || "Logo"}
+                  width={180}
+                  height={48}
+                  loading="lazy"
+                  decoding="async"
+                  className={`h-11 w-auto max-w-[70px] sm:max-w-[90px] object-contain shrink-0 ${
+                    footerDark ? "dark:hidden" : ""
+                  } ${!isSideBySide && showText ? "mb-3" : ""}`}
+                />
+              )}
+              {showLogo && footerDark && (
+                <img
+                  src={footerDark}
+                  alt={s.logoText || "Logo"}
+                  width={180}
+                  height={48}
+                  loading="lazy"
+                  decoding="async"
+                  className={`h-11 w-auto max-w-[70px] sm:max-w-[90px] object-contain shrink-0 ${
+                    footerLight ? "hidden dark:block" : ""
+                  } ${!isSideBySide && showText ? "mb-3" : ""}`}
+                />
+              )}
+              {showText && (
+                <div
+                  className="text-2xl uppercase leading-none"
+                  style={{
+                    fontFamily: '"Inter", system-ui, sans-serif',
+                    fontWeight: 800,
+                    letterSpacing: "0.05em",
+                  }}
                 >
-                  {s.logoTextPrimary !== undefined && s.logoTextPrimary !== ""
-                    ? s.logoTextPrimary
-                    : s.logoText
-                      ? s.logoText.split(" ")[0]
-                      : "Today"}
-                </span>{" "}
-                <span style={{ color: safeSecondaryColor }}>
-                  {s.logoTextSecondary !== undefined && s.logoTextSecondary !== ""
-                    ? s.logoTextSecondary
-                    : s.logoText && s.logoText.split(" ").length > 1
-                      ? s.logoText.split(" ").slice(1).join(" ")
-                      : "Tripura"}
-                </span>
-              </div>
-            )}
+                  <span
+                    style={s.logoColorPrimary ? { color: s.logoColorPrimary } : undefined}
+                    className={
+                      !s.logoColorPrimary || s.logoColorPrimary === "#000000"
+                        ? "text-foreground dark:text-white"
+                        : ""
+                    }
+                  >
+                    {s.logoTextPrimary !== undefined && s.logoTextPrimary !== ""
+                      ? s.logoTextPrimary
+                      : s.logoText
+                        ? s.logoText.split(" ")[0]
+                        : "Today"}
+                  </span>{" "}
+                  <span style={{ color: safeSecondaryColor }}>
+                    {s.logoTextSecondary !== undefined && s.logoTextSecondary !== ""
+                      ? s.logoTextSecondary
+                      : s.logoText && s.logoText.split(" ").length > 1
+                        ? s.logoText.split(" ").slice(1).join(" ")
+                        : "Tripura"}
+                  </span>
+                </div>
+              )}
+            </Link>
             <p className="mt-3 text-sm text-muted-foreground">
               {s.footerNote?.trim() ||
                 s.metaDescription ||
