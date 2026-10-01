@@ -142,7 +142,17 @@ export function Footer() {
                 </div>
               )}
             </Link>
-            <p className="mt-3 text-sm text-muted-foreground">
+
+            {/* Elegant Accent Divider below Logo & Site Name */}
+            <div className="my-3.5 flex items-center gap-1.5 w-full max-w-[220px] mx-auto md:mx-0" aria-hidden="true">
+              <span
+                className="h-[3px] w-9 rounded-full shrink-0"
+                style={{ backgroundColor: safeSecondaryColor || "#dc2626" }}
+              />
+              <span className="h-[1px] flex-1 bg-border/80" />
+            </div>
+
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {s.footerNote?.trim() ||
                 s.metaDescription ||
                 "News Theme is an independent newsroom covering breaking news, finance, business and markets across Northeast India and beyond. Trusted, verified and editorially independent journalism."}{" "}
