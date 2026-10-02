@@ -85,9 +85,9 @@ export function Masthead() {
         : "Tripura";
 
   const taglineContent = s.tagline ? (
-    <span className="break-words">{s.tagline}</span>
+    <span className="break-words text-center inline-block">{s.tagline}</span>
   ) : (
-    <span className="inline-flex flex-wrap items-center gap-x-1.5 sm:gap-x-2">
+    <span className="inline-flex flex-wrap items-center justify-center gap-x-1.5 sm:gap-x-2">
       <span className="text-[#1d4ed8] dark:text-blue-400">Breaking News</span>
       <span className="text-muted-foreground">•</span>
       <span className="text-[#b91c1c] dark:text-red-400">Finance</span>
@@ -135,9 +135,9 @@ export function Masthead() {
                 </div>
 
                 {/* Brand Title (Two-tone) & Tagline on the Right */}
-                <div className="flex flex-col justify-center min-w-0">
+                <div className="flex flex-col justify-center items-center text-center min-w-0 w-full">
                   <h1
-                    className="leading-none text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase font-extrabold"
+                    className="leading-none text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase font-extrabold text-center"
                     style={{
                       fontFamily: '"Inter", system-ui, sans-serif',
                       fontWeight: 800,
@@ -158,7 +158,7 @@ export function Masthead() {
                       {secondaryWord}
                     </span>
                   </h1>
-                  <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[11px] md:text-xs font-semibold uppercase tracking-[0.16em] sm:tracking-[0.24em] md:tracking-[0.32em] text-foreground/80 dark:text-foreground/85">
+                  <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[11px] md:text-xs font-semibold uppercase text-center w-full text-foreground/80 dark:text-foreground/85">
                     {taglineContent}
                   </div>
                 </div>
@@ -254,7 +254,7 @@ export function Masthead() {
                 )}
               </Link>
               {showText && (
-                <p className="mt-2.5 sm:mt-3 block text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.25em] md:tracking-[0.35em] text-foreground/80 dark:text-foreground/85">
+                <p className="mt-2.5 sm:mt-3 block text-center mx-auto text-[10px] sm:text-[11px] font-semibold uppercase text-foreground/80 dark:text-foreground/85">
                   {taglineContent}
                 </p>
               )}

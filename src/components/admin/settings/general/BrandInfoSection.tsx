@@ -174,9 +174,9 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
               </div>
 
               {/* Text + Tagline on the right */}
-              <div className="flex flex-col justify-center min-w-0">
+              <div className="flex flex-col justify-center items-center text-center min-w-0 w-full">
                 <div
-                  className="text-2xl sm:text-3xl md:text-4xl font-extrabold uppercase tracking-wide leading-none"
+                  className="text-2xl sm:text-3xl md:text-4xl font-extrabold uppercase tracking-wide leading-none text-center"
                   style={{
                     fontFamily: '"Inter", system-ui, sans-serif',
                     letterSpacing: "0.05em",
@@ -193,7 +193,7 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
                       : "THEME"}
                   </span>
                 </div>
-                <div className="mt-1 text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                <div className="mt-1 text-[9px] sm:text-[10px] font-semibold uppercase text-center w-full text-slate-500">
                   {settings.tagline || "BREAKING NEWS · FINANCE · BUSINESS · MARKETS"}
                 </div>
               </div>
