@@ -1,4 +1,4 @@
-﻿import { query } from "./db.server";
+import { query } from "./db.server";
 import { execSync } from "child_process";
 import path from "path";
 import fs from "fs";
@@ -78,7 +78,7 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
     return gitStatusCache.data;
   }
 
-  let version = "v1.0.57";
+  let version = "v1.1.5";
   try {
     const pkgPath = path.join(ROOT, "package.json");
     const pkgRaw = fs.readFileSync(pkgPath, "utf-8");
