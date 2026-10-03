@@ -88,9 +88,28 @@ function UpdatesPage() {
   const refresh = async () => {
     setLoading(true);
     try {
-      const [statusRes, historyRes] = await Promise.all([getGitStatus(), getDeployHistory()]);
+      const [statusRes, historyRes] = await Promise.all([
+        getGitStatus({ data: { forceRefresh: true } }),
+        getDeployHistory(),
+      ]);
       setGitStatus(statusRes);
       setDeployments(historyRes.deployments ?? []);
+
+      // Synchronize with layout immediately so the sidebar update badge clears
+      if (typeof window !== "undefined") {
+        const cur = statusRes?.version || "v1.1.5";
+        const latest = statusRes?.latestVersion || cur;
+        const hasUpdate = Boolean(statusRes?.hasNewVersion || ((statusRes?.behind ?? 0) > 0));
+        const statusObj = {
+          hasUpdate,
+          currentVersion: cur,
+          latestVersion: latest,
+          checked: true,
+        };
+        sessionStorage.setItem("admin_update_status", JSON.stringify(statusObj));
+        sessionStorage.setItem("admin_update_check_time", Date.now().toString());
+        window.dispatchEvent(new CustomEvent("admin_update_synced"));
+      }
     } catch (err: any) {
       toast.error("Failed to load status: " + err.message);
     } finally {
@@ -110,6 +129,11 @@ function UpdatesPage() {
         res?.updated || res?.data?.updated || res?.result?.updated || res?.success
       );
       if (isUpdated) {
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("admin_update_status");
+          sessionStorage.removeItem("admin_update_check_time");
+          sessionStorage.removeItem("admin_update_dismissed");
+        }
         toast.success(`Updated and built latest release! Restarting server and reloading in 8 seconds...`);
         setTimeout(() => {
           window.location.reload();

@@ -146,23 +146,51 @@ function AdminLayout() {
   useEffect(() => {
     let mounted = true;
 
-    // Check if we already checked for updates recently in this session (within 10 minutes)
+    const syncFromSession = () => {
+      if (typeof window !== "undefined") {
+        try {
+          const cached = sessionStorage.getItem("admin_update_status");
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed.currentVersion && parsed.latestVersion && parsed.currentVersion === parsed.latestVersion && (!parsed.behind || parsed.behind <= 0)) {
+              parsed.hasUpdate = false;
+            }
+            setUpdateStatus(parsed);
+          }
+        } catch {}
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("admin_update_synced", syncFromSession);
+    }
+
+    // Check if cached update status exists in this session
     if (typeof window !== "undefined") {
       const lastCheck = sessionStorage.getItem("admin_update_check_time");
       const cachedStatus = sessionStorage.getItem("admin_update_status");
-      if (lastCheck && cachedStatus && Date.now() - parseInt(lastCheck) < 10 * 60 * 1000) {
+      // Only trust cache if checked recently and NOT on the updates page
+      if (lastCheck && cachedStatus && Date.now() - parseInt(lastCheck) < 3 * 60 * 1000 && pathname !== "/admin/updates") {
         try {
           const parsed = JSON.parse(cachedStatus);
+          if (parsed.currentVersion && parsed.latestVersion && parsed.currentVersion === parsed.latestVersion && (!parsed.behind || parsed.behind <= 0)) {
+            parsed.hasUpdate = false;
+          }
           setUpdateStatus(parsed);
-          return;
+          return () => {
+            mounted = false;
+            if (typeof window !== "undefined") {
+              window.removeEventListener("admin_update_synced", syncFromSession);
+            }
+          };
         } catch {}
       }
     }
 
-    getGitStatus()
+    getGitStatus({ data: { forceRefresh: pathname === "/admin/updates" } })
       .then((res) => {
         if (!mounted) return;
-        const cur = res?.version || "v1.0.55";
+        const cur = res?.version || "v1.1.5";
         const latest = res?.latestVersion || cur;
         const isSimulated =
           typeof window !== "undefined" &&
@@ -189,10 +217,14 @@ function AdminLayout() {
       .catch((e) => {
         console.error("Version check notice:", e);
       });
+
     return () => {
       mounted = false;
+      if (typeof window !== "undefined") {
+        window.removeEventListener("admin_update_synced", syncFromSession);
+      }
     };
-  }, []);
+  }, [pathname]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
