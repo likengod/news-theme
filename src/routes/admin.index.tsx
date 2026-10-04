@@ -175,7 +175,7 @@ function DashboardPage() {
               />
             </div>
             <div className="lg:col-span-5 xl:col-span-5">
-              <TrafficChannelsCard />
+              <TrafficChannelsCard totalViews={data.totalViews} />
             </div>
           </div>
         </div>
@@ -194,7 +194,7 @@ function DashboardPage() {
         </div>
       )}
 
-      {activeTab === "demographics" && <DemographicsTab />}
+      {activeTab === "demographics" && <DemographicsTab totalViews={data.totalViews} />}
 
       {activeTab === "content" && (
         <div className="space-y-6">

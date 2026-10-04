@@ -11,8 +11,11 @@ export function RevenueTab({ data }: RevenueTabProps) {
   const monthlyRate = 149;
   const yearlyRate = 1499;
 
-  const monthlySubs = Math.round(data.totalSubscribers * 0.75);
-  const yearlySubs = Math.max(1, data.totalSubscribers - monthlySubs);
+  const hasSubs = data.totalSubscribers > 0;
+  const hasRev = data.totalRevenue > 0;
+
+  const monthlySubs = hasSubs ? Math.round(data.totalSubscribers * 0.75) : 0;
+  const yearlySubs = hasSubs ? Math.max(0, data.totalSubscribers - monthlySubs) : 0;
 
   const mrr = data.totalRevenue;
   const arr = mrr * 12;
@@ -34,7 +37,7 @@ export function RevenueTab({ data }: RevenueTabProps) {
             {currency}{mrr.toLocaleString()}
           </p>
           <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
-            <ArrowUpRight className="h-3 w-3" /> +18.4% growth this month
+            <ArrowUpRight className="h-3 w-3" /> {hasRev ? "+18.4% growth this month" : "+0.0% growth this month"}
           </p>
         </div>
 
@@ -68,7 +71,7 @@ export function RevenueTab({ data }: RevenueTabProps) {
             {data.totalSubscribers.toLocaleString()}
           </p>
           <p className="mt-1 text-xs text-amber-600 dark:text-amber-400 font-bold">
-            96.8% monthly retention rate
+            {hasSubs ? "96.8% monthly retention rate" : "0.0% retention (No active subscribers)"}
           </p>
         </div>
       </div>
