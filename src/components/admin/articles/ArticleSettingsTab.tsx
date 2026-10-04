@@ -4,12 +4,16 @@ import { formatDateTimeLocal, type Row } from "./types";
 interface ArticleSettingsTabProps {
   row: Row;
   onChange: <K extends keyof Row>(field: K, value: Row[K]) => void;
+  currentUserAuthor?: string;
+  authorOptions?: { id: string; name: string; username?: string; role: string }[];
   isEnterprisePlus?: boolean;
 }
 
 export default function ArticleSettingsTab({
   row,
   onChange,
+  currentUserAuthor,
+  authorOptions,
   isEnterprisePlus,
 }: ArticleSettingsTabProps) {
   return (
@@ -34,15 +38,52 @@ export default function ArticleSettingsTab({
         </Field>
 
         <Field label="Author *">
-          <input
-            id="article-author"
-            name="author"
-            aria-label="Author"
-            autoComplete="off"
-            value={row.author}
-            onChange={(e) => onChange("author", e.target.value)}
-            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-          />
+          <div className="space-y-1.5">
+            <select
+              aria-label="Select author or admin profile"
+              className="w-full rounded-md border border-slate-200 bg-slate-50/80 px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 focus:bg-white focus:outline-none"
+              defaultValue=""
+              onChange={(e) => {
+                if (e.target.value) {
+                  onChange("author", e.target.value);
+                }
+              }}
+            >
+              <option value="" disabled>
+                ⚡ Select author / admin profile...
+              </option>
+              {currentUserAuthor && (
+                <option value={currentUserAuthor}>
+                  👤 {currentUserAuthor} (Your Profile)
+                </option>
+              )}
+              {authorOptions && authorOptions.length > 0 && (
+                <optgroup label="Admin & Editorial Users">
+                  {authorOptions.map((a) => (
+                    <option key={a.id} value={a.name}>
+                      {a.name} ({a.role}{a.username ? ` · @${a.username}` : ""})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              <optgroup label="Editorial Desks">
+                <option value="Newsroom Desk">Newsroom Desk</option>
+                <option value="Editorial Desk">Editorial Desk</option>
+                <option value="Today Tripura Bureau">Today Tripura Bureau</option>
+              </optgroup>
+            </select>
+
+            <input
+              id="article-author"
+              name="author"
+              aria-label="Author"
+              autoComplete="off"
+              value={row.author}
+              placeholder="e.g. Admin User"
+              onChange={(e) => onChange("author", e.target.value)}
+              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
+            />
+          </div>
         </Field>
 
         <Field label="Status">

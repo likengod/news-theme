@@ -142,8 +142,8 @@ export const signInServer = createServerFn({ method: "POST" })
     const users = await query(
       `SELECT u.* FROM users u
        LEFT JOIN profiles p ON u.id = p.id
-       WHERE u.email = ? OR u.display_name = ? OR p.phone = ?`,
-      [email, email, email],
+       WHERE u.email = ? OR u.username = ? OR u.display_name = ? OR p.phone = ?`,
+      [email, email, email, email],
     );
     if (users.length === 0) throw new Error("Invalid email, username, phone or password");
 
@@ -203,8 +203,9 @@ export const getSessionServer = createServerFn({ method: "GET" })
     if (!token) return { session: null };
 
     const sessions = await query(
-      `SELECT s.*, u.email FROM sessions s 
+      `SELECT s.*, u.email, u.display_name, u.username, p.display_name AS profile_name FROM sessions s 
        JOIN users u ON s.user_id = u.id 
+       LEFT JOIN profiles p ON u.id = p.id
        WHERE s.id = ? AND s.expires_at > NOW()`,
       [token],
     );
@@ -212,10 +213,21 @@ export const getSessionServer = createServerFn({ method: "GET" })
     if (sessions.length === 0) return { session: null };
 
     const session = sessions[0];
+    const displayName = session.profile_name || session.display_name || session.email?.split("@")[0] || "Admin";
     return {
       session: {
         access_token: token,
-        user: { id: session.user_id, email: session.email },
+        user: {
+          id: session.user_id,
+          email: session.email,
+          username: session.username || null,
+          displayName: displayName,
+          user_metadata: {
+            display_name: displayName,
+            full_name: displayName,
+            username: session.username || null,
+          },
+        },
       },
     };
   });
@@ -226,8 +238,9 @@ export const getUserServer = createServerFn({ method: "GET" })
     if (!token) return { user: null };
 
     const sessions = await query(
-      `SELECT s.*, u.email FROM sessions s 
+      `SELECT s.*, u.email, u.display_name, u.username, p.display_name AS profile_name FROM sessions s 
        JOIN users u ON s.user_id = u.id 
+       LEFT JOIN profiles p ON u.id = p.id
        WHERE s.id = ? AND s.expires_at > NOW()`,
       [token],
     );
@@ -235,8 +248,19 @@ export const getUserServer = createServerFn({ method: "GET" })
     if (sessions.length === 0) return { user: null };
 
     const session = sessions[0];
+    const displayName = session.profile_name || session.display_name || session.email?.split("@")[0] || "Admin";
     return {
-      user: { id: session.user_id, email: session.email },
+      user: {
+        id: session.user_id,
+        email: session.email,
+        username: session.username || null,
+        displayName: displayName,
+        user_metadata: {
+          display_name: displayName,
+          full_name: displayName,
+          username: session.username || null,
+        },
+      },
     };
   });
 

@@ -6,11 +6,12 @@ import type { AdminUserRow } from "@/lib/admin-users.functions";
 type Props = {
   roles: Role[];
   onClose: () => void;
-  onCreate: (email: string, pass: string, name: string, role: AdminUserRow["role"]) => void;
+  onCreate: (email: string, pass: string, name: string, role: AdminUserRow["role"], username?: string) => void;
 };
 
 export function CreateUserModal({ roles, onClose, onCreate }: Props) {
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<AdminUserRow["role"]>("reader");
@@ -19,7 +20,7 @@ export function CreateUserModal({ roles, onClose, onCreate }: Props) {
   const submit = () => {
     if (!email || !email.includes("@")) return alert("Please enter a valid email address");
     if (!password || password.length < 6) return alert("Password must be at least 6 characters");
-    onCreate(email.trim(), password, displayName.trim(), role);
+    onCreate(email.trim(), password, displayName.trim(), role, username.trim());
   };
 
   return (
@@ -44,6 +45,22 @@ export function CreateUserModal({ roles, onClose, onCreate }: Props) {
               placeholder="user@example.com"
               className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
             />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-slate-600">
+              Username (Optional)
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-2.5 text-xs font-semibold text-slate-400">@</span>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
+                placeholder="username"
+                className="h-10 w-full rounded-lg border border-slate-200 pl-7 pr-3 text-sm font-mono focus:border-slate-900 focus:outline-none"
+              />
+            </div>
           </div>
 
           <div>

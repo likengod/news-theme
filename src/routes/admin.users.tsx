@@ -170,9 +170,9 @@ function UsersPage() {
     row: null,
   });
 
-  const handleCreate = async (email: string, pass: string, name: string, role: AppRole) => {
+  const handleCreate = async (email: string, pass: string, name: string, role: AppRole, username?: string) => {
     try {
-      await createFn({ data: { email, password: pass, displayName: name, role } });
+      await createFn({ data: { email, password: pass, displayName: name, role, username } });
       toast.success(`User ${email} created successfully`);
       setShowCreate(false);
       qc.invalidateQueries({ queryKey: ["admin-users"] });
@@ -244,9 +244,9 @@ function UsersPage() {
     }
   };
 
-  const handleSaveDetails = async (userId: string, name: string, avatar: string) => {
+  const handleSaveDetails = async (userId: string, name: string, avatar: string, username?: string) => {
     try {
-      await detailsFn({ data: { userId, displayName: name, avatarUrl: avatar } });
+      await detailsFn({ data: { userId, displayName: name, avatarUrl: avatar, username } });
       toast.success("Profile details updated");
       setModal({ kind: null, row: null });
       qc.invalidateQueries({ queryKey: ["admin-users"] });

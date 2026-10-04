@@ -5,15 +5,15 @@ import type { Row } from "@/components/admin/ArticleEditor";
 
 const KEY = "nt:articles:v1";
 
-export const blankRow = (): Row => ({
-  id: Date.now(),
+export const blankRow = (defaultAuthor?: string): Row => ({
+  id: 0,
   title: "",
   slug: "",
   category: sections[0],
   city: "",
   state: "",
   country: "",
-  author: "",
+  author: defaultAuthor || "Admin User",
   views: 0,
   status: "Draft",
   date: new Date().toISOString().slice(0, 10),

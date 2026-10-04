@@ -9,7 +9,7 @@ type Props = {
   onClose: () => void;
   onSavePoints: (userId: string, points: number) => void;
   onSavePassword: (userId: string, pass: string) => void;
-  onSaveDetails: (userId: string, name: string, avatar: string) => void;
+  onSaveDetails: (userId: string, name: string, avatar: string, username?: string) => void;
 };
 
 export function UserActionModal({
@@ -33,6 +33,7 @@ export function UserActionModal({
   const [points, setPoints] = useState(row.points);
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [username, setUsername] = useState(row.username || "");
   const [displayName, setDisplayName] = useState(row.displayName || "");
   const [avatarUrl, setAvatarUrl] = useState(row.avatarUrl || "");
 
@@ -43,7 +44,7 @@ export function UserActionModal({
       if (!password || password.length < 6) return alert("Password must be at least 6 characters");
       onSavePassword(row.id, password);
     } else if (kind === "details") {
-      onSaveDetails(row.id, displayName, avatarUrl);
+      onSaveDetails(row.id, displayName, avatarUrl, username);
     }
   };
 
@@ -102,6 +103,22 @@ export function UserActionModal({
 
           {kind === "details" && (
             <div className="space-y-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">
+                  Username
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-xs font-semibold text-slate-400">@</span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
+                    placeholder="username"
+                    className="h-10 w-full rounded-lg border border-slate-200 pl-7 pr-3 text-sm font-mono focus:border-slate-900 focus:outline-none"
+                  />
+                </div>
+                <p className="mt-1 text-[11px] text-slate-400">Unique login handle (e.g. admin, editor_1)</p>
+              </div>
               <div>
                 <label className="mb-1 block text-xs font-semibold text-slate-600">
                   Display Name

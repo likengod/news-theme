@@ -27,10 +27,14 @@ export { statusStyle };
 
 export default function ArticleEditor({
   initial,
+  currentUserAuthor,
+  authorOptions,
   onClose,
   onSave,
 }: {
   initial: Row;
+  currentUserAuthor?: string;
+  authorOptions?: { id: string; name: string; username?: string; role: string }[];
   onClose: () => void;
   onSave: (r: Row) => void;
 }) {
@@ -50,7 +54,7 @@ export default function ArticleEditor({
     city: initial.city || "",
     state: initial.state || "",
     country: initial.country || "",
-    author: initial.author || "",
+    author: initial.author || currentUserAuthor || "Admin User",
     excerpt: initial.excerpt || "",
     content: initial.content || "",
     featuredImage: initial.featuredImage || "",
@@ -164,6 +168,12 @@ export default function ArticleEditor({
 
             <div className="flex items-center gap-2">
               <button
+                onClick={() => handleSave("Published")}
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition-colors shadow-sm"
+              >
+                Publish
+              </button>
+              <button
                 onClick={() => setShowAiModal(true)}
                 className="flex items-center gap-1.5 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 hover:text-indigo-900 transition-colors border border-indigo-100 shadow-sm"
               >
@@ -229,6 +239,8 @@ export default function ArticleEditor({
             <ArticleSettingsTab
               row={r}
               onChange={set}
+              currentUserAuthor={currentUserAuthor}
+              authorOptions={authorOptions}
               isEnterprisePlus={isEnterprisePlus}
             />
           )}

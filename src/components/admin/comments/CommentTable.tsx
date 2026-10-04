@@ -3,6 +3,10 @@ import { type CommentRow, formatCommentTimeAgo } from "@/lib/comments.functions"
 
 type Props = {
   comments: CommentRow[];
+  selectedIds?: Set<number>;
+  allSelected?: boolean;
+  onToggleSelectAll?: () => void;
+  onToggleSelectOne?: (id: number) => void;
   onSetStatus: (id: number, status: "Approved" | "Pending" | "Spam") => void;
   onDelete: (id: number) => void;
   onAiReply?: (comment: CommentRow) => void;
@@ -14,12 +18,33 @@ const badge: Record<CommentRow["status"], string> = {
   Spam: "bg-red-50 text-red-700 border-red-200",
 };
 
-export function CommentTable({ comments, onSetStatus, onDelete, onAiReply }: Props) {
+export function CommentTable({
+  comments,
+  selectedIds,
+  allSelected,
+  onToggleSelectAll,
+  onToggleSelectOne,
+  onSetStatus,
+  onDelete,
+  onAiReply,
+}: Props) {
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
       <table className="w-full min-w-[650px] text-left text-sm">
         <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
           <tr>
+            {onToggleSelectAll && (
+              <th className="px-4 py-3 w-10 text-center">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={onToggleSelectAll}
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
+                  title="Select / Deselect all comments on this page"
+                  aria-label="Select all comments on this page"
+                />
+              </th>
+            )}
             <th className="px-4 sm:px-5 py-3">User &amp; Time</th>
             <th className="px-4 sm:px-5 py-3">Comment Body</th>
             <th className="px-4 sm:px-5 py-3">Article</th>
@@ -28,8 +53,26 @@ export function CommentTable({ comments, onSetStatus, onDelete, onAiReply }: Pro
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
-          {comments.map((c) => (
-            <tr key={c.id} className="hover:bg-slate-50/70 transition-colors">
+          {comments.map((c) => {
+            const isSelected = selectedIds?.has(c.id) ?? false;
+            return (
+              <tr
+                key={c.id}
+                className={`transition-colors ${
+                  isSelected ? "bg-amber-50/60" : "hover:bg-slate-50/70"
+                }`}
+              >
+                {onToggleSelectOne && (
+                  <td className="px-4 py-3 text-center">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => onToggleSelectOne(c.id)}
+                      className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
+                      aria-label={`Select comment #${c.id}`}
+                    />
+                  </td>
+                )}
               <td className="px-5 py-3">
                 <p className="font-semibold text-slate-900">{c.user || "Anonymous"}</p>
                 <p className="text-xs text-slate-500">{c.email}</p>
@@ -105,11 +148,12 @@ export function CommentTable({ comments, onSetStatus, onDelete, onAiReply }: Pro
                 </div>
               </td>
             </tr>
-          ))}
+          );
+        })}
 
           {comments.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-5 py-8 text-center text-xs text-slate-400">
+              <td colSpan={6} className="px-5 py-8 text-center text-xs text-slate-400">
                 No comments found in this tab.
               </td>
             </tr>

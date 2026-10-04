@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronLeft, ChevronRight, Sparkles, Trash2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Trash2,
+  CheckSquare,
+  Check,
+  X,
+  ShieldAlert,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   getAdminComments,
   updateCommentStatus,
   deleteComment,
+  deleteCommentsBulk,
+  updateCommentsBulkStatus,
   getAllCommentsFn,
   importCommentsFn,
   type CommentRow,
@@ -34,11 +45,14 @@ function CommentsPage() {
   const getCommentsFn = useServerFn(getAdminComments);
   const updateStatusFn = useServerFn(updateCommentStatus);
   const deleteCommentFn = useServerFn(deleteComment);
+  const deleteBulkFn = useServerFn(deleteCommentsBulk);
+  const updateStatusBulkFn = useServerFn(updateCommentsBulkStatus);
   const getAllFn = useServerFn(getAllCommentsFn);
   const importFn = useServerFn(importCommentsFn);
 
   const [tab, setTab] = useState<C["status"] | "All">("All");
   const [rows, setRows] = useState<C[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
@@ -98,6 +112,61 @@ function CommentsPage() {
     }
   };
 
+  const allSelected =
+    rows.length > 0 && rows.every((r) => selectedIds.has(r.id));
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(rows.map((r) => r.id)));
+    }
+  };
+
+  const toggleSelectOne = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (
+      !confirm(
+        `Are you sure you want to permanently delete ${selectedIds.size} selected comment(s)?`,
+      )
+    )
+      return;
+    try {
+      const ids = Array.from(selectedIds);
+      const res = await deleteBulkFn({ data: ids });
+      toast.success(`Successfully deleted ${res.count} comment(s)`);
+      setSelectedIds(new Set());
+      loadComments();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete selected comments");
+    }
+  };
+
+  const handleBulkStatus = async (status: "Approved" | "Spam") => {
+    if (selectedIds.size === 0) return;
+    try {
+      const ids = Array.from(selectedIds);
+      const res = await updateStatusBulkFn({ data: { ids, status } });
+      toast.success(`Marked ${res.count} comment(s) as ${status}`);
+      setSelectedIds(new Set());
+      loadComments();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update comments status");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -147,13 +216,55 @@ function CommentsPage() {
         onTabChange={(t) => {
           setTab(t);
           setPage(1);
+          setSelectedIds(new Set());
         }}
         searchQuery={q}
         onSearchChange={(query) => {
           setQ(query);
           setPage(1);
+          setSelectedIds(new Set());
         }}
       />
+
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-white shadow-lg animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <CheckSquare className="h-4 w-4 text-emerald-400" />
+            <span>
+              {selectedIds.size} comment{selectedIds.size !== 1 ? "s" : ""} selected
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => handleBulkStatus("Approved")}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/25 transition-colors cursor-pointer"
+            >
+              <Check className="h-3.5 w-3.5 text-emerald-400" /> Approve Selected
+            </button>
+            <button
+              onClick={() => handleBulkStatus("Spam")}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/15 px-3 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/25 transition-colors cursor-pointer"
+            >
+              <ShieldAlert className="h-3.5 w-3.5 text-amber-400" /> Mark as Spam
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition-colors shadow-sm cursor-pointer"
+            >
+              <Trash2 className="h-3.5 w-3.5" /> Delete Selected
+            </button>
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="ml-1 grid h-7 w-7 place-items-center rounded-lg border border-slate-700 bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white cursor-pointer"
+              title="Clear selection"
+              aria-label="Clear selection"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Comment Table */}
       {loading ? (
@@ -163,6 +274,10 @@ function CommentsPage() {
       ) : (
         <CommentTable
           comments={rows}
+          selectedIds={selectedIds}
+          allSelected={allSelected}
+          onToggleSelectAll={toggleSelectAll}
+          onToggleSelectOne={toggleSelectOne}
           onSetStatus={setStatus}
           onDelete={remove}
           onAiReply={
@@ -185,14 +300,20 @@ function CommentsPage() {
         {totalPages > 1 && (
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => {
+                setPage((p) => Math.max(1, p - 1));
+                setSelectedIds(new Set());
+              }}
               disabled={page <= 1}
               className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 disabled:opacity-40"
             >
               <ChevronLeft className="h-3.5 w-3.5" /> Previous
             </button>
             <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => {
+                setPage((p) => Math.min(totalPages, p + 1));
+                setSelectedIds(new Set());
+              }}
               disabled={page >= totalPages}
               className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 disabled:opacity-40"
             >

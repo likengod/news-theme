@@ -150,7 +150,15 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
       r.access_level || "Free",
     ];
 
-    if (r.id) {
+    let isExisting = false;
+    if (r.id && Number(r.id) > 0) {
+      const existingCheck = await query("SELECT id FROM articles WHERE id = ?", [r.id]);
+      if (existingCheck.length > 0) {
+        isExisting = true;
+      }
+    }
+
+    if (isExisting) {
       // Update
       const setClause = fields.map((f) => `${f} = ?`).join(", ");
       await query(`UPDATE articles SET ${setClause} WHERE id = ?`, [...values, r.id]);
@@ -167,6 +175,30 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
       Object.keys(HOMEPAGE_CACHE).forEach((k) => delete HOMEPAGE_CACHE[k as any]);
       return { ...r, slug, id: result.insertId };
     }
+  });
+
+// Admin only: get list of admin & editor author profiles for author dropdown
+export const getAdminAuthorProfiles = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async () => {
+    const rows = await query(`
+      SELECT DISTINCT 
+        u.id, 
+        COALESCE(p.display_name, u.display_name, u.email) AS name, 
+        u.username,
+        r.role
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.id
+      JOIN user_roles r ON u.id = r.user_id
+      WHERE r.role IN ('admin', 'editor', 'author', 'journalist')
+      ORDER BY FIELD(r.role, 'admin', 'editor', 'author', 'journalist'), name ASC
+    `);
+    return rows.map((r: any) => ({
+      id: r.id,
+      name: r.name,
+      username: r.username,
+      role: r.role,
+    }));
   });
 
 // Admin only: delete article

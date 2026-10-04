@@ -9,6 +9,7 @@ type AppRole = "admin" | "editor" | "author" | "journalist" | "premium" | "reade
 export type AdminUserRow = {
   id: string;
   email: string;
+  username: string | null;
   publicUserId: string;
   displayName: string | null;
   avatarUrl: string | null;
@@ -46,9 +47,9 @@ export const listAdminUsers = createServerFn({ method: "GET" })
       const params: any[] = [];
 
       if (q) {
-        filterSql += " AND (u.email LIKE ? OR p.display_name LIKE ? OR p.public_user_id LIKE ?)";
+        filterSql += " AND (u.email LIKE ? OR u.username LIKE ? OR p.display_name LIKE ? OR p.public_user_id LIKE ?)";
         const term = `%${q}%`;
-        params.push(term, term, term);
+        params.push(term, term, term, term);
       }
 
       if (role && role !== "all") {
@@ -74,6 +75,7 @@ export const listAdminUsers = createServerFn({ method: "GET" })
           `SELECT 
            u.id, 
            u.email, 
+           u.username,
            u.created_at,
            p.public_user_id, 
            p.display_name, 
@@ -97,6 +99,7 @@ export const listAdminUsers = createServerFn({ method: "GET" })
       const mappedRows: AdminUserRow[] = rows.map((u: any) => ({
         id: u.id,
         email: u.email,
+        username: u.username || null,
         publicUserId: u.public_user_id || "0000000000",
         displayName: u.display_name || null,
         avatarUrl: u.avatar_url || null,
@@ -118,6 +121,7 @@ export const getAllAdminUsers = createServerFn({ method: "GET" })
       SELECT 
         u.id, 
         u.email, 
+        u.username,
         u.created_at,
         p.public_user_id, 
         p.display_name, 
@@ -134,6 +138,7 @@ export const getAllAdminUsers = createServerFn({ method: "GET" })
     return rows.map((u: any) => ({
       id: u.id,
       email: u.email,
+      username: u.username || null,
       publicUserId: u.public_user_id || "0000000000",
       displayName: u.display_name || null,
       avatarUrl: u.avatar_url || null,
@@ -230,7 +235,7 @@ export const importAdminUsers = createServerFn({ method: "POST" })
 export const createAdminUser = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator(
-    (data: { email: string; password: string; displayName?: string; role?: AppRole }) => {
+    (data: { email: string; password: string; username?: string; displayName?: string; role?: AppRole }) => {
       if (!data.email || !data.email.includes("@")) throw new Error("Valid email required");
       if (!data.password || data.password.length < 8)
         throw new Error("Password must be at least 8 characters");
@@ -241,7 +246,18 @@ export const createAdminUser = createServerFn({ method: "POST" })
     await assertAdmin(context.userId);
 
     const check = await query("SELECT id FROM users WHERE email = ?", [data.email]);
-    if (check.length > 0) throw new Error("User already exists");
+    if (check.length > 0) throw new Error("User with this email already exists");
+
+    let username = (data.username || "").trim().toLowerCase();
+    if (!username) {
+      username = data.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_.-]/g, "");
+    }
+    if (username) {
+      const uCheck = await query("SELECT id FROM users WHERE username = ?", [username]);
+      if (uCheck.length > 0) {
+        username = `${username}_${Math.floor(100 + Math.random() * 900)}`;
+      }
+    }
 
     const uid = crypto.randomUUID();
     const salt = crypto.randomBytes(16).toString("hex");
@@ -249,9 +265,10 @@ export const createAdminUser = createServerFn({ method: "POST" })
     const name = data.displayName || data.email.split("@")[0];
 
     // Insert user
-    await query("INSERT INTO users (id, email, password_hash, salt, display_name) VALUES (?, ?, ?, ?, ?)", [
+    await query("INSERT INTO users (id, email, username, password_hash, salt, display_name) VALUES (?, ?, ?, ?, ?, ?)", [
       uid,
       data.email,
+      username || null,
       passHash,
       salt,
       name,
@@ -296,9 +313,9 @@ export const createAdminUser = createServerFn({ method: "POST" })
     }
 
     await query(
-      `INSERT INTO profiles (id, public_user_id, display_name, email, active, journalist_id) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [uid, publicUserId, name, data.email, true, journalistId],
+      `INSERT INTO profiles (id, public_user_id, username, display_name, email, active, journalist_id) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [uid, publicUserId, username || null, name, data.email, true, journalistId],
     );
 
     return { ok: true, id: uid };
@@ -470,7 +487,7 @@ export const updateAdminUserPassword = createServerFn({ method: "POST" })
 export const updateAdminUserDetails = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator(
-    (data: { userId: string; email?: string; displayName?: string; avatarUrl?: string }) => data,
+    (data: { userId: string; email?: string; username?: string; displayName?: string; avatarUrl?: string }) => data,
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
@@ -485,6 +502,26 @@ export const updateAdminUserDetails = createServerFn({ method: "POST" })
 
       await query("UPDATE users SET email = ? WHERE id = ?", [data.email, data.userId]);
       await query("UPDATE profiles SET email = ? WHERE id = ?", [data.email, data.userId]);
+    }
+
+    if (data.username !== undefined) {
+      const cleanUsername = data.username.trim().toLowerCase();
+      if (cleanUsername) {
+        if (!/^[a-z0-9_.-]{3,30}$/.test(cleanUsername)) {
+          throw new Error("Username must be 3-30 characters (letters, numbers, underscore, hyphen or dot only)");
+        }
+        const check = await query("SELECT id FROM users WHERE username = ? AND id != ?", [
+          cleanUsername,
+          data.userId,
+        ]);
+        if (check.length > 0) throw new Error("Username already taken by another user");
+
+        await query("UPDATE users SET username = ? WHERE id = ?", [cleanUsername, data.userId]);
+        await query("UPDATE profiles SET username = ? WHERE id = ?", [cleanUsername, data.userId]);
+      } else {
+        await query("UPDATE users SET username = NULL WHERE id = ?", [data.userId]);
+        await query("UPDATE profiles SET username = NULL WHERE id = ?", [data.userId]);
+      }
     }
 
     if (data.displayName !== undefined) {

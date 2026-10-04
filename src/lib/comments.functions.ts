@@ -114,6 +114,31 @@ export const deleteComment = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+// Admin only: Bulk delete comments
+export const deleteCommentsBulk = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .validator((data: number[]) => data)
+  .handler(async ({ data: ids }) => {
+    if (!ids || ids.length === 0) return { success: true, count: 0 };
+    const placeholders = ids.map(() => "?").join(",");
+    await query(`DELETE FROM comments WHERE id IN (${placeholders})`, ids);
+    return { success: true, count: ids.length };
+  });
+
+// Admin only: Bulk update comments status
+export const updateCommentsBulkStatus = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .validator((data: { ids: number[]; status: "Approved" | "Pending" | "Spam" }) => data)
+  .handler(async ({ data }) => {
+    if (!data.ids || data.ids.length === 0) return { success: true, count: 0 };
+    const placeholders = data.ids.map(() => "?").join(",");
+    await query(`UPDATE comments SET status = ? WHERE id IN (${placeholders})`, [
+      data.status,
+      ...data.ids,
+    ]);
+    return { success: true, count: data.ids.length };
+  });
+
 // Admin only: Delete ALL comments permanently
 export const deleteAllCommentsFn = createServerFn({ method: "POST" })
   .middleware([requireAdmin])

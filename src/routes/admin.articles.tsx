@@ -6,6 +6,7 @@ import { slugify } from "@/lib/news-data";
 import { toast } from "sonner";
 import { type Row } from "@/components/admin/ArticleEditor";
 import { blankRow } from "@/lib/articles-store";
+import { authClient as supabase } from "@/lib/auth-client";
 import {
   getAdminArticles,
   saveAdminArticle,
@@ -13,6 +14,7 @@ import {
   deleteAdminArticlesBulk,
   getAllAdminArticles,
   importAdminArticles,
+  getAdminAuthorProfiles,
 } from "@/lib/articles.functions";
 import { useDebounce } from "@/hooks/useDebounce";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
@@ -73,6 +75,33 @@ function ArticlesPage() {
     confirmLabel: string;
     onConfirm: () => void;
   } | null>(null);
+
+  // Author profiles state
+  const [currentUserAuthor, setCurrentUserAuthor] = useState("Admin User");
+  const [authorOptions, setAuthorOptions] = useState<{ id: string; name: string; username?: string; role: string }[]>([]);
+  const fetchAuthorProfilesFn = useServerFn(getAdminAuthorProfiles);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const u = data.user as any;
+      if (u) {
+        const name =
+          u.displayName ||
+          u.user_metadata?.display_name ||
+          u.user_metadata?.full_name ||
+          u.username ||
+          u.email?.split("@")[0] ||
+          "Admin User";
+        setCurrentUserAuthor(name);
+      }
+    });
+
+    fetchAuthorProfilesFn()
+      .then((res) => {
+        if (Array.isArray(res)) setAuthorOptions(res);
+      })
+      .catch(() => {});
+  }, []);
 
   // Fetch from server (paginated)
   const fetchArticles = useCallback(async () => {
@@ -261,7 +290,9 @@ function ArticlesPage() {
           }
         >
           <ArticleEditor
-            initial={editing ?? blankRow()}
+            initial={editing ?? blankRow(currentUserAuthor)}
+            currentUserAuthor={currentUserAuthor}
+            authorOptions={authorOptions}
             onClose={() => {
               setEditing(null);
               setCreating(false);
