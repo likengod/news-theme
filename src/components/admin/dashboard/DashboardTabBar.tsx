@@ -20,8 +20,6 @@ export function DashboardTabBar({
 }: DashboardTabBarProps) {
   const tabs: Array<{ id: DashboardTab; label: string }> = [
     { id: "overview", label: "Overview" },
-    { id: "audiences", label: "Audiences" },
-    { id: "demographics", label: "Demographics" },
     { id: "content", label: "Content & Posts" },
     { id: "revenue", label: "Revenue & Subscriptions" },
   ];

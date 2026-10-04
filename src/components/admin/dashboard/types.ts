@@ -1,6 +1,6 @@
 export type Timeframe = "Day" | "Week" | "Month";
 
-export type DashboardTab = "overview" | "audiences" | "demographics" | "content" | "revenue";
+export type DashboardTab = "overview" | "content" | "revenue";
 
 export interface ArticleItem {
   id?: number;

@@ -6,11 +6,10 @@ import {
   DashboardHeader,
   DashboardTabBar,
   DashboardMetricsGrid,
-  AudienceChartCard,
-  EngagementCards,
+  NewsroomPerformanceCard,
+  CategoryStatsCard,
+  RecentArticlesCard,
   TopArticlesTable,
-  TrafficChannelsCard,
-  DemographicsTab,
   RevenueTab,
   type DashboardTab,
   type DashboardData,
@@ -150,51 +149,27 @@ function DashboardPage() {
       {/* 4. Tab Content Views */}
       {activeTab === "overview" && (
         <div className="space-y-6">
-          {/* Main Visual Row: Big Audience Chart (Left) + Engagement Cards (Right) */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
-            <div className="lg:col-span-7 xl:col-span-8">
-              <AudienceChartCard
-                totalViews={data.totalViews}
-                totalUsers={data.totalUsers}
-              />
-            </div>
-            <div className="lg:col-span-5 xl:col-span-4">
-              <EngagementCards
-                totalUsers={data.totalUsers}
-                totalViews={data.totalViews}
-              />
-            </div>
-          </div>
+          {/* Real Newsroom Engagement Metrics */}
+          <NewsroomPerformanceCard data={data} />
 
-          {/* Bottom Row: Page Views by Page Title (Left) + Sessions by Channel (Right) */}
+          {/* Real Content Distribution & Top Articles */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
-            <div className="lg:col-span-7 xl:col-span-7">
+            <div className="lg:col-span-7 xl:col-span-8 space-y-6">
               <TopArticlesTable
                 articles={filteredArticles}
                 featuredArticles={filteredFeatured}
               />
             </div>
-            <div className="lg:col-span-5 xl:col-span-5">
-              <TrafficChannelsCard totalViews={data.totalViews} />
+            <div className="lg:col-span-5 xl:col-span-4 space-y-6">
+              <CategoryStatsCard
+                categories={data.categoryStats}
+                totalArticles={data.totalArticles}
+              />
+              <RecentArticlesCard articles={data.recentArticles} />
             </div>
           </div>
         </div>
       )}
-
-      {activeTab === "audiences" && (
-        <div className="space-y-6">
-          <AudienceChartCard
-            totalViews={data.totalViews}
-            totalUsers={data.totalUsers}
-          />
-          <EngagementCards
-            totalUsers={data.totalUsers}
-            totalViews={data.totalViews}
-          />
-        </div>
-      )}
-
-      {activeTab === "demographics" && <DemographicsTab totalViews={data.totalViews} />}
 
       {activeTab === "content" && (
         <div className="space-y-6">
@@ -202,6 +177,7 @@ function DashboardPage() {
             articles={filteredArticles}
             featuredArticles={filteredFeatured}
           />
+          <RecentArticlesCard articles={data.recentArticles} />
         </div>
       )}
 
