@@ -145,13 +145,17 @@ const server = createServer(async (req, res) => {
         }
         if (
           parsedPath.startsWith("/assets/") ||
-          parsedPath.startsWith("/uploads/") ||
           parsedPath.startsWith("/fonts/") ||
-          [".ico", ".svg", ".woff2", ".woff", ".ttf", ".webp", ".jpg", ".png"].includes(ext)
+          [".woff2", ".woff", ".ttf", ".otf"].includes(ext)
         ) {
           res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        } else if (
+          parsedPath.startsWith("/uploads/") ||
+          [".ico", ".svg", ".webp", ".jpg", ".jpeg", ".png", ".gif"].includes(ext)
+        ) {
+          res.setHeader("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
         } else {
-          res.setHeader("Cache-Control", "public, max-age=2592000");
+          res.setHeader("Cache-Control", "public, max-age=86400");
         }
 
         const compressibleExts = [".css", ".js", ".json", ".svg", ".txt", ".xml", ".html"];
@@ -205,6 +209,13 @@ const server = createServer(async (req, res) => {
         res.setHeader("Expires", "0");
         res.setHeader("X-Content-Type-Options", "nosniff");
         res.setHeader("X-Frame-Options", "SAMEORIGIN");
+        res.setHeader("X-XSS-Protection", "1; mode=block");
+        res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+        res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+        res.setHeader(
+          "Content-Security-Policy",
+          "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: fonts.gstatic.com; frame-src 'self' https:;"
+        );
 
         const acceptEncoding = (req.headers["accept-encoding"] || "").toLowerCase();
         if (acceptEncoding.includes("gzip") && cached.gzipped) {
@@ -245,8 +256,13 @@ const server = createServer(async (req, res) => {
     // Essential HTTP Security Headers
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("X-Frame-Options", "SAMEORIGIN");
+    res.setHeader("X-XSS-Protection", "1; mode=block");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
     res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: fonts.gstatic.com; frame-src 'self' https:;"
+    );
 
     const contentType = response.headers.get("content-type") || "";
     console.log(`[SSR] Content-Type: "${contentType}", Status: ${response.status}, isPublicGet: ${isPublicGet}`);

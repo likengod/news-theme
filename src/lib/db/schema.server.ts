@@ -111,6 +111,34 @@ export async function runQuickMigrations(
     }
   }
 
+  // 6. Ensure high-performance composite indexes exist on all tables
+  try {
+    await safeCreateIndex("articles", "idx_articles_cat_created", "category, created_at DESC");
+    await safeCreateIndex("articles", "idx_articles_status_created", "status, created_at DESC");
+    await safeCreateIndex("articles", "idx_articles_hero_flags", "featured, status, date DESC");
+    await safeCreateIndex("articles", "idx_articles_status_date_id", "status, date DESC, id DESC");
+    await safeCreateIndex("articles", "idx_articles_journalist_status", "journalistId, status");
+    await safeCreateIndex("comments", "idx_comments_article_status", "article_slug, status, created_at DESC");
+    await safeCreateIndex("inbox_requests", "idx_inbox_created", "created_at DESC");
+    await safeCreateIndex("profiles", "idx_profiles_points", "points DESC");
+    await safeCreateIndex("profiles", "idx_profiles_active_points", "active, points DESC");
+    await safeCreateIndex("sessions", "idx_sessions_expires", "expires_at");
+    await safeCreateIndex("sessions", "idx_sessions_user_expires", "user_id, expires_at");
+    await safeCreateIndex("user_roles", "idx_user_roles_role_user", "role, user_id");
+  } catch (e: any) {
+    console.warn("[Migration] Index creation notice:", e?.message);
+  }
+
+  // 7. Full-text search index for ultra-fast title & summary queries
+  try {
+    const ftIndex = await query("SHOW INDEX FROM articles WHERE Key_name = 'ft_articles_search'");
+    if (ftIndex.length === 0) {
+      await query("ALTER TABLE articles ADD FULLTEXT INDEX ft_articles_search (title, summary)");
+    }
+  } catch (e: any) {
+    // Engine or MySQL version without fulltext on innodb, safely ignore
+  }
+
   quickMigrationsRan = true;
 }
 

@@ -5,9 +5,44 @@ type Props = {
   midImage?: { src: string; caption?: string; credit?: string };
 };
 
+// Enforce security on rich text embeds (sandboxing iframes, safe link openers)
+if (typeof (DOMPurify as any)?.addHook === "function") {
+  (DOMPurify as any).addHook("afterSanitizeAttributes", (node: Element) => {
+    if (node.tagName === "IFRAME") {
+      node.setAttribute(
+        "sandbox",
+        "allow-scripts allow-same-origin allow-presentation allow-popups",
+      );
+      node.setAttribute("loading", "lazy");
+      node.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+    }
+    if (node.tagName === "A") {
+      const href = node.getAttribute("href") || "";
+      if (href.startsWith("http://") || href.startsWith("https://")) {
+        node.setAttribute("rel", "noopener noreferrer");
+        node.setAttribute("target", "_blank");
+      }
+    }
+  });
+}
+
+const purifyConfig = {
+  ADD_TAGS: ["iframe"],
+  ADD_ATTR: [
+    "style",
+    "class",
+    "target",
+    "rel",
+    "loading",
+    "allowfullscreen",
+    "sandbox",
+    "referrerpolicy",
+    "frameborder",
+  ],
+};
+
 export const ArticleBody = memo(function ArticleBody({ paragraphs, midImage }: Props) {
   const hasHtml = paragraphs.some((p) => p.includes("<"));
-  const purifyConfig = { ADD_ATTR: ["style", "class", "target"] };
 
   if (hasHtml || paragraphs.length === 1) {
     let fullContent = paragraphs.join("\n");

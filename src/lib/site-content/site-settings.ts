@@ -426,6 +426,29 @@ export const defaultSettings: SiteSettings = {
 const SETTINGS_KEY = "nt:site-settings";
 let memorySettings: SiteSettings | null = null;
 
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === SETTINGS_KEY && e.newValue) {
+      memorySettings = null;
+      window.dispatchEvent(new Event("nt:settings-updated"));
+      window.dispatchEvent(new Event("nt:ads-updated"));
+    }
+  });
+
+  if (typeof BroadcastChannel !== "undefined") {
+    try {
+      const bc = new BroadcastChannel("nt_settings_channel");
+      bc.onmessage = (msg) => {
+        if (msg?.data?.type === "settings_updated") {
+          memorySettings = null;
+          window.dispatchEvent(new Event("nt:settings-updated"));
+          window.dispatchEvent(new Event("nt:ads-updated"));
+        }
+      };
+    } catch {}
+  }
+}
+
 export function loadSettings(): SiteSettings {
   if (memorySettings) {
     if (memorySettings.copyright) {
@@ -461,6 +484,13 @@ export async function saveSettings(s: SiteSettings) {
   if (typeof window !== "undefined") {
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(cleaned));
+      if (typeof BroadcastChannel !== "undefined") {
+        try {
+          const bc = new BroadcastChannel("nt_settings_channel");
+          bc.postMessage({ type: "settings_updated" });
+          bc.close();
+        } catch {}
+      }
     } catch (e) {
       console.warn("Failed to save settings to localStorage, continuing to server save", e);
     }
