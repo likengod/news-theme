@@ -7,7 +7,6 @@ import {
   Globe,
   Share2,
   Building2,
-  Newspaper,
   Info,
   Check,
 } from "lucide-react";
@@ -23,14 +22,21 @@ export default function ArticleMediaTab({ row, onChange }: ArticleMediaTabProps)
   const defaultSiteName = settings?.siteName || "Today Tripura";
   const activeCredit = row.imageCredit?.trim() || defaultSiteName;
 
+  const PRESET_CAPTIONS = [
+    { label: "প্রতীকী ছবি", value: "প্রতীকী ছবি" },
+    { label: "Representative Image", value: "Representative Image" },
+    { label: "ফাইল ছবি", value: "ফাইল ছবি" },
+    { label: "ছবি: সংগৃহীত", value: "ছবি: সংগৃহীত" },
+    { label: "ছবি: সোশ্যাল মিডিয়া", value: "ছবি: সোশ্যাল মিডিয়া" },
+    { label: "নিজস্ব চিত্র", value: "নিজস্ব চিত্র" },
+  ];
+
   const PRESET_CREDITS = [
     { label: defaultSiteName, value: defaultSiteName, icon: Building2, desc: "Website / Newsroom" },
     { label: "Newsroom Desk", value: "Newsroom Desk", icon: Camera, desc: "Staff Photographer" },
     { label: "Social Media", value: "Social Media", icon: Share2, desc: "Collected from Social Media" },
     { label: "AI Generated", value: "AI Generated", icon: Sparkles, desc: "Generated with AI" },
     { label: "Collected from Web", value: "Collected from Web", icon: Globe, desc: "Online Source" },
-    { label: "PTI", value: "PTI News", icon: Newspaper, desc: "Press Trust of India" },
-    { label: "ANI", value: "ANI News", icon: Newspaper, desc: "Asian News International" },
   ];
 
   return (
@@ -57,25 +63,60 @@ export default function ArticleMediaTab({ row, onChange }: ArticleMediaTabProps)
             </span>
           </div>
 
-          {/* Image Caption Input */}
-          <div className="space-y-1">
+          {/* Image Caption Input & Presets */}
+          <div className="space-y-1.5">
             <label
               htmlFor="article-image-caption"
               className="block text-xs font-semibold text-slate-700"
             >
               Photo Caption / Description
             </label>
+
+            {/* Quick Caption Preset Chips */}
+            <div className="flex flex-wrap items-center gap-1.5 pb-1">
+              <span className="text-[10px] uppercase font-bold text-slate-500 mr-0.5">
+                Quick Defaults:
+              </span>
+              {PRESET_CAPTIONS.map((preset) => {
+                const isSelected = (row.imageCaption || "").trim() === preset.value;
+                return (
+                  <button
+                    key={preset.value}
+                    type="button"
+                    onClick={() => onChange("imageCaption", preset.value)}
+                    className={`inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-[11px] font-medium transition cursor-pointer border ${
+                      isSelected
+                        ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100 hover:border-slate-300"
+                    }`}
+                  >
+                    <span>{preset.label}</span>
+                    {isSelected && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                  </button>
+                );
+              })}
+              {row.imageCaption && (
+                <button
+                  type="button"
+                  onClick={() => onChange("imageCaption", "")}
+                  className="text-[11px] text-slate-400 hover:text-red-500 transition-colors ml-1 underline cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+
             <input
               id="article-image-caption"
               name="imageCaption"
               type="text"
               value={row.imageCaption || ""}
               onChange={(e) => onChange("imageCaption", e.target.value)}
-              placeholder="e.g. Rescuers and officials at the scene shortly after the incident..."
+              placeholder="e.g. প্রতীকী ছবি / Representative Image, or enter custom caption..."
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
             />
             <p className="text-[11px] text-slate-400">
-              Optional description of what is depicted in the photo.
+              Select a quick preset above or type your own description.
             </p>
           </div>
 
@@ -96,7 +137,8 @@ export default function ArticleMediaTab({ row, onChange }: ArticleMediaTabProps)
             {/* Quick Preset Buttons */}
             <div className="flex flex-wrap items-center gap-1.5">
               {PRESET_CREDITS.map((preset) => {
-                const isSelected = (row.imageCredit || "").toLowerCase() === preset.value.toLowerCase() ||
+                const isSelected =
+                  (row.imageCredit || "").toLowerCase() === preset.value.toLowerCase() ||
                   (!row.imageCredit && preset.value === defaultSiteName);
                 const Icon = preset.icon;
                 return (
