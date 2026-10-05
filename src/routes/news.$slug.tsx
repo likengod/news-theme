@@ -9,6 +9,7 @@ import { ArticleHero } from "@/components/article/ArticleHero";
 import { ArticleBody } from "@/components/article/ArticleBody";
 import { ArticleFooter } from "@/components/article/ArticleFooter";
 import { ArticleSidebar } from "@/components/article/ArticleSidebar";
+import { ArticleLeftNav } from "@/components/article/ArticleLeftNav";
 import { ShareRail } from "@/components/article/ShareRail";
 import { ArticleQrCard } from "@/components/article/ArticleQrCard";
 import { ContentProtectionGuard } from "@/components/article/ContentProtectionGuard";
@@ -223,8 +224,9 @@ function ArticlePage() {
       <ReadingProgress />
       <Header />
 
-      <main className="mx-auto max-w-6xl px-4 pt-3 pb-12 w-full max-w-full min-w-0">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px] w-full max-w-full min-w-0 items-start">
+      <main className="mx-auto max-w-7xl px-3 sm:px-4 pt-3 pb-12 w-full max-w-full min-w-0">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_320px] w-full max-w-full min-w-0 items-start">
+          <ArticleLeftNav />
           <article className="relative w-full max-w-full min-w-0">
             <ArticleHeader
               title={data.title}

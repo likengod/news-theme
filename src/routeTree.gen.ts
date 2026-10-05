@@ -21,6 +21,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
+import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as ReelsRouteImport } from './routes/reels'
@@ -127,6 +128,11 @@ const SearchRoute = SearchRouteImport.update({
 const RssDotxmlRoute = RssDotxmlRouteImport.update({
   id: '/rss.xml',
   path: '/rss.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultsRoute = ResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -391,6 +397,7 @@ export interface FileRoutesByFullPath {
   '/reels': typeof ReelsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/results': typeof ResultsRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
@@ -451,6 +458,7 @@ export interface FileRoutesByTo {
   '/reels': typeof ReelsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/results': typeof ResultsRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
@@ -513,6 +521,7 @@ export interface FileRoutesById {
   '/reels': typeof ReelsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/results': typeof ResultsRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
@@ -576,6 +585,7 @@ export interface FileRouteTypes {
     | '/reels'
     | '/refund-policy'
     | '/reset-password'
+    | '/results'
     | '/rss.xml'
     | '/search'
     | '/setup'
@@ -636,6 +646,7 @@ export interface FileRouteTypes {
     | '/reels'
     | '/refund-policy'
     | '/reset-password'
+    | '/results'
     | '/rss.xml'
     | '/search'
     | '/setup'
@@ -697,6 +708,7 @@ export interface FileRouteTypes {
     | '/reels'
     | '/refund-policy'
     | '/reset-password'
+    | '/results'
     | '/rss.xml'
     | '/search'
     | '/setup'
@@ -759,6 +771,7 @@ export interface RootRouteChildren {
   ReelsRoute: typeof ReelsRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ResultsRoute: typeof ResultsRoute
   RssDotxmlRoute: typeof RssDotxmlRoute
   SearchRoute: typeof SearchRoute
   SetupRoute: typeof SetupRoute
@@ -862,6 +875,13 @@ declare module '@tanstack/react-router' {
       path: '/rss.xml'
       fullPath: '/rss.xml'
       preLoaderRoute: typeof RssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/results': {
+      id: '/results'
+      path: '/results'
+      fullPath: '/results'
+      preLoaderRoute: typeof ResultsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -1264,6 +1284,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReelsRoute: ReelsRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ResultsRoute: ResultsRoute,
   RssDotxmlRoute: RssDotxmlRoute,
   SearchRoute: SearchRoute,
   SetupRoute: SetupRoute,
