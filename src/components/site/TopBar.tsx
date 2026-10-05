@@ -222,7 +222,7 @@ export function TopBar() {
                   <SheetTitle
                     className="text-2xl uppercase tracking-wider font-extrabold"
                     style={{
-                      fontFamily: '"Inter", system-ui, sans-serif',
+                      fontFamily: 'var(--font-headlines, "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif)',
                       fontWeight: 800,
                       letterSpacing: "0.05em",
                     }}
@@ -239,16 +239,18 @@ export function TopBar() {
                     >
                       {settings.logoTextPrimary !== undefined && settings.logoTextPrimary !== ""
                         ? settings.logoTextPrimary
-                        : settings.logoText
-                          ? settings.logoText.split(" ")[0]
-                          : "Today"}
+                        : (settings.logoText || "").trim().split(/\s+/).filter(Boolean)[0] ||
+                          (settings.siteName || "").trim().split(/\s+/).filter(Boolean)[0] ||
+                          "Today"}
                     </span>{" "}
                     <span style={{ color: getAccessibleLogoColor(settings.logoColorSecondary || "#dc2626", isDark, 4.5) }}>
                       {settings.logoTextSecondary !== undefined && settings.logoTextSecondary !== ""
                         ? settings.logoTextSecondary
-                        : settings.logoText && settings.logoText.split(" ").length > 1
-                          ? settings.logoText.split(" ").slice(1).join(" ")
-                          : "Tripura"}
+                        : (settings.logoText || "").trim().split(/\s+/).filter(Boolean).length > 1
+                          ? (settings.logoText || "").trim().split(/\s+/).filter(Boolean).slice(1).join(" ")
+                          : (settings.siteName || "").trim().split(/\s+/).filter(Boolean).length > 1
+                            ? (settings.siteName || "").trim().split(/\s+/).filter(Boolean).slice(1).join(" ")
+                            : ""}
                     </span>
                   </SheetTitle>
                   <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground truncate">

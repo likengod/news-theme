@@ -97,7 +97,7 @@ function UpdatesPage() {
 
       // Synchronize with layout immediately so the sidebar update badge clears
       if (typeof window !== "undefined") {
-        const cur = statusRes?.version || "v1.1.12";
+        const cur = statusRes?.version || "v1.1.13";
         const latest = statusRes?.latestVersion || cur;
         const hasUpdate = Boolean(statusRes?.hasNewVersion || ((statusRes?.behind ?? 0) > 0));
         const statusObj = {

@@ -74,31 +74,37 @@ export function Masthead() {
     }
   }
 
-  const hasLogo = !!(s.logoLight || s.logoDark);
+  const [logoFailed, setLogoFailed] = useState(false);
+
+  const hasLogo = !logoFailed && !!(s.logoLight || s.logoDark);
   const mode = s.logoDisplayMode || (hasLogo ? "both" : "text_only");
   const isFitScreen = !!s.logoFitScreen || mode === "logo_fit";
 
   const showLogo =
     hasLogo &&
     (mode === "logo_only" || mode === "both" || mode === "both_stacked" || mode === "logo_fit");
+  // Always show text if no logo exists, if logo failed, or if display mode includes text
   const showText =
-    !hasLogo || mode === "text_only" || mode === "both" || mode === "both_stacked";
+    !hasLogo || logoFailed || mode === "text_only" || mode === "both" || mode === "both_stacked";
   const isSideBySide = mode === "both" && showLogo && showText;
   const isStacked = mode === "both_stacked" && showLogo && showText;
+
+  const siteWords = (s.siteName || "").trim().split(/\s+/).filter(Boolean);
+  const logoWords = (s.logoText || "").trim().split(/\s+/).filter(Boolean);
 
   const primaryWord =
     s.logoTextPrimary !== undefined && s.logoTextPrimary !== ""
       ? s.logoTextPrimary
-      : s.logoText
-        ? s.logoText.split(" ")[0]
-        : "Today";
+      : logoWords[0] || siteWords[0] || "Today";
 
   const secondaryWord =
     s.logoTextSecondary !== undefined && s.logoTextSecondary !== ""
       ? s.logoTextSecondary
-      : s.logoText && s.logoText.split(" ").length > 1
-        ? s.logoText.split(" ").slice(1).join(" ")
-        : "Tripura";
+      : logoWords.length > 1
+        ? logoWords.slice(1).join(" ")
+        : siteWords.length > 1
+          ? siteWords.slice(1).join(" ")
+          : "";
 
   const taglineContent = s.tagline ? (
     <span className="break-words text-center inline-block">{s.tagline}</span>
@@ -127,10 +133,11 @@ export function Masthead() {
                   {s.logoLight && (
                     <img
                       src={s.logoLight}
-                      alt={s.logoText || "Logo"}
+                      alt={s.logoText || s.siteName || "Logo"}
                       width={160}
                       height={80}
                       decoding="async"
+                      onError={() => setLogoFailed(true)}
                       className={`h-11 sm:h-16 md:h-20 lg:h-22 w-auto max-w-[80px] sm:max-w-[120px] md:max-w-[160px] object-contain ${
                         s.logoDark ? "dark:hidden" : ""
                       }`}
@@ -139,10 +146,11 @@ export function Masthead() {
                   {s.logoDark && (
                     <img
                       src={s.logoDark}
-                      alt={s.logoText || "Logo"}
+                      alt={s.logoText || s.siteName || "Logo"}
                       width={160}
                       height={80}
                       decoding="async"
+                      onError={() => setLogoFailed(true)}
                       className={`h-11 sm:h-16 md:h-20 lg:h-22 w-auto max-w-[80px] sm:max-w-[120px] md:max-w-[160px] object-contain ${
                         s.logoLight ? "hidden dark:block" : ""
                       }`}
@@ -155,7 +163,7 @@ export function Masthead() {
                   <h1
                     className="leading-none text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase font-extrabold text-center"
                     style={{
-                      fontFamily: '"Inter", system-ui, sans-serif',
+                      fontFamily: 'var(--font-headlines, "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif)',
                       fontWeight: 800,
                       letterSpacing: "0.05em",
                     }}
@@ -183,16 +191,17 @@ export function Masthead() {
           )}
 
           {/* 2. Fit Screen / Full Banner Logo */}
-          {((mode === "logo_fit" || (mode === "logo_only" && isFitScreen)) && !isSideBySide) && (
+          {(!logoFailed && (mode === "logo_fit" || (mode === "logo_only" && isFitScreen)) && !isSideBySide) && (
             <Link to="/" aria-label={s.siteName || "Home"} className="block w-full">
               <div className="w-full flex items-center justify-center">
                 {s.logoLight && (
                   <img
                     src={s.logoLight}
-                    alt={s.logoText || "Logo"}
+                    alt={s.logoText || s.siteName || "Logo"}
                     width={800}
                     height={160}
                     decoding="async"
+                    onError={() => setLogoFailed(true)}
                     className={`w-full max-w-5xl h-auto max-h-36 sm:max-h-48 md:max-h-60 object-contain mx-auto ${
                       s.logoDark ? "dark:hidden" : ""
                     }`}
@@ -201,10 +210,11 @@ export function Masthead() {
                 {s.logoDark && (
                   <img
                     src={s.logoDark}
-                    alt={s.logoText || "Logo"}
+                    alt={s.logoText || s.siteName || "Logo"}
                     width={800}
                     height={160}
                     decoding="async"
+                    onError={() => setLogoFailed(true)}
                     className={`w-full max-w-5xl h-auto max-h-36 sm:max-h-48 md:max-h-60 object-contain mx-auto ${
                       s.logoLight ? "hidden dark:block" : ""
                     }`}
@@ -214,17 +224,18 @@ export function Masthead() {
             </Link>
           )}
 
-          {/* 3. Stacked Logo + Text or Logo Only (Standard) or Text Only */}
-          {!isSideBySide && mode !== "logo_fit" && !(mode === "logo_only" && isFitScreen) && (
+          {/* 3. Stacked Logo + Text or Logo Only (Standard) or Text Only (or Fallback if logo failed) */}
+          {!isSideBySide && (logoFailed || (mode !== "logo_fit" && !(mode === "logo_only" && isFitScreen))) && (
             <div>
               <Link to="/" aria-label={s.siteName || "Home"} className="block">
                 {showLogo && s.logoLight && (
                   <img
                     src={s.logoLight}
-                    alt={s.logoText || "Logo"}
+                    alt={s.logoText || s.siteName || "Logo"}
                     width={200}
                     height={64}
                     decoding="async"
+                    onError={() => setLogoFailed(true)}
                     className={`mx-auto h-16 object-contain ${
                       s.logoDark ? "dark:hidden" : ""
                     } ${showText ? "mb-2" : ""}`}
@@ -233,10 +244,11 @@ export function Masthead() {
                 {showLogo && s.logoDark && (
                   <img
                     src={s.logoDark}
-                    alt={s.logoText || "Logo"}
+                    alt={s.logoText || s.siteName || "Logo"}
                     width={200}
                     height={64}
                     decoding="async"
+                    onError={() => setLogoFailed(true)}
                     className={`mx-auto h-16 object-contain ${
                       s.logoLight ? "hidden dark:block" : ""
                     } ${showText ? "mb-2" : ""}`}
@@ -246,7 +258,7 @@ export function Masthead() {
                   <h1
                     className="leading-none text-3xl sm:text-5xl md:text-6xl lg:text-7xl uppercase"
                     style={{
-                      fontFamily: '"Inter", system-ui, sans-serif',
+                      fontFamily: 'var(--font-headlines, "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif)',
                       fontWeight: 800,
                       letterSpacing: "0.05em",
                     }}
@@ -266,7 +278,7 @@ export function Masthead() {
                     </span>
                   </h1>
                 ) : (
-                  <h1 className="sr-only">{s.logoText || "Today Tripura"}</h1>
+                  <h1 className="sr-only">{s.logoText || s.siteName || "Today Tripura"}</h1>
                 )}
               </Link>
               {showText && (

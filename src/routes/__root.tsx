@@ -313,7 +313,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       links.push({
         rel: "stylesheet",
         href: googleFontsUrl,
-        media: "print",
       });
     }
 
