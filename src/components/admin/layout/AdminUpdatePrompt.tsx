@@ -2,6 +2,8 @@ import React from "react";
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, Rocket } from "lucide-react";
 
+import { APP_VERSION } from "@/lib/version";
+
 interface AdminUpdatePromptProps {
   firstName: string;
   currentVersion?: string;
@@ -38,7 +40,7 @@ export function AdminUpdatePrompt({
 
         <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm font-semibold text-slate-500">
           <span className="font-mono text-slate-700 bg-slate-200/70 px-2.5 py-1 rounded-full text-[11px] sm:text-xs">
-            Current: {currentVersion || "v1.0.55"}
+            Current: {currentVersion || APP_VERSION}
           </span>
           <span>➔</span>
           <span className="font-mono text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold">

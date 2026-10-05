@@ -31,6 +31,7 @@ import {
   getDeployLog,
   initializeGitRepo,
 } from "@/lib/deploy.functions";
+import { APP_VERSION } from "@/lib/version";
 
 export const Route = createFileRoute("/admin/updates")({
   component: UpdatesPage,
@@ -97,7 +98,7 @@ function UpdatesPage() {
 
       // Synchronize with layout immediately so the sidebar update badge clears
       if (typeof window !== "undefined") {
-        const cur = statusRes?.version || "v1.1.30";
+        const cur = statusRes?.version || APP_VERSION;
         const latest = statusRes?.latestVersion || cur;
         const hasUpdate = Boolean(statusRes?.hasNewVersion || ((statusRes?.behind ?? 0) > 0));
         const statusObj = {
@@ -203,10 +204,10 @@ function UpdatesPage() {
     }
   };
 
-  const currentVersion = gitStatus?.version || "v1.0.57";
+  const currentVersion = gitStatus?.version || APP_VERSION;
   const latestVersion = gitStatus?.latestVersion || currentVersion;
-  const hasNewVersion = Boolean(gitStatus?.hasNewVersion || latestVersion !== currentVersion);
-  const updatesAvailable = (gitStatus?.behind ?? 0) > 0 || hasNewVersion;
+  const hasNewVersion = Boolean(gitStatus?.hasNewVersion || (gitStatus && latestVersion !== currentVersion));
+  const updatesAvailable = !loading && ((gitStatus?.behind ?? 0) > 0 || hasNewVersion);
   const updatesCount =
     gitStatus?.behind && gitStatus.behind > 0 ? gitStatus.behind : hasNewVersion ? 1 : 0;
 

@@ -2,6 +2,7 @@ import { query } from "./db.server";
 import { execSync } from "child_process";
 import path from "path";
 import fs from "fs";
+import { APP_VERSION } from "./version";
 
 const ROOT = process.cwd();
 
@@ -67,8 +68,8 @@ export async function ensureDeployTable() {
 // ─── Git Status ──────────────────────────────────────────────────────────────
 
 let gitStatusCache: { data: any; expiry: number } | null = null;
-const GIT_STATUS_CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache
-
+const GIT_STATUS_CACHE_TTL = 60 * 1000; // 1 minute cache
+ 
 export function invalidateGitStatusCache() {
   gitStatusCache = null;
 }
@@ -78,13 +79,24 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
     return gitStatusCache.data;
   }
 
-  let version = "v1.1.30";
+  let version = APP_VERSION;
   try {
-    const pkgPath = path.join(ROOT, "package.json");
-    const pkgRaw = fs.readFileSync(pkgPath, "utf-8");
-    const pkg = JSON.parse(pkgRaw);
-    if (pkg.version) {
-      version = pkg.version.startsWith("v") ? pkg.version : `v${pkg.version}`;
+    const candidatePaths = [
+      path.join(ROOT, "package.json"),
+      path.join(process.cwd(), "package.json"),
+      path.resolve(__dirname, "../../package.json"),
+      path.resolve(__dirname, "../package.json"),
+      path.resolve(ROOT, "../package.json"),
+    ];
+    for (const pkgPath of candidatePaths) {
+      if (fs.existsSync(pkgPath)) {
+        const pkgRaw = fs.readFileSync(pkgPath, "utf-8");
+        const pkg = JSON.parse(pkgRaw);
+        if (pkg.version) {
+          version = pkg.version.startsWith("v") ? pkg.version : `v${pkg.version}`;
+          break;
+        }
+      }
     }
   } catch {}
 

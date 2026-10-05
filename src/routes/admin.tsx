@@ -11,6 +11,7 @@ import { getUserServer, getCurrentUserRole } from "@/lib/auth.functions";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { isEnterprisePlusLicense } from "@/lib/site-content";
 import { getGitStatus } from "@/lib/deploy.functions";
+import { APP_VERSION } from "@/lib/version";
 import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
 import { AdminTopBar } from "@/components/admin/layout/AdminTopBar";
 import { AdminUpdatePrompt } from "@/components/admin/layout/AdminUpdatePrompt";
@@ -190,7 +191,7 @@ function AdminLayout() {
     getGitStatus({ data: { forceRefresh: pathname === "/admin/updates" } })
       .then((res) => {
         if (!mounted) return;
-        const cur = res?.version || "v1.1.30";
+        const cur = res?.version || APP_VERSION;
         const latest = res?.latestVersion || cur;
         const isSimulated =
           typeof window !== "undefined" &&
