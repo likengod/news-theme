@@ -51,8 +51,8 @@ export const getAdminArticles = createServerFn({ method: "GET" })
       params.push(term, term, term);
     }
     if (category && category !== "All") {
-      filterSql += " AND category = ?";
-      params.push(category);
+      filterSql += " AND (category = ? OR category LIKE ? OR category LIKE ? OR category LIKE ? OR category LIKE ?)";
+      params.push(category, `${category},%`, `%, ${category}`, `%, ${category},%`, `%,${category},%`);
     }
     if (status && status !== "All") {
       filterSql += " AND status = ?";
@@ -348,8 +348,8 @@ export const searchPublicArticles = createServerFn({ method: "GET" })
     }
 
     if (category && category !== "All") {
-      filterSql += " AND category = ?";
-      params.push(category);
+      filterSql += " AND (category = ? OR category LIKE ? OR category LIKE ? OR category LIKE ? OR category LIKE ?)";
+      params.push(category, `${category},%`, `%, ${category}`, `%, ${category},%`, `%,${category},%`);
     }
 
     countSql += filterSql;
@@ -376,7 +376,14 @@ export const searchPublicArticles = createServerFn({ method: "GET" })
 export const getPublicArticleBySlug = createServerFn({ method: "GET" })
   .validator((slug: string) => slug)
   .handler(async ({ data: slug }) => {
-    const rows = await query("SELECT * FROM articles WHERE slug = ?", [slug]);
+    let decoded = slug;
+    try {
+      decoded = decodeURIComponent(slug);
+    } catch (_) {}
+    const rows = await query("SELECT * FROM articles WHERE slug = ? OR slug = ? LIMIT 1", [
+      slug,
+      decoded,
+    ]);
     if (rows.length === 0) return null;
 
     // Increment view count in background

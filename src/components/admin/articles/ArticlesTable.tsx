@@ -124,7 +124,23 @@ export function ArticlesTable({
                     </div>
                   </div>
                 </td>
-                <td className="px-5 py-3 text-slate-600">{r.category}</td>
+                <td className="px-5 py-3 text-slate-600">
+                  <div className="flex flex-wrap gap-1 max-w-[220px]">
+                    {(r.category || "General").split(",").map((c, i) => (
+                      <span
+                        key={i}
+                        className={`inline-block rounded px-1.5 py-0.5 text-[11px] font-medium ${
+                          i === 0
+                            ? "bg-slate-100 text-slate-800 border border-slate-200 font-semibold"
+                            : "bg-slate-50 text-slate-600 border border-slate-100"
+                        }`}
+                        title={i === 0 ? `${c.trim()} (Primary Category)` : c.trim()}
+                      >
+                        {c.trim()}
+                      </span>
+                    ))}
+                  </div>
+                </td>
                 <td className="px-5 py-3 text-slate-600">{r.author}</td>
                 <td className="px-5 py-3 text-slate-600">
                   <span className="inline-flex items-center gap-1">

@@ -46,7 +46,14 @@ export const getCategories = createServerFn({ method: "GET" })
       let sql = `
         SELECT c.*, COUNT(a.id) as count 
         FROM categories c 
-        LEFT JOIN articles a ON c.name = a.category AND a.status = 'Published'
+        LEFT JOIN articles a ON (
+          c.name = a.category OR 
+          a.category LIKE CONCAT(c.name, ',%') OR 
+          a.category LIKE CONCAT('%, ', c.name) OR 
+          a.category LIKE CONCAT('%, ', c.name, ',%') OR
+          a.category LIKE CONCAT('%,', c.name) OR 
+          a.category LIKE CONCAT('%,', c.name, ',%')
+        ) AND a.status = 'Published'
       `;
       const params: any[] = [];
       if (q) {
@@ -297,27 +304,49 @@ export const getCategoryData = createServerFn({ method: "GET" })
   .validator((data: any) => data)
   .handler(async ({ data }) => {
     try {
-      const slug = typeof data === "string" ? data : data?.slug || "";
+      const rawSlug = typeof data === "string" ? data : data?.slug || "";
       const page = typeof data === "object" && Number(data?.page) > 0 ? Number(data.page) : 1;
       const limit = typeof data === "object" && Number(data?.limit) > 0 ? Number(data.limit) : 10;
       const offset = (page - 1) * limit;
 
-      const catRows = await query("SELECT * FROM categories WHERE slug = ?", [slug]);
+      let decodedSlug = rawSlug;
+      try {
+        decodedSlug = decodeURIComponent(rawSlug);
+      } catch (_) {}
+
+      // Match by slug or name (supports both English and Unicode/Bengali names and custom slugs)
+      const catRows = await query(
+        "SELECT * FROM categories WHERE slug = ? OR slug = ? OR name = ? OR name = ? LIMIT 1",
+        [decodedSlug, rawSlug, decodedSlug, rawSlug],
+      );
       if (!Array.isArray(catRows) || catRows.length === 0) return null;
       const cat = catRows[0];
 
+      const catWhere = `(
+        category = ? OR category = ? OR
+        category LIKE ? OR category LIKE ? OR
+        category LIKE ? OR category LIKE ? OR
+        category LIKE ? OR category LIKE ? OR
+        category LIKE ? OR category LIKE ?
+      ) AND status = 'Published' AND date <= NOW()`;
+
+      const catParams = [
+        cat.name, cat.slug,
+        `${cat.name},%`, `${cat.slug},%`,
+        `%, ${cat.name}`, `%, ${cat.slug}`,
+        `%, ${cat.name},%`, `%, ${cat.slug},%`,
+        `%,${cat.name},%`, `%,${cat.slug},%`,
+      ];
+
       const [countRes, articles, latestRows] = await Promise.all([
+        query(`SELECT COUNT(*) as total FROM articles WHERE ${catWhere}`, catParams),
         query(
-          "SELECT COUNT(*) as total FROM articles WHERE category = ? AND status = 'Published' AND date <= NOW()",
-          [cat.name],
+          `SELECT * FROM articles WHERE ${catWhere} ORDER BY date DESC, id DESC LIMIT ? OFFSET ?`,
+          [...catParams, limit, offset],
         ),
         query(
-          "SELECT * FROM articles WHERE category = ? AND status = 'Published' AND date <= NOW() ORDER BY date DESC, id DESC LIMIT ? OFFSET ?",
-          [cat.name, limit, offset],
-        ),
-        query(
-          "SELECT * FROM articles WHERE category = ? AND status = 'Published' AND date <= NOW() ORDER BY date DESC, id DESC LIMIT 5",
-          [cat.name],
+          `SELECT * FROM articles WHERE ${catWhere} ORDER BY date DESC, id DESC LIMIT 5`,
+          catParams,
         ),
       ]);
 

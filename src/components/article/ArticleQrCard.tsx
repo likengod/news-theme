@@ -24,8 +24,12 @@ export function ArticleQrCard({ url }: Props) {
     return () => window.removeEventListener("nt:settings-updated", handleUpdate);
   }, []);
 
+  const hasCustomAlert =
+    settings.festiveThemeEnabled !== false &&
+    (!!settings.topBarWeatherCustomText || !!settings.festiveAlertImage);
+
   useEffect(() => {
-    if (settings.festiveThemeEnabled === false || !settings.topBarWeatherCustomText) {
+    if (!hasCustomAlert) {
       setShowCustomText(false);
       return;
     }
@@ -34,7 +38,7 @@ export function ArticleQrCard({ url }: Props) {
       setShowCustomText((prev) => !prev);
     }, delay);
     return () => clearInterval(interval);
-  }, [settings.festiveThemeEnabled, settings.topBarWeatherCustomText, settings.topBarSwapDelay]);
+  }, [hasCustomAlert, settings.topBarSwapDelay]);
 
   const qrCodeUrl = useMemo(() => {
     return `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(url)}`;
@@ -50,10 +54,15 @@ export function ArticleQrCard({ url }: Props) {
     settings.topBarTextColor ||
     "#000000";
 
+  const resolvedGrad =
+    activeGradient &&
+    (FESTIVE_GRADIENT_MAP[activeGradient] ||
+      (activeGradient.includes("gradient(") ? activeGradient : null));
+
   const scanMeStyle =
-    activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
+    resolvedGrad
       ? {
-          backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
+          backgroundImage: resolvedGrad,
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
           backgroundClip: "text",
@@ -66,7 +75,7 @@ export function ArticleQrCard({ url }: Props) {
     : undefined;
 
   const textToDisplay =
-    settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText
+    hasCustomAlert && showCustomText && settings.topBarWeatherCustomText
       ? settings.topBarWeatherCustomText
       : settings.festiveScanMeCustomText || "SCAN ME";
 
@@ -75,12 +84,19 @@ export function ArticleQrCard({ url }: Props) {
       <div>
         <h4
           key={showCustomText ? "custom" : "default"}
-          className="text-xs font-extrabold uppercase leading-tight tracking-tight sm:text-sm animate-in fade-in duration-300"
-          style={scanMeStyle}
+          className="text-xs font-extrabold uppercase leading-tight tracking-tight sm:text-sm animate-in fade-in duration-300 inline-flex items-center gap-1.5"
         >
-          {textToDisplay}
+          {hasCustomAlert && showCustomText && settings.festiveAlertImage ? (
+            <img
+              src={settings.festiveAlertImage}
+              alt="Alert"
+              className="h-4 w-auto max-w-[80px] object-contain shrink-0 align-middle"
+            />
+          ) : (
+            <span style={scanMeStyle}>{textToDisplay}</span>
+          )}
         </h4>
-        {!(showCustomText && settings.topBarWeatherCustomText) && (
+        {!(hasCustomAlert && showCustomText) && (
           <p
             className="text-[10px] font-medium text-slate-500 dark:text-slate-400 animate-in fade-in duration-300"
             style={subtextStyle}

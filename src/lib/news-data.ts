@@ -148,14 +148,18 @@ export interface Article {
   views: number;
 }
 
-export function slugify(input: string): string {
-  return (
-    input
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
-      .slice(0, 80) || "sample"
-  );
+export function slugify(input: any): string {
+  if (!input) return "sample";
+  const str = typeof input === "string" ? input : String(input?.name || input || "");
+  if (!str.trim()) return "sample";
+  const slug = str
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\p{M}]+/gu, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 100);
+
+  return slug || "sample";
 }
 
 const LOCAL_IMAGES = [heroImg, fedImg, techImg, oilImg, cryptoImg, wsImg, tradeImg];

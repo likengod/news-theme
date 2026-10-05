@@ -1,7 +1,8 @@
 import { MapPin } from "lucide-react";
-import { sections, slugify } from "@/lib/news-data";
+import { slugify } from "@/lib/news-data";
 import RichEditor from "@/components/admin/articles/RichEditor";
 import { Field } from "@/components/admin/articles/ArticleSubComponents";
+import MultiCategorySelector from "@/components/admin/articles/MultiCategorySelector";
 import type { Row } from "./types";
 
 interface ArticleContentTabProps {
@@ -34,33 +35,27 @@ export default function ArticleContentTab({
           />
         </Field>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <Field label="Category">
-            <select
-              id="article-category"
-              name="category"
-              aria-label="Article Category"
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
+          <div>
+            <MultiCategorySelector
               value={row.category}
-              onChange={(e) => onChange("category", e.target.value)}
-              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
-            >
-              {sections.map((s) => (
-                <option key={s}>{s}</option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Title slug (URL last segment)">
-            <input
-              id="article-slug"
-              name="slug"
-              aria-label="Title slug"
-              autoComplete="off"
-              value={row.slug}
-              onChange={(e) => onChange("slug", slugify(e.target.value))}
-              placeholder="auto from title"
-              className="w-full rounded-md border border-slate-200 px-3 py-2 font-mono text-sm focus:border-slate-900 focus:outline-none"
+              onChange={(val) => onChange("category", val)}
             />
-          </Field>
+          </div>
+          <div>
+            <Field label="Title slug (URL last segment)">
+              <input
+                id="article-slug"
+                name="slug"
+                aria-label="Title slug"
+                autoComplete="off"
+                value={row.slug}
+                onChange={(e) => onChange("slug", slugify(e.target.value))}
+                placeholder="auto from title"
+                className="w-full rounded-md border border-slate-200 px-3 py-2 font-mono text-sm focus:border-slate-900 focus:outline-none"
+              />
+            </Field>
+          </div>
         </div>
 
         <div className="mt-4">

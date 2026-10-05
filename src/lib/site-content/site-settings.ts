@@ -171,6 +171,7 @@ export type SiteSettings = {
   customAlertAnimationStyle: string;
   customAlertFontFamily: string;
   customAlertFontSize: number;
+  festiveAlertImage?: string;
 
   // Event Page Customizations
   eventTitle: string;
@@ -419,6 +420,7 @@ export const defaultSettings: SiteSettings = {
   customAlertAnimationStyle: "slide-up",
   customAlertFontFamily: "inter",
   customAlertFontSize: 14,
+  festiveAlertImage: "",
 };
 
 const SETTINGS_KEY = "nt:site-settings";

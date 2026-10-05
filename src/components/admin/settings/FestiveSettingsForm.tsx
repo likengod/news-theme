@@ -67,8 +67,42 @@ export function FestiveSettingsForm() {
   };
 
   const customAlertText = settings.topBarWeatherCustomText?.trim() || "Breaking News Alert";
-  const activeGradient = settings.topBarTextGradient || settings.festiveCategoryTitleGradient;
-  const activeColor = settings.festiveCategoryTitleColor || settings.topBarTextColor || "#000000";
+
+  // 1. Category Title Appearance (Default Category Pages)
+  const resolvedCategoryGrad =
+    settings.festiveCategoryTitleGradient &&
+    (FESTIVE_GRADIENT_MAP[settings.festiveCategoryTitleGradient] ||
+      (settings.festiveCategoryTitleGradient.includes("gradient(")
+        ? settings.festiveCategoryTitleGradient
+        : null));
+
+  const categoryTitleStyle: React.CSSProperties = resolvedCategoryGrad
+    ? {
+        backgroundImage: resolvedCategoryGrad,
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+        display: "inline-block",
+      }
+    : { color: settings.festiveCategoryTitleColor || "#000000" };
+
+  // 2. Custom Alert / Top Bar Text Appearance
+  const resolvedAlertGrad =
+    settings.topBarTextGradient &&
+    (FESTIVE_GRADIENT_MAP[settings.topBarTextGradient] ||
+      (settings.topBarTextGradient.includes("gradient(")
+        ? settings.topBarTextGradient
+        : null));
+
+  const alertTextStyle: React.CSSProperties = resolvedAlertGrad
+    ? {
+        backgroundImage: resolvedAlertGrad,
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+        display: "inline-block",
+      }
+    : { color: settings.topBarTextColor || "#000000" };
 
   const selectedFont = fontConfig.fonts.find((f) => f.id === settings.customAlertFontFamily);
   const customAlertFontFamilyCss = selectedFont
@@ -78,30 +112,10 @@ export function FestiveSettingsForm() {
     ROTATION_ANIMATION_STYLE[settings.customAlertAnimationStyle || "slide-up"] ||
     ROTATION_ANIMATION_STYLE["slide-up"];
 
-  const textStyle: React.CSSProperties =
-    activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
-      ? {
-          backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          display: "inline-block",
-        }
-      : { color: activeColor };
-
-  const badgeStyle: React.CSSProperties =
-    activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
-      ? {
-          backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
-          backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-        }
-      : {
-          backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
-          color: settings.festiveCategoryBadgeTextColor || "#FFFFFF",
-        };
+  const badgeStyle: React.CSSProperties = {
+    backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
+    color: settings.festiveCategoryBadgeTextColor || "#FFFFFF",
+  };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -190,7 +204,8 @@ export function FestiveSettingsForm() {
             showCustomText={showCustomText}
             animNonce={animNonce}
             customAlertText={customAlertText}
-            textStyle={textStyle}
+            categoryTitleStyle={categoryTitleStyle}
+            alertTextStyle={alertTextStyle}
             badgeStyle={badgeStyle}
             customAlertFontFamilyCss={customAlertFontFamilyCss}
             rotationAnimStyle={rotationAnimStyle}

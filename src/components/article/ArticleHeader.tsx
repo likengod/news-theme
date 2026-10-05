@@ -32,8 +32,12 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
     return () => window.removeEventListener("nt:settings-updated", handleUpdate);
   }, []);
 
+  const hasCustomAlert =
+    settings.festiveThemeEnabled !== false &&
+    (!!settings.topBarWeatherCustomText || !!settings.festiveAlertImage);
+
   useEffect(() => {
-    if (settings.festiveThemeEnabled === false || !settings.topBarWeatherCustomText) {
+    if (!hasCustomAlert) {
       setShowCustomText(false);
       return;
     }
@@ -42,14 +46,19 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
       setShowCustomText((prev) => !prev);
     }, delay);
     return () => clearInterval(interval);
-  }, [settings.festiveThemeEnabled, settings.topBarWeatherCustomText, settings.topBarSwapDelay]);
+  }, [hasCustomAlert, settings.topBarSwapDelay]);
 
   const activeGradient = settings.festiveCategoryTitleGradient || settings.topBarTextGradient;
 
+  const resolvedGrad =
+    activeGradient &&
+    (FESTIVE_GRADIENT_MAP[activeGradient] ||
+      (activeGradient.includes("gradient(") ? activeGradient : null));
+
   const badgeStyle =
-    activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
+    resolvedGrad
       ? {
-          backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
+          backgroundImage: resolvedGrad,
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
           backgroundClip: "text",
@@ -59,35 +68,68 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
           color: settings.festiveCategoryTitleColor || settings.topBarTextColor || "#000000",
         };
 
-  const badgeText =
-    settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText
-      ? settings.topBarWeatherCustomText
-      : category;
+  const categoriesList = (category || "News")
+    .split(",")
+    .map((c) => c.trim())
+    .filter(Boolean);
+  if (categoriesList.length === 0) categoriesList.push("News");
 
   return (
     <>
-      <nav className="mb-1 text-xs uppercase tracking-widest text-muted-foreground">
+      <nav className="mb-1 flex flex-wrap items-center text-xs uppercase tracking-widest text-muted-foreground">
         <Link to="/" className="hover:text-foreground">
           Home
         </Link>
-        <span className="mx-2">/</span>
-        <Link
-          to="/$slug"
-          params={{ slug: slugify(category) }}
-          className="hover:text-foreground"
-        >
-          {category}
-        </Link>
+        {categoriesList.map((cat) => (
+          <span key={cat} className="inline-flex items-center">
+            <span className="mx-2 text-muted-foreground/50">/</span>
+            <Link
+              to="/$slug"
+              params={{ slug: slugify(cat) }}
+              className="hover:text-foreground transition-colors"
+            >
+              {cat}
+            </Link>
+          </span>
+        ))}
       </nav>
 
       <header className="border-b border-border pb-3">
-        <span
-          key={showCustomText ? "custom" : "default"}
-          className="inline-block text-xs font-extrabold uppercase tracking-widest animate-in fade-in duration-300"
-          style={badgeStyle}
-        >
-          {badgeText}
-        </span>
+        {hasCustomAlert && showCustomText ? (
+          <span
+            key="custom"
+            className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-widest animate-in fade-in duration-300"
+          >
+            {settings.festiveAlertImage ? (
+              <img
+                src={settings.festiveAlertImage}
+                alt="Alert"
+                className="h-5 w-auto max-w-[80px] object-contain shrink-0 align-middle"
+              />
+            ) : (
+              <span style={badgeStyle}>{settings.topBarWeatherCustomText}</span>
+            )}
+          </span>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            {categoriesList.map((cat, idx) => (
+              <Link
+                key={cat}
+                to="/$slug"
+                params={{ slug: slugify(cat) }}
+                className={`inline-flex items-center text-xs font-extrabold uppercase tracking-widest hover:opacity-80 transition-opacity ${
+                  idx > 0 ? "opacity-90" : ""
+                }`}
+                style={badgeStyle}
+              >
+                <span>{cat}</span>
+                {idx < categoriesList.length - 1 && (
+                  <span className="ml-2 text-muted-foreground/40 font-normal">·</span>
+                )}
+              </Link>
+            ))}
+          </div>
+        )}
         <h1 className="headline mt-3 font-serif text-3xl font-bold leading-tight text-primary md:text-5xl">
           {title}
         </h1>

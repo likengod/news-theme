@@ -99,7 +99,10 @@ function CategoryPage() {
   }, []);
 
   useEffect(() => {
-    if (settings.festiveThemeEnabled === false || !settings.topBarWeatherCustomText) {
+    if (
+      settings.festiveThemeEnabled === false ||
+      (!settings.topBarWeatherCustomText && !settings.festiveAlertImage)
+    ) {
       setShowCustomText(false);
       return;
     }
@@ -108,7 +111,12 @@ function CategoryPage() {
       setShowCustomText((prev) => !prev);
     }, delay);
     return () => clearInterval(interval);
-  }, [settings.festiveThemeEnabled, settings.topBarWeatherCustomText, settings.topBarSwapDelay]);
+  }, [
+    settings.festiveThemeEnabled,
+    settings.topBarWeatherCustomText,
+    settings.festiveAlertImage,
+    settings.topBarSwapDelay,
+  ]);
 
   if (!loaderData) {
     return (
@@ -131,34 +139,61 @@ function CategoryPage() {
 
   const { category, featured, list, latest, totalPages = 1 } = loaderData;
 
-  const categoryTitleStyle =
+  // Category Title Appearance (independent from custom alert)
+  const activeCategoryGradient =
     settings.festiveCategoryTitleGradient &&
-    FESTIVE_GRADIENT_MAP[settings.festiveCategoryTitleGradient]
-      ? {
-          backgroundImage: FESTIVE_GRADIENT_MAP[settings.festiveCategoryTitleGradient],
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          display: "inline-block",
-        }
-      : settings.festiveCategoryTitleColor
-        ? { color: settings.festiveCategoryTitleColor }
-        : undefined;
+    (FESTIVE_GRADIENT_MAP[settings.festiveCategoryTitleGradient] ||
+      (settings.festiveCategoryTitleGradient.includes("gradient(")
+        ? settings.festiveCategoryTitleGradient
+        : null));
 
-  const isShowingCustomAlert = Boolean(
-    settings.festiveThemeEnabled !== false && showCustomText && settings.topBarWeatherCustomText,
+  const categoryTitleStyle = activeCategoryGradient
+    ? {
+        backgroundImage: activeCategoryGradient,
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+        display: "inline-block",
+      }
+    : settings.festiveCategoryTitleColor
+      ? { color: settings.festiveCategoryTitleColor }
+      : undefined;
+
+  // Custom Alert / Top Bar Message Appearance
+  const activeAlertGradient =
+    settings.topBarTextGradient &&
+    (FESTIVE_GRADIENT_MAP[settings.topBarTextGradient] ||
+      (settings.topBarTextGradient.includes("gradient(")
+        ? settings.topBarTextGradient
+        : null));
+
+  const alertTextStyle = activeAlertGradient
+    ? {
+        backgroundImage: activeAlertGradient,
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+        display: "inline-block",
+      }
+    : settings.topBarTextColor
+      ? { color: settings.topBarTextColor }
+      : undefined;
+
+  const hasCustomAlert = Boolean(
+    settings.festiveThemeEnabled !== false &&
+      (settings.topBarWeatherCustomText || settings.festiveAlertImage),
   );
-  // Text rotation: pure CSS keyframe animation (no tailwindcss-animate needed)
+
+  const isShowingCustomAlert = Boolean(hasCustomAlert && showCustomText);
+
+  // Text rotation: pure CSS keyframe animation
   const rotationAnimStyle =
     TEXT_ROTATION_CSS[settings.customAlertAnimationStyle || "slide-up"] ||
     TEXT_ROTATION_CSS["slide-up"];
 
-  const currentTitleStyle = {
-    ...categoryTitleStyle,
-    ...(isShowingCustomAlert && settings.customAlertFontFamily
-      ? { fontFamily: FONT_FAMILY_MAP[settings.customAlertFontFamily] || FONT_FAMILY_MAP["inter"] }
-      : {}),
-  };
+  const customAlertFontFamilyCss = settings.customAlertFontFamily
+    ? FONT_FAMILY_MAP[settings.customAlertFontFamily] || FONT_FAMILY_MAP["inter"]
+    : undefined;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -179,12 +214,35 @@ function CategoryPage() {
           </nav>
           <h1
             key={`${showCustomText ? "custom" : "default"}-${settings.customAlertAnimationStyle}`}
-            className={`font-serif text-5xl font-bold md:text-6xl ${
-              categoryTitleStyle ? "" : "text-foreground"
-            }`}
-            style={{ ...currentTitleStyle, ...rotationAnimStyle }}
+            className="font-serif text-5xl font-bold md:text-6xl flex items-center flex-wrap gap-3"
+            style={rotationAnimStyle}
           >
-            {isShowingCustomAlert ? settings.topBarWeatherCustomText : category.name}
+            {isShowingCustomAlert ? (
+              settings.festiveAlertImage ? (
+                <img
+                  src={settings.festiveAlertImage}
+                  alt="Alert Badge"
+                  className="h-12 md:h-16 w-auto max-w-[240px] object-contain shrink-0 align-middle"
+                />
+              ) : (
+                <span
+                  className={alertTextStyle ? "" : "text-foreground"}
+                  style={{
+                    ...alertTextStyle,
+                    ...(customAlertFontFamilyCss ? { fontFamily: customAlertFontFamilyCss } : {}),
+                  }}
+                >
+                  {settings.topBarWeatherCustomText}
+                </span>
+              )
+            ) : (
+              <span
+                className={categoryTitleStyle ? "" : "text-foreground"}
+                style={categoryTitleStyle}
+              >
+                {category.name}
+              </span>
+            )}
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
             {category.description}

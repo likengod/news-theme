@@ -58,8 +58,12 @@ export function MarketsMagazine({
     return () => window.removeEventListener("nt:settings-updated", handleUpdate);
   }, []);
 
+  const hasCustomAlert =
+    settings.festiveThemeEnabled !== false &&
+    (!!settings.topBarWeatherCustomText || !!settings.festiveAlertImage);
+
   useEffect(() => {
-    if (settings.festiveThemeEnabled === false || !settings.topBarWeatherCustomText) {
+    if (!hasCustomAlert) {
       setShowCustomText(false);
       return;
     }
@@ -68,7 +72,7 @@ export function MarketsMagazine({
       setShowCustomText((prev) => !prev);
     }, delay);
     return () => clearInterval(interval);
-  }, [settings.festiveThemeEnabled, settings.topBarWeatherCustomText, settings.topBarSwapDelay]);
+  }, [hasCustomAlert, settings.topBarSwapDelay]);
 
   useEffect(() => {
     if (ctx?.adConfig) {
@@ -111,7 +115,8 @@ export function MarketsMagazine({
   let dbMagazineArticles = articles.filter((a) => {
     if (localUsed.has(a.id)) return false;
     if (!magazineCategory || magazineCategory === "Auto (Latest)") return true;
-    return a.category?.toLowerCase() === magazineCategory.toLowerCase();
+    const cats = (a.category || "").split(",").map((c: string) => c.trim().toLowerCase());
+    return cats.includes(magazineCategory.toLowerCase());
   });
 
   // If not enough articles found for this category, fill with other available articles
@@ -144,11 +149,16 @@ export function MarketsMagazine({
     forest: "linear-gradient(to right, #11998e, #38ef7d)",
   };
 
+  const resolvedGrad =
+    activeGradient &&
+    (FESTIVE_GRADIENT_MAP[activeGradient] ||
+      (activeGradient.includes("gradient(") ? activeGradient : null));
+
   const badgeStyle =
-    activeGradient && FESTIVE_GRADIENT_MAP[activeGradient]
+    resolvedGrad
       ? {
           backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
-          backgroundImage: FESTIVE_GRADIENT_MAP[activeGradient],
+          backgroundImage: resolvedGrad,
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
           backgroundClip: "text",
@@ -172,10 +182,18 @@ export function MarketsMagazine({
       <div className="mb-5 inline-block">
         <span
           key={showCustomText ? "custom" : "default"}
-          className="px-2.5 py-1 font-sans text-xs font-black uppercase tracking-widest inline-block rounded-xs shadow-xs transition-all duration-300"
+          className="px-2.5 py-1 font-sans text-xs font-black uppercase tracking-widest inline-flex items-center gap-1.5 rounded-xs shadow-xs transition-all duration-300"
           style={badgeStyle}
         >
-          {badgeTitle}
+          {hasCustomAlert && showCustomText && settings.festiveAlertImage ? (
+            <img
+              src={settings.festiveAlertImage}
+              alt="Alert"
+              className="h-4 w-auto max-w-[80px] object-contain shrink-0 align-middle"
+            />
+          ) : (
+            <span>{badgeTitle}</span>
+          )}
         </span>
       </div>
 

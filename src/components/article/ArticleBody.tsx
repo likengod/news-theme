@@ -17,7 +17,7 @@ export const ArticleBody = memo(function ArticleBody({ paragraphs, midImage }: P
     }
     return (
       <div
-        className="prose-article space-y-4 md:space-y-5 text-[15px] md:text-lg leading-relaxed md:leading-[1.85] text-foreground/90 whitespace-pre-wrap"
+        className="prose-article space-y-4 md:space-y-5 text-base md:text-lg leading-relaxed md:leading-[1.85] text-foreground/90 whitespace-pre-wrap"
         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(fullContent, purifyConfig) }}
       />
     );
@@ -28,7 +28,7 @@ export const ArticleBody = memo(function ArticleBody({ paragraphs, midImage }: P
   const afterMid = paragraphs.slice(4);
 
   return (
-    <div className="prose-article space-y-4 md:space-y-5 text-[15px] md:text-lg leading-relaxed md:leading-[1.85] text-foreground/90">
+    <div className="prose-article space-y-4 md:space-y-5 text-base md:text-lg leading-relaxed md:leading-[1.85] text-foreground/90">
       {first && <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(first, purifyConfig) }} />}
 
       {beforeMid.map((p, i) => (

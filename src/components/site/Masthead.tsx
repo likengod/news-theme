@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { sections } from "@/lib/news-data";
+import { sections, slugify } from "@/lib/news-data";
 import { getTopTags } from "@/lib/taxonomy.functions";
 import { ChevronDown, Home, Search, X } from "lucide-react";
-
-const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
 
 import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
 import { useTheme } from "@/lib/theme";
@@ -23,37 +21,52 @@ export function Masthead() {
     : undefined;
   const safeSecondaryColor = getAccessibleLogoColor(s.logoColorSecondary || "#dc2626", isDark, 4.5);
 
-  let navItems = sections;
-  let dropdownItems = otherCategories;
+  let navItems: { name: string; slug: string }[] = sections.map((sec) => ({
+    name: sec,
+    slug: slugify(sec),
+  }));
+  let dropdownItems: { name: string; slug: string }[] = otherCategories.map((c) => ({
+    name: c,
+    slug: slugify(c),
+  }));
 
   if (dbCats.length > 0) {
     const explicitHeaderCats = dbCats
-      .filter((c: any) => c.showInHeader)
-      .sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0))
-      .map((c: any) => c.name);
+      .filter((c: any) => c && c.showInHeader)
+      .sort((a: any, b: any) => (a?.sortOrder || 0) - (b?.sortOrder || 0))
+      .map((c: any) => ({
+        name: String(c?.name || ""),
+        slug: String(c?.slug || slugify(c?.name || "")),
+      }));
     const dropdownCats = dbCats
-      .filter((c: any) => !c.showInHeader)
-      .sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0))
-      .map((c: any) => c.name);
+      .filter((c: any) => c && !c.showInHeader)
+      .sort((a: any, b: any) => (a?.sortOrder || 0) - (b?.sortOrder || 0))
+      .map((c: any) => ({
+        name: String(c?.name || ""),
+        slug: String(c?.slug || slugify(c?.name || "")),
+      }));
 
     if (explicitHeaderCats.length > 0) {
       navItems = explicitHeaderCats;
       if (dropdownCats.length > 0) {
-        navItems = [...navItems, "Others"];
+        navItems = [...navItems, { name: "Others", slug: "others" }];
         dropdownItems = dropdownCats;
       } else {
         dropdownItems = [];
       }
     } else {
-      const allCatNames = [...dbCats]
-        .sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0))
-        .map((c: any) => c.name);
-      if (allCatNames.length <= 11) {
-        navItems = allCatNames;
+      const allMapped = [...dbCats]
+        .sort((a: any, b: any) => (a?.sortOrder || 0) - (b?.sortOrder || 0))
+        .map((c: any) => ({
+          name: String(c?.name || ""),
+          slug: String(c?.slug || slugify(c?.name || "")),
+        }));
+      if (allMapped.length <= 11) {
+        navItems = allMapped;
         dropdownItems = [];
       } else {
-        navItems = [...allCatNames.slice(0, 10), "Others"];
-        dropdownItems = allCatNames.slice(10);
+        navItems = [...allMapped.slice(0, 10), { name: "Others", slug: "others" }];
+        dropdownItems = allMapped.slice(10);
       }
     }
   }
@@ -273,34 +286,34 @@ export function Masthead() {
             >
               <Home className="h-4 w-4" />
             </Link>
-            {navItems.map((s: string) =>
-              s === "Others" ? (
-                <div key={s} className="group relative">
+            {navItems.map((item) =>
+              item.name === "Others" ? (
+                <div key={item.name} className="group relative">
                   <button className="flex items-center gap-1 whitespace-nowrap px-3 py-1 uppercase transition-colors hover:underline">
-                    {s}
+                    {item.name}
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
                   <div className="invisible absolute left-1/2 z-50 mt-0 w-48 -translate-x-1/2 border border-border bg-background py-2 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100">
                     {dropdownItems.map((c) => (
                       <Link
-                        key={c}
+                        key={c.slug}
                         to="/$slug"
-                        params={{ slug: slugify(c) }}
+                        params={{ slug: c.slug }}
                         className="block px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-muted"
                       >
-                        {c}
+                        {c.name}
                       </Link>
                     ))}
                   </div>
                 </div>
               ) : (
                 <Link
-                  key={s}
+                  key={item.slug}
                   to="/$slug"
-                  params={{ slug: slugify(s) }}
+                  params={{ slug: item.slug }}
                   className="whitespace-nowrap px-3 py-1 transition-colors hover:underline"
                 >
-                  {s}
+                  {item.name}
                 </Link>
               ),
             )}

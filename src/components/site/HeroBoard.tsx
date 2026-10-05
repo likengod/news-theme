@@ -71,13 +71,17 @@ export const HeroBoard = React.memo(function HeroBoard({
       return selected;
     }
 
+    function matchesCat(catStr: string | undefined, target: string) {
+      if (!target || target === "Auto (Latest)") return true;
+      if (!catStr) return false;
+      const cats = catStr.split(",").map((c) => c.trim().toLowerCase());
+      return cats.includes(target.toLowerCase());
+    }
+
     // 1. Featured Leads (Slider)
     const featuredCategory = cfg?.heroFeatured?.category || "Auto (Latest)";
     const slideCount = cfg?.heroFeatured?.slideCount ?? 3;
-    const leadArticles = getUnique(articles, slideCount, (a) => {
-      if (!featuredCategory || featuredCategory === "Auto (Latest)") return true;
-      return a.category?.toLowerCase() === featuredCategory.toLowerCase();
-    });
+    const leadArticles = getUnique(articles, slideCount, (a) => matchesCat(a.category, featuredCategory));
     const leads = leadArticles.map((a, i) => ({
       kicker: a.category,
       title: a.title,
@@ -109,10 +113,7 @@ export const HeroBoard = React.memo(function HeroBoard({
 
     // 3. Popular
     const popularCategory = cfg?.heroPopular?.category || "Auto (Latest)";
-    const popularArticles = getUnique(articles, 4, (a) => {
-      if (!popularCategory || popularCategory === "Auto (Latest)") return true;
-      return a.category?.toLowerCase() === popularCategory.toLowerCase();
-    });
+    const popularArticles = getUnique(articles, 4, (a) => matchesCat(a.category, popularCategory));
     const popular = popularArticles.map((a, i) => ({
       title: a.title,
       by: a.author || "Newsroom",
@@ -123,10 +124,7 @@ export const HeroBoard = React.memo(function HeroBoard({
 
     // 4. Opinion
     const opinionCategory = cfg?.heroOpinion?.category || "Opinion";
-    const opinionArticles = getUnique(articles, 6, (a) => {
-      if (!opinionCategory || opinionCategory === "Auto (Latest)") return true;
-      return a.category?.toLowerCase() === opinionCategory.toLowerCase();
-    });
+    const opinionArticles = getUnique(articles, 6, (a) => matchesCat(a.category, opinionCategory));
     const opinion = opinionArticles.map((a, i) => ({
       title: a.title,
       by: a.author || "Newsroom",
@@ -137,10 +135,7 @@ export const HeroBoard = React.memo(function HeroBoard({
 
     // 5. Culture & Music row
     const cultureCategory = cfg?.heroCultureMusic?.category || "Auto (Latest)";
-    const cultureArticles = getUnique(articles, 4, (a) => {
-      if (!cultureCategory || cultureCategory === "Auto (Latest)") return true;
-      return a.category?.toLowerCase() === cultureCategory.toLowerCase();
-    });
+    const cultureArticles = getUnique(articles, 4, (a) => matchesCat(a.category, cultureCategory));
     const culture = cultureArticles.map((a, i) => ({
       title: a.title,
       kicker: a.category,

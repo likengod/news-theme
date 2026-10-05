@@ -9,6 +9,13 @@ export const FESTIVE_GRADIENT_MAP: Record<string, string> = {
   forest: "linear-gradient(to right, #11998e, #38ef7d)",
 };
 
+export const resolveFestiveGradient = (val: string | undefined): string | null => {
+  if (!val) return null;
+  if (FESTIVE_GRADIENT_MAP[val]) return FESTIVE_GRADIENT_MAP[val];
+  if (val.includes("gradient(")) return val;
+  return null;
+};
+
 export const ROTATION_KEYFRAMES = `
 @keyframes rot-slide-up   { from { opacity:0; transform: translateY(60px);  } to { opacity:1; transform: translateY(0); } }
 @keyframes rot-slide-down { from { opacity:0; transform: translateY(-60px); } to { opacity:1; transform: translateY(0); } }
@@ -40,4 +47,9 @@ export const PRESET_COLORS = [
   { name: "Festive Purple", hex: "#7B1FA2" },
   { name: "Emerald Green", hex: "#2E7D32" },
   { name: "Electric Blue", hex: "#1565C0" },
+  { name: "Crimson Rose", hex: "#C2185B" },
+  { name: "Amber Orange", hex: "#FF6F00" },
+  { name: "Teal Cyan", hex: "#00897B" },
+  { name: "Indigo Night", hex: "#283593" },
+  { name: "Slate Charcoal", hex: "#374151" },
 ];

@@ -2,6 +2,8 @@ import React from "react";
 import { Search, Loader2, Trash2 } from "lucide-react";
 import { sections } from "@/lib/news-data";
 
+import { useCategories } from "@/components/site/AdSettingsContext";
+
 interface ArticlesFilterBarProps {
   query: string;
   setQuery: (q: string) => void;
@@ -21,6 +23,16 @@ export function ArticlesFilterBar({
   selectedCount,
   onRequestBulkDelete,
 }: ArticlesFilterBarProps) {
+  const dbCats = useCategories();
+  const allCategoryOptions = React.useMemo(() => {
+    const s = new Set<string>();
+    sections.forEach((sec) => s.add(sec));
+    (dbCats || []).forEach((c) => {
+      if (c?.name) s.add(c.name);
+    });
+    return Array.from(s);
+  }, [dbCats]);
+
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-white p-3">
       <div className="relative flex-1 min-w-[200px]">
@@ -44,7 +56,7 @@ export function ArticlesFilterBar({
         className="rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
       >
         <option>All</option>
-        {sections.map((s) => (
+        {allCategoryOptions.map((s) => (
           <option key={s}>{s}</option>
         ))}
       </select>

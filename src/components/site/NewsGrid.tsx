@@ -89,10 +89,15 @@ export const NewsGrid = React.memo(function NewsGrid({
   const articlesByCategoryName = useMemo(() => {
     const m = new Map<string, any[]>();
     for (const a of articles) {
-      const cat = (a.category || "Others").toLowerCase().trim();
-      const existing = m.get(cat) || [];
-      existing.push(a);
-      m.set(cat, existing);
+      const cats = (a.category || "Others")
+        .split(",")
+        .map((c: string) => c.trim().toLowerCase())
+        .filter(Boolean);
+      for (const cat of cats) {
+        const existing = m.get(cat) || [];
+        existing.push(a);
+        m.set(cat, existing);
+      }
     }
     return m;
   }, [articles]);

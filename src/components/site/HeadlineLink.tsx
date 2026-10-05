@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { slugify } from "@/lib/news-data";
 
 type Props = {
   title: string;
@@ -7,13 +8,6 @@ type Props = {
   className?: string;
   lineClamp?: 2 | 3 | 4 | 5 | 6;
 };
-
-const slugify = (s: string) =>
-  s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 80) || "sample";
 
 /** Standard headline link → /article/$slug. Always uses `.headline` (Playfair serif). */
 export function HeadlineLink({

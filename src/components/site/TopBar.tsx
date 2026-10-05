@@ -5,14 +5,13 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
 import { SearchBox } from "./SearchModal";
-import { sections } from "@/lib/news-data";
+import { sections, slugify } from "@/lib/news-data";
 import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
 import { loadSettings, defaultSettings } from "@/lib/site-content";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useTheme } from "@/lib/theme";
 import { getAccessibleLogoColor } from "@/lib/color-utils";
-const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
 
 const FONT_FAMILY_MAP: Record<string, string> = {
   inter: '"Inter", system-ui, sans-serif',
@@ -37,7 +36,7 @@ const otherCategories = ["Entertainment", "Health", "Education", "Jobs", "Travel
 export function TopBar() {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const isDark = theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const isDark = theme === "dark" || ((theme as string) === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState(defaultSettings);
   const [mounted, setMounted] = useState(false);
@@ -45,10 +44,18 @@ export function TopBar() {
   const [localAqi, setLocalAqi] = useState("DEL 165 AQI");
   const navigate = useNavigate();
   const dbCats = useCategories();
-  const allItems =
+  const allItems: { name: string; slug: string }[] =
     dbCats.length > 0
-      ? [...dbCats].sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((c: any) => c.name)
-      : sections.filter((s) => s !== "Others").concat(otherCategories);
+      ? [...dbCats]
+          .sort((a: any, b: any) => (a?.sortOrder || 0) - (b?.sortOrder || 0))
+          .map((c: any) => ({
+            name: String(c?.name || ""),
+            slug: String(c?.slug || slugify(c?.name || "")),
+          }))
+      : sections
+          .filter((s) => s !== "Others")
+          .concat(otherCategories)
+          .map((s) => ({ name: String(s), slug: slugify(s) }));
 
   useEffect(() => {
     setSettings(loadSettings());
@@ -105,7 +112,9 @@ export function TopBar() {
   });
 
   const hasCustomRight =
-    mounted && settings.festiveThemeEnabled !== false && !!settings.topBarWeatherCustomText;
+    mounted &&
+    settings.festiveThemeEnabled !== false &&
+    (!!settings.topBarWeatherCustomText || !!settings.festiveAlertImage);
   const delay = Number(settings.topBarSwapDelay) || 5;
 
   useEffect(() => {
@@ -165,7 +174,6 @@ export function TopBar() {
             <span
               className={`absolute inset-y-0 left-0 flex items-center font-bold transition-[transform,opacity] duration-500 will-change-transform ${showCustom ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
               style={{
-                ...gradientStyle,
                 fontFamily:
                   FONT_FAMILY_MAP[settings.customAlertFontFamily || "inter"] ||
                   FONT_FAMILY_MAP["inter"],
@@ -174,7 +182,17 @@ export function TopBar() {
                   : undefined,
               }}
             >
-              {settings.topBarWeatherCustomText}
+              {settings.festiveAlertImage ? (
+                <img
+                  src={settings.festiveAlertImage}
+                  alt="Alert"
+                  className="h-4.5 w-auto max-w-[80px] object-contain shrink-0 align-middle"
+                />
+              ) : (
+                <span style={gradientStyle}>
+                  {settings.topBarWeatherCustomText}
+                </span>
+              )}
             </span>
           )}
         </div>
@@ -270,15 +288,15 @@ export function TopBar() {
                         {t("nav.home")}
                       </Link>
                     </li>
-                    {allItems.map((s: string) => (
-                      <li key={s}>
+                    {allItems.map((item) => (
+                      <li key={item.slug}>
                         <Link
                           to="/$slug"
-                          params={{ slug: slugify(s) }}
+                          params={{ slug: item.slug }}
                           onClick={() => setOpen(false)}
                           className="block px-5 py-4 text-sm font-semibold uppercase tracking-wider text-foreground hover:bg-muted/40 hover:underline"
                         >
-                          {s}
+                          {item.name}
                         </Link>
                       </li>
                     ))}

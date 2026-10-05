@@ -8,7 +8,8 @@ interface FestivePreviewCardProps {
   showCustomText: boolean;
   animNonce: number;
   customAlertText: string;
-  textStyle: React.CSSProperties;
+  categoryTitleStyle: React.CSSProperties;
+  alertTextStyle: React.CSSProperties;
   badgeStyle: React.CSSProperties;
   customAlertFontFamilyCss: string;
   rotationAnimStyle: React.CSSProperties;
@@ -21,12 +22,15 @@ export function FestivePreviewCard({
   showCustomText,
   animNonce,
   customAlertText,
-  textStyle,
+  categoryTitleStyle,
+  alertTextStyle,
   badgeStyle,
   customAlertFontFamilyCss,
   rotationAnimStyle,
   triggerTestSwap,
 }: FestivePreviewCardProps) {
+  const hasAlertImage = Boolean(settings.festiveAlertImage);
+
   return (
     <div className="lg:col-span-5 flex flex-col justify-between rounded-xl border border-slate-200 bg-slate-50/70 p-5">
       <div>
@@ -64,9 +68,9 @@ export function FestivePreviewCard({
             <div className="relative h-8 overflow-hidden flex items-center">
               <span
                 key={`topbar-${showCustomText ? "custom" : "default"}-${animNonce}`}
-                className="absolute inset-x-0 font-bold truncate"
+                className="absolute inset-x-0 font-bold truncate inline-flex items-center gap-1.5"
                 style={{
-                  ...(showCustomText ? textStyle : {}),
+                  ...(showCustomText ? alertTextStyle : {}),
                   ...(showCustomText
                     ? {
                         fontFamily: customAlertFontFamilyCss,
@@ -76,7 +80,19 @@ export function FestivePreviewCard({
                   ...rotationAnimStyle,
                 }}
               >
-                {showCustomText ? customAlertText : "DEL 165 AQI | MUM 82 AQI | KOL 145 AQI"}
+                {showCustomText ? (
+                  hasAlertImage ? (
+                    <img
+                      src={settings.festiveAlertImage}
+                      alt="Alert"
+                      className="h-4.5 w-auto max-w-[80px] object-contain shrink-0"
+                    />
+                  ) : (
+                    <span>{customAlertText}</span>
+                  )
+                ) : (
+                  <span>DEL 165 AQI | MUM 82 AQI | KOL 145 AQI</span>
+                )}
               </span>
             </div>
           </div>
@@ -89,14 +105,26 @@ export function FestivePreviewCard({
             <div className="relative h-10 overflow-hidden flex items-center">
               <h1
                 key={`cat-${showCustomText ? "custom" : "default"}-${animNonce}`}
-                className="absolute inset-x-0 font-serif text-3xl font-bold truncate"
+                className="absolute inset-x-0 font-serif text-3xl font-bold truncate inline-flex items-center gap-2"
                 style={{
-                  ...textStyle,
+                  ...(showCustomText ? alertTextStyle : categoryTitleStyle),
                   ...(showCustomText ? { fontFamily: customAlertFontFamilyCss } : {}),
                   ...rotationAnimStyle,
                 }}
               >
-                {showCustomText ? customAlertText : "Country"}
+                {showCustomText ? (
+                  hasAlertImage ? (
+                    <img
+                      src={settings.festiveAlertImage}
+                      alt="Alert"
+                      className="h-8 w-auto max-w-[140px] object-contain shrink-0"
+                    />
+                  ) : (
+                    <span>{customAlertText}</span>
+                  )
+                ) : (
+                  <span>Country</span>
+                )}
               </h1>
             </div>
           </div>
@@ -106,10 +134,18 @@ export function FestivePreviewCard({
             <span className="text-[10px] text-slate-400 font-medium">Section Badge:</span>
             <span
               key={`badge-${showCustomText ? "custom" : "default"}-${animNonce}`}
-              className="px-2.5 py-1 text-xs font-black uppercase tracking-widest font-sans rounded-xs shadow-xs"
+              className="px-2.5 py-1 text-xs font-black uppercase tracking-widest font-sans rounded-xs shadow-xs inline-flex items-center gap-1.5"
               style={{ ...badgeStyle, ...rotationAnimStyle }}
             >
-              {showCustomText ? customAlertText : "MARKETS"}
+              {showCustomText && hasAlertImage ? (
+                <img
+                  src={settings.festiveAlertImage}
+                  alt="Alert"
+                  className="h-4 w-auto max-w-[60px] object-contain shrink-0"
+                />
+              ) : (
+                <span>{showCustomText ? customAlertText : "MARKETS"}</span>
+              )}
             </span>
           </div>
 
@@ -120,10 +156,18 @@ export function FestivePreviewCard({
               <div>
                 <h4
                   key={`scan-${showCustomText ? "custom" : "default"}-${animNonce}`}
-                  className="text-xs font-extrabold uppercase leading-tight tracking-tight"
-                  style={{ ...textStyle, ...rotationAnimStyle }}
+                  className="text-xs font-extrabold uppercase leading-tight tracking-tight inline-flex items-center gap-1.5"
+                  style={{ ...(showCustomText ? alertTextStyle : categoryTitleStyle), ...rotationAnimStyle }}
                 >
-                  {showCustomText ? customAlertText : "SCAN ME"}
+                  {showCustomText && hasAlertImage ? (
+                    <img
+                      src={settings.festiveAlertImage}
+                      alt="Alert"
+                      className="h-4 w-auto max-w-[60px] object-contain shrink-0"
+                    />
+                  ) : (
+                    <span>{showCustomText ? customAlertText : "SCAN ME"}</span>
+                  )}
                 </h4>
                 {!showCustomText && (
                   <p className="text-[9px] font-medium text-slate-400 animate-in fade-in duration-300">
