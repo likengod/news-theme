@@ -66,6 +66,14 @@ export const SLOTS: SlotMeta[] = [
     size: "1080 × 1920 px (WebP)",
     shownOn: "Watch carousel & Reels grid — auto-inserted every 3 reels",
   },
+  {
+    key: "post_ads",
+    label: "Post Ads",
+    orientation: "Portrait + Landscape",
+    ratio: "Mobile: 320×50 px · Desktop: 728×90 px",
+    size: "Mobile: 320 × 50 px / 300 × 75 px · Desktop: 728 × 90 px / 970 × 90 px",
+    shownOn: "Article pages — bottom of featured hero image",
+  },
 ];
 
 export type Tab = AdSlot | "trash";

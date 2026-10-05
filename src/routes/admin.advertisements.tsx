@@ -31,6 +31,7 @@ import { PopupTimingCard } from "@/components/admin/advertisements/PopupTimingCa
 import { ScriptAdEditor } from "@/components/admin/advertisements/ScriptAdEditor";
 import { AdTrashDrawer } from "@/components/admin/advertisements/AdTrashDrawer";
 import { ReelAdsGuidanceCard } from "@/components/admin/advertisements/ReelAdsGuidanceCard";
+import { PostAdsGuidanceCard } from "@/components/admin/advertisements/PostAdsGuidanceCard";
 import { AdItemCard } from "@/components/admin/advertisements/AdItemCard";
 import { AdSlotsNavBar } from "@/components/admin/advertisements/AdSlotsNavBar";
 import { AdSlotToolbar } from "@/components/admin/advertisements/AdSlotToolbar";
@@ -330,6 +331,9 @@ function AdvertisementsPage() {
 
           {/* Reel Ads guidance banner */}
           {tab === "reel_ads" && <ReelAdsGuidanceCard />}
+
+          {/* Post Ads guidance banner */}
+          {tab === "post_ads" && <PostAdsGuidanceCard />}
 
           {/* Ad Count Bar & Controls */}
           <AdSlotToolbar

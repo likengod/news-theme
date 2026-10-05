@@ -417,6 +417,51 @@ export function DualImageCell({
     );
   }
 
+  if (slot === "post_ads") {
+    return (
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-start gap-4">
+        <div className="flex flex-col gap-1">
+          <span className="text-[10.5px] font-semibold text-slate-600">
+            Mobile Ad (<span className="text-blue-600 font-bold">320 × 50 px / 300 × 75 px</span>)
+          </span>
+          <SingleSlotImagePicker
+            label="Mobile Ad"
+            badgeColor="bg-blue-600"
+            value={portraitVal}
+            aspectClass="w-32 h-10 aspect-[320/50]"
+            emptyText="+ Mobile Ad"
+            recSize="320 × 50 px / 300 × 75 px"
+            onChange={(url) => {
+              onUpdate(ad.id, {
+                imagePortrait: url,
+                image: url || ad.imageLandscape || ad.image,
+              });
+            }}
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-[10.5px] font-semibold text-slate-600">
+            Desktop Ad (<span className="text-emerald-600 font-bold">728 × 90 px / 970 × 90 px</span>)
+          </span>
+          <SingleSlotImagePicker
+            label="Desktop Ad"
+            badgeColor="bg-emerald-600"
+            value={landscapeVal}
+            aspectClass="w-40 h-10 aspect-[728/90]"
+            emptyText="+ Desktop Ad"
+            recSize="728 × 90 px / 970 × 90 px"
+            onChange={(url) => {
+              onUpdate(ad.id, {
+                imageLandscape: url,
+                image: url || ad.imagePortrait || ad.image,
+              });
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // Popup & other slots: Portrait + Landscape
   return (
     <div className="flex items-center justify-start gap-4">

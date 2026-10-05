@@ -1,3 +1,5 @@
+import { PostFeaturedImageAd } from "./PostFeaturedImageAd";
+
 type Props = {
   src: string;
   alt: string;
@@ -8,16 +10,19 @@ type Props = {
 export function ArticleHero({ src, alt, caption, credit }: Props) {
   return (
     <figure className="mb-8">
-      <img
-        src={src}
-        alt={alt}
-        width={1200}
-        height={675}
-        loading="eager"
-        fetchPriority="high"
-        decoding="async"
-        className="aspect-[16/9] w-full object-cover"
-      />
+      <div className="relative overflow-hidden group">
+        <img
+          src={src}
+          alt={alt}
+          width={1200}
+          height={675}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          className="aspect-[16/9] w-full object-cover"
+        />
+        <PostFeaturedImageAd />
+      </div>
       {(caption || credit) && (
         <figcaption className="mt-3 border-b border-border pb-3 text-xs leading-relaxed text-muted-foreground">
           {caption && <span className="italic">{caption}</span>}

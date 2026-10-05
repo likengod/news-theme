@@ -11,6 +11,7 @@ import {
   defaultAdSlidesAd3,
   defaultAdSlidesPopup,
   defaultAdSlidesLeaderboard,
+  defaultAdSlidesPostAds,
   type AdSlot,
   type AdSlotMode,
   type AdSlideItem,
@@ -24,6 +25,7 @@ const SLOT_DEFAULTS: Record<AdSlot, AdSlideItem[]> = {
   leaderboard: defaultAdSlidesLeaderboard,
   hero_showcase: [],
   reel_ads: [],
+  post_ads: defaultAdSlidesPostAds,
 };
 
 export type AdSlide = {

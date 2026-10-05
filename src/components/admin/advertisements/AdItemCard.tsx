@@ -168,7 +168,7 @@ export function AdItemCard({
       </div>
 
       <div className="mt-3">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
               {slot === "home1" || slot === "ad3"
@@ -177,33 +177,64 @@ export function AdItemCard({
                   ? "Upload Banner Image (Landscape ~2:1)"
                   : slot === "reel_ads"
                     ? "Upload Reel Ad (Vertical 9:16 — 1080 × 1920 px)"
-                    : "Upload Banner Images"}
+                    : slot === "post_ads"
+                      ? "Upload Post Featured Ad (Mobile & Desktop Separate Sizes)"
+                      : "Upload Banner Images"}
             </div>
             <DualImageCell ad={ad} slot={slot} onUpdate={onUpdate} />
           </div>
 
-          <div className="flex-1 max-w-md">
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Click-Through URL
-              </label>
-              {ad.href && ad.href !== "#" && (
-                <a
-                  href={ad.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-600 hover:underline"
-                >
-                  Test link <ExternalLink className="h-2.5 w-2.5" />
-                </a>
-              )}
+          <div className="flex-1 max-w-md space-y-2.5">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  Click-Through URL
+                </label>
+                {ad.href && ad.href !== "#" && (
+                  <a
+                    href={ad.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-600 hover:underline"
+                  >
+                    Test link <ExternalLink className="h-2.5 w-2.5" />
+                  </a>
+                )}
+              </div>
+              <input
+                value={ad.href}
+                onChange={(e) => onUpdate(ad.id, { href: e.target.value })}
+                placeholder="https://advertiser.com"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 transition"
+              />
             </div>
-            <input
-              value={ad.href}
-              onChange={(e) => onUpdate(ad.id, { href: e.target.value })}
-              placeholder="https://advertiser.com"
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 transition"
-            />
+
+            {slot === "post_ads" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-100">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                    Sponsor / Brand Name
+                  </label>
+                  <input
+                    value={ad.sponsor || ""}
+                    onChange={(e) => onUpdate(ad.id, { sponsor: e.target.value })}
+                    placeholder="e.g. Scapia"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none transition"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                    Headline / Offer Text
+                  </label>
+                  <input
+                    value={ad.headline || ""}
+                    onChange={(e) => onUpdate(ad.id, { headline: e.target.value })}
+                    placeholder="e.g. 5% rewards on UPI spends"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none transition"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

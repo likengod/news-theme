@@ -23,6 +23,8 @@ export type AdSlideItem = {
   imageLandscape?: string;
   href: string;
   label?: string;
+  sponsor?: string; // Brand/sponsor name (e.g. "Scapia")
+  headline?: string; // Promotional headline/offer text
   expiresAt?: string | null; // ISO date; auto-trash when past
   deletedAt?: string | null; // ISO timestamp; purge after 30 days
   slot?: AdSlot; // used in trash to know where to restore
@@ -154,6 +156,19 @@ export const defaultAdSlidesLeaderboard: AdSlideItem[] = [
   },
 ];
 
+export const defaultAdSlidesPostAds: AdSlideItem[] = [
+  {
+    id: "post-ad-1",
+    image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=728&h=90&q=80",
+    imageLandscape: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=728&h=90&q=80",
+    imagePortrait: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=320&h=75&q=80",
+    href: "https://scapia.cards",
+    label: "Scapia Federal Credit Card",
+    sponsor: "Scapia",
+    headline: "₹500 के न्यूनतम लेनदेन पर UPI खर्च पर 5% रिवॉर्ड।",
+  },
+];
+
 export type AdSlot =
   | "home1"
   | "home2"
@@ -161,7 +176,8 @@ export type AdSlot =
   | "popup"
   | "leaderboard"
   | "hero_showcase"
-  | "reel_ads";
+  | "reel_ads"
+  | "post_ads";
 export type AdSlotMode = "image" | "script";
 
 export type AdConfiguration = {
@@ -183,6 +199,7 @@ const DEFAULT_SLOT_MODE: Record<AdSlot, AdSlotMode> = {
   leaderboard: "image",
   hero_showcase: "image",
   reel_ads: "image",
+  post_ads: "image",
 };
 
 export function loadAdSlotMode(slot: AdSlot): AdSlotMode {
@@ -243,6 +260,7 @@ const ADS_KEYS: Record<AdSlot, string> = {
   leaderboard: "nt:ads:v2:leaderboard",
   hero_showcase: "nt:ads:v2:hero_showcase",
   reel_ads: "nt:ads:v2:reel_ads",
+  post_ads: "nt:ads:v2:post_ads",
 };
 
 const TRASH_KEY = "nt:site-ads-trash";
@@ -257,6 +275,7 @@ const DEFAULT_ROTATION: Record<AdSlot, number> = {
   leaderboard: 5,
   hero_showcase: 5,
   reel_ads: 5,
+  post_ads: 5,
 };
 
 export function loadAdRotation(slot: AdSlot): number {
@@ -374,6 +393,7 @@ const DEFAULTS: Record<AdSlot, AdSlideItem[]> = {
   leaderboard: defaultAdSlidesLeaderboard,
   hero_showcase: [],
   reel_ads: [],
+  post_ads: defaultAdSlidesPostAds,
 };
 
 const inMemoryAdsCache: Partial<Record<AdSlot, AdSlideItem[]>> = {};
@@ -725,6 +745,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         let parsed = JSON.parse(rows[0].value) as AdConfiguration;
         if (parsed?.slots) {
           parsed.slots.reel_ads = parsed.slots.reel_ads || [];
+          parsed.slots.post_ads = parsed.slots.post_ads || defaultAdSlidesPostAds;
           parsed.slots.hero_showcase = (parsed.slots.hero_showcase || []).filter(
             (ad: any) => {
               const img = ad?.imageLandscape || ad?.image || ad?.imagePortrait || "";
@@ -734,12 +755,15 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         }
         if (parsed?.modes) {
           parsed.modes.reel_ads = parsed.modes.reel_ads || "image";
+          parsed.modes.post_ads = parsed.modes.post_ads || "image";
         }
         if (parsed?.rotations) {
           parsed.rotations.reel_ads = parsed.rotations.reel_ads || 5;
+          parsed.rotations.post_ads = parsed.rotations.post_ads || 5;
         }
         if (parsed?.scripts) {
           parsed.scripts.reel_ads = parsed.scripts.reel_ads || "";
+          parsed.scripts.post_ads = parsed.scripts.post_ads || "";
         }
 
         try {
@@ -771,6 +795,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         leaderboard: defaultAdSlidesLeaderboard,
         hero_showcase: [],
         reel_ads: [],
+        post_ads: defaultAdSlidesPostAds,
       },
       modes: {
         home1: "image",
@@ -780,6 +805,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         leaderboard: "image",
         hero_showcase: "image",
         reel_ads: "image",
+        post_ads: "image",
       },
       scripts: {
         home1: "",
@@ -789,6 +815,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         leaderboard: "",
         hero_showcase: "",
         reel_ads: "",
+        post_ads: "",
       },
       rotations: {
         home1: 5,
@@ -798,6 +825,7 @@ export const getAdConfigurationServer = createServerFn({ method: "GET" }).handle
         leaderboard: 5,
         hero_showcase: 5,
         reel_ads: 5,
+        post_ads: 5,
       },
       popupConfig: defaultPopupConfig,
     };
@@ -849,6 +877,7 @@ export function syncAdConfigurationToServer() {
       leaderboard: loadAds("leaderboard"),
       hero_showcase: loadAds("hero_showcase"),
       reel_ads: loadAds("reel_ads"),
+      post_ads: loadAds("post_ads"),
     },
     modes: {
       home1: loadAdSlotMode("home1"),
@@ -858,6 +887,7 @@ export function syncAdConfigurationToServer() {
       leaderboard: loadAdSlotMode("leaderboard"),
       hero_showcase: loadAdSlotMode("hero_showcase"),
       reel_ads: loadAdSlotMode("reel_ads"),
+      post_ads: loadAdSlotMode("post_ads"),
     },
     scripts: {
       home1: loadAdSlotScript("home1"),
@@ -867,6 +897,7 @@ export function syncAdConfigurationToServer() {
       leaderboard: loadAdSlotScript("leaderboard"),
       hero_showcase: loadAdSlotScript("hero_showcase"),
       reel_ads: loadAdSlotScript("reel_ads"),
+      post_ads: loadAdSlotScript("post_ads"),
     },
     rotations: {
       home1: loadAdRotation("home1"),
@@ -876,6 +907,7 @@ export function syncAdConfigurationToServer() {
       leaderboard: loadAdRotation("leaderboard"),
       hero_showcase: loadAdRotation("hero_showcase"),
       reel_ads: loadAdRotation("reel_ads"),
+      post_ads: loadAdRotation("post_ads"),
     },
     popupConfig: loadPopupConfig(),
   };

@@ -89,7 +89,7 @@ function renderErrorPage(detail) {
 //#region src/server.ts
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./assets/server-L6QoXbyQ.js").then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./assets/server-C77FiLgv.js").then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
 async function normalizeCatastrophicSsrResponse(request, response) {
