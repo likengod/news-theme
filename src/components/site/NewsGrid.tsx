@@ -194,15 +194,15 @@ export const NewsGrid = React.memo(function NewsGrid({
                 params={{ slug: col?.slug || "sample" }}
                 className="group block w-full max-w-full min-w-0"
               >
-                <div className="relative overflow-hidden">
+                <div className="relative overflow-hidden bg-muted">
                   <img
                     src={col.img}
                     alt={col.lead}
                     loading="lazy"
                     decoding="async"
                     width={400}
-                    height={300}
-                    className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    height={225}
+                    className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   {col.hasVideo && (
                     <span className="absolute inset-0 flex items-center justify-center">

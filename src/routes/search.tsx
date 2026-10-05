@@ -168,8 +168,8 @@ function SearchPage() {
                     loading="lazy"
                     decoding="async"
                     width={200}
-                    height={150}
-                    className="aspect-[4/3] w-full object-cover rounded-sm hover:scale-105 transition-transform duration-300"
+                    height={112}
+                    className="aspect-[16/9] w-full object-cover rounded-sm hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
                 <div>

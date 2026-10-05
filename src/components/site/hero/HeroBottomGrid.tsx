@@ -23,15 +23,15 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
             className="group block"
           >
             {activeBottomItems[0].img && (
-              <div className="overflow-hidden">
+              <div className="overflow-hidden bg-muted">
                 <img
                   src={activeBottomItems[0].img}
                   alt={activeBottomItems[0].title}
                   loading="lazy"
                   decoding="async"
                   width={400}
-                  height={300}
-                  className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  height={225}
+                  className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
             )}
@@ -52,15 +52,15 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
             className="group block border-t border-border pt-6 md:border-t-0 md:pt-0"
           >
             {activeBottomItems[1].img && (
-              <div className="hidden md:block overflow-hidden">
+              <div className="hidden md:block overflow-hidden bg-muted">
                 <img
                   src={activeBottomItems[1].img}
                   alt={activeBottomItems[1].title}
                   loading="lazy"
                   decoding="async"
                   width={400}
-                  height={300}
-                  className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  height={225}
+                  className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
             )}

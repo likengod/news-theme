@@ -28,9 +28,9 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
                 alt={c.title}
                 loading="lazy"
                 decoding="async"
-                width={300}
+                width={400}
                 height={225}
-                className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               {c.play && (
                 <span className="absolute inset-0 grid place-items-center">

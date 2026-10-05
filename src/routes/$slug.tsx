@@ -275,11 +275,11 @@ function CategoryPage() {
                       // @ts-ignore
                       fetchPriority="high"
                       width={400}
-                      height={300}
-                      className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      height={225}
+                      className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="aspect-[4/3] w-full bg-slate-100 flex items-center justify-center text-slate-400">
+                    <div className="aspect-[16/9] w-full bg-slate-100 flex items-center justify-center text-slate-400">
                       No Image
                     </div>
                   )}
@@ -356,11 +356,11 @@ function CategoryPage() {
                           loading="lazy"
                           decoding="async"
                           width={200}
-                          height={150}
-                          className="aspect-[4/3] w-full object-cover"
+                          height={112}
+                          className="aspect-[16/9] w-full object-cover"
                         />
                       ) : (
-                        <div className="aspect-[4/3] w-full bg-slate-100 flex items-center justify-center text-slate-400">
+                        <div className="aspect-[16/9] w-full bg-slate-100 flex items-center justify-center text-slate-400">
                           No Image
                         </div>
                       )}

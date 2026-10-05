@@ -64,7 +64,7 @@ export function RelatedNews({ currentSlug }: { currentSlug?: string }) {
                   alt={it.title}
                   loading="lazy"
                   decoding="async"
-                  className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
               <div className="mt-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">

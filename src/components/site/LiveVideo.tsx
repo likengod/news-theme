@@ -55,7 +55,7 @@ export function LiveVideo() {
 
   return (
     <article className="text-center">
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-black rounded-lg border border-border/40 shadow-sm group">
+      <div className="relative aspect-[16/9] w-full overflow-hidden bg-black rounded-lg border border-border/40 shadow-sm group">
         {isPlaying ? (
           <>
             <iframe
