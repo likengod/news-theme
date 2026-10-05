@@ -191,6 +191,7 @@ function CategoriesPage() {
                 metaDescription: "",
                 showInHeader: false,
                 sortOrder: 0,
+                redirectUrl: "",
               })
             }
             className="inline-flex items-center gap-1.5 sm:gap-2 rounded-md bg-slate-900 px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 transition whitespace-nowrap shadow-xs"
@@ -310,6 +311,21 @@ function CategoriesPage() {
                 <p className="mt-1 text-[10px] text-slate-500">Lower numbers appear first (e.g., 1 appears before 2).</p>
               </div>
             )}
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-slate-600">
+                Custom Redirect URL (Optional)
+              </label>
+              <input
+                type="text"
+                value={editing.redirectUrl || ""}
+                onChange={(e) => setEditing({ ...editing, redirectUrl: e.target.value })}
+                className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
+                placeholder="e.g. /event, /about, or https://example.com"
+              />
+              <p className="mt-1 text-[10px] text-slate-500">
+                When visitors click or open this category, they will be redirected to this custom URL. Leave blank for standard category articles.
+              </p>
+            </div>
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <label className="text-xs font-semibold text-slate-600">Description</label>

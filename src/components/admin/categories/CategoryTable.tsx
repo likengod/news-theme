@@ -31,6 +31,11 @@ export function CategoryTable({ categories, onEdit, onDelete }: Props) {
                       Header
                     </span>
                   )}
+                  {c.redirectUrl && (
+                    <span className="rounded bg-indigo-50 border border-indigo-200/80 px-1.5 py-0.5 text-[9px] font-semibold text-indigo-700 max-w-[140px] truncate inline-block" title={`Redirects to ${c.redirectUrl}`}>
+                      ↳ {c.redirectUrl}
+                    </span>
+                  )}
                 </div>
               </td>
               <td className="px-5 py-3 font-mono text-xs text-slate-500">{c.slug}</td>

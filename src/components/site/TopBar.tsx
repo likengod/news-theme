@@ -44,18 +44,19 @@ export function TopBar() {
   const [localAqi, setLocalAqi] = useState("DEL 165 AQI");
   const navigate = useNavigate();
   const dbCats = useCategories();
-  const allItems: { name: string; slug: string }[] =
+  const allItems: { name: string; slug: string; redirectUrl?: string | null }[] =
     dbCats.length > 0
       ? [...dbCats]
           .sort((a: any, b: any) => (a?.sortOrder || 0) - (b?.sortOrder || 0))
           .map((c: any) => ({
             name: String(c?.name || ""),
             slug: String(c?.slug || slugify(c?.name || "")),
+            redirectUrl: c?.redirectUrl || null,
           }))
       : sections
           .filter((s) => s !== "Others")
           .concat(otherCategories)
-          .map((s) => ({ name: String(s), slug: slugify(s) }));
+          .map((s) => ({ name: String(s), slug: slugify(s), redirectUrl: null }));
 
   useEffect(() => {
     setSettings(loadSettings());
@@ -290,14 +291,26 @@ export function TopBar() {
                     </li>
                     {allItems.map((item) => (
                       <li key={item.slug}>
-                        <Link
-                          to="/$slug"
-                          params={{ slug: item.slug }}
-                          onClick={() => setOpen(false)}
-                          className="block px-5 py-4 text-sm font-semibold uppercase tracking-wider text-foreground hover:bg-muted/40 hover:underline"
-                        >
-                          {item.name}
-                        </Link>
+                        {item.redirectUrl ? (
+                          <a
+                            href={item.redirectUrl}
+                            target={item.redirectUrl.startsWith("http") ? "_blank" : undefined}
+                            rel={item.redirectUrl.startsWith("http") ? "noopener noreferrer" : undefined}
+                            onClick={() => setOpen(false)}
+                            className="block px-5 py-4 text-sm font-semibold uppercase tracking-wider text-foreground hover:bg-muted/40 hover:underline"
+                          >
+                            {item.name}
+                          </a>
+                        ) : (
+                          <Link
+                            to="/$slug"
+                            params={{ slug: item.slug }}
+                            onClick={() => setOpen(false)}
+                            className="block px-5 py-4 text-sm font-semibold uppercase tracking-wider text-foreground hover:bg-muted/40 hover:underline"
+                          >
+                            {item.name}
+                          </Link>
+                        )}
                       </li>
                     ))}
                   </ul>

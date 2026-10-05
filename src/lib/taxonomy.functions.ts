@@ -12,6 +12,7 @@ export type CategoryRow = {
   metaDescription: string;
   showInHeader: boolean;
   sortOrder: number;
+  redirectUrl?: string | null;
   count?: number; // count of articles in category
 };
 
@@ -73,6 +74,7 @@ export const getCategories = createServerFn({ method: "GET" })
         metaDescription: r.meta_description || "",
         showInHeader: Boolean(r.show_in_header),
         sortOrder: Number(r.sort_order || 0),
+        redirectUrl: r.redirect_url || null,
         count: Number(r.count || 0),
       }));
 
@@ -99,39 +101,85 @@ export const saveCategory = createServerFn({ method: "POST" })
     const c = data;
     const slug = c.slug || slugify(c.name);
     const sortOrder = c.sortOrder || 0;
+    const redirectUrl = c.redirectUrl ? c.redirectUrl.trim() : null;
 
     if (c.id && c.id < 1000000) {
-      await query(
-        `UPDATE categories 
-         SET name = ?, slug = ?, description = ?, meta_title = ?, meta_description = ?, show_in_header = ?, sort_order = ?
-         WHERE id = ?`,
-        [
-          c.name,
-          slug,
-          c.description || "",
-          c.metaTitle || "",
-          c.metaDescription || "",
-          c.showInHeader ? 1 : 0,
-          sortOrder,
-          c.id,
-        ],
-      );
-      return { ...c, slug };
+      try {
+        await query(
+          `UPDATE categories 
+           SET name = ?, slug = ?, description = ?, meta_title = ?, meta_description = ?, show_in_header = ?, sort_order = ?, redirect_url = ?
+           WHERE id = ?`,
+          [
+            c.name,
+            slug,
+            c.description || "",
+            c.metaTitle || "",
+            c.metaDescription || "",
+            c.showInHeader ? 1 : 0,
+            sortOrder,
+            redirectUrl,
+            c.id,
+          ],
+        );
+      } catch (err: any) {
+        if (err.message && err.message.includes("redirect_url")) {
+          await query(
+            `UPDATE categories 
+             SET name = ?, slug = ?, description = ?, meta_title = ?, meta_description = ?, show_in_header = ?, sort_order = ?
+             WHERE id = ?`,
+            [
+              c.name,
+              slug,
+              c.description || "",
+              c.metaTitle || "",
+              c.metaDescription || "",
+              c.showInHeader ? 1 : 0,
+              sortOrder,
+              c.id,
+            ],
+          );
+        } else {
+          throw err;
+        }
+      }
+      return { ...c, slug, redirectUrl };
     } else {
-      const res = await query(
-        `INSERT INTO categories (name, slug, description, meta_title, meta_description, show_in_header, sort_order) 
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [
-          c.name,
-          slug,
-          c.description || "",
-          c.metaTitle || "",
-          c.metaDescription || "",
-          c.showInHeader ? 1 : 0,
-          sortOrder,
-        ],
-      );
-      return { ...c, slug, id: res.insertId };
+      let res: any;
+      try {
+        res = await query(
+          `INSERT INTO categories (name, slug, description, meta_title, meta_description, show_in_header, sort_order, redirect_url) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            c.name,
+            slug,
+            c.description || "",
+            c.metaTitle || "",
+            c.metaDescription || "",
+            c.showInHeader ? 1 : 0,
+            sortOrder,
+            redirectUrl,
+          ],
+        );
+      } catch (err: any) {
+        if (err.message && err.message.includes("redirect_url")) {
+          res = await query(
+            `INSERT INTO categories (name, slug, description, meta_title, meta_description, show_in_header, sort_order) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              c.name,
+              slug,
+              c.description || "",
+              c.metaTitle || "",
+              c.metaDescription || "",
+              c.showInHeader ? 1 : 0,
+              sortOrder,
+            ],
+          );
+        } else {
+          throw err;
+        }
+      }
+      return { ...c, slug, redirectUrl, id: res.insertId };
     }
   });
 
@@ -414,6 +462,7 @@ export const getCategoryData = createServerFn({ method: "GET" })
           description: cat.description || `Latest ${cat.name} news, analysis and updates.`,
           metaTitle: cat.meta_title || `${cat.name} News - News Theme`,
           metaDescription: cat.meta_description || `Read latest ${cat.name} articles and coverage.`,
+          redirectUrl: cat.redirect_url || null,
         },
         featured,
         list,

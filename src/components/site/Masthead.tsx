@@ -21,11 +21,11 @@ export function Masthead() {
     : undefined;
   const safeSecondaryColor = getAccessibleLogoColor(s.logoColorSecondary || "#dc2626", isDark, 4.5);
 
-  let navItems: { name: string; slug: string }[] = sections.map((sec) => ({
+  let navItems: { name: string; slug: string; redirectUrl?: string | null }[] = sections.map((sec) => ({
     name: sec,
     slug: slugify(sec),
   }));
-  let dropdownItems: { name: string; slug: string }[] = otherCategories.map((c) => ({
+  let dropdownItems: { name: string; slug: string; redirectUrl?: string | null }[] = otherCategories.map((c) => ({
     name: c,
     slug: slugify(c),
   }));
@@ -37,6 +37,7 @@ export function Masthead() {
       .map((c: any) => ({
         name: String(c?.name || ""),
         slug: String(c?.slug || slugify(c?.name || "")),
+        redirectUrl: c?.redirectUrl || null,
       }));
     const dropdownCats = dbCats
       .filter((c: any) => c && !c.showInHeader)
@@ -44,6 +45,7 @@ export function Masthead() {
       .map((c: any) => ({
         name: String(c?.name || ""),
         slug: String(c?.slug || slugify(c?.name || "")),
+        redirectUrl: c?.redirectUrl || null,
       }));
 
     if (explicitHeaderCats.length > 0) {
@@ -60,6 +62,7 @@ export function Masthead() {
         .map((c: any) => ({
           name: String(c?.name || ""),
           slug: String(c?.slug || slugify(c?.name || "")),
+          redirectUrl: c?.redirectUrl || null,
         }));
       if (allMapped.length <= 11) {
         navItems = allMapped;
@@ -294,18 +297,40 @@ export function Masthead() {
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
                   <div className="invisible absolute left-1/2 z-50 mt-0 w-48 -translate-x-1/2 border border-border bg-background py-2 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100">
-                    {dropdownItems.map((c) => (
-                      <Link
-                        key={c.slug}
-                        to="/$slug"
-                        params={{ slug: c.slug }}
-                        className="block px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-muted"
-                      >
-                        {c.name}
-                      </Link>
-                    ))}
+                    {dropdownItems.map((c) =>
+                      c.redirectUrl ? (
+                        <a
+                          key={c.slug}
+                          href={c.redirectUrl}
+                          target={c.redirectUrl.startsWith("http") ? "_blank" : undefined}
+                          rel={c.redirectUrl.startsWith("http") ? "noopener noreferrer" : undefined}
+                          className="block px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-muted"
+                        >
+                          {c.name}
+                        </a>
+                      ) : (
+                        <Link
+                          key={c.slug}
+                          to="/$slug"
+                          params={{ slug: c.slug }}
+                          className="block px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-muted"
+                        >
+                          {c.name}
+                        </Link>
+                      ),
+                    )}
                   </div>
                 </div>
+              ) : item.redirectUrl ? (
+                <a
+                  key={item.slug}
+                  href={item.redirectUrl}
+                  target={item.redirectUrl.startsWith("http") ? "_blank" : undefined}
+                  rel={item.redirectUrl.startsWith("http") ? "noopener noreferrer" : undefined}
+                  className="whitespace-nowrap px-3 py-1 transition-colors hover:underline"
+                >
+                  {item.name}
+                </a>
               ) : (
                 <Link
                   key={item.slug}

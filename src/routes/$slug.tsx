@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { Share2, User } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -60,8 +60,14 @@ export const Route = createFileRoute("/$slug")({
       const data = await getCategoryData({
         data: { slug: params.slug, page: deps.page || 1, limit: 10 },
       });
+      if (data?.category?.redirectUrl) {
+        throw redirect({ href: data.category.redirectUrl });
+      }
       return data;
-    } catch (err) {
+    } catch (err: any) {
+      if (err && typeof err === "object" && ("to" in err || "href" in err || "status" in err || (err as any).isRedirect)) {
+        throw err;
+      }
       console.warn("[Category loader] Error:", err);
       return null;
     }
@@ -89,6 +95,12 @@ function CategoryPage() {
   const [settings, setSettings] = useState(() => loadSettings());
 
   const [showCustomText, setShowCustomText] = useState(false);
+
+  useEffect(() => {
+    if (loaderData?.category?.redirectUrl && typeof window !== "undefined") {
+      window.location.replace(loaderData.category.redirectUrl);
+    }
+  }, [loaderData?.category?.redirectUrl]);
 
   useEffect(() => {
     const handleUpdate = () => {

@@ -76,6 +76,17 @@ export async function runQuickMigrations(
     }
   }
 
+  try {
+    const catRedirCols = await query("SHOW COLUMNS FROM categories LIKE 'redirect_url'");
+    if (catRedirCols.length === 0) {
+      await query("ALTER TABLE categories ADD COLUMN redirect_url VARCHAR(500) DEFAULT NULL");
+    }
+  } catch (err: any) {
+    if (!err.message?.includes("Duplicate column name")) {
+      console.warn("[Migration] categories.redirect_url notice:", err.message);
+    }
+  }
+
   // 4. Ensure articles table has access_level
   try {
     const artCols = await query("SHOW COLUMNS FROM articles LIKE 'access_level'");
@@ -178,6 +189,7 @@ export async function createTablesAndIndexes(
       meta_description TEXT,
       show_in_header BOOLEAN DEFAULT FALSE,
       sort_order INT DEFAULT 0,
+      redirect_url VARCHAR(500) DEFAULT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
