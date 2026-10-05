@@ -190,7 +190,7 @@ function AdminLayout() {
     getGitStatus({ data: { forceRefresh: pathname === "/admin/updates" } })
       .then((res) => {
         if (!mounted) return;
-        const cur = res?.version || "v1.1.15";
+        const cur = res?.version || "v1.1.16";
         const latest = res?.latestVersion || cur;
         const isSimulated =
           typeof window !== "undefined" &&
