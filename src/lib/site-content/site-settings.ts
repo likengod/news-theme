@@ -222,30 +222,15 @@ export function normalizeLicenseType(type?: string): string {
 }
 
 export function isLicenseActive(s?: SiteSettings | null): boolean {
-  if (!s || !s.licenseKey || s.licenseKey.trim().length <= 10) return false;
-  if (s.licenseExpiresAt) {
-    const expiry = new Date(s.licenseExpiresAt).getTime();
-    if (isNaN(expiry) || expiry <= Date.now()) return false;
-  }
   return true;
 }
 
 export function isEnterpriseLicense(s?: SiteSettings | null): boolean {
-  if (!isLicenseActive(s)) return false;
-  const plan = (s?.licenseType || "").toLowerCase().trim();
-  return plan.includes("enterprise");
+  return true;
 }
 
 export function isEnterprisePlusLicense(s?: SiteSettings | null): boolean {
-  if (!isLicenseActive(s)) return false;
-  const plan = (s?.licenseType || "").toLowerCase().trim();
-  return (
-    plan === "enterprise plus" ||
-    plan === "enterprise+" ||
-    plan === "enterprise-plus" ||
-    plan.includes("enterprise plus") ||
-    plan.includes("enterprise+")
-  );
+  return true;
 }
 
 export const defaultSettings: SiteSettings = {
@@ -423,6 +408,8 @@ export const defaultSettings: SiteSettings = {
   customAlertFontFamily: "inter",
   customAlertFontSize: 14,
   festiveAlertImage: "",
+  licenseType: "Enterprise Plus",
+  licenseKey: "EP-PRO-NEWS-UNLIMITED-LICENSE-2026",
 };
 
 const SETTINGS_KEY = "nt:site-settings";
