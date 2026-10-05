@@ -31,7 +31,6 @@ export function Footer() {
     { label: t("footer.workWithUs"), to: "/work-with-us" },
     { label: t("footer.submitNews"), to: "/submit-news" },
     ...(showEventLink ? [{ label: t("footer.event", "Event"), to: "/event" }] : []),
-    { label: "Reels", to: "/reels" },
     ...(isEnterprise ? [{ label: t("footer.factCheck", "Fact Check"), to: "/fact-check" }] : []),
     ...(isEnterprise
       ? [{ label: t("footer.verifiedJournalist"), to: "/verified-journalist" }]
