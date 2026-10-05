@@ -19,7 +19,15 @@ export type AdminUserRow = {
   status: "Active" | "Suspended";
 };
 
+let adminUsersMigrated = false;
 async function assertAdmin(userId: string) {
+  if (!adminUsersMigrated) {
+    try {
+      const { runQuickMigrations } = await import("./db/schema.server");
+      await runQuickMigrations(query);
+      adminUsersMigrated = true;
+    } catch {}
+  }
   const roles = await query("SELECT role FROM user_roles WHERE user_id = ? AND role = 'admin'", [
     userId,
   ]);
@@ -62,36 +70,82 @@ export const listAdminUsers = createServerFn({ method: "GET" })
       else if (sort === "points_asc") orderSql = " ORDER BY p.points ASC, u.created_at DESC";
       else if (sort === "name") orderSql = " ORDER BY p.display_name ASC, u.email ASC";
 
-      const [countRes, rows] = await Promise.all([
-        query(
-          `SELECT COUNT(DISTINCT u.id) AS total
-         FROM users u
-         LEFT JOIN profiles p ON u.id = p.id
-         LEFT JOIN user_roles r ON u.id = r.user_id
-         ${filterSql}`,
-          params,
-        ),
-        query(
-          `SELECT 
-           u.id, 
-           u.email, 
-           u.username,
-           u.created_at,
-           p.public_user_id, 
-           p.display_name, 
-           p.avatar_url, 
-           p.points, 
-           p.active,
-           r.role
-         FROM users u
-         LEFT JOIN profiles p ON u.id = p.id
-         LEFT JOIN user_roles r ON u.id = r.user_id
-         ${filterSql}
-         ${orderSql}
-         LIMIT ? OFFSET ?`,
-          [...params, safeLimit, offset],
-        ),
-      ]);
+      let countRes: any[] = [];
+      let rows: any[] = [];
+      try {
+        [countRes, rows] = await Promise.all([
+          query(
+            `SELECT COUNT(DISTINCT u.id) AS total
+           FROM users u
+           LEFT JOIN profiles p ON u.id = p.id
+           LEFT JOIN user_roles r ON u.id = r.user_id
+           ${filterSql}`,
+            params,
+          ),
+          query(
+            `SELECT 
+             u.id, 
+             u.email, 
+             u.username,
+             u.created_at,
+             p.public_user_id, 
+             p.display_name, 
+             p.avatar_url, 
+             p.points, 
+             p.active,
+             r.role
+           FROM users u
+           LEFT JOIN profiles p ON u.id = p.id
+           LEFT JOIN user_roles r ON u.id = r.user_id
+           ${filterSql}
+           ${orderSql}
+           LIMIT ? OFFSET ?`,
+            [...params, safeLimit, offset],
+          ),
+        ]);
+      } catch (err: any) {
+        // Fallback without u.username if column not migrated yet
+        let safeFilterSql = " WHERE 1=1";
+        const safeParams: any[] = [];
+        if (q) {
+          safeFilterSql += " AND (u.email LIKE ? OR p.display_name LIKE ? OR p.public_user_id LIKE ?)";
+          const term = `%${q}%`;
+          safeParams.push(term, term, term);
+        }
+        if (role && role !== "all") {
+          safeFilterSql += " AND r.role = ?";
+          safeParams.push(role);
+        }
+        [countRes, rows] = await Promise.all([
+          query(
+            `SELECT COUNT(DISTINCT u.id) AS total
+           FROM users u
+           LEFT JOIN profiles p ON u.id = p.id
+           LEFT JOIN user_roles r ON u.id = r.user_id
+           ${safeFilterSql}`,
+            safeParams,
+          ),
+          query(
+            `SELECT 
+             u.id, 
+             u.email, 
+             u.created_at,
+             p.public_user_id, 
+             p.display_name, 
+             p.avatar_url, 
+             p.points, 
+             p.active,
+             r.role
+           FROM users u
+           LEFT JOIN profiles p ON u.id = p.id
+           LEFT JOIN user_roles r ON u.id = r.user_id
+           ${safeFilterSql}
+           ${orderSql}
+           LIMIT ? OFFSET ?`,
+            [...safeParams, safeLimit, offset],
+          ),
+        ]);
+      }
 
       const total = Number(countRes[0]?.total ?? 0);
       const totalPages = Math.max(1, Math.ceil(total / safeLimit));
@@ -117,23 +171,43 @@ export const getAllAdminUsers = createServerFn({ method: "GET" })
   .middleware([requireAuth])
   .handler(async ({ context }): Promise<AdminUserRow[]> => {
     await assertAdmin(context.userId);
-    const rows = await query(`
-      SELECT 
-        u.id, 
-        u.email, 
-        u.username,
-        u.created_at,
-        p.public_user_id, 
-        p.display_name, 
-        p.avatar_url, 
-        p.points, 
-        p.active,
-        r.role
-      FROM users u
-      LEFT JOIN profiles p ON u.id = p.id
-      LEFT JOIN user_roles r ON u.id = r.user_id
-      ORDER BY u.created_at DESC
-    `);
+    let rows: any[] = [];
+    try {
+      rows = await query(`
+        SELECT 
+          u.id, 
+          u.email, 
+          u.username,
+          u.created_at,
+          p.public_user_id, 
+          p.display_name, 
+          p.avatar_url, 
+          p.points, 
+          p.active,
+          r.role
+        FROM users u
+        LEFT JOIN profiles p ON u.id = p.id
+        LEFT JOIN user_roles r ON u.id = r.user_id
+        ORDER BY u.created_at DESC
+      `);
+    } catch {
+      rows = await query(`
+        SELECT 
+          u.id, 
+          u.email, 
+          u.created_at,
+          p.public_user_id, 
+          p.display_name, 
+          p.avatar_url, 
+          p.points, 
+          p.active,
+          r.role
+        FROM users u
+        LEFT JOIN profiles p ON u.id = p.id
+        LEFT JOIN user_roles r ON u.id = r.user_id
+        ORDER BY u.created_at DESC
+      `);
+    }
 
     return rows.map((u: any) => ({
       id: u.id,

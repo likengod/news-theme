@@ -203,10 +203,12 @@ export async function initializeDatabase(customAdmin?: {
     return;
   }
 
-  // Fast-bypass check: If core tables already exist, skip running 35+ DDL and seed queries!
+  // Fast-bypass check: If core tables already exist, run quick migrations and exit!
   try {
     const existing = await query("SELECT 1 FROM articles LIMIT 1");
     if (existing && !customAdmin) {
+      const { runQuickMigrations } = await import("./db/schema.server");
+      await runQuickMigrations(query);
       isInitialized = true;
       return;
     }

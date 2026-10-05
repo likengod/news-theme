@@ -1,5 +1,108 @@
 import { safeCreateIndex } from "../db.server";
 
+let quickMigrationsRan = false;
+
+export async function runQuickMigrations(
+  query: (sql: string, params?: any[]) => Promise<any>,
+) {
+  if (quickMigrationsRan) return;
+
+  // 1. Ensure users table has username & salt
+  try {
+    const uCols = await query("SHOW COLUMNS FROM users LIKE 'username'");
+    if (uCols.length === 0) {
+      await query("ALTER TABLE users ADD COLUMN username VARCHAR(100) DEFAULT NULL");
+    }
+  } catch (err: any) {
+    if (!err.message?.includes("Duplicate column name")) {
+      console.warn("[Migration] users.username notice:", err.message);
+    }
+  }
+
+  try {
+    const sCols = await query("SHOW COLUMNS FROM users LIKE 'salt'");
+    if (sCols.length === 0) {
+      await query("ALTER TABLE users ADD COLUMN salt VARCHAR(64) DEFAULT NULL");
+    }
+  } catch (err: any) {
+    if (!err.message?.includes("Duplicate column name")) {
+      console.warn("[Migration] users.salt notice:", err.message);
+    }
+  }
+
+  // 2. Ensure profiles table has username
+  try {
+    const pCols = await query("SHOW COLUMNS FROM profiles LIKE 'username'");
+    if (pCols.length === 0) {
+      await query("ALTER TABLE profiles ADD COLUMN username VARCHAR(100) DEFAULT NULL");
+    }
+  } catch (err: any) {
+    if (!err.message?.includes("Duplicate column name")) {
+      console.warn("[Migration] profiles.username notice:", err.message);
+    }
+  }
+
+  // 3. Ensure categories table has show_in_header, sort_order, parent_id
+  try {
+    const catParentCols = await query("SHOW COLUMNS FROM categories LIKE 'parent_id'");
+    if (catParentCols.length === 0) {
+      await query("ALTER TABLE categories ADD COLUMN parent_id INT DEFAULT NULL");
+    }
+  } catch (err: any) {
+    if (!err.message?.includes("Duplicate column name")) {
+      console.warn("[Migration] categories.parent_id notice:", err.message);
+    }
+  }
+
+  try {
+    const catHeaderCols = await query("SHOW COLUMNS FROM categories LIKE 'show_in_header'");
+    if (catHeaderCols.length === 0) {
+      await query("ALTER TABLE categories ADD COLUMN show_in_header BOOLEAN DEFAULT FALSE");
+    }
+  } catch (err: any) {
+    if (!err.message?.includes("Duplicate column name")) {
+      console.warn("[Migration] categories.show_in_header notice:", err.message);
+    }
+  }
+
+  try {
+    const catSortCols = await query("SHOW COLUMNS FROM categories LIKE 'sort_order'");
+    if (catSortCols.length === 0) {
+      await query("ALTER TABLE categories ADD COLUMN sort_order INT DEFAULT 0");
+    }
+  } catch (err: any) {
+    if (!err.message?.includes("Duplicate column name")) {
+      console.warn("[Migration] categories.sort_order notice:", err.message);
+    }
+  }
+
+  // 4. Ensure articles table has access_level
+  try {
+    const artCols = await query("SHOW COLUMNS FROM articles LIKE 'access_level'");
+    if (artCols.length === 0) {
+      await query("ALTER TABLE articles ADD COLUMN access_level VARCHAR(50) DEFAULT 'Free'");
+    }
+  } catch (err: any) {
+    if (!err.message?.includes("Duplicate column name")) {
+      console.warn("[Migration] articles.access_level notice:", err.message);
+    }
+  }
+
+  // 5. Ensure comments table has parent_id
+  try {
+    const commCols = await query("SHOW COLUMNS FROM comments LIKE 'parent_id'");
+    if (commCols.length === 0) {
+      await query("ALTER TABLE comments ADD COLUMN parent_id INT DEFAULT NULL");
+    }
+  } catch (err: any) {
+    if (!err.message?.includes("Duplicate column name")) {
+      console.warn("[Migration] comments.parent_id notice:", err.message);
+    }
+  }
+
+  quickMigrationsRan = true;
+}
+
 export async function createTablesAndIndexes(
   query: (sql: string, params?: any[]) => Promise<any>,
 ) {
@@ -8,6 +111,7 @@ export async function createTablesAndIndexes(
     CREATE TABLE IF NOT EXISTS users (
       id VARCHAR(255) PRIMARY KEY,
       email VARCHAR(255) UNIQUE NOT NULL,
+      username VARCHAR(100) DEFAULT NULL,
       password_hash VARCHAR(255) NOT NULL,
       salt VARCHAR(64),
       display_name VARCHAR(255),
@@ -33,6 +137,7 @@ export async function createTablesAndIndexes(
     CREATE TABLE IF NOT EXISTS profiles (
       id VARCHAR(255) PRIMARY KEY,
       public_user_id VARCHAR(100) UNIQUE NOT NULL,
+      username VARCHAR(100) DEFAULT NULL,
       display_name VARCHAR(255),
       avatar_url TEXT,
       points INT DEFAULT 0,

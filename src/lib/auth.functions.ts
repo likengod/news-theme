@@ -126,6 +126,18 @@ export const signUpServer = createServerFn({ method: "POST" })
     };
   });
 
+let authSchemaChecked = false;
+async function ensureAuthSchema() {
+  if (authSchemaChecked) return;
+  try {
+    const { runQuickMigrations } = await import("./db/schema.server");
+    await runQuickMigrations(query);
+    authSchemaChecked = true;
+  } catch (err) {
+    // Non-blocking
+  }
+}
+
 export const signInServer = createServerFn({ method: "POST" })
   .validator((data) =>
     z
@@ -139,12 +151,30 @@ export const signInServer = createServerFn({ method: "POST" })
     const { email, password } = data;
     if (!email || !password) throw new Error("Email and password are required");
 
-    const users = await query(
-      `SELECT u.* FROM users u
-       LEFT JOIN profiles p ON u.id = p.id
-       WHERE u.email = ? OR u.username = ? OR u.display_name = ? OR p.phone = ?`,
-      [email, email, email, email],
-    );
+    await ensureAuthSchema();
+
+    let users: any[] = [];
+    try {
+      users = await query(
+        `SELECT u.* FROM users u
+         LEFT JOIN profiles p ON u.id = p.id
+         WHERE u.email = ? OR u.username = ? OR u.display_name = ? OR p.phone = ?`,
+        [email, email, email, email],
+      );
+    } catch (err: any) {
+      if (err.message && err.message.includes("username")) {
+        // Fallback for legacy DB schema where username column is not yet present
+        users = await query(
+          `SELECT u.* FROM users u
+           LEFT JOIN profiles p ON u.id = p.id
+           WHERE u.email = ? OR u.display_name = ? OR p.phone = ?`,
+          [email, email, email],
+        );
+      } else {
+        throw err;
+      }
+    }
+
     if (users.length === 0) throw new Error("Invalid email, username, phone or password");
 
     const user = users[0];
@@ -202,13 +232,30 @@ export const getSessionServer = createServerFn({ method: "GET" })
   .handler(async ({ data: token }) => {
     if (!token) return { session: null };
 
-    const sessions = await query(
-      `SELECT s.*, u.email, u.display_name, u.username, p.display_name AS profile_name FROM sessions s 
-       JOIN users u ON s.user_id = u.id 
-       LEFT JOIN profiles p ON u.id = p.id
-       WHERE s.id = ? AND s.expires_at > NOW()`,
-      [token],
-    );
+    await ensureAuthSchema();
+
+    let sessions: any[] = [];
+    try {
+      sessions = await query(
+        `SELECT s.*, u.email, u.display_name, u.username, p.display_name AS profile_name FROM sessions s 
+         JOIN users u ON s.user_id = u.id 
+         LEFT JOIN profiles p ON u.id = p.id
+         WHERE s.id = ? AND s.expires_at > NOW()`,
+        [token],
+      );
+    } catch (err: any) {
+      if (err.message && err.message.includes("username")) {
+        sessions = await query(
+          `SELECT s.*, u.email, u.display_name, p.display_name AS profile_name FROM sessions s 
+           JOIN users u ON s.user_id = u.id 
+           LEFT JOIN profiles p ON u.id = p.id
+           WHERE s.id = ? AND s.expires_at > NOW()`,
+          [token],
+        );
+      } else {
+        throw err;
+      }
+    }
 
     if (sessions.length === 0) return { session: null };
 
@@ -237,13 +284,30 @@ export const getUserServer = createServerFn({ method: "GET" })
   .handler(async ({ data: token }) => {
     if (!token) return { user: null };
 
-    const sessions = await query(
-      `SELECT s.*, u.email, u.display_name, u.username, p.display_name AS profile_name FROM sessions s 
-       JOIN users u ON s.user_id = u.id 
-       LEFT JOIN profiles p ON u.id = p.id
-       WHERE s.id = ? AND s.expires_at > NOW()`,
-      [token],
-    );
+    await ensureAuthSchema();
+
+    let sessions: any[] = [];
+    try {
+      sessions = await query(
+        `SELECT s.*, u.email, u.display_name, u.username, p.display_name AS profile_name FROM sessions s 
+         JOIN users u ON s.user_id = u.id 
+         LEFT JOIN profiles p ON u.id = p.id
+         WHERE s.id = ? AND s.expires_at > NOW()`,
+        [token],
+      );
+    } catch (err: any) {
+      if (err.message && err.message.includes("username")) {
+        sessions = await query(
+          `SELECT s.*, u.email, u.display_name, p.display_name AS profile_name FROM sessions s 
+           JOIN users u ON s.user_id = u.id 
+           LEFT JOIN profiles p ON u.id = p.id
+           WHERE s.id = ? AND s.expires_at > NOW()`,
+          [token],
+        );
+      } else {
+        throw err;
+      }
+    }
 
     if (sessions.length === 0) return { user: null };
 

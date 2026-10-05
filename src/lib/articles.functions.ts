@@ -181,24 +181,43 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
 export const getAdminAuthorProfiles = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async () => {
-    const rows = await query(`
-      SELECT DISTINCT 
-        u.id, 
-        COALESCE(p.display_name, u.display_name, u.email) AS name, 
-        u.username,
-        r.role
-      FROM users u
-      LEFT JOIN profiles p ON u.id = p.id
-      JOIN user_roles r ON u.id = r.user_id
-      WHERE r.role IN ('admin', 'editor', 'author', 'journalist')
-      ORDER BY FIELD(r.role, 'admin', 'editor', 'author', 'journalist'), name ASC
-    `);
-    return rows.map((r: any) => ({
-      id: r.id,
-      name: r.name,
-      username: r.username,
-      role: r.role,
-    }));
+    try {
+      const rows = await query(`
+        SELECT DISTINCT 
+          u.id, 
+          COALESCE(p.display_name, u.display_name, u.email) AS name, 
+          u.username,
+          r.role
+        FROM users u
+        LEFT JOIN profiles p ON u.id = p.id
+        JOIN user_roles r ON u.id = r.user_id
+        WHERE r.role IN ('admin', 'editor', 'author', 'journalist')
+        ORDER BY FIELD(r.role, 'admin', 'editor', 'author', 'journalist'), name ASC
+      `);
+      return rows.map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        username: r.username,
+        role: r.role,
+      }));
+    } catch {
+      const rows = await query(`
+        SELECT DISTINCT 
+          u.id, 
+          COALESCE(p.display_name, u.display_name, u.email) AS name, 
+          r.role
+        FROM users u
+        LEFT JOIN profiles p ON u.id = p.id
+        JOIN user_roles r ON u.id = r.user_id
+        WHERE r.role IN ('admin', 'editor', 'author', 'journalist')
+        ORDER BY FIELD(r.role, 'admin', 'editor', 'author', 'journalist'), name ASC
+      `);
+      return rows.map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        role: r.role,
+      }));
+    }
   });
 
 // Admin only: delete article
