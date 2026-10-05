@@ -19,7 +19,7 @@ export function Ticker() {
     </div>
   );
   return (
-    <div className="overflow-hidden border-y border-border bg-card/60 py-2 md:sticky md:top-[88px] md:z-20 md:bg-background/90 md:backdrop-blur-md">
+    <div className="overflow-hidden border-y border-border bg-card/60 py-2">
       <div className="flex ticker-scroll w-max">
         {row}
         {row}
