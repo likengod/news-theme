@@ -101,10 +101,10 @@ function ResultsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Header />
 
-      <main className="flex-1 mx-auto max-w-5xl px-4 py-8 w-full">
+      <main className="flex-1 mx-auto max-w-4xl px-4 py-8 w-full">
         {/* Banner Title */}
         <div className="text-center max-w-2xl mx-auto space-y-2 mb-8">
           <div className="inline-flex items-center gap-2 rounded-full bg-red-100 dark:bg-red-950/50 px-3 py-1 text-xs font-bold text-red-700 dark:text-red-400">
@@ -120,8 +120,8 @@ function ResultsPage() {
           </p>
         </div>
 
-        {/* Search / Lookup Form Box */}
-        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-5 sm:p-7 mb-8 print:hidden">
+        {/* Search / Lookup Form (Flat, No Card Effect) */}
+        <div className="mb-10 print:hidden border-b border-slate-200 dark:border-slate-800 pb-8">
           <form onSubmit={handleSearch} className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Board / University */}
@@ -133,7 +133,7 @@ function ResultsPage() {
                   id={boardSelectId}
                   value={selectedBoardId}
                   onChange={(e) => handleBoardChange(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm font-medium focus:border-red-600 focus:outline-none"
+                  className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-background px-3 py-2 text-sm font-medium focus:border-red-600 focus:outline-none"
                 >
                   {SUPPORTED_BOARDS.map((b) => (
                     <option key={b.id} value={b.id}>
@@ -152,7 +152,7 @@ function ResultsPage() {
                   id={examSelectId}
                   value={selectedExamId}
                   onChange={(e) => setSelectedExamId(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm font-medium focus:border-red-600 focus:outline-none"
+                  className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-background px-3 py-2 text-sm font-medium focus:border-red-600 focus:outline-none"
                 >
                   {selectedBoard.exams.map((ex) => (
                     <option key={ex.id} value={ex.id}>
@@ -175,7 +175,7 @@ function ResultsPage() {
                   value={rollNo}
                   onChange={(e) => setRollNo(e.target.value)}
                   placeholder="e.g. 1001 or 1002"
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm font-semibold tracking-wider focus:border-red-600 focus:outline-none"
+                  className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-background px-3 py-2 text-sm font-semibold tracking-wider focus:border-red-600 focus:outline-none"
                 />
               </div>
 
@@ -190,7 +190,7 @@ function ResultsPage() {
                   value={regNo}
                   onChange={(e) => setRegNo(e.target.value)}
                   placeholder="Optional registration no..."
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm focus:border-red-600 focus:outline-none"
+                  className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-background px-3 py-2 text-sm focus:border-red-600 focus:outline-none"
                 />
               </div>
 
@@ -203,7 +203,7 @@ function ResultsPage() {
                   id={yearSelectId}
                   value={examYear}
                   onChange={(e) => setExamYear(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm font-medium focus:border-red-600 focus:outline-none"
+                  className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-background px-3 py-2 text-sm font-medium focus:border-red-600 focus:outline-none"
                 >
                   <option value="2026">2026 (Latest)</option>
                   <option value="2025">2025</option>
@@ -229,7 +229,7 @@ function ResultsPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="inline-flex items-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 text-sm shadow-md transition disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 text-sm transition disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? (
                   <>
@@ -249,13 +249,13 @@ function ResultsPage() {
 
         {/* Error Notification */}
         {errorMsg && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300 flex items-center gap-2">
+          <div className="mb-6 rounded-md border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300 flex items-center gap-2">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        {/* Marksheet & Certificate Display Card */}
+        {/* Marksheet & Certificate Display */}
         {result && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {/* Action Bar */}
@@ -268,7 +268,7 @@ function ResultsPage() {
                 <button
                   type="button"
                   onClick={handlePrint}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-100 transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted transition cursor-pointer"
                 >
                   <Printer className="h-3.5 w-3.5" />
                   <span>প্রিন্ট / মার্কশিট ডাউনলোড</span>
@@ -276,8 +276,8 @@ function ResultsPage() {
               </div>
             </div>
 
-            {/* Official Marksheet Document Card */}
-            <div className="rounded-2xl border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            {/* Official Marksheet Document View (Flat) */}
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-card p-6 sm:p-8 relative overflow-hidden">
               {/* Decorative Watermark Header */}
               <div className="flex flex-col items-center text-center border-b-2 border-slate-200 dark:border-slate-800 pb-6 mb-6">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 mb-2">
@@ -422,8 +422,8 @@ function ResultsPage() {
           </div>
         )}
 
-        {/* Quick Links Section to Official Educational Portals */}
-        <div className="mt-12 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 print:hidden">
+        {/* Quick Links Section to Official Educational Portals (Flat) */}
+        <div className="mt-12 border-t border-slate-200 dark:border-slate-800 pt-8 print:hidden">
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
             <Building2 className="h-4 w-4 text-red-600" />
             <span>ত্রিপুরা শিক্ষা ও ফলাফল অফিশিয়াল পোর্টালসমূহ (Official Portals)</span>
@@ -433,7 +433,7 @@ function ResultsPage() {
               href="https://tbse.tripura.gov.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 p-3 hover:border-red-500 hover:bg-red-50/50 dark:hover:bg-red-950/20 transition group"
+              className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 p-3 hover:border-red-500 hover:bg-muted/50 transition group"
             >
               <div>
                 <span className="font-bold block text-slate-900 dark:text-white group-hover:text-red-600">TBSE Portal</span>
@@ -446,7 +446,7 @@ function ResultsPage() {
               href="https://tripurauniv.ac.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 p-3 hover:border-red-500 hover:bg-red-50/50 dark:hover:bg-red-950/20 transition group"
+              className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 p-3 hover:border-red-500 hover:bg-muted/50 transition group"
             >
               <div>
                 <span className="font-bold block text-slate-900 dark:text-white group-hover:text-red-600">Tripura University</span>
@@ -459,7 +459,7 @@ function ResultsPage() {
               href="https://mbbuniversity.ac.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 p-3 hover:border-red-500 hover:bg-red-50/50 dark:hover:bg-red-950/20 transition group"
+              className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 p-3 hover:border-red-500 hover:bg-muted/50 transition group"
             >
               <div>
                 <span className="font-bold block text-slate-900 dark:text-white group-hover:text-red-600">MBB University</span>
@@ -472,7 +472,7 @@ function ResultsPage() {
               href="https://digilocker.gov.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 p-3 hover:border-red-500 hover:bg-red-50/50 dark:hover:bg-red-950/20 transition group"
+              className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 p-3 hover:border-red-500 hover:bg-muted/50 transition group"
             >
               <div>
                 <span className="font-bold block text-slate-900 dark:text-white group-hover:text-red-600">DigiLocker</span>
