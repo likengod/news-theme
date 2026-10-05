@@ -19,6 +19,34 @@ export interface ArticlePageData {
   access_level?: "Free" | "Premium";
 }
 
+function parseArticleDate(dateVal: any): Date {
+  if (!dateVal) return new Date();
+  if (dateVal instanceof Date) {
+    return isNaN(dateVal.getTime()) ? new Date() : dateVal;
+  }
+  if (typeof dateVal === "string") {
+    const trimmed = dateVal.trim();
+    if (!trimmed || trimmed.startsWith("0000-00-00")) {
+      return new Date();
+    }
+    let d = new Date(trimmed);
+    if (!isNaN(d.getTime())) return d;
+    if (trimmed.includes(" ")) {
+      d = new Date(trimmed.replace(" ", "T"));
+      if (!isNaN(d.getTime())) return d;
+    }
+    if (trimmed.includes(" ") && !trimmed.endsWith("Z")) {
+      d = new Date(trimmed.replace(" ", "T") + "Z");
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  if (typeof dateVal === "number") {
+    const d = new Date(dateVal);
+    if (!isNaN(d.getTime())) return d;
+  }
+  return new Date();
+}
+
 export async function getArticleData(slug: string): Promise<ArticlePageData | null> {
   try {
     const art = await getPublicArticleBySlug({ data: slug });
@@ -33,18 +61,19 @@ export async function getArticleData(slug: string): Promise<ArticlePageData | nu
         "As retail trading continues to evolve, market experts advise focusing on core economic indicators and long-term asset building. Our weekly updates will continue tracking this ongoing story with insights from market analysts and local brokerage feeds.",
       ];
 
+      const now = new Date();
       return {
         slug,
         title: title || "Exclusive Market Report",
         category: "Markets",
         author: "Justina Lee",
-        date: new Date().toLocaleString("en-US", {
+        date: now.toLocaleString("en-US", {
           month: "long",
           day: "numeric",
           year: "numeric",
         }),
-        publishedISO: new Date().toISOString(),
-        modifiedISO: new Date().toISOString(),
+        publishedISO: now.toISOString(),
+        modifiedISO: now.toISOString(),
         hero: "/placeholder.svg",
         midImage: "/placeholder.svg",
         paragraphs,
@@ -54,29 +83,46 @@ export async function getArticleData(slug: string): Promise<ArticlePageData | nu
       };
     }
 
-    const published = new Date(art.date);
+    const published = parseArticleDate(art.date);
+    const isoString = published.toISOString();
 
-    return {
-      slug: art.slug,
-      title: art.title,
-      category: art.category,
-      author: art.author || "Newsroom",
-      date: published.toLocaleString("en-US", {
+    let displayDate = "";
+    try {
+      displayDate = published.toLocaleString("en-US", {
         month: "long",
         day: "numeric",
         year: "numeric",
         hour: "numeric",
         minute: "2-digit",
-      }),
-      publishedISO: published.toISOString(),
-      modifiedISO: published.toISOString(),
+      });
+    } catch {
+      displayDate = published.toDateString();
+    }
+
+    let paragraphs: string[] = [];
+    if (art.content && typeof art.content === "string" && art.content.trim()) {
+      paragraphs = [art.content];
+    } else if (art.excerpt && typeof art.excerpt === "string" && art.excerpt.trim()) {
+      paragraphs = [art.excerpt];
+    } else {
+      paragraphs = [art.title || ""];
+    }
+
+    return {
+      slug: art.slug,
+      title: art.title || "",
+      category: art.category || "News",
+      author: art.author || "Newsroom",
+      date: displayDate,
+      publishedISO: isoString,
+      modifiedISO: isoString,
       hero: art.featuredImage || "",
       midImage: art.featuredImage || "",
       imageCaption: art.imageCaption || "",
       imageCredit: art.imageCredit || "",
-      paragraphs: [art.content || art.excerpt || art.title],
-      views: art.views || 0,
-      excerpt: art.excerpt || `${art.title}`,
+      paragraphs,
+      views: Number(art.views) || 0,
+      excerpt: art.excerpt || art.title || "",
       access_level: art.access_level || "Free",
     };
   } catch (err) {
