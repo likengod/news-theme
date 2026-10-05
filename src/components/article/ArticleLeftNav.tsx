@@ -43,7 +43,7 @@ export function ArticleLeftNav() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-red-600"></span>
               </span>
             </div>
-            <span className="truncate">লাইভ রয়েছে</span>
+            <span className="truncate">লাইভ</span>
           </Link>
 
           {/* Reels / Shorts */}
