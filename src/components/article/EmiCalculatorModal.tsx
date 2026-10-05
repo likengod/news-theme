@@ -46,8 +46,8 @@ export function EmiCalculatorModal({ isOpen, onClose }: Props) {
               <Calculator className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold">গৃহ ঋণ EMI ক্যালকুলেটর</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Home Loan EMI Calculator</p>
+              <h3 className="text-base font-bold">EMI ক্যালকুলেটর</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Loan EMI Calculator</p>
             </div>
           </div>
           <button

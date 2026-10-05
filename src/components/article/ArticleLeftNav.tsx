@@ -55,19 +55,13 @@ export function ArticleLeftNav() {
             <span className="truncate font-semibold text-slate-900 dark:text-white">শর্টস / Reels</span>
           </Link>
 
-          {/* Results (Marksheet & Degree Certificate) */}
+          {/* Result */}
           <Link
             to="/results"
-            className="group relative flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors bg-amber-50/70 dark:bg-amber-950/20 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/40"
+            className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
           >
-            <GraduationCap className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-            <div className="flex flex-col min-w-0">
-              <span className="truncate font-bold">ফলাফল / Result</span>
-              <span className="text-[9px] text-amber-700 dark:text-amber-300 font-medium">মার্কশিট ও ডিগ্রি</span>
-            </div>
-            <span className="absolute -top-1 right-1 rounded-full bg-red-600 px-1 py-0.2 text-[8px] font-bold text-white uppercase tracking-tight">
-              New
-            </span>
+            <GraduationCap className="h-4 w-4 shrink-0 text-slate-600 group-hover:text-red-600 dark:text-slate-400" />
+            <span className="truncate">Result</span>
           </Link>
 
           {/* Video */}
@@ -126,14 +120,14 @@ export function ArticleLeftNav() {
           </div>
 
           <div className="flex flex-col space-y-0.5 text-[11px] font-medium text-slate-600 dark:text-slate-400">
-            {/* Home Loan EMI Calculator */}
+            {/* EMI Calculator */}
             <button
               type="button"
               onClick={() => setShowEmiModal(true)}
-              className="group flex items-start gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer"
+              className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer"
             >
-              <Calculator className="h-3.5 w-3.5 mt-0.5 shrink-0 text-slate-500 group-hover:text-red-600" />
-              <span className="leading-tight">গৃহ ঋণের EMI ক্যালকুলেটর</span>
+              <Calculator className="h-3.5 w-3.5 shrink-0 text-slate-500 group-hover:text-red-600" />
+              <span className="truncate">EMI ক্যালকুলেটর</span>
             </button>
 
             {/* Age Calculator */}
