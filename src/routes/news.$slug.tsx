@@ -18,6 +18,7 @@ import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { getSiteSettingsServer } from "@/lib/site-content/site-settings";
 import { Lock, LogIn, AlertCircle, Sparkles } from "lucide-react";
 import { getCurrentUserRole } from "@/lib/auth.functions";
+import { getHomepageArticles } from "@/lib/articles.functions";
 import { authClient as supabase } from "@/lib/auth-client";
 import { trackRead } from "@/lib/user-actions-tracker";
 
@@ -73,16 +74,22 @@ function ArticleNotFound() {
 export const Route = createFileRoute("/news/$slug")({
   loader: async ({ params, context }) => {
     try {
-      const [data, origin, settings] = await Promise.all([
+      const [data, origin, settings, trendingArticles] = await Promise.all([
         context.queryClient.ensureQueryData(articleQueryOptions(params.slug)).catch(() => null),
         getRequestOrigin().catch(() => ""),
         getSiteSettingsServer().catch(() => null),
+        getHomepageArticles({ data: 8 }).catch(() => []),
       ]);
       const siteName = settings?.siteName || "Today Tripura";
-      return { data, origin, siteName };
+      return {
+        data,
+        origin,
+        siteName,
+        trendingArticles: Array.isArray(trendingArticles) ? trendingArticles : [],
+      };
     } catch (err) {
       console.warn("[Article loader] Error:", err);
-      return { data: null, origin: "", siteName: "Today Tripura" };
+      return { data: null, origin: "", siteName: "Today Tripura", trendingArticles: [] };
     }
   },
   head: ({ loaderData }) => {
@@ -157,7 +164,7 @@ export const Route = createFileRoute("/news/$slug")({
 function ArticlePage() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(articleQueryOptions(slug));
-  const { origin } = Route.useLoaderData();
+  const { origin, trendingArticles } = Route.useLoaderData();
   const settings = useSiteSettings();
   const siteName = settings?.siteName || "Today Tripura";
   const shareUrl = useMemo(() => `${origin}/news/${slug}`, [origin, slug]);
@@ -216,17 +223,19 @@ function ArticlePage() {
       <ReadingProgress />
       <Header />
 
-      <main className="mx-auto max-w-6xl px-4 pt-2 pb-8 w-full max-w-full min-w-0 overflow-x-clip">
-        <ArticleHeader
-          title={data.title}
-          author={data.author}
-          date={data.date}
-          views={data.views}
-          category={data.category}
-        />
+      <main className="mx-auto max-w-6xl px-4 pt-3 pb-12 w-full max-w-full min-w-0">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px] w-full max-w-full min-w-0 items-start">
+          <article className="relative w-full max-w-full min-w-0">
+            <ArticleHeader
+              title={data.title}
+              author={data.author}
+              date={data.date}
+              views={data.views}
+              category={data.category}
+              deck={data.excerpt}
+              shareUrl={shareUrl}
+            />
 
-        <div className="grid grid-cols-1 gap-10 pt-8 lg:grid-cols-[minmax(0,1fr)_300px] w-full max-w-full min-w-0">
-          <article className="relative w-full max-w-full min-w-0 overflow-hidden">
             <ArticleHero
               src={data.hero}
               alt={data.title}
@@ -234,7 +243,7 @@ function ArticlePage() {
               credit={heroCredit}
             />
 
-            <div className="mx-auto max-w-[720px] pt-4">
+            <div className="w-full pt-1">
               {checkingAuth ? (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-400 space-y-4">
                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
@@ -244,14 +253,18 @@ function ArticlePage() {
                 <>
                   <ArticleBody
                     paragraphs={data.paragraphs}
-                    midImage={data.midImage ? {
-                      src: data.midImage,
-                      caption: heroCaption,
-                      credit: heroCredit,
-                    } : undefined}
+                    midImage={
+                      data.midImage
+                        ? {
+                            src: data.midImage,
+                            caption: heroCaption,
+                            credit: heroCredit,
+                          }
+                        : undefined
+                    }
                   />
                   {/* Social share bar at the end of the article, with Share on Left and QR Code Card on Right */}
-                  <div className="mt-6 flex flex-wrap items-center justify-between gap-3 pb-1">
+                  <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 dark:border-slate-800 pt-4 pb-1">
                     <ShareRail url={shareUrl} title={data.title} />
                     <ArticleQrCard url={shareUrl} />
                   </div>
@@ -306,7 +319,7 @@ function ArticlePage() {
             </div>
           </article>
 
-          <ArticleSidebar />
+          <ArticleSidebar trending={trendingArticles} currentSlug={slug} />
         </div>
       </main>
 

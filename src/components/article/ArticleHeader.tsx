@@ -3,6 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { Views } from "@/components/site/Views";
 import { loadSettings } from "@/lib/site-content";
 import { slugify } from "@/lib/news-data";
+import { Share2, Check } from "lucide-react";
+import { toast } from "sonner";
 
 const FESTIVE_GRADIENT_MAP: Record<string, string> = {
   "indian-flag": "linear-gradient(to right, #FF9933, #000080, #138808)",
@@ -20,11 +22,21 @@ type Props = {
   views: number;
   category?: string;
   deck?: string;
+  shareUrl?: string;
 };
 
-export function ArticleHeader({ title, author, date, views, category = "News", deck }: Props) {
+export function ArticleHeader({
+  title,
+  author,
+  date,
+  views,
+  category = "News",
+  deck,
+  shareUrl,
+}: Props) {
   const [settings, setSettings] = useState(() => loadSettings());
   const [showCustomText, setShowCustomText] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const handleUpdate = () => setSettings(loadSettings());
@@ -48,6 +60,38 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
     return () => clearInterval(interval);
   }, [hasCustomAlert, settings.topBarSwapDelay]);
 
+  const handleShare = async () => {
+    const url =
+      shareUrl || (typeof window !== "undefined" ? window.location.href : "");
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({
+          title,
+          text: deck || title,
+          url,
+        });
+        return;
+      } catch (err: any) {
+        if (err?.name !== "AbortError") {
+          console.warn("Share failed, falling back to copy:", err);
+        } else {
+          return;
+        }
+      }
+    }
+
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        toast.success("Link copied to clipboard!");
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        toast.error("Failed to copy link");
+      }
+    }
+  };
+
   const activeGradient = settings.festiveCategoryTitleGradient || settings.topBarTextGradient;
 
   const resolvedGrad =
@@ -65,7 +109,7 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
           display: "inline-block",
         }
       : {
-          color: settings.festiveCategoryTitleColor || settings.topBarTextColor || "#000000",
+          color: settings.festiveCategoryTitleColor || settings.topBarTextColor || "#dc2626",
         };
 
   const categoriesList = (category || "News")
@@ -75,112 +119,109 @@ export function ArticleHeader({ title, author, date, views, category = "News", d
   if (categoriesList.length === 0) categoriesList.push("News");
 
   return (
-    <>
-      <nav className="mb-1 flex flex-wrap items-center text-xs uppercase tracking-widest text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">
+    <header className="mb-4 w-full">
+      {/* Breadcrumb / Category Row */}
+      <nav className="mb-2.5 flex flex-wrap items-center text-xs tracking-wide text-muted-foreground">
+        <Link to="/" className="hover:text-foreground transition-colors font-medium">
           Home
         </Link>
         {categoriesList.map((cat) => (
           <span key={cat} className="inline-flex items-center">
-            <span className="mx-2 text-muted-foreground/50">/</span>
+            <span className="mx-2 text-muted-foreground/40 font-light">/</span>
             <Link
               to="/$slug"
               params={{ slug: slugify(cat) }}
-              className="hover:text-foreground transition-colors"
+              className="hover:text-red-600 dark:hover:text-red-400 transition-colors font-semibold"
+              style={badgeStyle}
             >
               {cat}
             </Link>
           </span>
         ))}
-      </nav>
 
-      <header className="border-b border-border pb-3">
-        {hasCustomAlert && showCustomText ? (
-          <span
-            key="custom"
-            className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-widest animate-in fade-in duration-300"
-          >
+        {hasCustomAlert && showCustomText && (
+          <span className="ml-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider animate-in fade-in duration-300">
             {settings.festiveAlertImage ? (
               <img
                 src={settings.festiveAlertImage}
                 alt="Alert"
-                className="h-5 w-auto max-w-[80px] object-contain shrink-0 align-middle"
+                className="h-4 w-auto max-w-[70px] object-contain shrink-0 align-middle"
               />
             ) : (
               <span style={badgeStyle}>{settings.topBarWeatherCustomText}</span>
             )}
           </span>
-        ) : (
-          <div className="flex flex-wrap items-center gap-2">
-            {categoriesList.map((cat, idx) => (
-              <Link
-                key={cat}
-                to="/$slug"
-                params={{ slug: slugify(cat) }}
-                className={`inline-flex items-center text-xs font-extrabold uppercase tracking-widest hover:opacity-80 transition-opacity ${
-                  idx > 0 ? "opacity-90" : ""
-                }`}
-                style={badgeStyle}
-              >
-                <span>{cat}</span>
-                {idx < categoriesList.length - 1 && (
-                  <span className="ml-2 text-muted-foreground/40 font-normal">·</span>
-                )}
-              </Link>
-            ))}
-          </div>
         )}
-        <h1 className="headline mt-3 font-serif text-3xl font-bold leading-tight text-primary md:text-5xl">
-          {title}
-        </h1>
-        {deck && (
-          <p className="mt-3 text-lg leading-relaxed text-muted-foreground md:text-xl">{deck}</p>
-        )}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-y-3 gap-x-2 text-[10px] sm:text-xs uppercase tracking-widest text-muted-foreground">
-          <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-4 gap-y-1 flex-1">
-            <span className="font-semibold text-foreground">By {author}</span>
-            <span aria-hidden>•</span>
-            <time>
-              {date.split(/ at /i)[0]}
-              {date.split(/ at /i)[1] && (
-                <span className="hidden sm:inline"> AT {date.split(/ at /i)[1]}</span>
-              )}
-            </time>
-            <span aria-hidden>•</span>
-            <Views count={views} />
-          </div>
+      </nav>
 
+      {/* Main Headline - Bold, high impact, ABP Ananda style */}
+      <h1 className="text-2xl sm:text-3xl md:text-[34px] lg:text-[38px] font-bold text-slate-950 dark:text-white leading-[1.3] tracking-tight mb-3">
+        {title}
+      </h1>
+
+      {/* Excerpt / Dek / Sub-headline - ABP Ananda style */}
+      {deck && (
+        <p className="text-base sm:text-lg text-slate-700 dark:text-slate-300 leading-relaxed font-normal mb-3">
+          {deck}
+        </p>
+      )}
+
+      {/* Byline & Metadata Bar */}
+      <div className="border-y border-slate-200 dark:border-slate-800/80 py-2.5 my-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-400">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span>
+            Written By :{" "}
+            <span className="font-semibold text-red-600 dark:text-red-500">
+              {author || "Newsroom"}
+            </span>
+          </span>
+          <span className="text-slate-300 dark:text-slate-700 font-light">|</span>
+          <span>
+            Updated at : <time className="text-slate-700 dark:text-slate-300 font-medium">{date}</time>
+          </span>
+          {views > 0 && (
+            <>
+              <span className="text-slate-300 dark:text-slate-700 font-light">|</span>
+              <Views count={views} />
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Quick Share Button */}
+          <button
+            type="button"
+            onClick={handleShare}
+            aria-label="Share article"
+            title="Share article"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
+          >
+            {copied ? (
+              <Check className="h-4 w-4 text-green-600" />
+            ) : (
+              <Share2 className="h-4 w-4" />
+            )}
+          </button>
+
+          {/* Google News follow badge */}
           {settings.googleNews && settings.googleNews !== "#" && (
             <a
               href={settings.googleNews || "https://news.google.com/"}
               target="_blank"
               rel="noopener noreferrer"
               title="Follow on Google News"
-              className="flex shrink-0 items-center gap-2 transition hover:opacity-80 normal-case tracking-normal rounded hover:bg-muted p-1 sm:p-0"
+              className="flex shrink-0 items-center gap-1.5 transition hover:opacity-85 rounded-full border border-slate-200 dark:border-slate-800 px-2.5 py-1 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
             >
               <img
                 src="https://upload.wikimedia.org/wikipedia/commons/d/da/Google_News_icon.svg"
                 alt="Google News"
-                className="h-6 w-6 sm:h-7 sm:w-7"
+                className="h-4 w-4"
               />
-              <div className="flex flex-col items-start justify-center text-left font-sans">
-                <span className="text-[9px] font-medium tracking-wide text-[#3c4043] uppercase leading-none mb-[1px]">
-                  Follow on
-                </span>
-                <span className="text-[15px] font-medium leading-none tracking-tight flex items-center">
-                  <span className="text-[#4285F4]">G</span>
-                  <span className="text-[#EA4335]">o</span>
-                  <span className="text-[#FBBC05]">o</span>
-                  <span className="text-[#4285F4]">g</span>
-                  <span className="text-[#34A853]">l</span>
-                  <span className="text-[#EA4335]">e</span>
-                  <span className="text-[#3c4043] ml-1">News</span>
-                </span>
-              </div>
+              <span className="text-[11px] font-medium leading-none">Google News</span>
             </a>
           )}
         </div>
-      </header>
-    </>
+      </div>
+    </header>
   );
 }
