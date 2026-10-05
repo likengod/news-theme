@@ -16,6 +16,8 @@ export type Row = {
   content: string;
   featuredImage: string;
   ogImage: string;
+  imageCaption?: string;
+  imageCredit?: string;
   metaTitle: string;
   metaDescription: string;
   tags: string;

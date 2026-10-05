@@ -21,6 +21,8 @@ export const blankRow = (defaultAuthor?: string): Row => ({
   content: "",
   featuredImage: "",
   ogImage: "",
+  imageCaption: "",
+  imageCredit: "",
   metaTitle: "",
   metaDescription: "",
   tags: "",

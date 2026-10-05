@@ -14,6 +14,8 @@ import { ArticleQrCard } from "@/components/article/ArticleQrCard";
 import { ContentProtectionGuard } from "@/components/article/ContentProtectionGuard";
 import { articleQueryOptions, type ArticlePageData } from "@/lib/article-data";
 import { getRequestOrigin } from "@/lib/origin.functions";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { getSiteSettingsServer } from "@/lib/site-content/site-settings";
 import { Lock, LogIn, AlertCircle, Sparkles } from "lucide-react";
 import { getCurrentUserRole } from "@/lib/auth.functions";
 import { authClient as supabase } from "@/lib/auth-client";
@@ -71,20 +73,23 @@ function ArticleNotFound() {
 export const Route = createFileRoute("/news/$slug")({
   loader: async ({ params, context }) => {
     try {
-      const [data, origin] = await Promise.all([
+      const [data, origin, settings] = await Promise.all([
         context.queryClient.ensureQueryData(articleQueryOptions(params.slug)).catch(() => null),
         getRequestOrigin().catch(() => ""),
+        getSiteSettingsServer().catch(() => null),
       ]);
-      return { data, origin };
+      const siteName = settings?.siteName || "Today Tripura";
+      return { data, origin, siteName };
     } catch (err) {
       console.warn("[Article loader] Error:", err);
-      return { data: null, origin: "" };
+      return { data: null, origin: "", siteName: "Today Tripura" };
     }
   },
   head: ({ loaderData }) => {
+    const siteName = loaderData?.siteName || "Today Tripura";
     if (!loaderData || !loaderData.data) {
       return {
-        meta: [{ title: "Article Not Found – News Theme" }, { name: "robots", content: "noindex" }],
+        meta: [{ title: `Article Not Found – ${siteName}` }, { name: "robots", content: "noindex" }],
       };
     }
 
@@ -94,7 +99,7 @@ export const Route = createFileRoute("/news/$slug")({
 
     return {
       meta: [
-        { title: `${data.title} – News Theme` },
+        { title: `${data.title} – ${siteName}` },
         { name: "description", content: data.excerpt },
         { name: "robots", content: "index,follow" },
         { name: "author", content: data.author },
@@ -105,7 +110,7 @@ export const Route = createFileRoute("/news/$slug")({
         { property: "og:image", content: absImg },
         { property: "og:image:width", content: "1200" },
         { property: "og:image:height", content: "630" },
-        { property: "og:site_name", content: "News Theme" },
+        { property: "og:site_name", content: siteName },
         { property: "article:published_time", content: data.publishedISO },
         { property: "article:modified_time", content: data.modifiedISO },
         { property: "article:author", content: data.author },
@@ -134,7 +139,7 @@ export const Route = createFileRoute("/news/$slug")({
             author: [{ "@type": "Person", name: data.author }],
             publisher: {
               "@type": "Organization",
-              name: "News Theme",
+              name: siteName,
               logo: { "@type": "ImageObject", url: `${origin}/favicon.ico` },
             },
             mainEntityOfPage: { "@type": "WebPage", "@id": url },
@@ -153,6 +158,8 @@ function ArticlePage() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(articleQueryOptions(slug));
   const { origin } = Route.useLoaderData();
+  const settings = useSiteSettings();
+  const siteName = settings?.siteName || "Today Tripura";
   const shareUrl = useMemo(() => `${origin}/news/${slug}`, [origin, slug]);
 
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -200,6 +207,9 @@ function ArticlePage() {
     return <ArticleNotFound />;
   }
 
+  const heroCaption = data.imageCaption?.trim() || "";
+  const heroCredit = data.imageCredit?.trim() || siteName;
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden w-full max-w-full">
       <ContentProtectionGuard />
@@ -220,8 +230,8 @@ function ArticlePage() {
             <ArticleHero
               src={data.hero}
               alt={data.title}
-              caption="Rescuers and officials at the scene shortly after the incident."
-              credit="News Theme"
+              caption={heroCaption}
+              credit={heroCredit}
             />
 
             <div className="mx-auto max-w-[720px] pt-4">
@@ -234,11 +244,11 @@ function ArticlePage() {
                 <>
                   <ArticleBody
                     paragraphs={data.paragraphs}
-                    midImage={{
+                    midImage={data.midImage ? {
                       src: data.midImage,
-                      caption: "Aid workers coordinating relief operations on the ground.",
-                      credit: "News Theme",
-                    }}
+                      caption: heroCaption,
+                      credit: heroCredit,
+                    } : undefined}
                   />
                   {/* Social share bar at the end of the article, with Share on Left and QR Code Card on Right */}
                   <div className="mt-6 flex flex-wrap items-center justify-between gap-3 pb-1">

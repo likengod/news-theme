@@ -59,6 +59,8 @@ export default function ArticleEditor({
     content: raw.content || "",
     featuredImage: raw.featuredImage || "",
     ogImage: raw.ogImage || "",
+    imageCaption: raw.imageCaption || "",
+    imageCredit: raw.imageCredit || "",
     metaTitle: raw.metaTitle || "",
     metaDescription: raw.metaDescription || "",
     tags: raw.tags || "",

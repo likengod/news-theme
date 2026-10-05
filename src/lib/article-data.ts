@@ -11,6 +11,8 @@ export interface ArticlePageData {
   modifiedISO: string;
   hero: string;
   midImage: string;
+  imageCaption?: string;
+  imageCredit?: string;
   paragraphs: string[];
   views: number;
   excerpt: string;
@@ -70,9 +72,11 @@ export async function getArticleData(slug: string): Promise<ArticlePageData | nu
       modifiedISO: published.toISOString(),
       hero: art.featuredImage || "",
       midImage: art.featuredImage || "",
+      imageCaption: art.imageCaption || "",
+      imageCredit: art.imageCredit || "",
       paragraphs: [art.content || art.excerpt || art.title],
       views: art.views || 0,
-      excerpt: art.excerpt || `${art.title} — read the full report on News Theme.`,
+      excerpt: art.excerpt || `${art.title}`,
       access_level: art.access_level || "Free",
     };
   } catch (err) {

@@ -87,7 +87,7 @@ export async function runQuickMigrations(
     }
   }
 
-  // 4. Ensure articles table has access_level
+  // 4. Ensure articles table has access_level, imageCaption, and imageCredit
   try {
     const artCols = await query("SHOW COLUMNS FROM articles LIKE 'access_level'");
     if (artCols.length === 0) {
@@ -96,6 +96,28 @@ export async function runQuickMigrations(
   } catch (err: any) {
     if (!err.message?.includes("Duplicate column name")) {
       console.warn("[Migration] articles.access_level notice:", err.message);
+    }
+  }
+
+  try {
+    const capCols = await query("SHOW COLUMNS FROM articles LIKE 'imageCaption'");
+    if (capCols.length === 0) {
+      await query("ALTER TABLE articles ADD COLUMN imageCaption TEXT DEFAULT NULL");
+    }
+  } catch (err: any) {
+    if (!err.message?.includes("Duplicate column name")) {
+      console.warn("[Migration] articles.imageCaption notice:", err.message);
+    }
+  }
+
+  try {
+    const credCols = await query("SHOW COLUMNS FROM articles LIKE 'imageCredit'");
+    if (credCols.length === 0) {
+      await query("ALTER TABLE articles ADD COLUMN imageCredit VARCHAR(255) DEFAULT NULL");
+    }
+  } catch (err: any) {
+    if (!err.message?.includes("Duplicate column name")) {
+      console.warn("[Migration] articles.imageCredit notice:", err.message);
     }
   }
 
@@ -266,6 +288,8 @@ export async function createTablesAndIndexes(
       content TEXT,
       featuredImage TEXT,
       ogImage TEXT,
+      imageCaption TEXT,
+      imageCredit VARCHAR(255),
       metaTitle VARCHAR(255),
       metaDescription TEXT,
       tags TEXT,

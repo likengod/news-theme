@@ -78,7 +78,7 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
     return gitStatusCache.data;
   }
 
-  let version = "v1.1.19";
+  let version = "v1.1.20";
   try {
     const pkgPath = path.join(ROOT, "package.json");
     const pkgRaw = fs.readFileSync(pkgPath, "utf-8");

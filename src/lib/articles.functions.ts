@@ -19,6 +19,8 @@ export type ArticleRow = {
   content: string;
   featuredImage: string;
   ogImage: string;
+  imageCaption?: string;
+  imageCredit?: string;
   metaTitle: string;
   metaDescription: string;
   tags: string;
@@ -64,7 +66,7 @@ export const getAdminArticles = createServerFn({ method: "GET" })
       query(`SELECT COUNT(*) AS total FROM articles${filterSql}`, params),
       query(
         `SELECT id, title, slug, category, city, state, country, author, views, status, date,
-                excerpt, content, featuredImage, ogImage, metaTitle, metaDescription, tags,
+                excerpt, content, featuredImage, ogImage, imageCaption, imageCredit, metaTitle, metaDescription, tags,
                 featured, newsType, journalistId, journalistName, access_level
          FROM articles${filterSql} ORDER BY date DESC, id DESC LIMIT ? OFFSET ?`,
         [...params, safeLimit, offset],
@@ -87,7 +89,7 @@ export const getAdminArticleById = createServerFn({ method: "GET" })
     if (!id || id <= 0) return null;
     const rows = await query(
       `SELECT id, title, slug, category, city, state, country, author, views, status, date,
-              excerpt, content, featuredImage, ogImage, metaTitle, metaDescription, tags,
+              excerpt, content, featuredImage, ogImage, imageCaption, imageCredit, metaTitle, metaDescription, tags,
               featured, newsType, journalistId, journalistName, access_level
        FROM articles WHERE id = ? LIMIT 1`,
       [id],
@@ -129,6 +131,8 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
       "content",
       "featuredImage",
       "ogImage",
+      "imageCaption",
+      "imageCredit",
       "metaTitle",
       "metaDescription",
       "tags",
@@ -176,6 +180,8 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
       r.content ?? (existingRow?.content ?? ""),
       r.featuredImage ?? (existingRow?.featuredImage ?? ""),
       r.ogImage || r.featuredImage || (existingRow?.ogImage ?? ""),
+      r.imageCaption ?? (existingRow?.imageCaption ?? ""),
+      r.imageCredit ?? (existingRow?.imageCredit ?? ""),
       r.metaTitle ?? (existingRow?.metaTitle ?? ""),
       r.metaDescription ?? (existingRow?.metaDescription ?? ""),
       r.tags ?? (existingRow?.tags ?? ""),
@@ -276,7 +282,7 @@ export const getAllAdminArticles = createServerFn({ method: "GET" })
   .handler(async (): Promise<ArticleRow[]> => {
     const rows = await query(`
       SELECT id, title, slug, category, city, state, country, author, views, status, date,
-             excerpt, content, featuredImage, ogImage, metaTitle, metaDescription, tags, featured,
+             excerpt, content, featuredImage, ogImage, imageCaption, imageCredit, metaTitle, metaDescription, tags, featured,
              newsType, journalistId, journalistName, access_level
       FROM articles ORDER BY date DESC, id DESC
     `);
@@ -372,7 +378,7 @@ export const importAdminArticles = createServerFn({ method: "POST" })
 // Reusable lightweight column projection for lists, cards, search, and feeds (omits heavy HTML content)
 export const PUBLIC_CARD_COLUMNS = `
   id, title, slug, category, city, state, country, author, views, status, date,
-  excerpt, featuredImage, ogImage, tags, featured, newsType, journalistId, journalistName, access_level
+  excerpt, featuredImage, ogImage, imageCaption, imageCredit, tags, featured, newsType, journalistId, journalistName, access_level
 `;
 
 // Public: get articles for search page
