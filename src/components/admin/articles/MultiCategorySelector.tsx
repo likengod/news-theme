@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Star, X, Plus, Check, ChevronDown, Search, Tag, Edit3 } from "lucide-react";
-import { sections } from "@/lib/news-data";
 import { useCategories } from "@/components/site/AdSettingsContext";
 import { getCategories } from "@/lib/taxonomy.functions";
 
@@ -10,15 +9,14 @@ interface MultiCategorySelectorProps {
 }
 
 const POPULAR_SUGGESTIONS = [
-  "National",
-  "State",
   "Tripura",
-  "Business",
+  "State",
+  "National",
   "Politics",
   "Sports",
   "Entertainment",
   "Crime",
-  "Tech",
+  "Business",
 ];
 
 export default function MultiCategorySelector({
@@ -59,20 +57,18 @@ export default function MultiCategorySelector({
       .filter(Boolean);
   }, [value]);
 
-  // Combine all available categories (DB + default sections)
+  // Combine all available categories (DB categories only — no hardcoded defaults)
   const allAvailableCategories = useMemo(() => {
     const set = new Set<string>();
-    // First, default sections
-    sections.forEach((s) => set.add(s));
-    // Second, context categories
+    // Context categories (from root loader)
     (contextCats || []).forEach((c) => {
       if (c?.name) set.add(c.name);
     });
-    // Third, fetched categories
+    // Fetched DB categories
     (fetchedCats || []).forEach((c) => {
       if (c?.name) set.add(c.name);
     });
-    // Also include any currently selected custom categories
+    // Also include any currently selected categories (even custom ones)
     selectedCategories.forEach((s) => set.add(s));
     return Array.from(set);
   }, [contextCats, fetchedCats, selectedCategories]);
