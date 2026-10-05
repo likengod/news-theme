@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FileText,
   Image as ImageIcon,
@@ -46,33 +46,40 @@ export default function ArticleEditor({
     planType.includes("enterprise plus");
 
   // Normalize initial data to handle null database values
-  const normalizedInitial: Row = {
-    ...initial,
-    title: initial.title || "",
-    slug: initial.slug || "",
-    category: initial.category || "Northeast",
-    city: initial.city || "",
-    state: initial.state || "",
-    country: initial.country || "",
-    author: initial.author || currentUserAuthor || "Admin User",
-    excerpt: initial.excerpt || "",
-    content: initial.content || "",
-    featuredImage: initial.featuredImage || "",
-    ogImage: initial.ogImage || "",
-    metaTitle: initial.metaTitle || "",
-    metaDescription: initial.metaDescription || "",
-    tags: initial.tags || "",
-    views: initial.views || 0,
-    featured: !!initial.featured,
-    newsType: initial.newsType || "Standard",
-    journalistId: initial.journalistId || "",
-    journalistName: initial.journalistName || "",
-    access_level: initial.access_level || "Free",
-  };
+  const normalizeRow = (raw: Row): Row => ({
+    ...raw,
+    title: raw.title || "",
+    slug: raw.slug || "",
+    category: raw.category || "",
+    city: raw.city || "",
+    state: raw.state || "",
+    country: raw.country || "",
+    author: raw.author || currentUserAuthor || "Admin User",
+    excerpt: raw.excerpt || "",
+    content: raw.content || "",
+    featuredImage: raw.featuredImage || "",
+    ogImage: raw.ogImage || "",
+    metaTitle: raw.metaTitle || "",
+    metaDescription: raw.metaDescription || "",
+    tags: raw.tags || "",
+    date: raw.date || new Date().toISOString(),
+    views: raw.views || 0,
+    featured: !!raw.featured,
+    newsType: raw.newsType || "Standard",
+    journalistId: raw.journalistId || "",
+    journalistName: raw.journalistName || "",
+    access_level: raw.access_level || "Free",
+  });
 
-  const [r, setR] = useState<Row>(normalizedInitial);
+  const [r, setR] = useState<Row>(() => normalizeRow(initial));
   const [tab, setTab] = useState<Tab>("content");
   const [showAiModal, setShowAiModal] = useState(false);
+
+  useEffect(() => {
+    if (initial) {
+      setR(normalizeRow(initial));
+    }
+  }, [initial, currentUserAuthor]);
 
   const set = <K extends keyof Row>(k: K, v: Row[K]) => setR((p) => ({ ...p, [k]: v }));
 

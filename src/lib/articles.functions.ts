@@ -63,8 +63,9 @@ export const getAdminArticles = createServerFn({ method: "GET" })
     const [countRes, rows] = await Promise.all([
       query(`SELECT COUNT(*) AS total FROM articles${filterSql}`, params),
       query(
-        `SELECT id, title, slug, category, author, views, status, date,
-                featuredImage, featured, newsType, journalistId, journalistName, access_level
+        `SELECT id, title, slug, category, city, state, country, author, views, status, date,
+                excerpt, content, featuredImage, ogImage, metaTitle, metaDescription, tags,
+                featured, newsType, journalistId, journalistName, access_level
          FROM articles${filterSql} ORDER BY date DESC, id DESC LIMIT ? OFFSET ?`,
         [...params, safeLimit, offset],
       ),
@@ -76,6 +77,24 @@ export const getAdminArticles = createServerFn({ method: "GET" })
       total,
       totalPages: Math.max(1, Math.ceil(total / safeLimit)),
     };
+  });
+
+// Admin only: get single article by ID with all fields
+export const getAdminArticleById = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .validator((id: number) => id)
+  .handler(async ({ data: id }): Promise<ArticleRow | null> => {
+    if (!id || id <= 0) return null;
+    const rows = await query(
+      `SELECT id, title, slug, category, city, state, country, author, views, status, date,
+              excerpt, content, featuredImage, ogImage, metaTitle, metaDescription, tags,
+              featured, newsType, journalistId, journalistName, access_level
+       FROM articles WHERE id = ? LIMIT 1`,
+      [id],
+    );
+    if (!rows || rows.length === 0) return null;
+    const r = rows[0];
+    return { ...r, featured: Boolean(r.featured) };
   });
 
 // Admin only: save/create article
@@ -120,43 +139,52 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
       "access_level",
     ];
 
+    let isExisting = false;
+    let existingRow: any = null;
+    if (r.id && Number(r.id) > 0) {
+      const existingCheck = await query("SELECT * FROM articles WHERE id = ?", [r.id]);
+      if (existingCheck.length > 0) {
+        isExisting = true;
+        existingRow = existingCheck[0];
+      }
+    }
+
+    // Format date carefully: preserve original date if existing and not modified
     let formattedDate = new Date().toISOString().slice(0, 19).replace("T", " ");
     if (r.date) {
-      formattedDate = String(r.date).replace("T", " ").replace("Z", "").substring(0, 19);
+      let rawDate = String(r.date).replace("T", " ").replace("Z", "").trim();
+      if (rawDate.length === 16) {
+        rawDate += ":00";
+      }
+      formattedDate = rawDate.substring(0, 19);
+    } else if (existingRow?.date) {
+      formattedDate = String(existingRow.date).replace("T", " ").replace("Z", "").substring(0, 19);
     }
 
     const values = [
-      r.title,
+      r.title || (existingRow?.title ?? ""),
       slug,
-      r.category,
-      r.city,
-      r.state,
-      r.country,
-      r.author,
-      r.views || 0,
-      r.status,
+      r.category || (existingRow?.category ?? "Tripura"),
+      r.city ?? (existingRow?.city ?? ""),
+      r.state ?? (existingRow?.state ?? ""),
+      r.country ?? (existingRow?.country ?? ""),
+      r.author || (existingRow?.author ?? "Admin User"),
+      Number(r.views ?? existingRow?.views ?? 0) || 0,
+      r.status || (existingRow?.status ?? "Draft"),
       formattedDate,
-      r.excerpt,
-      r.content,
-      r.featuredImage,
-      r.ogImage || r.featuredImage,
-      r.metaTitle,
-      r.metaDescription,
-      r.tags,
-      r.featured ? 1 : 0,
-      r.newsType || "Standard",
-      r.journalistId,
-      r.journalistName,
-      r.access_level || "Free",
+      r.excerpt ?? (existingRow?.excerpt ?? ""),
+      r.content ?? (existingRow?.content ?? ""),
+      r.featuredImage ?? (existingRow?.featuredImage ?? ""),
+      r.ogImage || r.featuredImage || (existingRow?.ogImage ?? ""),
+      r.metaTitle ?? (existingRow?.metaTitle ?? ""),
+      r.metaDescription ?? (existingRow?.metaDescription ?? ""),
+      r.tags ?? (existingRow?.tags ?? ""),
+      (r.featured !== undefined ? Boolean(r.featured) : Boolean(existingRow?.featured)) ? 1 : 0,
+      r.newsType || (existingRow?.newsType ?? "Standard"),
+      r.journalistId ?? (existingRow?.journalistId ?? ""),
+      r.journalistName ?? (existingRow?.journalistName ?? ""),
+      r.access_level || (existingRow?.access_level ?? "Free"),
     ];
-
-    let isExisting = false;
-    if (r.id && Number(r.id) > 0) {
-      const existingCheck = await query("SELECT id FROM articles WHERE id = ?", [r.id]);
-      if (existingCheck.length > 0) {
-        isExisting = true;
-      }
-    }
 
     if (isExisting) {
       // Update

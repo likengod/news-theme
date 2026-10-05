@@ -50,13 +50,32 @@ export const fullUrl = (r: Row) => {
 export const formatDateTimeLocal = (dateVal: any): string => {
   if (!dateVal) return "";
   try {
-    const d = typeof dateVal === "string" ? new Date(dateVal) : dateVal;
-    if (d instanceof Date && !isNaN(d.getTime())) {
-      const pad = (n: number) => String(n).padStart(2, "0");
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    }
     if (typeof dateVal === "string") {
-      return dateVal.slice(0, 16).replace(" ", "T");
+      const s = dateVal.trim();
+      // If already YYYY-MM-DDTHH:mm, return first 16 chars
+      if (s.includes("T")) {
+        const d = new Date(s);
+        if (!isNaN(d.getTime())) {
+          const pad = (n: number) => String(n).padStart(2, "0");
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+        return s.slice(0, 16);
+      }
+      // If MySQL 'YYYY-MM-DD HH:mm:ss' format
+      if (s.includes(" ")) {
+        const iso = s.replace(" ", "T");
+        const d = new Date(iso);
+        if (!isNaN(d.getTime())) {
+          const pad = (n: number) => String(n).padStart(2, "0");
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+        return iso.slice(0, 16);
+      }
+      return s.slice(0, 16);
+    }
+    if (dateVal instanceof Date && !isNaN(dateVal.getTime())) {
+      const pad = (n: number) => String(n).padStart(2, "0");
+      return `${dateVal.getFullYear()}-${pad(dateVal.getMonth() + 1)}-${pad(dateVal.getDate())}T${pad(dateVal.getHours())}:${pad(dateVal.getMinutes())}`;
     }
   } catch (e) {
     console.error("formatDateTimeLocal error:", e);

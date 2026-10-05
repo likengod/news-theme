@@ -9,6 +9,7 @@ import { blankRow } from "@/lib/articles-store";
 import { authClient as supabase } from "@/lib/auth-client";
 import {
   getAdminArticles,
+  getAdminArticleById,
   saveAdminArticle,
   deleteAdminArticle,
   deleteAdminArticlesBulk,
@@ -41,6 +42,7 @@ const PAGE_SIZE = 20;
 function ArticlesPage() {
   const router = useRouter();
   const fetchArticlesFn = useServerFn(getAdminArticles);
+  const fetchArticleByIdFn = useServerFn(getAdminArticleById);
   const saveArticleFn = useServerFn(saveAdminArticle);
   const deleteArticleFn = useServerFn(deleteAdminArticle);
   const deleteArticlesBulkFn = useServerFn(deleteAdminArticlesBulk);
@@ -271,7 +273,19 @@ function ArticlesPage() {
         allOnPageSelected={allOnPageSelected}
         onTogglePage={togglePage}
         onToggleOne={toggleOne}
-        onEdit={(row) => setEditing(row)}
+        onEdit={async (row) => {
+          setEditing(row);
+          if (row.id) {
+            try {
+              const full = await fetchArticleByIdFn({ data: row.id });
+              if (full) {
+                setEditing(full as Row);
+              }
+            } catch (err) {
+              console.warn("Could not fetch full article by ID:", err);
+            }
+          }
+        }}
         onRequestDelete={requestDelete}
         page={page}
         totalPages={totalPages}
@@ -290,6 +304,7 @@ function ArticlesPage() {
           }
         >
           <ArticleEditor
+            key={editing ? `edit-${editing.id}` : "create-article"}
             initial={editing ?? blankRow(currentUserAuthor)}
             currentUserAuthor={currentUserAuthor}
             authorOptions={authorOptions}
