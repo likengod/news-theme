@@ -11,6 +11,7 @@ export type SiteSettings = {
   contactEmail: string;
   contactPhone: string;
   address: string;
+  pinCode?: string;
   emailNewsTips?: string;
   emailAdvertising?: string;
   emailCareers?: string;
@@ -254,6 +255,7 @@ export const defaultSettings: SiteSettings = {
   contactEmail: "contact@todaytripura.com",
   contactPhone: "+1 (555) 234-5678",
   address: "Agartala, Tripura, India",
+  pinCode: "799006",
   emailNewsTips: "tips@todaytripura.com",
   emailAdvertising: "ads@todaytripura.com",
   emailCareers: "careers@todaytripura.com",

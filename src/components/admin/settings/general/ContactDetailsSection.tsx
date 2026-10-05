@@ -40,6 +40,19 @@ export function ContactDetailsSection({ settings, update }: ContactDetailsSectio
           />
         </div>
 
+        <div>
+          <label htmlFor="pinCode" className="mb-1 block text-xs font-semibold text-slate-600">PIN / ZIP Code</label>
+          <input
+            id="pinCode"
+            name="pinCode"
+            type="text"
+            value={settings.pinCode || ""}
+            onChange={(e) => update("pinCode", e.target.value)}
+            placeholder="799006"
+            className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
+          />
+        </div>
+
         <div className="sm:col-span-2">
           <label htmlFor="officeAddress" className="mb-1 block text-xs font-semibold text-slate-600">Office Address</label>
           <textarea

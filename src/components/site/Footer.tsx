@@ -216,25 +216,32 @@ export function Footer() {
             <ul className="mt-3 space-y-2.5 text-sm text-muted-foreground">
               <li className="flex items-start justify-center gap-2 md:justify-end">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                <span>
-                  Agartala, Tripura (W) India
-                  <br />
-                  Pin: 799006
+                <span className="text-center md:text-right">
+                  {s.address || "Agartala, Tripura, India"}
+                  {(s.pinCode || !s.address) && (
+                    <>
+                      <br />
+                      Pin: {s.pinCode || "799006"}
+                    </>
+                  )}
                 </span>
               </li>
               <li className="flex items-center justify-center gap-2 md:justify-end">
                 <Phone className="h-4 w-4 shrink-0" />
-                <a href="tel:+919999999999" className="hover:text-foreground hover:underline">
-                  +91 99999 99999
+                <a
+                  href={`tel:${(s.contactPhone || "+91 99999 99999").replace(/\s+/g, "")}`}
+                  className="hover:text-foreground hover:underline"
+                >
+                  {s.contactPhone || "+91 99999 99999"}
                 </a>
               </li>
               <li className="flex items-center justify-center gap-2 md:justify-end">
                 <Mail className="h-4 w-4 shrink-0" />
                 <a
-                  href="mailto:hello@northeasttimeline.com"
+                  href={`mailto:${s.contactEmail || "contact@todaytripura.com"}`}
                   className="hover:text-foreground hover:underline"
                 >
-                  hello@northeasttimeline.com
+                  {s.contactEmail || "contact@todaytripura.com"}
                 </a>
               </li>
             </ul>
