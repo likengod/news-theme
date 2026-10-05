@@ -8,6 +8,7 @@ import { ChevronDown, Home, Search, X } from "lucide-react";
 import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
 import { useTheme } from "@/lib/theme";
 import { getAccessibleLogoColor } from "@/lib/color-utils";
+import { SearchBox } from "./SearchModal";
 
 const otherCategories = ["Entertainment", "Health", "Education", "Jobs", "Travel", "Lifestyle"];
 
@@ -291,20 +292,20 @@ export function Masthead() {
         </div>
       </header>
 
-      <nav className="hidden border-t border-border md:block md:sticky md:top-11 md:z-30 md:bg-background md:border-b h-11">
-        <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-4 px-4">
-          <div className="flex flex-1 flex-wrap items-center justify-center gap-1 text-sm font-semibold uppercase tracking-wider">
+      <nav className="sticky top-0 z-40 w-full border-t border-b border-border bg-background/95 backdrop-blur-md shadow-xs h-11 transition-all">
+        <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-2 px-2 sm:px-4">
+          <div className="flex flex-1 items-center justify-start md:justify-center gap-1 text-xs sm:text-sm font-semibold uppercase tracking-wider overflow-x-auto no-scrollbar scroll-smooth py-1">
             <Link
               to="/"
               aria-label="Home"
-              className="flex items-center whitespace-nowrap px-3 py-1 transition-colors hover:underline"
+              className="flex items-center shrink-0 whitespace-nowrap px-2.5 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
             >
               <Home className="h-4 w-4" />
             </Link>
             {navItems.map((item) =>
               item.name === "Others" ? (
-                <div key={item.name} className="group relative">
-                  <button className="flex items-center gap-1 whitespace-nowrap px-3 py-1 uppercase transition-colors hover:underline">
+                <div key={item.name} className="group relative shrink-0">
+                  <button className="flex items-center gap-1 whitespace-nowrap px-2.5 py-1 uppercase text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors">
                     {item.name}
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
@@ -316,7 +317,7 @@ export function Masthead() {
                           href={c.redirectUrl}
                           target={c.redirectUrl.startsWith("http") ? "_blank" : undefined}
                           rel={c.redirectUrl.startsWith("http") ? "noopener noreferrer" : undefined}
-                          className="block px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-muted"
+                          className="block px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-muted hover:text-red-600 transition-colors"
                         >
                           {c.name}
                         </a>
@@ -325,7 +326,7 @@ export function Masthead() {
                           key={c.slug}
                           to="/$slug"
                           params={{ slug: c.slug }}
-                          className="block px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-muted"
+                          className="block px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-muted hover:text-red-600 transition-colors"
                         >
                           {c.name}
                         </Link>
@@ -339,7 +340,7 @@ export function Masthead() {
                   href={item.redirectUrl}
                   target={item.redirectUrl.startsWith("http") ? "_blank" : undefined}
                   rel={item.redirectUrl.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className="whitespace-nowrap px-3 py-1 transition-colors hover:underline"
+                  className="shrink-0 whitespace-nowrap px-2.5 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
                 >
                   {item.name}
                 </a>
@@ -348,12 +349,18 @@ export function Masthead() {
                   key={item.slug}
                   to="/$slug"
                   params={{ slug: item.slug }}
-                  className="whitespace-nowrap px-3 py-1 transition-colors hover:underline"
+                  className="shrink-0 whitespace-nowrap px-2.5 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                  activeProps={{
+                    className: "shrink-0 whitespace-nowrap px-2.5 py-1 text-red-600 dark:text-red-500 font-bold",
+                  }}
                 >
                   {item.name}
                 </Link>
               ),
             )}
+          </div>
+          <div className="hidden sm:flex shrink-0 items-center pl-2 border-l border-border/60">
+            <SearchBox className="p-1.5 text-foreground/80 hover:text-foreground hover:bg-muted rounded-full transition-colors" />
           </div>
         </div>
       </nav>

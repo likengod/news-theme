@@ -106,7 +106,7 @@ function Home() {
   const usedIds = new Set<number>();
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen bg-background text-foreground overflow-x-clip w-full max-w-full">
       {/* Above-the-fold: render immediately for fastest first paint */}
       <Header breakingArticles={dbArticles} />
 

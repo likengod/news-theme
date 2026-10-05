@@ -142,7 +142,7 @@ export function TopBar() {
 
   return (
     <div
-      className="sticky top-0 z-45 h-11 border-b border-border bg-background transition-colors duration-300"
+      className="relative z-20 h-11 border-b border-border bg-background transition-colors duration-300"
       style={{
         backgroundColor: (mounted && settings.topBarBgColor) || undefined,
         borderColor: mounted && settings.topBarBgColor ? "transparent" : undefined,

@@ -218,7 +218,7 @@ function ArticlePage() {
   const heroCredit = data.imageCredit?.trim() || siteName;
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen bg-background text-foreground overflow-x-clip w-full max-w-full">
       <ContentProtectionGuard />
       <ReadingProgress />
       <Header />
