@@ -1,0 +1,2 @@
+import{t as e}from"./jsx-runtime-CMgEUHpv.js";import{t}from"./PolicyLayout-mw2rdju9.js";import{d as n}from"./index-CwQhOya8.js";var r=e();function i(){let e=n.useLoaderData();return(0,r.jsx)(t,{title:e?.title||``,intro:e?.intro||``,sections:e?.sections&&e.sections.length>0?e.sections.map(e=>({heading:e.heading,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e.body}})})):[{heading:e?.title||``,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e?.body||``}})}]})}export{i as component};
+//# sourceMappingURL=data-deletion-policy-CDmqyMAC.js.map

@@ -7,7 +7,7 @@ export function HeroSidebarLeft({ activeLeftItems }: { activeLeftItems: any[] })
       {activeLeftItems.map((it, i) => {
         let visibilityClass = "";
         if (i >= 5) {
-          visibilityClass = "hidden xl:block";
+          visibilityClass = "hidden 2xl:block";
         }
         return (
           <div key={`${it.title}-${i}`} className={`${i === 0 ? "pb-3" : "py-3"} ${visibilityClass}`}>
