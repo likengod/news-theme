@@ -77,8 +77,8 @@ export function PostFeaturedImageAd() {
   if (slotMode === "script") {
     if (!slotScript || !slotScript.trim()) return null;
     return (
-      <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-4 sm:right-4 z-20 transition-all duration-300">
-        <div className="relative rounded-xl border border-slate-200/90 bg-white/95 backdrop-blur-md p-2 shadow-xl">
+      <div className="absolute bottom-2 inset-x-2 sm:bottom-3 sm:inset-x-4 z-20 flex items-center justify-center pointer-events-auto">
+        <div className="relative inline-flex max-w-full items-center justify-center overflow-hidden">
           {/* Dismiss button */}
           <button
             type="button"
@@ -89,9 +89,9 @@ export function PostFeaturedImageAd() {
             }}
             title="Close ad"
             aria-label="Close ad"
-            className="absolute -top-2.5 -right-2.5 z-30 flex h-6 w-6 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 shadow-md transition hover:bg-slate-100 hover:text-slate-900"
+            className="absolute top-1 right-1 z-30 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-xs transition"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-3 w-3" />
           </button>
           <div className="w-full flex items-center justify-center overflow-hidden min-h-[50px] sm:min-h-[90px]">
             <ScriptAdRenderer code={slotScript} />
@@ -105,15 +105,16 @@ export function PostFeaturedImageAd() {
   if (sortedAds.length === 0) return null;
 
   const currentAd = sortedAds[currentIndex % sortedAds.length];
-  const headline = currentAd.headline || currentAd.label || "Exclusive Partner Offer";
-  const sponsor = currentAd.sponsor || (currentAd.headline ? currentAd.label : "Sponsored");
+  const altText = currentAd.label || currentAd.headline || "Advertisement";
   const mobileImage = currentAd.imagePortrait || currentAd.image;
   const desktopImage = currentAd.imageLandscape || currentAd.image;
 
+  if (!mobileImage && !desktopImage) return null;
+
   return (
-    <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-4 sm:right-4 z-20 transition-all duration-300">
-      <div className="group/ad relative overflow-hidden rounded-xl border border-slate-200/90 bg-white/95 backdrop-blur-md shadow-xl transition-all hover:bg-white hover:shadow-2xl">
-        {/* Dismiss button (X) pinned at top-right */}
+    <div className="absolute bottom-2 inset-x-2 sm:bottom-3 sm:inset-x-4 z-20 flex items-center justify-center pointer-events-auto">
+      <div className="relative inline-flex max-w-full items-center justify-center overflow-hidden">
+        {/* Dismiss button (X) */}
         <button
           type="button"
           onClick={(e) => {
@@ -123,60 +124,35 @@ export function PostFeaturedImageAd() {
           }}
           title="Close ad"
           aria-label="Close ad"
-          className="absolute top-1.5 right-1.5 z-30 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-md border border-slate-200 bg-white/90 text-slate-500 shadow-2xs transition hover:bg-slate-100 hover:text-slate-900"
+          className="absolute top-1 right-1 z-30 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-xs transition"
         >
-          <X className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+          <X className="h-3 w-3" />
         </button>
 
         <a
           href={currentAd.href || "#"}
           target={currentAd.href && currentAd.href !== "#" ? "_blank" : undefined}
-          rel="noopener noreferrer"
-          className="flex items-center gap-3 sm:gap-4 p-2 sm:p-2.5 pr-8 sm:pr-10 text-left transition"
+          rel="noopener sponsored"
+          className="block max-w-full transition hover:opacity-95"
         >
-          {/* Ad Image / Graphic: Mobile image on small screens, Desktop image on larger screens */}
-          <div className="shrink-0 overflow-hidden rounded-lg bg-slate-100 border border-slate-100 flex items-center justify-center">
-            {/* Mobile View Image */}
-            {mobileImage && (
-              <img
-                src={mobileImage}
-                alt={sponsor || headline}
-                className="block sm:hidden h-12 w-20 max-w-[80px] object-cover"
-                loading="eager"
-              />
-            )}
-            {/* Desktop View Image */}
-            {desktopImage && (
-              <img
-                src={desktopImage}
-                alt={sponsor || headline}
-                className="hidden sm:block h-14 w-28 max-w-[112px] md:h-16 md:w-32 md:max-w-[128px] object-cover"
-                loading="eager"
-              />
-            )}
-          </div>
-
-          {/* Headline & Sponsor Branding */}
-          <div className="flex-1 min-w-0 flex flex-col justify-center">
-            <h4 className="text-xs sm:text-sm md:text-[15px] font-bold text-slate-900 leading-tight sm:leading-snug line-clamp-2 group-hover/ad:text-indigo-600 transition-colors">
-              {headline}
-            </h4>
-            <div className="mt-0.5 sm:mt-1 flex items-center gap-1.5">
-              <span className="text-[10px] sm:text-xs font-semibold text-slate-600 truncate">
-                {sponsor}
-              </span>
-              <span className="rounded bg-slate-100 px-1 py-0.2 text-[8.5px] sm:text-[9.5px] font-bold uppercase tracking-wider text-slate-500 border border-slate-200">
-                Ad
-              </span>
-            </div>
-          </div>
-
-          {/* Circular Black Right Arrow CTA button (matches reference image) */}
-          <div className="shrink-0 flex items-center justify-center">
-            <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-black text-white shadow-xs group-hover/ad:bg-slate-800 group-hover/ad:scale-105 transition-all">
-              <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
-            </div>
-          </div>
+          {/* Mobile View Banner */}
+          {mobileImage && (
+            <img
+              src={mobileImage}
+              alt={altText}
+              className="block sm:hidden w-auto max-w-full h-auto max-h-[60px] object-contain mx-auto"
+              loading="eager"
+            />
+          )}
+          {/* Desktop View Banner */}
+          {desktopImage && (
+            <img
+              src={desktopImage}
+              alt={altText}
+              className="hidden sm:block w-auto max-w-full h-auto max-h-[90px] object-contain mx-auto"
+              loading="eager"
+            />
+          )}
         </a>
       </div>
     </div>

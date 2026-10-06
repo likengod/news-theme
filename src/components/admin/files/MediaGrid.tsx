@@ -26,7 +26,7 @@ export type MediaItemDef = {
 
 function SafeImage({ src, alt, className, ...props }: any) {
   const [error, setError] = useState(false);
-  if (error || !src) {
+  if (error || !src || src.trim() === "") {
     return (
       <div className="flex flex-col items-center justify-center text-slate-400 h-full w-full bg-slate-100">
         <ImageIcon className="h-6 w-6 mb-1 opacity-50" />

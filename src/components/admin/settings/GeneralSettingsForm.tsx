@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import { Save } from "lucide-react";
 import { toast } from "sonner";
-import { loadSettings, saveSettings, cleanCopyright, type SiteSettings } from "@/lib/site-content";
+import {
+  loadSettings,
+  saveSettings,
+  cleanCopyright,
+  isEnterpriseLicense,
+  isEnterprisePlusLicense,
+  type SiteSettings,
+} from "@/lib/site-content";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { BrandInfoSection } from "./general/BrandInfoSection";
 import { LogoUploadersSection } from "./general/LogoUploadersSection";

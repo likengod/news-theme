@@ -10,7 +10,7 @@ type Props = {
 export function ArticleHero({ src, alt, caption, credit }: Props) {
   return (
     <figure className="mb-8">
-      <div className="relative overflow-hidden group">
+      <div className="relative overflow-hidden group rounded-xl border border-border/60 bg-black/5 dark:bg-black/40 flex items-center justify-center">
         <img
           src={src}
           alt={alt}
@@ -19,7 +19,7 @@ export function ArticleHero({ src, alt, caption, credit }: Props) {
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          className="aspect-[16/9] w-full object-cover"
+          className="w-full h-auto max-h-[550px] object-contain object-center transition-transform duration-300 group-hover:scale-[1.01]"
         />
         <PostFeaturedImageAd />
       </div>

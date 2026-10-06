@@ -1,0 +1,2 @@
+import{a as e}from"./jsx-runtime-CMgEUHpv.js";import{t}from"./react-DVOt8n3w.js";import{t as n}from"./useRouter-UsdK6dNV.js";var r=e(t(),1);function i(e){let t=n();return r.useCallback(n=>t.navigate({...n,from:n.from??e?.from}),[e?.from,t])}export{i as t};
+//# sourceMappingURL=useNavigate-gSrjGP_B.js.map

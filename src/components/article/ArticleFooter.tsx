@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import { Link } from "@tanstack/react-router";
-import { slugify } from "@/lib/news-data";
 
 const RelatedNews = lazy(() =>
   import("@/components/site/RelatedNews").then((m) => ({ default: m.RelatedNews })),
@@ -14,41 +13,40 @@ type Props = {
   author: string;
   tags?: string[];
   articleTitle?: string;
+  category?: string;
 };
-
-const DEFAULT_TAGS = ["Breaking", "Northeast", "Report", "Update"];
 
 export function ArticleFooter({
   slug,
   author,
-  tags = DEFAULT_TAGS,
+  tags,
   articleTitle = "Untitled Article",
+  category,
 }: Props) {
-  const initials = author
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
+  const hasTags = Array.isArray(tags) && tags.length > 0;
 
   return (
     <footer className="mt-2">
-      <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
-        <span className="mr-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Tags:
-        </span>
-        {tags.map((t) => (
-          <Link
-            key={t}
-            to="/$slug"
-            params={{ slug: slugify(t) }}
-            className="rounded-full border border-border px-3 py-1 text-xs uppercase tracking-widest text-muted-foreground transition hover:bg-muted hover:text-foreground"
-          >
-            {t}
-          </Link>
-        ))}
-      </div>
+      {hasTags && (
+        <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
+          <span className="mr-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Tags:
+          </span>
+          {tags.map((t) => (
+            <Link
+              key={t}
+              to="/search"
+              search={{ q: t }}
+              className="rounded-full border border-border px-3 py-1 text-xs uppercase tracking-widest text-muted-foreground transition hover:bg-muted hover:text-foreground hover:border-foreground/30"
+            >
+              {t}
+            </Link>
+          ))}
+        </div>
+      )}
 
       <Suspense fallback={<div className="mt-8 h-24 animate-pulse rounded bg-muted" />}>
-        <RelatedNews currentSlug={slug} />
+        <RelatedNews currentSlug={slug} category={category} />
       </Suspense>
 
       <Suspense fallback={<div className="mt-8 h-32 animate-pulse rounded bg-muted" />}>
@@ -57,3 +55,5 @@ export function ArticleFooter({
     </footer>
   );
 }
+
+export default ArticleFooter;

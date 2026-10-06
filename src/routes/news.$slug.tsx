@@ -218,6 +218,22 @@ function ArticlePage() {
   const heroCaption = data.imageCaption?.trim() || "";
   const heroCredit = data.imageCredit?.trim() || siteName;
 
+  const isLeftNavVisible = Boolean(settings?.showArticleLeftNav);
+  const isRightSidebarVisible = settings?.showArticleRightSidebar !== false;
+
+  const gridLayoutClass = useMemo(() => {
+    if (isLeftNavVisible && isRightSidebarVisible) {
+      return "grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_320px]";
+    }
+    if (isLeftNavVisible && !isRightSidebarVisible) {
+      return "grid-cols-1 xl:grid-cols-[140px_minmax(0,1fr)]";
+    }
+    if (!isLeftNavVisible && isRightSidebarVisible) {
+      return "grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px]";
+    }
+    return "grid-cols-1 max-w-4xl mx-auto";
+  }, [isLeftNavVisible, isRightSidebarVisible]);
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-clip w-full max-w-full">
       <ContentProtectionGuard />
@@ -225,8 +241,8 @@ function ArticlePage() {
       <Header />
 
       <main className="mx-auto max-w-7xl px-3 sm:px-4 pt-3 pb-12 w-full max-w-full min-w-0">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_320px] w-full max-w-full min-w-0 items-start">
-          <ArticleLeftNav />
+        <div className={`grid gap-6 ${gridLayoutClass} w-full max-w-full min-w-0 items-start`}>
+          {isLeftNavVisible && <ArticleLeftNav />}
           <article className="relative w-full max-w-full min-w-0">
             <ArticleHeader
               title={data.title}
@@ -316,12 +332,20 @@ function ArticlePage() {
               )}
 
               {isAuthorized && (
-                <ArticleFooter slug={slug} author={data.author} articleTitle={data.title} />
+                <ArticleFooter
+                  slug={slug}
+                  author={data.author}
+                  articleTitle={data.title}
+                  tags={data.tags}
+                  category={data.category}
+                />
               )}
             </div>
           </article>
 
-          <ArticleSidebar trending={trendingArticles} currentSlug={slug} />
+          {isRightSidebarVisible && (
+            <ArticleSidebar trending={trendingArticles} currentSlug={slug} />
+          )}
         </div>
       </main>
 

@@ -7,15 +7,27 @@ type Props = {
   hint?: string;
   value: SectionStyle;
   showCategory?: boolean;
+  showToggle?: boolean;
+  showImageFit?: boolean;
   onChange: (v: SectionStyle) => void;
   children?: React.ReactNode;
 };
 
-export function SectionCard({ label, hint, value, showCategory, onChange, children }: Props) {
+export function SectionCard({
+  label,
+  hint,
+  value,
+  showCategory,
+  showToggle,
+  showImageFit,
+  onChange,
+  children,
+}: Props) {
   const [showStyle, setShowStyle] = useState(false);
   const [localTitle, setLocalTitle] = useState(value.title);
   const [localColor, setLocalColor] = useState(value.color);
   const [localFontSize, setLocalFontSize] = useState(value.fontSize);
+  const isEnabled = value.enabled !== false;
 
   useEffect(() => {
     setLocalTitle(value.title);
@@ -38,13 +50,44 @@ export function SectionCard({ label, hint, value, showCategory, onChange, childr
     onChange({ ...value, fontSize: val });
   };
 
+  const handleToggle = () => {
+    onChange({ ...value, enabled: !isEnabled });
+  };
+
   return (
-    <div className="rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:border-slate-300">
+    <div className={`rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:border-slate-300 ${!isEnabled ? "opacity-60 bg-slate-50/50" : ""}`}>
       {/* Header row */}
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/60 px-4 py-2.5">
-        <div>
-          <p className="text-sm font-semibold text-slate-900">{label}</p>
-          {hint && <p className="text-[11px] text-slate-500">{hint}</p>}
+        <div className="flex items-center gap-2.5">
+          {showToggle && (
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isEnabled}
+              onClick={handleToggle}
+              title={isEnabled ? "Disable section" : "Enable section"}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                isEnabled ? "bg-slate-900" : "bg-slate-300"
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs transition duration-200 ${
+                  isEnabled ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
+          )}
+          <div>
+            <p className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
+              {label}
+              {showToggle && (
+                <span className={`text-[10px] px-1.5 py-0.2 rounded font-medium ${isEnabled ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-600"}`}>
+                  {isEnabled ? "Visible" : "Hidden"}
+                </span>
+              )}
+            </p>
+            {hint && <p className="text-[11px] text-slate-500">{hint}</p>}
+          </div>
         </div>
         <div
           className="hidden max-w-[180px] truncate font-bold uppercase tracking-[0.15em] sm:block"
@@ -84,6 +127,23 @@ export function SectionCard({ label, hint, value, showCategory, onChange, childr
                     {c}
                   </option>
                 ))}
+              </select>
+            </label>
+          )}
+
+          {showImageFit && (
+            <label className="block">
+              <span className="mb-1 block text-[11px] font-medium text-slate-500">
+                Featured image display style
+              </span>
+              <select
+                value={value.imageFit ?? "contain"}
+                onChange={(e) => onChange({ ...value, imageFit: e.target.value as any })}
+                className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-sm font-semibold focus:border-slate-900 focus:outline-none"
+              >
+                <option value="contain">Fit Full Image (Uncropped / Show 100% of photo &amp; text)</option>
+                <option value="natural">Natural Aspect Ratio (Original photo shape)</option>
+                <option value="cover">Crop to Fill Card (Zoom &amp; Fill)</option>
               </select>
             </label>
           )}

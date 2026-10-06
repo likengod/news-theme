@@ -120,7 +120,7 @@ export function HeroMain({ activeLeads, cfg }: any) {
     carouselItems.push(
       <CarouselItem key={`news-${index}`}>
         <Link to="/news/$slug" params={{ slug: featured.slug || "sample" }} className="group block">
-          <div className="overflow-hidden relative">
+          <div className="overflow-hidden relative rounded-xl border border-border/40 bg-black/5 dark:bg-black/30 flex items-center justify-center">
             <img
               src={featured.img}
               alt={featured.title}
@@ -130,7 +130,7 @@ export function HeroMain({ activeLeads, cfg }: any) {
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
               width={800}
               height={500}
-              className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="w-full h-auto max-h-[480px] object-contain object-center transition-transform duration-500 group-hover:scale-[1.02]"
             />
           </div>
           <h2 className="headline mt-3 text-xl font-bold text-foreground group-hover:underline md:mt-4 md:text-3xl">

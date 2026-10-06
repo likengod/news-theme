@@ -165,7 +165,7 @@ export function slugify(input: any): string {
 const LOCAL_IMAGES = [heroImg, fedImg, techImg, oilImg, cryptoImg, wsImg, tradeImg];
 
 export function getArticleImage(img?: string, index?: number): string {
-  if (!img || img === "/placeholder.svg" || img.includes("placeholder")) {
+  if (!img || img.trim() === "" || img === "/placeholder.svg" || img.includes("placeholder")) {
     const idx = (index ?? 0) % LOCAL_IMAGES.length;
     return LOCAL_IMAGES[idx];
   }

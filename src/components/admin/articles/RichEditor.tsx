@@ -58,6 +58,15 @@ const HIGHLIGHT_PALETTE_ROWS = [
   ["#f1f5f9", "#e2e8f0", "#cbd5e1", "#94a3b8"],
 ];
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function RichEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLInputElement>(null);
@@ -69,7 +78,8 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
 
   const [fontOptions, setFontOptions] = useState<string[]>(["Default"]);
   const [mode, setMode] = useState<"visual" | "plain">("visual");
-  const [currentSize, setCurrentSize] = useState<string>("16");
+  // Default font size is 14px as requested
+  const [currentSize, setCurrentSize] = useState<string>("14");
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   const [textColorOpen, setTextColorOpen] = useState(false);
@@ -137,8 +147,11 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
 
   const saveSelection = () => {
     const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0) {
-      savedSelection.current = sel.getRangeAt(0).cloneRange();
+    if (sel && sel.rangeCount > 0 && ref.current) {
+      const range = sel.getRangeAt(0);
+      if (ref.current.contains(range.commonAncestorContainer)) {
+        savedSelection.current = range.cloneRange();
+      }
     }
   };
 
@@ -154,26 +167,55 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
   };
 
   const exec = (cmd: string, val?: string) => {
-    focus();
+    restoreSelection();
     document.execCommand(cmd, false, val);
     emit();
+    saveSelection();
   };
 
   const formatBlock = (tag: string) => {
-    focus();
+    restoreSelection();
     try {
       const ok = document.execCommand("formatBlock", false, `<${tag}>`);
       if (!ok) document.execCommand("formatBlock", false, tag);
     } catch {
       document.execCommand("formatBlock", false, tag);
     }
+
+    // When converting to a heading (h2, h3, h4), strip any trapped paragraph inline font-size
+    // so the heading renders at its true heading size without being squashed to 14px!
+    const sel = window.getSelection();
+    if (sel && sel.anchorNode && ref.current) {
+      let node: Node | null = sel.anchorNode;
+      while (node && node !== ref.current) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as HTMLElement;
+          const tagName = el.tagName.toLowerCase();
+          if (["h2", "h3", "h4"].includes(tagName)) {
+            el.style.fontSize = "";
+            el.querySelectorAll<HTMLElement>("span, font, [style*='font-size']").forEach((child) => {
+              child.style.fontSize = "";
+            });
+            break;
+          }
+          if (tagName === "p") {
+            el.style.fontSize = "14px";
+            break;
+          }
+        }
+        node = node.parentNode;
+      }
+    }
+
     emit();
+    saveSelection();
   };
 
   const insertHTML = (html: string) => {
-    focus();
+    restoreSelection();
     document.execCommand("insertHTML", false, html);
     emit();
+    saveSelection();
   };
 
   const insertImage = () => {
@@ -234,7 +276,7 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
 
   const insertTable = () => {
     insertHTML(`
-      <table style="width:100%;border-collapse:collapse;margin:16px 0;border:1px solid #cbd5e1">
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;border:1px solid #cbd5e1;font-size:14px">
         <thead>
           <tr style="background:#f8fafc">
             <th style="border:1px solid #cbd5e1;padding:8px 12px;text-align:left;font-weight:600">Header 1</th>
@@ -263,81 +305,174 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
 
   const setFontFamily = (f: string) => {
     if (f === "Default") return;
-    focus();
+    restoreSelection();
     const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
+    if (!sel || sel.rangeCount === 0 || !ref.current) return;
 
-    if (sel.isCollapsed) {
-      let node: Node | null = sel.anchorNode;
+    const fontValue = `'${f}', serif`;
+    const range = sel.getRangeAt(0);
+
+    if (range.collapsed) {
+      let node: Node | null = range.startContainer;
       while (node && node !== ref.current) {
         if (node.nodeType === Node.ELEMENT_NODE) {
           const el = node as HTMLElement;
           const tagName = el.tagName.toLowerCase();
           if (["p", "div", "li", "h1", "h2", "h3", "h4", "blockquote"].includes(tagName)) {
-            el.style.fontFamily = `'${f}', serif`;
+            el.style.fontFamily = fontValue;
             emit();
+            saveSelection();
             return;
           }
         }
         node = node.parentNode;
       }
-      insertHTML(`<span style="font-family:'${f}',serif">&#8203;</span>`);
       return;
     }
 
-    const range = sel.getRangeAt(0);
-    const span = document.createElement("span");
-    span.style.fontFamily = `'${f}', serif`;
-    span.appendChild(range.extractContents());
-    range.insertNode(span);
+    // Check multi-block selection (e.g. Ctrl+A or multiple paragraphs)
+    const allBlocks = ref.current.querySelectorAll<HTMLElement>("p, h2, h3, h4, li, blockquote");
+    const selectedBlocks: HTMLElement[] = [];
+    allBlocks.forEach((b) => {
+      if (sel.containsNode(b, true)) selectedBlocks.push(b);
+    });
 
-    const newRange = document.createRange();
-    newRange.selectNodeContents(span);
-    sel.removeAllRanges();
-    sel.addRange(newRange);
+    if (selectedBlocks.length > 1) {
+      selectedBlocks.forEach((b) => {
+        b.style.fontFamily = fontValue;
+      });
+      emit();
+      saveSelection();
+      return;
+    }
+
+    // Inline selection
+    document.execCommand("fontName", false, f);
+    const fontTags = ref.current.querySelectorAll(`font[face='${f}']`);
+    fontTags.forEach((font) => {
+      const span = document.createElement("span");
+      span.style.fontFamily = fontValue;
+      while (font.firstChild) span.appendChild(font.firstChild);
+      font.parentNode?.replaceChild(span, font);
+    });
     emit();
+    saveSelection();
   };
 
+  /**
+   * Robust Font Size Implementation:
+   * Works on:
+   * 1. Select All (Ctrl+A / multiple paragraphs)
+   * 2. Separate selected words/phrases (partial selection)
+   * 3. Cursor position (collapsed)
+   */
   const setFontSize = (px: string) => {
-    focus();
+    restoreSelection();
     setCurrentSize(px);
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
 
-    if (sel.isCollapsed) {
-      let node: Node | null = sel.anchorNode;
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || !ref.current) return;
+
+    const range = sel.getRangeAt(0);
+
+    // CASE 1: Cursor is collapsed (no selection, typing at point)
+    if (range.collapsed) {
+      let node: Node | null = range.startContainer;
+      let blockEl: HTMLElement | null = null;
       while (node && node !== ref.current) {
         if (node.nodeType === Node.ELEMENT_NODE) {
           const el = node as HTMLElement;
-          const tagName = el.tagName.toLowerCase();
-          if (["p", "div", "li", "h1", "h2", "h3", "h4", "blockquote"].includes(tagName)) {
-            el.style.fontSize = `${px}px`;
-            emit();
-            return;
+          const t = el.tagName.toLowerCase();
+          if (["p", "div", "li", "h2", "h3", "h4", "blockquote"].includes(t)) {
+            blockEl = el;
+            break;
           }
         }
         node = node.parentNode;
       }
-      insertHTML(`<span style="font-size:${px}px">&#8203;</span>`);
+
+      if (blockEl) {
+        blockEl.style.fontSize = `${px}px`;
+        blockEl.querySelectorAll<HTMLElement>("span[style*='font-size'], font").forEach((s) => {
+          s.style.fontSize = "";
+        });
+      } else {
+        const span = document.createElement("span");
+        span.style.fontSize = `${px}px`;
+        span.innerHTML = "&#8203;";
+        range.insertNode(span);
+        const newRange = document.createRange();
+        newRange.setStart(span, 1);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+      }
+      emit();
+      saveSelection();
       return;
     }
 
-    const range = sel.getRangeAt(0);
-    const span = document.createElement("span");
-    span.style.fontSize = `${px}px`;
-    span.appendChild(range.extractContents());
-    range.insertNode(span);
+    // CASE 2: Multi-block or complete block selection (Select-All / multiple paragraphs)
+    const allBlocks = ref.current.querySelectorAll<HTMLElement>("p, h2, h3, h4, li, blockquote");
+    const selectedBlocks: HTMLElement[] = [];
+    allBlocks.forEach((block) => {
+      if (sel.containsNode(block, true)) {
+        selectedBlocks.push(block);
+      }
+    });
 
-    const newRange = document.createRange();
-    newRange.selectNodeContents(span);
-    sel.removeAllRanges();
-    sel.addRange(newRange);
+    const isAllOrMultiBlock =
+      selectedBlocks.length > 1 ||
+      (selectedBlocks.length === 1 &&
+        range.toString().trim().length > 0 &&
+        range.toString().trim() === selectedBlocks[0].innerText.trim());
+
+    if (isAllOrMultiBlock) {
+      selectedBlocks.forEach((block) => {
+        block.style.fontSize = `${px}px`;
+        // Strip nested conflicting span font sizes so the new size is uniformly clean
+        block.querySelectorAll<HTMLElement>("span, font").forEach((child) => {
+          if (child.style.fontSize) child.style.fontSize = "";
+        });
+      });
+      emit();
+      saveSelection();
+      return;
+    }
+
+    // CASE 3: Partial or separate inline selection within a paragraph or phrase
+    try {
+      document.execCommand("styleWithCSS", false, "true");
+    } catch {}
+
+    // Use browser execCommand fontSize '7' as reliable non-destructive marker
+    document.execCommand("fontSize", false, "7");
+
+    const fontTags = ref.current.querySelectorAll("font[size='7']");
+    fontTags.forEach((f) => {
+      const span = document.createElement("span");
+      span.style.fontSize = `${px}px`;
+      while (f.firstChild) {
+        span.appendChild(f.firstChild);
+      }
+      f.parentNode?.replaceChild(span, f);
+    });
+
+    const styledSpans = ref.current.querySelectorAll<HTMLElement>(
+      "span[style*='-webkit-xxx-large'], span[style*='xxx-large'], span[style*='font-size: 7']",
+    );
+    styledSpans.forEach((s) => {
+      s.style.fontSize = `${px}px`;
+    });
+
     emit();
+    saveSelection();
   };
 
   const updateSelectionState = () => {
+    saveSelection();
     const sel = window.getSelection();
-    if (!sel || !sel.anchorNode) return;
+    if (!sel || !sel.anchorNode || !ref.current) return;
     const el =
       sel.anchorNode.nodeType === Node.ELEMENT_NODE
         ? (sel.anchorNode as HTMLElement)
@@ -347,7 +482,73 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
       const numeric = parseInt(fs, 10);
       if (numeric && sizes.includes(String(numeric))) {
         setCurrentSize(String(numeric));
+      } else {
+        setCurrentSize("14");
       }
+    }
+  };
+
+  /**
+   * Smart Paste Handler:
+   * When admin pastes text, paragraphs automatically default to 14px font size.
+   * Headings (h2, h3, h4) are PRESERVED and not squashed into 14px!
+   */
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const clipboardData = e.clipboardData;
+    if (!clipboardData) return;
+
+    const htmlData = clipboardData.getData("text/html");
+    const textData = clipboardData.getData("text/plain");
+
+    if (htmlData) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlData, "text/html");
+
+      doc.body.querySelectorAll("*").forEach((el) => {
+        const tag = el.tagName.toLowerCase();
+        if (tag !== "h2" && tag !== "h3" && tag !== "h4") {
+          // Standard paragraphs and list items default to 14px
+          if (["p", "li", "div"].includes(tag)) {
+            (el as HTMLElement).style.fontSize = "14px";
+            (el as HTMLElement).style.lineHeight = "1.75";
+          } else if (tag === "span" || tag === "font") {
+            (el as HTMLElement).style.fontSize = "";
+          }
+          (el as HTMLElement).style.fontFamily = "";
+        } else {
+          // Keep headings (H2, H3, H4) untouched with their full heading styles
+          (el as HTMLElement).style.fontSize = "";
+        }
+      });
+
+      const cleanHtml = doc.body.innerHTML;
+      if (cleanHtml.trim()) {
+        document.execCommand("insertHTML", false, cleanHtml);
+        emit();
+        saveSelection();
+        return;
+      }
+    }
+
+    // Plain text paste fallback
+    if (textData) {
+      const paragraphs = textData
+        .split(/\r?\n\r?\n/)
+        .map((p) => p.trim())
+        .filter(Boolean);
+
+      if (paragraphs.length > 1) {
+        const html = paragraphs
+          .map((p) => `<p style="font-size:14px;line-height:1.75;margin:0.5rem 0;">${escapeHtml(p)}</p>`)
+          .join("");
+        document.execCommand("insertHTML", false, html);
+      } else {
+        const html = `<p style="font-size:14px;line-height:1.75;margin:0.5rem 0;">${escapeHtml(textData)}</p>`;
+        document.execCommand("insertHTML", false, html);
+      }
+      emit();
+      saveSelection();
     }
   };
 
@@ -385,7 +586,10 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
     <button
       type="button"
       disabled={disabled}
-      onMouseDown={(e) => e.preventDefault()}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        saveSelection();
+      }}
       onClick={onClick}
       title={title}
       className="grid h-8 w-8 place-items-center rounded text-slate-700 hover:bg-slate-200 disabled:opacity-35 disabled:pointer-events-none transition-colors"
@@ -406,7 +610,12 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
       {/* TOOLBAR ROW 1: Typography, Headings, Fonts, Sizes, Inline Styles, Colors */}
       <div
         className="flex flex-wrap items-center gap-0.5 border-b border-slate-200 bg-slate-50/90 px-2 py-1.5"
-        onMouseDown={(e) => e.preventDefault()}
+        onMouseDown={(e) => {
+          if ((e.target as HTMLElement).tagName !== "SELECT") {
+            e.preventDefault();
+          }
+          saveSelection();
+        }}
       >
         <Btn onClick={() => exec("undo")} title="Undo (Ctrl+Z)" disabled={mode === "plain"}>
           <Undo className="h-4 w-4" />
@@ -418,7 +627,7 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
 
         <Btn
           onClick={() => formatBlock("p")}
-          title="Paragraph (P) - Normal body text"
+          title="Paragraph (P) - Normal body text (14px)"
           disabled={mode === "plain"}
         >
           <span className="font-bold text-sm leading-none text-slate-800">P</span>
@@ -446,15 +655,17 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
         </Btn>
         <Sep />
 
+        {/* Font Family Dropdown */}
         <select
+          onFocus={saveSelection}
+          onMouseDown={saveSelection}
           onChange={(e) => {
             setFontFamily(e.target.value);
             e.target.value = "Default";
           }}
-          onMouseDown={(e) => e.stopPropagation()}
           title="Font family"
           disabled={mode === "plain"}
-          className="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 outline-none hover:border-slate-300 disabled:opacity-35"
+          className="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 outline-none hover:border-slate-300 disabled:opacity-35 cursor-pointer"
         >
           {fontOptions.map((f) => (
             <option key={f} value={f}>
@@ -463,19 +674,21 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
           ))}
         </select>
 
+        {/* Font Size Dropdown (Default: 14px) */}
         <select
           value={currentSize}
+          onFocus={saveSelection}
+          onMouseDown={saveSelection}
           onChange={(e) => {
             setFontSize(e.target.value);
           }}
-          onMouseDown={(e) => e.stopPropagation()}
-          title="Font size (Default: 16px)"
+          title="Font size (Default: 14px)"
           disabled={mode === "plain"}
-          className="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 outline-none hover:border-slate-300 disabled:opacity-35"
+          className="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 outline-none hover:border-slate-300 disabled:opacity-35 cursor-pointer"
         >
           {sizes.map((s) => (
             <option key={s} value={s}>
-              {s === "16" ? "16 (Default)" : `${s}px`}
+              {s === "14" ? "14px (Default)" : `${s}px`}
             </option>
           ))}
         </select>
@@ -500,7 +713,23 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
           <Superscript className="h-4 w-4" />
         </Btn>
         <Btn
-          onClick={() => exec("removeFormat")}
+          onClick={() => {
+            restoreSelection();
+            exec("removeFormat");
+            if (ref.current) {
+              const sel = window.getSelection();
+              if (sel && sel.rangeCount > 0) {
+                ref.current.querySelectorAll<HTMLElement>("span, font").forEach((s) => {
+                  if (sel.containsNode(s, true)) {
+                    s.style.fontSize = "";
+                    s.style.fontFamily = "";
+                  }
+                });
+              }
+            }
+            setCurrentSize("14");
+            emit();
+          }}
           title="Clear formatting / Plain text"
           disabled={mode === "plain"}
         >
@@ -680,7 +909,10 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
       {/* TOOLBAR ROW 2: Alignments, Lists, Quotes, Divider, Link, Tables, Media, View Toggle */}
       <div
         className="flex flex-wrap items-center gap-0.5 border-b border-slate-200 bg-slate-50/60 px-2 py-1.5"
-        onMouseDown={(e) => e.preventDefault()}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          saveSelection();
+        }}
       >
         <Btn onClick={() => exec("justifyLeft")} title="Align left" disabled={mode === "plain"}>
           <AlignLeft className="h-4 w-4" />
@@ -790,10 +1022,12 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
           suppressContentEditableWarning
           onInput={emit}
           onBlur={emit}
+          onPaste={handlePaste}
+          onSelect={saveSelection}
           onKeyUp={updateSelectionState}
           onMouseUp={updateSelectionState}
           data-placeholder="Write your article here. Use the toolbar to format text, change color, insert images, and embed YouTube/Facebook videos - everything renders live as you type."
-          className={`rich-editor block w-full px-5 py-4 text-base text-[16px] leading-relaxed text-slate-900 focus:outline-none ${
+          className={`rich-editor block w-full px-5 py-4 text-[14px] leading-relaxed text-slate-900 focus:outline-none ${
             isFullscreen ? "flex-1 overflow-y-auto min-h-0" : "min-h-[380px]"
           }`}
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
@@ -806,7 +1040,7 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
             onChange(e.target.value);
           }}
           placeholder="Write or paste plain text / HTML here..."
-          className={`block w-full px-5 py-4 font-mono text-[16px] leading-relaxed text-slate-900 focus:outline-none bg-slate-50/50 resize-y ${
+          className={`block w-full px-5 py-4 font-mono text-[14px] leading-relaxed text-slate-900 focus:outline-none bg-slate-50/50 resize-y ${
             isFullscreen ? "flex-1 overflow-y-auto min-h-0" : "min-h-[380px]"
           }`}
           rows={16}
@@ -815,16 +1049,16 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
 
       <style>{`
         .rich-editor:empty:before { content: attr(data-placeholder); color: #94a3b8; pointer-events: none; }
-        .rich-editor, .rich-editor p { font-size: 16px; line-height: 1.75; margin: .5rem 0; }
-        .rich-editor h2 { font-size: 1.5rem; font-weight: 700; margin: 1rem 0 .5rem; font-family: 'Playfair Display', Georgia, serif; }
-        .rich-editor h3 { font-size: 1.25rem; font-weight: 700; margin: .75rem 0 .5rem; font-family: 'Playfair Display', Georgia, serif; }
-        .rich-editor h4 { font-size: 1.1rem; font-weight: 600; margin: .5rem 0 .25rem; }
+        .rich-editor, .rich-editor p, .rich-editor li, .rich-editor td { font-size: 14px; line-height: 1.75; margin: .5rem 0; }
+        .rich-editor h2 { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 .5rem; font-family: 'Playfair Display', Georgia, serif; line-height: 1.3; }
+        .rich-editor h3 { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 .5rem; font-family: 'Playfair Display', Georgia, serif; line-height: 1.35; }
+        .rich-editor h4 { font-size: 1.1rem; font-weight: 600; margin: .75rem 0 .25rem; line-height: 1.4; }
         .rich-editor ul { list-style: disc; padding-left: 1.5rem; margin: .5rem 0; }
         .rich-editor ol { list-style: decimal; padding-left: 1.5rem; margin: .5rem 0; }
-        .rich-editor blockquote { border-left: 3px solid #1A1110; padding: .25rem 1rem; margin: .75rem 0; color: #475569; font-style: italic; background:#f8fafc; }
+        .rich-editor blockquote { border-left: 3px solid #1A1110; padding: .5rem 1rem; margin: .75rem 0; color: #475569; font-style: italic; background:#f8fafc; font-size: 14px; }
         .rich-editor a { color: #2563eb; text-decoration: underline; }
         .rich-editor img { max-width: 100%; height: auto; }
-        .rich-editor table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        .rich-editor table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 14px; }
         .rich-editor th, .rich-editor td { border: 1px solid #cbd5e1; padding: 8px 12px; }
         .rich-editor th { background-color: #f8fafc; font-weight: 600; }
       `}</style>

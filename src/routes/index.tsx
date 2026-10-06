@@ -32,7 +32,7 @@ export const Route = createFileRoute("/")({
   loader: async () => {
     try {
       const [articles, tags, settings] = await Promise.all([
-        getHomepageArticles({ data: 25 }).catch((err) => {
+        getHomepageArticles({ data: 40 }).catch((err) => {
           console.warn(
             "[Homepage Loader] getHomepageArticles fallback to empty:",
             err?.message || err,

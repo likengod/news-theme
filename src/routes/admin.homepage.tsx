@@ -232,12 +232,16 @@ function HomepageEditorPage() {
             label="Watch"
             value={cfg.watch}
             showCategory
+            showToggle
             onChange={(v) => update("watch", v)}
           />
           <SectionCard
             label="Markets Magazine"
+            hint="Toggle to show or hide the Markets Magazine section on homepage."
             value={cfg.marketsMagazine}
             showCategory
+            showToggle
+            showImageFit
             onChange={(v) => update("marketsMagazine", v)}
           />
         </div>

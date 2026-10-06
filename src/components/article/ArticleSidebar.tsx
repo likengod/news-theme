@@ -1,7 +1,9 @@
 import { lazy, Suspense } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArchiveFinder } from "@/components/site/ArchiveFinder";
+import { ArticleSocialChannels } from "./ArticleSocialChannels";
 import { slugify } from "@/lib/news-data";
+import { useSiteSettings } from "@/components/site/AdSettingsContext";
 
 const Advertisement = lazy(() => import("@/components/site/Advertisement"));
 
@@ -21,7 +23,34 @@ type TrendingItem = {
   category?: string;
   featuredImage?: string;
   hero?: string;
+  excerpt?: string;
+  content?: string;
 };
+
+function getArticleSnippet(item?: { content?: string; excerpt?: string } | null): string {
+  if (!item) return "";
+  let raw = "";
+  if (item.content && item.content.replace(/<[^>]+>/g, "").trim().length > 20) {
+    raw = item.content;
+  } else if (item.excerpt) {
+    raw = item.excerpt;
+  } else {
+    raw = item.content || "";
+  }
+
+  return raw
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&#8203;/gi, "")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 type Props = {
   trending?: TrendingItem[];
@@ -29,95 +58,124 @@ type Props = {
 };
 
 export function ArticleSidebar({ trending = [], currentSlug }: Props) {
+  const settings = useSiteSettings();
+  const items = settings?.articleRightSidebarItems || {};
+
+  const showAd3 = items.ad3 !== false;
+  const showTrending = items.trendingNews !== false;
+  const showArchive = items.archiveFinder !== false;
+
   const activeItems = (trending || [])
     .filter((item) => item && item.slug && item.slug !== currentSlug)
     .slice(0, 6);
 
+  if (!showAd3 && !showTrending && !showArchive) {
+    return null;
+  }
+
   return (
     <aside className="space-y-6 w-full min-w-0">
       {/* Top Banner Advertisement (ABP Ananda top right ad) */}
-      <Suspense fallback={<div className="aspect-[300/250] w-full animate-pulse bg-muted rounded" />}>
-        <Advertisement slot="ad3" aspectRatio="1/1" />
-      </Suspense>
+      {showAd3 && (
+        <Suspense fallback={<div className="aspect-[300/250] w-full animate-pulse bg-muted rounded" />}>
+          <Advertisement slot="ad3" aspectRatio="1/1" />
+        </Suspense>
+      )}
 
       {/* সেরা শিরোনাম / Top Headlines Section - ABP Ananda style */}
-      <div className="w-full">
-        <div className="mb-4 border-b-2 border-red-600 pb-1.5 flex items-center justify-between">
-          <h3 className="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-tight flex items-center gap-2">
-            <span className="h-4 w-1 bg-red-600 rounded-sm inline-block" />
-            সেরা শিরোনাম
-          </h3>
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Trending
-          </span>
-        </div>
-
-        {activeItems.length > 0 ? (
-          <div className="space-y-3.5">
-            {activeItems.map((item) => {
-              const img = item.featuredImage || item.hero;
-              const firstCat = (item.category || "খবর").split(",")[0].trim();
-
-              return (
-                <article
-                  key={item.slug}
-                  className="group flex flex-col gap-1 border-b border-slate-100 dark:border-slate-800/80 pb-3 last:border-b-0"
-                >
-                  {firstCat && (
-                    <span className="text-[11px] font-bold text-red-600 dark:text-red-500 uppercase tracking-wide">
-                      {firstCat}
-                    </span>
-                  )}
-                  <div className="flex items-start gap-3">
-                    {img && (
-                      <Link
-                        to="/news/$slug"
-                        params={{ slug: item.slug }}
-                        className="shrink-0 overflow-hidden rounded bg-muted block"
-                      >
-                        <img
-                          src={img}
-                          alt={item.title}
-                          className="h-16 w-24 object-cover transition-transform duration-300 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      </Link>
-                    )}
-                    <Link
-                      to="/news/$slug"
-                      params={{ slug: item.slug }}
-                      className="text-xs sm:text-sm font-semibold leading-snug text-slate-900 dark:text-slate-100 line-clamp-3 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors"
-                    >
-                      {item.title}
-                    </Link>
-                  </div>
-                </article>
-              );
-            })}
+      {showTrending && (
+        <div className="w-full">
+          <div className="mb-4 border-b-2 border-red-600 pb-1.5 flex items-center justify-between">
+            <h3 className="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-tight flex items-center gap-2">
+              <span className="h-4 w-1 bg-red-600 rounded-sm inline-block" />
+              সেরা শিরোনাম
+            </h3>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Trending
+            </span>
           </div>
-        ) : (
-          <ol className="space-y-3">
-            {FALLBACK_TRENDING.map((t, i) => (
-              <li key={t} className="flex gap-3 border-b border-slate-100 dark:border-slate-800/60 pb-2.5 last:border-b-0">
-                <span className="font-sans text-xl font-bold text-red-600 dark:text-red-500 shrink-0 w-6">
-                  {i + 1}
-                </span>
-                <Link
-                  to="/news/$slug"
-                  params={{
-                    slug: slugify(t),
-                  }}
-                  className="line-clamp-2 text-xs sm:text-sm font-semibold leading-snug text-slate-900 dark:text-slate-100 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                >
-                  {t}
-                </Link>
-              </li>
-            ))}
-          </ol>
-        )}
-      </div>
 
-      <ArchiveFinder />
+          {activeItems.length > 0 ? (
+            <div className="space-y-3.5">
+              {activeItems.map((item) => {
+                const rawImg = item.featuredImage || item.hero;
+                const img = typeof rawImg === 'string' && rawImg.trim() !== '' ? rawImg.trim() : null;
+                const firstCat = (item.category || "খবর").split(",")[0].trim();
+                const snippet = getArticleSnippet(item);
+
+                return (
+                  <article
+                    key={item.slug}
+                    className="group flex flex-col gap-1 border-b border-slate-100 dark:border-slate-800/80 pb-3 last:border-b-0"
+                  >
+                    {firstCat && (
+                      <span className="text-[11px] font-bold text-red-600 dark:text-red-500 uppercase tracking-wide">
+                        {firstCat}
+                      </span>
+                    )}
+                    <div className="flex items-start gap-3">
+                      {img && (
+                        <Link
+                          to="/news/$slug"
+                          params={{ slug: item.slug }}
+                          className="shrink-0 overflow-hidden rounded bg-muted block"
+                        >
+                          <img
+                            src={img}
+                            alt={item.title}
+                            className="h-16 w-24 object-cover transition-transform duration-300 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        </Link>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          to="/news/$slug"
+                          params={{ slug: item.slug }}
+                          className="block"
+                        >
+                          <p className="text-xs sm:text-sm font-semibold leading-snug text-slate-900 dark:text-slate-100 line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+                            {item.title}
+                          </p>
+                          {snippet && (
+                            <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground line-clamp-2">
+                              {snippet}
+                            </p>
+                          )}
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <ol className="space-y-3">
+              {FALLBACK_TRENDING.map((t, i) => (
+                <li key={t} className="flex gap-3 border-b border-slate-100 dark:border-slate-800/60 pb-2.5 last:border-b-0">
+                  <span className="font-sans text-xl font-bold text-red-600 dark:text-red-500 shrink-0 w-6">
+                    {i + 1}
+                  </span>
+                  <Link
+                    to="/news/$slug"
+                    params={{
+                      slug: slugify(t),
+                    }}
+                    className="line-clamp-2 text-xs sm:text-sm font-semibold leading-snug text-slate-900 dark:text-slate-100 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                  >
+                    {t}
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
+      )}
+
+      {showArchive && <ArchiveFinder />}
+
+      {/* WhatsApp & Telegram Community Channel Buttons */}
+      <ArticleSocialChannels />
     </aside>
   );
 }

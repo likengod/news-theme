@@ -99,6 +99,7 @@ export function getPool() {
     user,
     password,
     database,
+    charset: "utf8mb4",
     waitForConnections: true,
     connectionLimit,
     maxIdle: 10,

@@ -38,6 +38,9 @@ export function AdSlotsNavBar({
           if ((s.key === "hero_showcase" || s.key === "reel_ads") && !isEnterprisePlus) {
             return null;
           }
+          if (s.key === "post_ads" && !isEnterprise && !isEnterprisePlus) {
+            return null;
+          }
           const isActive = tab === s.key;
           const count = slotCounts[s.key] || 0;
           return (
@@ -52,6 +55,11 @@ export function AdSlotsNavBar({
             >
               <div className="flex items-center gap-1">
                 <span>{s.label}</span>
+                {s.key === "post_ads" && !isEnterprise && !isEnterprisePlus && (
+                  <span className="rounded bg-amber-100 px-1.5 py-0.2 text-[8px] font-extrabold uppercase tracking-wider text-amber-800">
+                    Enterprise
+                  </span>
+                )}
               </div>
               <span
                 className={`rounded-full px-1.5 sm:px-2 py-0.2 sm:py-0.5 text-[9.5px] sm:text-[10.5px] font-bold ${

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import artImg from "@/assets/hero-markets.webp";
 import pensionImg from "@/assets/news-wallstreet.webp";
 import coverImg from "@/assets/news-oil.webp";
@@ -26,6 +26,235 @@ const FALLBACK_SLIDES = [coverImg, slide1, slide2, slide3, pensionImg, artImg].m
 
 import { useAdSettings } from "./AdSettingsContext";
 
+function getArticleSnippet(art?: { content?: string; excerpt?: string } | null): string {
+  if (!art) return "";
+  let raw = "";
+  if (art.content && art.content.replace(/<[^>]+>/g, "").trim().length > 30) {
+    raw = art.content;
+  } else if (art.excerpt) {
+    raw = art.excerpt;
+  } else {
+    raw = art.content || "";
+  }
+
+  let text = raw
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&#8203;/gi, "")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // Deduplicate consecutive identical sentences (prevents repetitive copy-paste text)
+  if (text) {
+    const parts = text.split(/(?<=[।?!.])/).map((s) => s.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      const deduped: string[] = [];
+      for (const part of parts) {
+        if (deduped.length === 0 || deduped[deduped.length - 1] !== part) {
+          deduped.push(part);
+        }
+      }
+      text = deduped.join(" ");
+    }
+  }
+
+  return text;
+}
+
+interface AdaptiveLineOptions {
+  singleLine: number;
+  twoLines: number;
+  threeLines?: number;
+}
+
+function useAdaptiveSnippetLines(
+  initialTitle: string,
+  options: AdaptiveLineOptions = { singleLine: 4, twoLines: 3, threeLines: 2 },
+) {
+  const titleRef = useRef<HTMLParagraphElement | HTMLHeadingElement | null>(null);
+  const [descLines, setDescLines] = useState<number>(() => {
+    if (!initialTitle) return options.singleLine;
+    return initialTitle.length > 52 ? options.twoLines : options.singleLine;
+  });
+
+  useEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+
+    const updateLines = () => {
+      const h = el.clientHeight;
+      const computed = window.getComputedStyle(el);
+      const lineHeight = parseFloat(computed.lineHeight) || 24;
+      const ratio = h / lineHeight;
+
+      if (ratio <= 1.35) {
+        setDescLines(options.singleLine);
+      } else if (ratio <= 2.35) {
+        setDescLines(options.twoLines);
+      } else {
+        setDescLines(options.threeLines ?? options.twoLines);
+      }
+    };
+
+    updateLines();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(updateLines);
+      ro.observe(el);
+      return () => ro.disconnect();
+    } else {
+      window.addEventListener("resize", updateLines);
+      return () => window.removeEventListener("resize", updateLines);
+    }
+  }, [initialTitle, options.singleLine, options.twoLines, options.threeLines]);
+
+  return { titleRef, descLines };
+}
+
+function MagazineLeadHeadline({ leadArt }: { leadArt: any }) {
+  const { titleRef, descLines } = useAdaptiveSnippetLines(leadArt.title, {
+    singleLine: 6,
+    twoLines: 5,
+    threeLines: 4,
+  });
+
+  const snippet = getArticleSnippet(leadArt);
+  const match = snippet.trim().match(/^(\S+)\s*([\s\S]*)$/);
+  const firstWord = match ? match[1] : snippet;
+  const restText = match ? match[2] : "";
+
+  return (
+    <Link
+      to="/news/$slug"
+      params={{
+        slug: leadArt.slug,
+      }}
+      className="group flex flex-col justify-center pt-0.5 min-w-0 w-full"
+    >
+      <h2
+        ref={titleRef as any}
+        className="headline text-[24px] sm:text-[28px] lg:text-[32px] xl:text-[36px] font-extrabold leading-[1.25] tracking-tight text-foreground group-hover:text-red-600 transition-colors line-clamp-3"
+      >
+        {leadArt.title}
+      </h2>
+      <p
+        className="mt-3 text-[14px] sm:text-[15px] lg:text-[16px] leading-relaxed text-muted-foreground select-text"
+        style={{
+          display: "-webkit-box",
+          WebkitBoxOrient: "vertical",
+          WebkitLineClamp: descLines,
+          overflow: "hidden",
+        }}
+      >
+        {firstWord ? (
+          <>
+            <span className="float-left text-[24px] sm:text-[28px] lg:text-[30px] font-black leading-[1.05] mr-2.5 mt-0.5 text-foreground select-text">
+              {firstWord}
+            </span>{" "}
+            {restText}
+          </>
+        ) : (
+          snippet
+        )}
+      </p>
+      <div className="mt-3 flex items-center gap-2 font-sans text-[13px] sm:text-[14px] font-semibold text-foreground">
+        <span className="text-red-600 uppercase text-xs font-bold tracking-wider">
+          {leadArt.category || "খবর"}
+        </span>
+        <span className="text-slate-300">•</span>
+        <span>By {leadArt.author || "Newsroom Staff"}</span>
+      </div>
+    </Link>
+  );
+}
+
+function MagazineCard1({ p1 }: { p1: any }) {
+  const { titleRef, descLines } = useAdaptiveSnippetLines(p1.title, {
+    singleLine: 4,
+    twoLines: 3,
+  });
+
+  return (
+    <Link
+      to="/news/$slug"
+      params={{
+        slug: p1.slug,
+      }}
+      className="group block w-full max-w-full min-w-0"
+    >
+      <div className="grid gap-4 md:grid-cols-[194px_1fr] items-start">
+        <img
+          src={getArticleImage(p1.featuredImage, 1)}
+          alt={p1.title}
+          loading="lazy"
+          decoding="async"
+          width={194}
+          height={130}
+          className="h-[130px] md:h-[135px] w-full object-cover md:w-[194px] rounded-xs shrink-0"
+        />
+        <div className="min-w-0">
+          <p
+            ref={titleRef as any}
+            className="headline text-[20px] font-bold leading-[1.3] tracking-normal text-foreground group-hover:underline md:text-[22px] line-clamp-2"
+          >
+            {p1.title}
+          </p>
+          <p
+            className="mt-2 text-[14px] leading-relaxed text-muted-foreground"
+            style={{
+              display: "-webkit-box",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: descLines,
+              overflow: "hidden",
+            }}
+          >
+            {getArticleSnippet(p1)}
+          </p>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function MagazineSmallCard({ article }: { article: any }) {
+  const { titleRef, descLines } = useAdaptiveSnippetLines(article.title, {
+    singleLine: 4,
+    twoLines: 3,
+  });
+
+  return (
+    <Link
+      to="/news/$slug"
+      params={{ slug: article.slug }}
+      className="group block min-w-0"
+    >
+      <p
+        ref={titleRef as any}
+        className="headline text-[17px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline line-clamp-2"
+      >
+        {article.title}
+      </p>
+      <p
+        className="mt-2 text-[14px] leading-relaxed text-muted-foreground"
+        style={{
+          display: "-webkit-box",
+          WebkitBoxOrient: "vertical",
+          WebkitLineClamp: descLines,
+          overflow: "hidden",
+        }}
+      >
+        {getArticleSnippet(article)}
+      </p>
+    </Link>
+  );
+}
+
 export function MarketsMagazine({
   articles = [],
   usedIds,
@@ -51,6 +280,8 @@ export function MarketsMagazine({
   const [slotScript, setSlotScript] = useState(initialScript);
   const [settings, setSettings] = useState(() => loadSettings());
   const [showCustomText, setShowCustomText] = useState(false);
+
+  const hasAd = slotMode === "script" ? Boolean(slotScript) : slides.length > 0;
 
   useEffect(() => {
     const handleUpdate = () => setSettings(loadSettings());
@@ -119,21 +350,10 @@ export function MarketsMagazine({
     return cats.includes(magazineCategory.toLowerCase());
   });
 
-  // If not enough articles found for this category, fill with other available articles
-  if (dbMagazineArticles.length < 4) {
-    const filler = articles.filter(
-      (a) => !localUsed.has(a.id) && !dbMagazineArticles.some((d) => d.id === a.id),
-    );
-    dbMagazineArticles = [...dbMagazineArticles, ...filler];
-  }
-  if (dbMagazineArticles.length < 4) {
-    const remaining = articles.filter((a) => !dbMagazineArticles.some((d) => d.id === a.id));
-    dbMagazineArticles = [...dbMagazineArticles, ...remaining];
-  }
-
   // Record selected articles as used
   dbMagazineArticles.slice(0, 4).forEach((a) => localUsed.add(a.id));
 
+  // Only use real articles from the database
   const leadArt = dbMagazineArticles[0];
   const p1 = dbMagazineArticles[1];
   const p2 = dbMagazineArticles[2];
@@ -157,15 +377,13 @@ export function MarketsMagazine({
   const badgeStyle =
     resolvedGrad
       ? {
-          backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
           backgroundImage: resolvedGrad,
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
           backgroundClip: "text",
         }
       : {
-          backgroundColor: settings.festiveCategoryBadgeBgColor || "#000000",
-          color: settings.festiveCategoryBadgeTextColor || "#ffffff",
+          color: settings.festiveCategoryBadgeTextColor || "inherit",
         };
 
   const badgeTitle =
@@ -173,16 +391,17 @@ export function MarketsMagazine({
       ? settings.topBarWeatherCustomText
       : cfg.marketsMagazine.title;
 
-  if (articles.length === 0) {
+  // If section is disabled in homepage config or there are no real articles for it, do not render
+  if (cfg.marketsMagazine.enabled === false || !leadArt) {
     return null;
   }
 
   return (
     <section className="border border-border bg-background px-4 py-6 font-sans sm:px-6 md:px-9 w-full max-w-full min-w-0 overflow-hidden">
-      <div className="mb-5 inline-block">
+      <div className="mb-4 inline-block">
         <span
           key={showCustomText ? "custom" : "default"}
-          className="px-2.5 py-1 font-sans text-xs font-black uppercase tracking-widest inline-flex items-center gap-1.5 rounded-xs shadow-xs transition-all duration-300"
+          className="font-sans text-xs sm:text-sm font-black uppercase tracking-widest inline-flex items-center gap-1.5 transition-all duration-300"
           style={badgeStyle}
         >
           {hasCustomAlert && showCustomText && settings.festiveAlertImage ? (
@@ -197,148 +416,91 @@ export function MarketsMagazine({
         </span>
       </div>
 
-      <div className="grid items-start gap-5 lg:grid-cols-[354px_minmax(0,1fr)_406px] w-full max-w-full min-w-0">
+      {/* Main Feature Layout */}
+      <div className={`grid items-start gap-6 w-full max-w-full min-w-0 ${hasAd ? "md:grid-cols-[minmax(280px,380px)_minmax(0,1fr)] lg:grid-cols-[minmax(300px,400px)_minmax(0,1fr)_340px] xl:grid-cols-[minmax(340px,460px)_minmax(0,1fr)_360px]" : "md:grid-cols-[minmax(320px,460px)_minmax(0,1fr)] lg:grid-cols-[minmax(360px,520px)_minmax(0,1fr)]"}`}>
+        {/* Featured Image Column */}
         <Link
           to="/news/$slug"
           params={{
-            slug: leadArt?.slug || "gen-z-traders-go-for-broke-in-pursuit-of-a-new-american-dream",
+            slug: leadArt.slug,
           }}
-          className="group block"
+          className="group block w-full min-w-0 overflow-hidden rounded-xl border border-slate-200/80 bg-slate-900/5 dark:bg-slate-900/60 transition-all hover:border-slate-300 shadow-xs"
         >
-          <figure>
-            <img
-              src={leadArt ? getArticleImage(leadArt.featuredImage, 0) : artImg}
-              alt="Lead Article"
-              loading="lazy"
-              decoding="async"
-              width={354}
-              height={235}
-              className="h-[235px] w-full object-cover"
-            />
-            <figcaption className="mt-1 text-right font-sans text-[10px] leading-tight text-muted-foreground">
-              Artwork: Najeebah Al-Ghadban for Northeast Markets
-            </figcaption>
+          <figure className="w-full flex flex-col items-center">
+            <div className="relative w-full flex items-center justify-center overflow-hidden rounded-xl bg-black/5 dark:bg-black/30">
+              {cfg.marketsMagazine.imageFit === "cover" ? (
+                <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden">
+                  <img
+                    src={getArticleImage(leadArt.featuredImage, 0)}
+                    alt={leadArt.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+              ) : (
+                <div className="relative w-full flex items-center justify-center p-0.5">
+                  <img
+                    src={getArticleImage(leadArt.featuredImage, 0)}
+                    alt={leadArt.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-auto max-h-[360px] sm:max-h-[420px] object-contain rounded-lg transition-transform duration-300 group-hover:scale-[1.02]"
+                  />
+                </div>
+              )}
+            </div>
+            {leadArt.imageCredit && (
+              <figcaption className="w-full px-2 py-1 text-right font-sans text-[11px] leading-tight text-muted-foreground">
+                {leadArt.imageCredit}
+              </figcaption>
+            )}
           </figure>
         </Link>
 
-        <Link
-          to="/news/$slug"
-          params={{
-            slug: leadArt?.slug || "gen-z-traders-go-for-broke-in-pursuit-of-a-new-american-dream",
-          }}
-          className="group block pt-0.5"
-        >
-          <p className="headline max-w-[500px] text-[26px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline md:text-[28px] line-clamp-2">
-            {leadArt
-              ? leadArt.title
-              : "Gen-Z Traders Go for Broke in Pursuit of a New American Dream"}
-          </p>
-          <p className="mt-2.5 max-w-[440px] text-[15px] leading-relaxed text-muted-foreground line-clamp-6">
-            {leadArt
-              ? leadArt.excerpt || leadArt.content?.replace(/<[^>]*>/g, "").slice(0, 300) + "..."
-              : "Lottery-like meme stocks and options can seem like a shortcut to beat high home prices, stubborn inflation and the looming threat of AI to entry-level jobs. A new generation of retail traders is piling into zero-day options, leveraged ETFs and viral tickers, betting that a single windfall can leapfrog them past a housing market that feels permanently out of reach and a labor market reshaped overnight."}
-          </p>
-          <p className="mt-1.5 font-sans text-[14px] leading-tight text-foreground">
-            By {leadArt ? leadArt.author || "Newsroom Staff" : "Justina Lee and Lu Wang"}
-          </p>
-        </Link>
+        {/* Headline & Story Deck Column */}
+        <MagazineLeadHeadline leadArt={leadArt} />
 
-        <aside className="relative h-[196px] overflow-hidden rounded-[10px] border border-border lg:mt-0 bg-muted/30">
-          {slotMode === "script" ? (
-            <div className="absolute inset-0 flex items-center justify-center p-2">
-              <ScriptAdRenderer code={slotScript} />
-            </div>
-          ) : (
-            slides.map((s, i) => (
-              <a
-                key={s.id}
-                href={s.href || "#"}
-                aria-hidden={i !== slideIdx}
-                className="absolute inset-0 block transition-opacity duration-300"
-                style={{
-                  opacity: i === slideIdx ? 1 : 0,
-                  pointerEvents: i === slideIdx ? "auto" : "none",
-                }}
-              >
-                <img
-                  src={s.image}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  width={406}
-                  height={196}
-                  className="h-full w-full object-cover"
-                />
-              </a>
-            ))
-          )}
-        </aside>
+        {/* Right Ad Slot (Only if ads are present) */}
+        {hasAd && (
+          <aside className="relative h-[200px] lg:h-[220px] w-full overflow-hidden rounded-xl border border-border bg-muted/30 shrink-0">
+            {slotMode === "script" ? (
+              <div className="absolute inset-0 flex items-center justify-center p-2">
+                <ScriptAdRenderer code={slotScript} />
+              </div>
+            ) : (
+              slides.map((s, i) => (
+                <a
+                  key={s.id}
+                  href={s.href || "#"}
+                  aria-hidden={i !== slideIdx}
+                  className="absolute inset-0 block transition-opacity duration-300"
+                  style={{
+                    opacity: i === slideIdx ? 1 : 0,
+                    pointerEvents: i === slideIdx ? "auto" : "none",
+                  }}
+                >
+                  <img
+                    src={s.image}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                </a>
+              ))
+            )}
+          </aside>
+        )}
       </div>
 
-      <div className="mt-3 grid gap-8 border-t border-border pt-3 lg:grid-cols-[minmax(0,1.62fr)_minmax(0,0.7fr)_minmax(0,0.86fr)] w-full max-w-full min-w-0">
-        <Link
-          to="/news/$slug"
-          params={{
-            slug: p1?.slug || "a-600-billion-experiment-kicks-off-at-the-biggest-us-pension-fund",
-          }}
-          className="group block w-full max-w-full min-w-0"
-        >
-          <div className="grid gap-4 md:grid-cols-[194px_1fr]">
-            <img
-              src={p1 ? getArticleImage(p1.featuredImage, 1) : pensionImg}
-              alt="Pension Fund"
-              loading="lazy"
-              decoding="async"
-              width={194}
-              height={130}
-              className="h-[130px] w-full object-cover md:w-[194px]"
-            />
-            <div>
-              <p className="headline text-[22px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline md:text-[24px] line-clamp-2">
-                {p1 ? p1.title : "Market Insights and Analysis"}
-              </p>
-              <p className="mt-2 max-w-[430px] text-[14px] leading-relaxed text-muted-foreground line-clamp-4">
-                {p1
-                  ? p1.excerpt || p1.content?.replace(/<[^>]*>/g, "").slice(0, 150) + "..."
-                  : "Latest developments and analytical perspectives on regional and global market trends."}
-              </p>
-            </div>
-          </div>
-        </Link>
-
-        <Link
-          to="/news/$slug"
-          params={{ slug: p2?.slug || "market-update-report" }}
-          className="group block"
-        >
-          <p className="font-sans text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
-            {p2 ? p2.category : "Analysis"}
-          </p>
-          <p className="headline mt-1 text-[17px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline line-clamp-3">
-            {p2 ? p2.title : "Economic Trends and Growth Outlook"}
-          </p>
-          <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground line-clamp-3">
-            {p2
-              ? p2.excerpt || p2.content?.replace(/<[^>]*>/g, "").slice(0, 150) + "..."
-              : "Key factors driving market momentum and policy adjustments across sectors."}
-          </p>
-        </Link>
-
-        <Link
-          to="/news/$slug"
-          params={{ slug: p3?.slug || "global-markets-review" }}
-          className="group block"
-        >
-          <p className="headline text-[17px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline line-clamp-2">
-            {p3 ? p3.title : "Global Financial Markets Review"}
-          </p>
-          <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground line-clamp-5">
-            {p3
-              ? p3.excerpt || p3.content?.replace(/<[^>]*>/g, "").slice(0, 150) + "..."
-              : "Examining market infrastructure, cross-border flows, and financial technology innovation."}
-          </p>
-        </Link>
-      </div>
+      {(p1 || p2 || p3) && (
+        <div className="mt-3 grid gap-8 border-t border-border pt-4 lg:grid-cols-[minmax(0,1.62fr)_minmax(0,0.7fr)_minmax(0,0.86fr)] w-full max-w-full min-w-0">
+          {p1 && <MagazineCard1 p1={p1} />}
+          {p2 && <MagazineSmallCard article={p2} />}
+          {p3 && <MagazineSmallCard article={p3} />}
+        </div>
+      )}
     </section>
   );
 }

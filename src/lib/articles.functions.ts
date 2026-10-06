@@ -47,13 +47,27 @@ export const getAdminArticles = createServerFn({ method: "GET" })
     let filterSql = " WHERE 1=1";
     const params: any[] = [];
 
-    if (q) {
-      filterSql += " AND (title LIKE ? OR excerpt LIKE ? OR tags LIKE ?)";
-      const term = `%${q}%`;
-      params.push(term, term, term);
+    const cleanQ = (q || "").trim();
+    if (cleanQ) {
+      // Split by whitespace so typing multiple words matches any/all words
+      const words = cleanQ.split(/\s+/).filter(Boolean);
+      if (words.length > 1) {
+        // Multi-word search: match each word or full phrase
+        const wordConditions: string[] = [];
+        for (const w of words) {
+          const wTerm = `%${w}%`;
+          wordConditions.push("(title LIKE ? OR slug LIKE ? OR excerpt LIKE ? OR tags LIKE ?)");
+          params.push(wTerm, wTerm, wTerm, wTerm);
+        }
+        filterSql += ` AND (${wordConditions.join(" AND ")})`;
+      } else {
+        filterSql += " AND (title LIKE ? OR slug LIKE ? OR excerpt LIKE ? OR tags LIKE ?)";
+        const term = `%${cleanQ}%`;
+        params.push(term, term, term, term);
+      }
     }
     if (category && category !== "All") {
-      filterSql += " AND (category = ? OR category LIKE ? OR category LIKE ? OR category LIKE ? OR category LIKE ?)";
+      filterSql += " AND (LOWER(category) = LOWER(?) OR LOWER(category) LIKE LOWER(?) OR LOWER(category) LIKE LOWER(?) OR LOWER(category) LIKE LOWER(?) OR LOWER(category) LIKE LOWER(?))";
       params.push(category, `${category},%`, `%, ${category}`, `%, ${category},%`, `%,${category},%`);
     }
     if (status && status !== "All") {
@@ -450,6 +464,57 @@ export const getPublicArticleBySlug = createServerFn({ method: "GET" })
     };
   });
 
+// Public: get related articles from database (matches category, excludes current article)
+export const getPublicRelatedArticles = createServerFn({ method: "GET" })
+  .validator((data: { category?: string; currentSlug?: string; limit?: number }) => data)
+  .handler(async ({ data }) => {
+    const { category, currentSlug = "", limit = 4 } = data;
+    const safeLimit = Math.min(Math.max(1, limit), 8);
+    let rows: any[] = [];
+
+    // 1. First attempt: published articles in the same category
+    if (category && category !== "All" && category.trim()) {
+      rows = await query(
+        `SELECT ${PUBLIC_CARD_COLUMNS} FROM articles 
+         WHERE status = 'Published' AND date <= NOW() AND slug != ?
+         AND (category = ? OR category LIKE ? OR category LIKE ? OR category LIKE ? OR category LIKE ?)
+         ORDER BY date DESC, id DESC LIMIT ?`,
+        [
+          currentSlug,
+          category,
+          `${category},%`,
+          `%, ${category}`,
+          `%, ${category},%`,
+          `%,${category},%`,
+          safeLimit,
+        ],
+      );
+    }
+
+    // 2. If fewer than safeLimit, fill with other recent published articles
+    if (rows.length < safeLimit) {
+      const needed = safeLimit - rows.length;
+      const excludeSlugs = [currentSlug, ...rows.map((r: any) => r.slug)].filter(Boolean);
+      const placeholders = excludeSlugs.map(() => "?").join(", ");
+      const fillSql =
+        excludeSlugs.length > 0
+          ? `SELECT ${PUBLIC_CARD_COLUMNS} FROM articles 
+           WHERE status = 'Published' AND date <= NOW() AND slug NOT IN (${placeholders})
+           ORDER BY date DESC, id DESC LIMIT ?`
+          : `SELECT ${PUBLIC_CARD_COLUMNS} FROM articles 
+           WHERE status = 'Published' AND date <= NOW()
+           ORDER BY date DESC, id DESC LIMIT ?`;
+      const fillParams = excludeSlugs.length > 0 ? [...excludeSlugs, needed] : [needed];
+      const fillRows = await query(fillSql, fillParams);
+      rows = [...rows, ...(fillRows || [])];
+    }
+
+    return (rows || []).map((r: any) => ({
+      ...r,
+      featured: Boolean(r.featured),
+    }));
+  });
+
 // Public: get archive/latest articles
 export const getPublicArchiveArticles = createServerFn({ method: "GET" })
   .validator(
@@ -525,7 +590,7 @@ export const getHomepageArticles = createServerFn({ method: "GET" })
       console.log(`[Cache Miss] Fetching homepage articles from MySQL (limit: ${limitNum})`);
       const items = await query(
         `SELECT id, title, slug, category, city, state, country, author, views, status, date,
-                excerpt, featuredImage, ogImage, tags, featured, newsType, journalistId, journalistName, access_level
+                excerpt, SUBSTRING(content, 1, 2500) AS content, featuredImage, ogImage, tags, featured, newsType, journalistId, journalistName, access_level
          FROM articles 
          WHERE status = 'Published' AND date <= NOW() 
          ORDER BY date DESC, id DESC 
@@ -543,7 +608,7 @@ export const getHomepageArticles = createServerFn({ method: "GET" })
       HOMEPAGE_CACHE[limitNum] = {
         data: mapped,
         lastFetched: now,
-        TTL: 60 * 1000, // 60 seconds
+        TTL: 5 * 1000, // 5 seconds
       };
 
       return mapped;

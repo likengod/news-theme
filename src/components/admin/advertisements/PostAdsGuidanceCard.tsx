@@ -45,7 +45,7 @@ export function PostAdsGuidanceCard() {
       </div>
 
       <p className="text-[11.5px] text-slate-600 leading-relaxed border-t border-indigo-100/80 pt-2.5">
-        <strong>How it displays:</strong> Displays along the bottom edge of the post hero image with thumbnail/banner, headline offer text, sponsor brand name, black circular arrow CTA button, and top-right close/dismiss <strong>(✕)</strong> button. Also supports <strong>Google AdSense / Third-Party Scripts</strong> via the top-right toggle.
+        <strong>How it displays:</strong> Displays along the bottom edge of the post hero image as a clean banner advertisement (Desktop: 728×90 / 970×90, Mobile: 320×50 / 300×75) with direct sponsor link and top-right close/dismiss <strong>(✕)</strong> button. Also supports <strong>Google AdSense / Third-Party Scripts</strong> via the top-right toggle.
       </p>
     </div>
   );

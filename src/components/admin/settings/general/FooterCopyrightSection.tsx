@@ -40,6 +40,26 @@ export function FooterCopyrightSection({ settings, update }: FooterCopyrightSect
             className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
           />
         </div>
+
+        <div className="sm:col-span-2">
+          <label htmlFor="footerWidth" className="mb-1 block text-xs font-semibold text-slate-600">
+            Footer Container Width (Big Screens)
+          </label>
+          <select
+            id="footerWidth"
+            name="footerWidth"
+            value={settings.footerWidth || "wide"}
+            onChange={(e) => update("footerWidth", e.target.value)}
+            className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm bg-white focus:border-slate-900 focus:outline-none"
+          >
+            <option value="wide">Wide / Edge-to-Edge Responsive (Recommended - 1536px, fits big screens)</option>
+            <option value="full">Full Width (100% fluid edge-to-edge)</option>
+            <option value="contained">Contained / Boxed (1280px standard)</option>
+          </select>
+          <p className="mt-1 text-xs text-slate-500">
+            Controls how wide the footer stretches on desktop and large widescreen monitors.
+          </p>
+        </div>
       </div>
     </section>
   );

@@ -14,6 +14,9 @@ export type SectionStyle = {
   slideInterval?: number;
   showMultiple?: boolean;
   slideCount?: number;
+  enabled?: boolean;
+  /** Image display mode: "cover" (crop to fill) or "contain" / "fit" (show entire full uncropped image) */
+  imageFit?: "cover" | "contain" | "natural";
 };
 
 export type LiveVideoConfig = {

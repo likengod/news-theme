@@ -16,6 +16,7 @@ export interface ArticlePageData {
   paragraphs: string[];
   views: number;
   excerpt: string;
+  tags?: string[];
   access_level?: "Free" | "Premium";
 }
 
@@ -108,6 +109,16 @@ export async function getArticleData(slug: string): Promise<ArticlePageData | nu
       paragraphs = [art.title || ""];
     }
 
+    let parsedTags: string[] = [];
+    if (art.tags && typeof art.tags === "string") {
+      parsedTags = art.tags
+        .split(",")
+        .map((t: string) => t.trim())
+        .filter(Boolean);
+    } else if (Array.isArray(art.tags)) {
+      parsedTags = art.tags.map((t: any) => String(t).trim()).filter(Boolean);
+    }
+
     return {
       slug: art.slug,
       title: art.title || "",
@@ -123,6 +134,7 @@ export async function getArticleData(slug: string): Promise<ArticlePageData | nu
       paragraphs,
       views: Number(art.views) || 0,
       excerpt: art.excerpt || art.title || "",
+      tags: parsedTags,
       access_level: art.access_level || "Free",
     };
   } catch (err) {

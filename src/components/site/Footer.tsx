@@ -67,10 +67,25 @@ export function Footer() {
     !hasLogo || mode === "text_only" || mode === "both" || mode === "both_stacked";
   const isSideBySide = mode === "both" && showLogo && showText;
 
+  // Split links into 2 neat categories for desktop readability and better space distribution:
+  // 1. Navigation & Company Links
+  const companyLinks = allAvailableLinks.slice(0, 7);
+  // 2. Policies, Terms & Archives
+  const legalLinks = allAvailableLinks.slice(7);
+
+  const footerWidthClass =
+    s.footerWidth === "full"
+      ? "w-full px-4 sm:px-8 lg:px-12 xl:px-16"
+      : s.footerWidth === "contained"
+        ? "mx-auto max-w-7xl px-4"
+        : "mx-auto max-w-[1600px] px-4 sm:px-8 lg:px-12";
+
+  const dividerAccentColor = safeSecondaryColor || s.logoColorSecondary || "#dc2626";
+
   return (
-    <footer className="border-t border-border bg-card/40">
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <div className="grid gap-8 md:grid-cols-3">
+    <footer className="border-t border-border bg-card/40 w-full overflow-hidden">
+      <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-8">
+        <div className="grid gap-8 md:grid-cols-3 lg:gap-10 items-start">
           {/* Brand */}
           <div className="flex flex-col items-center text-center md:items-start md:text-left">
             <Link
@@ -131,7 +146,7 @@ export function Footer() {
                         ? s.logoText.split(" ")[0]
                         : "Today"}
                   </span>{" "}
-                  <span style={{ color: safeSecondaryColor }}>
+                  <span style={{ color: dividerAccentColor }}>
                     {s.logoTextSecondary !== undefined && s.logoTextSecondary !== ""
                       ? s.logoTextSecondary
                       : s.logoText && s.logoText.split(" ").length > 1
@@ -142,16 +157,16 @@ export function Footer() {
               )}
             </Link>
 
-            {/* Elegant Accent Divider below Logo & Site Name */}
-            <div className="my-3.5 flex items-center gap-1.5 w-full max-w-[220px] mx-auto md:mx-0" aria-hidden="true">
+            {/* Accent Divider below Logo & Site Name */}
+            <div className="my-3.5 flex items-center gap-2 w-full max-w-[220px] mx-auto md:mx-0" aria-hidden="true">
               <span
-                className="h-[3px] w-9 rounded-full shrink-0"
-                style={{ backgroundColor: safeSecondaryColor || "#dc2626" }}
+                className="h-[4px] w-12 rounded-full shrink-0 shadow-xs"
+                style={{ backgroundColor: dividerAccentColor }}
               />
-              <span className="h-[1px] flex-1 bg-border/80" />
+              <span className="h-[1.5px] flex-1 bg-border/90 rounded-full" />
             </div>
 
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
               {s.footerNote?.trim() ||
                 s.metaDescription ||
                 "News Theme is an independent newsroom covering breaking news, finance, business and markets across Northeast India and beyond. Trusted, verified and editorially independent journalism."}{" "}
@@ -180,25 +195,41 @@ export function Footer() {
             />
           </div>
 
-          {/* Quick Links */}
-          <div className="text-center md:text-center">
+          {/* Quick Links (Single Centered Block as in reference image) */}
+          <div className="text-center">
             <p className="text-sm font-bold uppercase tracking-widest text-foreground">
               {t("footer.quickLinks")}
             </p>
-            <div className="mt-3 space-y-1.5 sm:space-y-2 text-xs sm:text-[13px] leading-relaxed text-muted-foreground">
+            {/* Elegant Accent Divider below Quick Links */}
+            <div className="my-3 flex items-center justify-center gap-2 w-full max-w-[160px] mx-auto" aria-hidden="true">
+              <span
+                className="h-[3.5px] w-10 rounded-full shrink-0 shadow-xs"
+                style={{ backgroundColor: dividerAccentColor }}
+              />
+              <span className="h-[1.5px] flex-1 bg-border/90 rounded-full" />
+            </div>
+
+            <div className="mt-3 space-y-2 text-xs sm:text-[13px] leading-relaxed text-muted-foreground">
               {quickLinks.map((row, i) => (
-                <div key={i} className="flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 md:gap-x-5 gap-y-1">
+                <div
+                  key={i}
+                  className="flex flex-wrap items-center justify-center gap-x-3.5 sm:gap-x-4 md:gap-x-5 gap-y-1"
+                >
                   {row.map((l) =>
                     l.to ? (
                       <Link
                         key={l.label}
                         to={l.to}
-                        className="whitespace-nowrap hover:text-foreground hover:underline"
+                        className="whitespace-nowrap hover:text-foreground hover:underline transition-colors py-0.5"
                       >
                         {l.label}
                       </Link>
                     ) : (
-                      <a key={l.label} href="#" className="whitespace-nowrap hover:text-foreground hover:underline">
+                      <a
+                        key={l.label}
+                        href="#"
+                        className="whitespace-nowrap hover:text-foreground hover:underline transition-colors py-0.5"
+                      >
                         {l.label}
                       </a>
                     ),
@@ -213,6 +244,16 @@ export function Footer() {
             <p className="text-sm font-bold uppercase tracking-widest text-foreground">
               {t("footer.connectWithUs")}
             </p>
+            {/* Elegant Accent Divider below Connect With Us */}
+            <div className="my-3 flex items-center justify-center md:justify-end gap-2 w-full max-w-[180px] mx-auto md:ml-auto md:mr-0" aria-hidden="true">
+              <span className="h-[1.5px] flex-1 bg-border/90 rounded-full hidden md:block" />
+              <span
+                className="h-[3.5px] w-10 rounded-full shrink-0 shadow-xs"
+                style={{ backgroundColor: dividerAccentColor }}
+              />
+              <span className="h-[1.5px] flex-1 bg-border/90 rounded-full md:hidden" />
+            </div>
+
             <ul className="mt-3 space-y-2.5 text-sm text-muted-foreground">
               <li className="flex items-start justify-center gap-2 md:justify-end">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0" />

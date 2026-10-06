@@ -36,6 +36,7 @@ export type SiteSettings = {
   logoDark: string; // header logo on night/dark mode
   footerLogoLight: string;
   footerLogoDark: string;
+  footerWidth?: "contained" | "wide" | "full";
   favicon: string;
   logoDisplayMode: "logo_only" | "text_only" | "both" | "both_stacked" | "logo_fit";
   logoFitScreen?: boolean;
@@ -143,6 +144,31 @@ export type SiteSettings = {
   protectionModalTitle: string;
   protectionModalMessage: string;
   forceHttps?: boolean; // Added force HTTPS setting
+  showArticleLeftNav?: boolean; // Show/hide left side navigation bar on article pages
+  showArticleRightSidebar?: boolean; // Show/hide right side sidebar/navigation on article pages
+  articleLeftNavItems?: {
+    live?: boolean;
+    reels?: boolean;
+    results?: boolean;
+    videos?: boolean;
+    photos?: boolean;
+    factCheck?: boolean;
+    opinion?: boolean;
+    archive?: boolean;
+    emiCalculator?: boolean;
+    ageCalculator?: boolean;
+  };
+  articleRightSidebarItems?: {
+    ad3?: boolean;
+    trendingNews?: boolean;
+    archiveFinder?: boolean;
+    whatsappChannel?: boolean;
+    telegramChannel?: boolean;
+    whatsappButtonText?: string;
+    whatsappChannelUrl?: string;
+    telegramButtonText?: string;
+    telegramChannelUrl?: string;
+  };
   // Speed Up Optimizations
   cleanUnusedCss: boolean;
   minifyJs: boolean;
@@ -226,11 +252,19 @@ export function isLicenseActive(s?: SiteSettings | null): boolean {
 }
 
 export function isEnterpriseLicense(s?: SiteSettings | null): boolean {
-  return true;
+  const plan = (s?.licenseType || "").toLowerCase().trim();
+  return plan.includes("enterprise");
 }
 
 export function isEnterprisePlusLicense(s?: SiteSettings | null): boolean {
-  return true;
+  const plan = (s?.licenseType || "").toLowerCase().trim();
+  return (
+    plan === "enterprise plus" ||
+    plan === "enterprise+" ||
+    plan === "enterprise-plus" ||
+    plan.includes("enterprise plus") ||
+    plan.includes("enterprise+")
+  );
 }
 
 export const defaultSettings: SiteSettings = {
@@ -264,6 +298,7 @@ export const defaultSettings: SiteSettings = {
   logoDark: "",
   footerLogoLight: "",
   footerLogoDark: "",
+  footerWidth: "wide",
   favicon: "",
   logoDisplayMode: "both",
   logoFitScreen: false,
@@ -410,6 +445,31 @@ export const defaultSettings: SiteSettings = {
   festiveAlertImage: "",
   licenseType: "Enterprise Plus",
   licenseKey: "EP-PRO-NEWS-UNLIMITED-LICENSE-2026",
+  showArticleLeftNav: false,
+  showArticleRightSidebar: true,
+  articleLeftNavItems: {
+    live: true,
+    reels: true,
+    results: true,
+    videos: true,
+    photos: true,
+    factCheck: true,
+    opinion: true,
+    archive: true,
+    emiCalculator: true,
+    ageCalculator: true,
+  },
+  articleRightSidebarItems: {
+    ad3: true,
+    trendingNews: true,
+    archiveFinder: true,
+    whatsappChannel: true,
+    telegramChannel: true,
+    whatsappButtonText: "",
+    whatsappChannelUrl: "",
+    telegramButtonText: "",
+    telegramChannelUrl: "",
+  },
 };
 
 const SETTINGS_KEY = "nt:site-settings";

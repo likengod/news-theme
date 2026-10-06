@@ -12,6 +12,7 @@ import {
   Sparkles,
   Type,
   Globe,
+  Compass,
 } from "lucide-react";
 import {
   loadSettings,
@@ -23,6 +24,11 @@ import { GeneralSettingsForm } from "@/components/admin/settings/GeneralSettings
 
 // Lazy-load other tabs so initial page visit is instant
 const SeoSettingsTab = lazy(() => import("@/components/admin/settings/SeoSettingsTab"));
+const NavigationSettingsTab = lazy(() =>
+  import("@/components/admin/settings/NavigationSettingsTab").then((m) => ({
+    default: m.NavigationSettingsTab,
+  })),
+);
 const ProtectionSettingsForm = lazy(() =>
   import("@/components/admin/settings/ProtectionSettingsForm").then((m) => ({
     default: m.ProtectionSettingsForm,
@@ -63,6 +69,7 @@ const SpeedOptimizationTab = lazy(() =>
 type SettingsSearch = {
   tab?:
     | "general"
+    | "navigation"
     | "seo"
     | "festive"
     | "fonts"
@@ -112,6 +119,7 @@ function SettingsPage() {
   const [s, setS] = useState<SiteSettings>(() => loadSettings());
   const [tab, setTab] = useState<
     | "general"
+    | "navigation"
     | "seo"
     | "festive"
     | "fonts"
@@ -167,6 +175,7 @@ function SettingsPage() {
     icon: React.ComponentType<{ className?: string }>;
   }> = [
     { id: "general", label: "General", icon: Save },
+    { id: "navigation", label: "Navigation", icon: Compass },
     { id: "seo", label: "News SEO & Webmaster", icon: Globe },
     ...(isEnterprise
       ? [{ id: "festive" as const, label: "Festive", icon: Sparkles }]
@@ -223,6 +232,10 @@ function SettingsPage() {
 
       <Suspense fallback={<SettingsTabSkeleton />}>
         {tab === "general" && <GeneralSettingsForm s={s} update={update} onSave={onSave} />}
+
+        {tab === "navigation" && (
+          <NavigationSettingsTab s={s} update={update} />
+        )}
 
         {tab === "seo" && <SeoSettingsTab s={s} update={update} />}
 
