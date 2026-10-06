@@ -107,7 +107,7 @@ export const HeroBoard = React.memo(function HeroBoard({
       kicker: a.category,
       title: a.title,
       excerpt: a.excerpt || a.content?.replace(/<[^>]*>/g, "").slice(0, 150) + "...",
-      img: i < 2 ? getArticleImage(a.featuredImage, i + 12) : undefined,
+      img: (i < 2 || i === 5) ? getArticleImage(a.featuredImage, i + 12) : undefined,
       slug: a.slug,
     }));
 

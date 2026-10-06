@@ -89,6 +89,35 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
             })}
           </div>
         )}
+
+        {activeBottomItems[5] && (
+          <Link
+            to="/news/$slug"
+            params={{ slug: activeBottomItems[5]?.slug || "sample" }}
+            className="group hidden md:block lg:hidden border-t border-border pt-6 md:border-t-0 md:pt-0"
+          >
+            {activeBottomItems[5].img && (
+              <div className="overflow-hidden bg-muted">
+                <img
+                  src={activeBottomItems[5].img}
+                  alt={activeBottomItems[5].title}
+                  loading="lazy"
+                  decoding="async"
+                  width={400}
+                  height={225}
+                  className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+            )}
+            <h3 className="headline mt-4 text-xl text-foreground group-hover:underline line-clamp-2 [-webkit-line-clamp:2] [max-height:none]">
+              {activeBottomItems[5].title}
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
+              {activeBottomItems[5].excerpt}
+            </p>
+            <MinRead seed={activeBottomItems[5].title} kicker={activeBottomItems[5].kicker} />
+          </Link>
+        )}
       </div>
     </div>
   );
