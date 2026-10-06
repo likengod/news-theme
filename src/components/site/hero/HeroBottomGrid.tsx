@@ -16,66 +16,86 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
         {cfg.heroTopStories.title}
       </h2>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 w-full max-w-full min-w-0">
-        {activeBottomItems[0] && (
-          <Link
-            to="/news/$slug"
-            params={{ slug: activeBottomItems[0]?.slug || "sample" }}
-            className="group block"
-          >
-            {activeBottomItems[0].img && (
-              <div className="overflow-hidden bg-muted">
-                <img
-                  src={activeBottomItems[0].img}
-                  alt={activeBottomItems[0].title}
-                  loading="lazy"
-                  decoding="async"
-                  width={400}
-                  height={225}
-                  className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
-            )}
-            <h3 className="headline mt-4 text-xl text-foreground group-hover:underline [-webkit-line-clamp:3] [max-height:none]">
-              {activeBottomItems[0].title}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
-              {activeBottomItems[0].excerpt}
-            </p>
-            <MinRead seed={activeBottomItems[0].title} kicker={activeBottomItems[0].kicker} />
-          </Link>
-        )}
+        
+        {/* Column 1 */}
+        <div className="flex flex-col h-full w-full min-w-0">
+          {activeBottomItems[0] && (
+            <Link
+              to="/news/$slug"
+              params={{ slug: activeBottomItems[0]?.slug || "sample" }}
+              className="group block"
+            >
+              {activeBottomItems[0].img && (
+                <div className="overflow-hidden bg-muted">
+                  <img
+                    src={activeBottomItems[0].img}
+                    alt={activeBottomItems[0].title}
+                    loading="lazy"
+                    decoding="async"
+                    width={400}
+                    height={225}
+                    className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+              )}
+              <h3 className="headline mt-4 text-xl text-foreground group-hover:underline [-webkit-line-clamp:3] [max-height:none]">
+                {activeBottomItems[0].title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
+                {activeBottomItems[0].excerpt}
+              </p>
+              <MinRead seed={activeBottomItems[0].title} kicker={activeBottomItems[0].kicker} />
+            </Link>
+          )}
 
-        {activeBottomItems[1] && (
-          <Link
-            to="/news/$slug"
-            params={{ slug: activeBottomItems[1]?.slug || "sample" }}
-            className="group block border-t border-border pt-6 md:border-t-0 md:pt-0"
-          >
-            {activeBottomItems[1].img && (
-              <div className="hidden md:block overflow-hidden bg-muted">
-                <img
-                  src={activeBottomItems[1].img}
-                  alt={activeBottomItems[1].title}
-                  loading="lazy"
-                  decoding="async"
-                  width={400}
-                  height={225}
-                  className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
-            )}
-            <h3 className="headline mt-0 md:mt-4 text-xl text-foreground group-hover:underline line-clamp-2 [-webkit-line-clamp:2] [max-height:none]">
-              {activeBottomItems[1].title}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
-              {activeBottomItems[1].excerpt}
-            </p>
-            <MinRead seed={activeBottomItems[1].title} kicker={activeBottomItems[1].kicker} />
-          </Link>
-        )}
+          {activeBottomItems[5] && (
+            <div className="hidden lg:block 2xl:hidden mt-auto border-t border-border pt-6 pb-2">
+              <HeadlineArticle item={activeBottomItems[5]} dense />
+            </div>
+          )}
+        </div>
 
+        {/* Column 2 */}
+        <div className="flex flex-col h-full w-full min-w-0">
+          {activeBottomItems[1] && (
+            <Link
+              to="/news/$slug"
+              params={{ slug: activeBottomItems[1]?.slug || "sample" }}
+              className="group block border-t border-border pt-6 md:border-t-0 md:pt-0"
+            >
+              {activeBottomItems[1].img && (
+                <div className="hidden md:block overflow-hidden bg-muted">
+                  <img
+                    src={activeBottomItems[1].img}
+                    alt={activeBottomItems[1].title}
+                    loading="lazy"
+                    decoding="async"
+                    width={400}
+                    height={225}
+                    className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+              )}
+              <h3 className="headline mt-0 md:mt-4 text-xl text-foreground group-hover:underline line-clamp-2 [-webkit-line-clamp:2] [max-height:none]">
+                {activeBottomItems[1].title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
+                {activeBottomItems[1].excerpt}
+              </p>
+              <MinRead seed={activeBottomItems[1].title} kicker={activeBottomItems[1].kicker} />
+            </Link>
+          )}
+
+          {activeBottomItems[6] && (
+            <div className="hidden lg:block 2xl:hidden mt-auto border-t border-border pt-6 pb-2">
+              <HeadlineArticle item={activeBottomItems[6]} dense />
+            </div>
+          )}
+        </div>
+
+        {/* Column 3 */}
         {activeBottomItems.length > 2 && (
-          <div className="divide-y divide-border border-t border-border pt-6 md:border-t-0 md:pt-0">
+          <div className="divide-y divide-border border-t border-border pt-6 md:border-t-0 md:pt-0 md:col-span-2 lg:col-span-1">
             {activeBottomItems.slice(2, 5).map((item: any, idx: number) => {
               if (!item) return null;
               return (
@@ -88,35 +108,6 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
               );
             })}
           </div>
-        )}
-
-        {activeBottomItems[5] && (
-          <Link
-            to="/news/$slug"
-            params={{ slug: activeBottomItems[5]?.slug || "sample" }}
-            className="group hidden md:block lg:hidden border-t border-border pt-6 md:border-t-0 md:pt-0"
-          >
-            {activeBottomItems[5].img && (
-              <div className="overflow-hidden bg-muted">
-                <img
-                  src={activeBottomItems[5].img}
-                  alt={activeBottomItems[5].title}
-                  loading="lazy"
-                  decoding="async"
-                  width={400}
-                  height={225}
-                  className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
-            )}
-            <h3 className="headline mt-4 text-xl text-foreground group-hover:underline line-clamp-2 [-webkit-line-clamp:2] [max-height:none]">
-              {activeBottomItems[5].title}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
-              {activeBottomItems[5].excerpt}
-            </p>
-            <MinRead seed={activeBottomItems[5].title} kicker={activeBottomItems[5].kicker} />
-          </Link>
         )}
       </div>
     </div>
