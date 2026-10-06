@@ -93,7 +93,7 @@ export const HeroBoard = React.memo(function HeroBoard({
       slug: a.slug,
     }));
 
-    const leftArticles = getUnique(articles, 5);
+    const leftArticles = getUnique(articles, 7);
     const left = leftArticles.map((a, i) => ({
       kicker: a.category,
       title: a.title,
