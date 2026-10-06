@@ -20,7 +20,7 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
             key={`${c?.title || "culture"}-${i}`}
             to="/news/$slug"
             params={{ slug: c?.slug || "sample" }}
-            className="group block w-full max-w-full min-w-0"
+            className="group flex flex-col h-full w-full max-w-full min-w-0"
           >
             <div className="relative overflow-hidden rounded-lg">
               <img
@@ -43,13 +43,13 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
                 {formatViews(c.views || viewsFor(c.title))} views
               </span>
             </div>
-            <h3 className="headline mt-3 text-lg leading-tight text-foreground group-hover:underline break-words">
+            <h3 className="headline mt-3 line-clamp-2 text-lg leading-tight text-foreground group-hover:underline break-words">
               {c.title}
             </h3>
-            <p className="mt-2 line-clamp-3 text-sm leading-snug text-muted-foreground break-words">
+            <p className="mt-2 line-clamp-2 text-sm leading-snug text-muted-foreground break-words">
               {c.excerpt}
             </p>
-            <p className="mt-3 flex items-center gap-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+            <p className="mt-auto pt-3 flex items-center gap-2 text-[11px] uppercase tracking-wider text-muted-foreground">
               <span>{c.date}</span>
               <span>·</span>
               <span className="kicker text-[10px]">{c.kicker}</span>
