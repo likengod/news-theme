@@ -1,3 +1,8 @@
+﻿import { useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Field, JournalistPicker } from "@/components/admin/articles/ArticleSubComponents";
 import { formatDateTimeLocal, type Row } from "./types";
 
@@ -5,7 +10,7 @@ interface ArticleSettingsTabProps {
   row: Row;
   onChange: <K extends keyof Row>(field: K, value: Row[K]) => void;
   currentUserAuthor?: string;
-  authorOptions?: { id: string; name: string; username?: string; role: string }[];
+  authorOptions?: { id: string; name: string; username?: string; email?: string; phone?: string; role: string }[];
   isEnterprisePlus?: boolean;
 }
 
@@ -39,34 +44,82 @@ export default function ArticleSettingsTab({
 
         <Field label="Author *">
           <div className="space-y-1.5">
-            <select
-              aria-label="Select author or admin profile"
-              className="w-full rounded-md border border-slate-200 bg-slate-50/80 px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 focus:bg-white focus:outline-none"
-              defaultValue=""
-              onChange={(e) => {
-                if (e.target.value) {
-                  onChange("author", e.target.value);
-                }
-              }}
-            >
-              <option value="" disabled>
-                ⚡ Select author / admin profile...
-              </option>
-              {currentUserAuthor && (
-                <option value={currentUserAuthor}>
-                  👤 {currentUserAuthor} (Your Profile)
-                </option>
-              )}
-              {authorOptions && authorOptions.length > 0 && (
-                <optgroup label="Admin & Editorial Users">
-                  {authorOptions.map((a) => (
-                    <option key={a.id} value={a.name}>
-                      {a.name} ({a.role}{a.username ? ` · @${a.username}` : ""})
-                    </option>
-                  ))}
-                </optgroup>
-              )}
-            </select>
+            <Popover open={authorOpen} onOpenChange={setAuthorOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={authorOpen}
+                  className="w-full justify-between font-normal text-slate-700 bg-slate-50/80 hover:bg-slate-100 px-2.5 py-1.5 h-auto text-xs"
+                >
+                  ? Select author / admin profile...
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px] p-0" align="start">
+                <Command
+                  filter={(value, search) => {
+                    const option = authorOptions?.find((a) => a.id === value);
+                    if (!option && currentUserAuthor?.toLowerCase() !== value) return 0;
+                    
+                    const searchTerms = search.toLowerCase().split(" ");
+                    const targetString = option 
+                      ? `${option.name} ${option.email || ""} ${option.phone || ""} ${option.username || ""} ${option.role}`.toLowerCase()
+                      : `${currentUserAuthor} your profile`.toLowerCase();
+                      
+                    return searchTerms.every(t => targetString.includes(t)) ? 1 : 0;
+                  }}
+                >
+                  <CommandInput placeholder="Search name, email, phone, or role..." />
+                  <CommandList>
+                    <CommandEmpty>No author found.</CommandEmpty>
+                    <CommandGroup heading="Admin & Editorial Users">
+                      {currentUserAuthor && (
+                        <CommandItem
+                          value={currentUserAuthor.toLowerCase()}
+                          onSelect={() => {
+                            onChange("author", currentUserAuthor);
+                            setAuthorOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={`mr-2 h-4 w-4 ${
+                              row.author === currentUserAuthor ? "opacity-100" : "opacity-0"
+                            }`}
+                          />
+                          ?? {currentUserAuthor} (Your Profile)
+                        </CommandItem>
+                      )}
+                      
+                      {authorOptions?.map((a) => (
+                        <CommandItem
+                          key={a.id}
+                          value={a.id}
+                          onSelect={() => {
+                            onChange("author", a.name);
+                            setAuthorOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={`mr-2 h-4 w-4 ${
+                              row.author === a.name ? "opacity-100" : "opacity-0"
+                            }`}
+                          />
+                          <div className="flex flex-col">
+                            <span>{a.name} ({a.role}{a.username ? ` • @${a.username}` : ""})</span>
+                            {(a.email || a.phone) && (
+                              <span className="text-xs text-slate-500">
+                                {a.email} {a.phone ? `• ${a.phone}` : ""}
+                              </span>
+                            )}
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
             <input
               id="article-author"
@@ -166,4 +219,6 @@ export default function ArticleSettingsTab({
     </div>
   );
 }
+
+
 

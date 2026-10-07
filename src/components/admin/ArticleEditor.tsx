@@ -34,7 +34,7 @@ export default function ArticleEditor({
 }: {
   initial: Row;
   currentUserAuthor?: string;
-  authorOptions?: { id: string; name: string; username?: string; role: string }[];
+  authorOptions?: { id: string; name: string; username?: string; email?: string; phone?: string; role: string }[];
   onClose: () => void;
   onSave: (r: Row) => void;
 }) {

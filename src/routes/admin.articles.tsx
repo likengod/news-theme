@@ -80,7 +80,7 @@ function ArticlesPage() {
 
   // Author profiles state
   const [currentUserAuthor, setCurrentUserAuthor] = useState("Admin User");
-  const [authorOptions, setAuthorOptions] = useState<{ id: string; name: string; username?: string; role: string }[]>([]);
+  const [authorOptions, setAuthorOptions] = useState<{ id: string; name: string; username?: string; email?: string; phone?: string; role: string }[]>([]);
   const fetchAuthorProfilesFn = useServerFn(getAdminAuthorProfiles);
 
   useEffect(() => {

@@ -231,11 +231,7 @@ export const getAdminAuthorProfiles = createServerFn({ method: "GET" })
   .handler(async () => {
     try {
       const rows = await query(`
-        SELECT DISTINCT 
-          u.id, 
-          COALESCE(p.display_name, u.display_name, u.email) AS name, 
-          u.username,
-          r.role
+        SELECT DISTINCT u.id, COALESCE(p.display_name, u.display_name, u.email) AS name, u.username, u.email, p.phone, r.role
         FROM users u
         LEFT JOIN profiles p ON u.id = p.id
         JOIN user_roles r ON u.id = r.user_id
@@ -714,3 +710,4 @@ export const getAdminDashboardStats = createServerFn({ method: "GET" })
       currencySymbol: "₹",
     };
   });
+
