@@ -120,22 +120,14 @@ function Home() {
 
         {/* On Desktop Devices (>= md): Render Watch section after HeroBoard */}
         <div className="hidden md:block">
-          <LazySection minHeight={420}>
-            <Columnists />
-          </LazySection>
+          <Columnists />
         </div>
 
-        <LazySection minHeight={600}>
-          <NewsGrid articles={dbArticles} usedIds={usedIds} />
-        </LazySection>
+        <NewsGrid articles={dbArticles} usedIds={usedIds} />
 
-        <LazySection minHeight={480}>
-          <ReelsSection />
-        </LazySection>
+        <ReelsSection />
 
-        <LazySection minHeight={700}>
-          <MarketsMagazine articles={dbArticles} usedIds={usedIds} />
-        </LazySection>
+        <MarketsMagazine articles={dbArticles} usedIds={usedIds} />
       </main>
 
       <Footer />

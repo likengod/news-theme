@@ -311,8 +311,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
     if (googleFontsUrl && typeof googleFontsUrl === "string" && googleFontsUrl.trim()) {
       links.push({
+        rel: "preload",
+        as: "style",
+        href: googleFontsUrl,
+      });
+      links.push({
         rel: "stylesheet",
         href: googleFontsUrl,
+        media: "print",
+        onLoad: "this.media='all'",
       });
     }
 

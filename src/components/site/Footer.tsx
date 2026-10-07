@@ -172,10 +172,10 @@ export function Footer() {
                 "News Theme is an independent newsroom covering breaking news, finance, business and markets across Northeast India and beyond. Trusted, verified and editorially independent journalism."}{" "}
               <Link
                 to="/about"
-                aria-label={t("footer.readMore", "Read more")}
+                aria-label={t("footer.readMoreAbout", "Read more about us")}
                 className="font-semibold text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300 ml-1 inline-block"
               >
-                {t("footer.readMore", "Read more")}
+                {t("footer.readMoreAbout", "Read more about us")}
               </Link>
             </p>
             <SocialIcons
