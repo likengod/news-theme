@@ -26,9 +26,11 @@ export function ArchiveFinder() {
       <p className="text-[11px] text-muted-foreground">Find stories by date</p>
       <div className="grid grid-cols-3 gap-2">
         <select
+          id="day"
           name="day"
           aria-label="Day"
           defaultValue=""
+          suppressHydrationWarning
           className="w-full border border-border bg-background px-2 py-2 text-sm outline-none focus:border-foreground"
         >
           <option value="">Day</option>
@@ -39,9 +41,11 @@ export function ArchiveFinder() {
           ))}
         </select>
         <select
+          id="month"
           name="month"
           aria-label="Month"
           defaultValue=""
+          suppressHydrationWarning
           className="w-full border border-border bg-background px-2 py-2 text-sm outline-none focus:border-foreground"
         >
           <option value="">Month</option>
@@ -54,9 +58,11 @@ export function ArchiveFinder() {
           )}
         </select>
         <select
+          id="year"
           name="year"
           aria-label="Year"
           defaultValue=""
+          suppressHydrationWarning
           className="w-full border border-border bg-background px-2 py-2 text-sm outline-none focus:border-foreground"
         >
           <option value="">Year</option>

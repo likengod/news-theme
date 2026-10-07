@@ -24,7 +24,7 @@ const FALLBACK_SLIDES = [coverImg, slide1, slide2, slide3, pensionImg, artImg].m
   (src) => ({ id: src, image: src, href: "#" }) as AdSlideItem,
 );
 
-import { useAdSettings } from "./AdSettingsContext";
+import { useAdSettings, useSiteSettings } from "./AdSettingsContext";
 
 function getArticleSnippet(art?: { content?: string; excerpt?: string } | null): string {
   if (!art) return "";
@@ -278,16 +278,10 @@ export function MarketsMagazine({
   });
   const [slotMode, setSlotMode] = useState<AdSlotMode>(initialMode);
   const [slotScript, setSlotScript] = useState(initialScript);
-  const [settings, setSettings] = useState(() => loadSettings());
+  const settings = useSiteSettings();
   const [showCustomText, setShowCustomText] = useState(false);
 
   const hasAd = slotMode === "script" ? Boolean(slotScript) : slides.length > 0;
-
-  useEffect(() => {
-    const handleUpdate = () => setSettings(loadSettings());
-    window.addEventListener("nt:settings-updated", handleUpdate);
-    return () => window.removeEventListener("nt:settings-updated", handleUpdate);
-  }, []);
 
   const hasCustomAlert =
     settings.festiveThemeEnabled !== false &&
@@ -403,6 +397,7 @@ export function MarketsMagazine({
           key={showCustomText ? "custom" : "default"}
           className="font-sans text-xs sm:text-sm font-black uppercase tracking-widest inline-flex items-center gap-1.5 transition-all duration-300"
           style={badgeStyle}
+          suppressHydrationWarning
         >
           {hasCustomAlert && showCustomText && settings.festiveAlertImage ? (
             <img
@@ -411,7 +406,7 @@ export function MarketsMagazine({
               className="h-4 w-auto max-w-[80px] object-contain shrink-0 align-middle"
             />
           ) : (
-            <span>{badgeTitle}</span>
+            <span suppressHydrationWarning>{badgeTitle}</span>
           )}
         </span>
       </div>
