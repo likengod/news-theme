@@ -1,17 +1,6 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  Sparkles,
-  X,
-  Flame,
-  Link as LinkIcon,
-  CheckCircle2,
-  AlertCircle,
-  ExternalLink,
-  Loader2,
-  Clock,
-  MessageSquare,
-} from "lucide-react";
+import { Sparkles, X, Clock, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import {
   generateDummyCommentsFn,
@@ -20,6 +9,9 @@ import {
   type CommentRow,
 } from "@/lib/comments.functions";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { AiArticlePicker } from "./AiArticlePicker";
+import { AiRepliesConfig } from "./AiRepliesConfig";
+import { AiPromptSettings } from "./AiPromptSettings";
 
 interface AiGenerateModalProps {
   isOpen: boolean;
@@ -236,94 +228,15 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess, replyTarget }: AiG
           )}
 
           {/* Target Article URL / Slug & Auto Fetch */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                <LinkIcon className="h-3.5 w-3.5 text-blue-600" />
-                Target Article URL or Slug <span className="text-red-500">*</span>
-              </label>
-              {aiArticleSlug && (
-                <span className="text-[11px] text-slate-500 font-mono">
-                  Slug: {aiArticleSlug}
-                </span>
-              )}
-            </div>
-
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                required
-                placeholder="Paste article URL or slug (e.g. https://.../news/... or slug)"
-                value={aiArticleInput}
-                onChange={(e) => setAiArticleInput(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 pr-24 font-medium text-slate-800"
-              />
-              <button
-                type="button"
-                onClick={() => handleFetchArticle(aiArticleInput)}
-                disabled={fetchingArticle || !aiArticleInput.trim()}
-                className="absolute right-1.5 top-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-40 transition flex items-center gap-1 shadow-xs"
-              >
-                {fetchingArticle ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  "Auto Fetch"
-                )}
-              </button>
-            </div>
-
-            {/* Fetching status indicator */}
-            {fetchingArticle && (
-              <div className="flex items-center gap-2 text-xs text-blue-600 py-1 font-medium">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Fetching article details from database...
-              </div>
-            )}
-
-            {/* Verified Article Preview Card */}
-            {resolvedArticle && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 shadow-xs animate-in fade-in duration-200">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-2.5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
-                          ✓ Article Verified
-                        </span>
-                        {resolvedArticle.category && (
-                          <span className="text-[10px] font-semibold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
-                            {resolvedArticle.category}
-                          </span>
-                        )}
-                      </div>
-                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 mt-1 leading-snug">
-                        {resolvedArticle.title}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 font-mono mt-0.5">
-                        ID: #{resolvedArticle.id} &bull; /{resolvedArticle.slug}
-                      </p>
-                    </div>
-                  </div>
-                  <a
-                    href={`/news/${resolvedArticle.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 shrink-0 bg-white px-2.5 py-1 rounded-md border border-slate-200 shadow-xs"
-                  >
-                    View <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-              </div>
-            )}
-
-            {/* Error message */}
-            {fetchError && !fetchingArticle && aiArticleInput && (
-              <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2.5">
-                <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
-                <span>{fetchError}</span>
-              </div>
-            )}
-          </div>
+          <AiArticlePicker
+            aiArticleInput={aiArticleInput}
+            setAiArticleInput={setAiArticleInput}
+            aiArticleSlug={aiArticleSlug}
+            fetchingArticle={fetchingArticle}
+            onFetchArticle={handleFetchArticle}
+            resolvedArticle={resolvedArticle}
+            fetchError={fetchError}
+          />
 
           {/* Number of Comments */}
           <div>
@@ -380,196 +293,29 @@ export function AiGenerateModal({ isOpen, onClose, onSuccess, replyTarget }: AiG
             </p>
           </div>
 
-          {/* Conversational Replies Toggle (When generating multiple comments) */}
+          {/* Conversational Replies Toggle */}
           {!targetReplyComment && aiCount >= 2 && (
-            <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-3.5 space-y-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <label
-                    onClick={() => setAiIncludeReplies(!aiIncludeReplies)}
-                    className="text-xs font-bold text-indigo-950 flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <MessageSquare className="h-4 w-4 text-indigo-600 shrink-0" />
-                    Include Conversational Replies (Threaded Comments)
-                  </label>
-                  <p className="text-[11px] text-indigo-800 mt-0.5 leading-relaxed">
-                    AI will generate realistic replies between readers debating or following up on earlier comments.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setAiIncludeReplies(!aiIncludeReplies)}
-                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition mt-0.5 ${
-                    aiIncludeReplies ? "bg-indigo-600" : "bg-slate-300"
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${
-                      aiIncludeReplies ? "translate-x-4" : "translate-x-0"
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {aiIncludeReplies && (
-                <div className="pt-2.5 border-t border-indigo-200/80 space-y-2.5 animate-in fade-in duration-150">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-indigo-950 flex items-center gap-1.5">
-                      How Many Comments Should Be Replies?
-                    </label>
-                    <span className="text-[11px] font-bold text-indigo-700 bg-indigo-100/90 px-2 py-0.5 rounded-md">
-                      {effectiveReplyCount} {effectiveReplyCount === 1 ? "Reply" : "Replies"} of {aiCount} Total
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min={1}
-                      max={maxReplies}
-                      value={effectiveReplyCount}
-                      onChange={(e) => setAiReplyCount(parseInt(e.target.value) || 1)}
-                      className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                    />
-                    <div className="flex items-center gap-1 shrink-0">
-                      <input
-                        type="number"
-                        min={1}
-                        max={maxReplies}
-                        value={effectiveReplyCount}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value) || 1;
-                          setAiReplyCount(Math.min(Math.max(1, val), maxReplies));
-                        }}
-                        className="w-14 rounded-md border border-indigo-300 bg-white px-2 py-1 text-xs font-bold text-indigo-950 text-center focus:border-indigo-500 focus:outline-none shadow-xs"
-                      />
-                      <span className="text-[11px] font-semibold text-indigo-900">replies</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-indigo-900 bg-white/90 rounded-lg px-3 py-2 border border-indigo-200 font-medium shadow-xs">
-                    <span>💬 Main Comments: <strong className="text-indigo-950 font-bold">{aiCount - effectiveReplyCount}</strong></span>
-                    <span>↳ Nested Replies: <strong className="text-indigo-950 font-bold">{effectiveReplyCount}</strong></span>
-                    <span>Total: <strong className="text-indigo-950 font-bold">{aiCount}</strong></span>
-                  </div>
-                </div>
-              )}
-            </div>
+            <AiRepliesConfig
+              aiCount={aiCount}
+              aiIncludeReplies={aiIncludeReplies}
+              setAiIncludeReplies={setAiIncludeReplies}
+              effectiveReplyCount={effectiveReplyCount}
+              maxReplies={maxReplies}
+              setAiReplyCount={setAiReplyCount}
+            />
           )}
 
-          {/* Language & Dialect Mode */}
-          <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Language &amp; Dialect Mode
-            </label>
-            <select
-              value={aiLanguage}
-              onChange={(e) => setAiLanguage(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white font-medium text-slate-800"
-            >
-              <option value="random_mix">
-                ✨ Natural Random Mix (Tripura Bengali + Banglish + Indian English) [Recommended]
-              </option>
-              <option value="Bengali">
-                বাংলা - Tripura Spoken Bengali (বাংলা হরফে স্থানীয় কথ্য টান)
-              </option>
-              <option value="Banglish">
-                Banglish - Bengali in Roman English letters (e.g. 'Khub bhalo udyog')
-              </option>
-              <option value="English">
-                Indian English - Local news reader tone (e.g. 'Good step by authorities')
-              </option>
-              <option value="CodeMixed">
-                Code-Mixed - Bangla + English blend ('Ei decision-ta accurate')
-              </option>
-            </select>
-            <p className="mt-1 text-[11px] text-slate-500">
-              {aiLanguage === "random_mix"
-                ? "Randomly distributes comments: one in Bengali script, one in Banglish, one in Indian English, and one code-mixed for total realism."
-                : "Generates comments in this specific linguistic style."}
-            </p>
-          </div>
-
-          {/* Admin Custom Prompt / Focus Keywords */}
-          <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-3.5 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-wider text-blue-950 flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-blue-600" />
-                Custom AI Focus / Keywords (Optional)
-              </label>
-              <span className="text-[10px] font-semibold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-full">
-                Topic Guidance
-              </span>
-            </div>
-            <textarea
-              rows={2}
-              value={aiCustomPrompt}
-              onChange={(e) => setAiCustomPrompt(e.target.value)}
-              placeholder="e.g. Focus on road conditions and mention AMC; or Praise the Chief Minister's decision; or Question when electricity issue will be resolved"
-              className="w-full rounded-lg border border-blue-200 bg-white p-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-            <p className="text-[11px] text-blue-800">
-              Enter any specific words, issues, or viewpoints you want the simulated readers to talk about.
-            </p>
-          </div>
-
-          {/* Sentiment Ratio */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                Sentiment Ratio
-              </label>
-              <span className="text-xs font-semibold text-slate-600">
-                <span className="text-emerald-600 font-bold">{aiPositivity}% Supportive</span> /{" "}
-                <span className="text-amber-600 font-bold">{100 - aiPositivity}% Critical / Questioning</span>
-              </span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="5"
-              value={aiPositivity}
-              onChange={(e) => setAiPositivity(parseInt(e.target.value))}
-              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-            />
-            <div className="flex justify-between text-[10px] text-slate-400 mt-0.5">
-              <span>0% (All Critical)</span>
-              <span>50% (Balanced)</span>
-              <span>100% (All Supportive)</span>
-            </div>
-          </div>
-
-          {/* Authentic Tripura Street Slang & Dialect Toggle */}
-          <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3.5 flex items-start justify-between gap-3">
-            <div>
-              <label
-                onClick={() => setAiAllowSlang(!aiAllowSlang)}
-                className="text-xs font-bold text-amber-950 flex items-center gap-1.5 cursor-pointer"
-              >
-                <Flame className="h-4 w-4 text-amber-600 shrink-0" />
-                Tripura Street Slang &amp; Sharp Dialect (আঞ্চলিক স্ল্যাং ও ক্ষোভপূর্ণ ভাষা)
-              </label>
-              <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
-                Allows authentic local expressions in critical comments:{" "}
-                <span className="font-medium">
-                  "বালের রাস্তা", "ফাইজলামি বন্ধ করুক", "কিতা অইতাছে", "আবাইল্লা", "ধুর ছাই", "খচ্চর", "তেঁড়ামি"
-                </span>{" "}
-                so critical reader reactions sound 100% natural, raw, and realistic.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setAiAllowSlang(!aiAllowSlang)}
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition mt-0.5 ${
-                aiAllowSlang ? "bg-amber-600" : "bg-slate-300"
-              }`}
-            >
-              <span
-                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${
-                  aiAllowSlang ? "translate-x-4" : "translate-x-0"
-                }`}
-              />
-            </button>
-          </div>
+          {/* Language, Prompt, Sentiment & Slang Settings */}
+          <AiPromptSettings
+            aiLanguage={aiLanguage}
+            setAiLanguage={setAiLanguage}
+            aiCustomPrompt={aiCustomPrompt}
+            setAiCustomPrompt={setAiCustomPrompt}
+            aiPositivity={aiPositivity}
+            setAiPositivity={setAiPositivity}
+            aiAllowSlang={aiAllowSlang}
+            setAiAllowSlang={setAiAllowSlang}
+          />
 
           {/* User Public IDs */}
           <div>

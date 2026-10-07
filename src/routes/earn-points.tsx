@@ -1,17 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import {
-  UserPlus,
-  MessageCircle,
-  Share2,
-  BookOpen,
-  Wallet,
-  Coins,
-  AlertCircle,
-  Lock,
-} from "lucide-react";
-import { FaFacebookF, FaInstagram, FaYoutube, FaWhatsapp } from "react-icons/fa6";
+import { Coins, AlertCircle, BookOpen, Share2 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
@@ -23,7 +13,6 @@ import {
   getUniqueCommentsCount,
 } from "@/lib/user-actions-tracker";
 import { loadRewards, type OneTimeReward, type RecurringReward } from "@/lib/rewards";
-import { loadSocialLinks } from "@/lib/social-links";
 import {
   loadAllPendingClaims,
   getClaimsForUser,
@@ -32,6 +21,13 @@ import {
 } from "@/lib/pending-claims";
 import { ProofModal, type SocialTaskDef } from "@/components/earn-points/ProofModal";
 import { TaskCard, DailyTaskCard } from "@/components/earn-points/TaskCard";
+import {
+  SOCIAL_TASK_META,
+  OTHER_TASK_ICONS,
+  DAILY_TASK_ICONS,
+} from "@/components/earn-points/taskConstants";
+import { EnterpriseLockedView } from "@/components/earn-points/EnterpriseLockedView";
+import { WalletSummaryCard } from "@/components/earn-points/WalletSummaryCard";
 
 /* ────────────── Route ────────────── */
 
@@ -55,63 +51,6 @@ export const Route = createFileRoute("/earn-points")({
   component: EarnPointsPage,
 });
 
-/* ────────────── Social task definitions (for UI rendering) ────────────── */
-
-const SOCIAL_TASK_META: Record<string, Omit<SocialTaskDef, "id" | "title" | "points">> = {
-  fb: {
-    platform: "Facebook",
-    icon: FaFacebookF,
-    iconColor: "#1877F2",
-    actionLabel: "Follow",
-    hrefKey: "facebook",
-    handleLabel: "Your Facebook profile URL or username",
-    handlePlaceholder: "https://facebook.com/yourname or @yourname",
-  },
-  yt: {
-    platform: "YouTube",
-    icon: FaYoutube,
-    iconColor: "#FF0000",
-    actionLabel: "Subscribe",
-    hrefKey: "youtube",
-    handleLabel: "Your YouTube channel URL or username",
-    handlePlaceholder: "https://youtube.com/@yourhandle",
-  },
-  ig: {
-    platform: "Instagram",
-    icon: FaInstagram,
-    iconColor: "#E4405F",
-    actionLabel: "Follow",
-    hrefKey: "instagram",
-    handleLabel: "Your Instagram username",
-    handlePlaceholder: "@yourinstagram",
-  },
-  wa: {
-    platform: "WhatsApp",
-    icon: FaWhatsapp,
-    iconColor: "#25D366",
-    actionLabel: "Join",
-    hrefKey: "whatsapp",
-    handleLabel: "Your WhatsApp number (for verification)",
-    handlePlaceholder: "+91 98765 43210",
-  },
-};
-
-const OTHER_TASK_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  signup: UserPlus,
-  first_comments: MessageCircle,
-  first_shares: Share2,
-  first_reads: BookOpen,
-};
-
-const DAILY_TASK_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  r_share: Share2,
-  p_share: Share2,
-  share_daily: Share2,
-  r_comment: MessageCircle,
-  p_comment: MessageCircle,
-  comment_daily: MessageCircle,
-};
-
 /* ────────────── State helpers ────────────── */
 
 const STORAGE = "nt:earn-points:v1";
@@ -125,6 +64,7 @@ function loadState(userId: string): State {
   } catch {}
   return { completed: {}, balance: 0 };
 }
+
 function saveState(userId: string, state: State) {
   localStorage.setItem(`${STORAGE}:${userId}`, JSON.stringify(state));
   localStorage.setItem(`nt:points:${userId}`, String(state.balance));
@@ -151,15 +91,12 @@ function EarnPointsPage() {
   const [dailyTasks, setDailyTasks] = useState<RecurringReward[]>([]);
 
   useEffect(() => {
-    // Only load if premium
     if (!isEnterprisePlus) return;
 
-    // Read rewards from admin config
     const groups = loadRewards();
     const allGroup = groups.find((g) => g.roleId === "all");
     const readerGroup = groups.find((g) => g.roleId === "reader");
 
-    // Social tasks = one-time tasks from "all" group that match social IDs
     const socialIds = new Set(["fb", "yt", "ig", "wa"]);
     const social = (allGroup?.oneTime ?? []).filter((t) => socialIds.has(t.id));
     const other = (allGroup?.oneTime ?? []).filter((t) => !socialIds.has(t.id));
@@ -167,7 +104,7 @@ function EarnPointsPage() {
     setSocialTasks(social);
     setOtherTasks(other);
     setDailyTasks(readerGroup?.recurring ?? []);
-  }, []);
+  }, [isEnterprisePlus]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -278,30 +215,7 @@ function EarnPointsPage() {
   };
 
   if (!isEnterprisePlus) {
-    return (
-      <div className="min-h-screen bg-background text-foreground flex flex-col">
-        <Header showTicker={false} showBreakingBar={false} />
-        <main className="flex-1 flex items-center justify-center p-6">
-          <div className="max-w-md w-full rounded-2xl border border-border bg-card p-8 text-center shadow-lg">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-              <Lock className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h1 className="mt-6 text-xl font-bold text-card-foreground">Enterprise Plus Feature Locked</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              The Wallet and Rewards system is exclusively available on Enterprise Plus plans.
-              Please ask the site administrator to upgrade their license to unlock this feature.
-            </p>
-            <Link
-              to="/"
-              className="mt-6 inline-flex w-full items-center justify-center rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-            >
-              Return Home
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+    return <EnterpriseLockedView />;
   }
 
   return (
@@ -320,48 +234,13 @@ function EarnPointsPage() {
           </p>
         </header>
 
-        {/* Wallet card */}
-        <section className="mb-10 rounded-2xl border border-border bg-gradient-to-br from-emerald-50 to-white p-6 shadow-sm dark:from-emerald-950/40 dark:to-background">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <span className="grid h-12 w-12 place-items-center rounded-full bg-emerald-600 text-white">
-                <Wallet className="h-6 w-6" />
-              </span>
-              <div>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">
-                  Wallet balance
-                </p>
-                <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">
-                  ₹{state.balance}
-                </p>
-                {userEmail && <p className="text-xs text-muted-foreground">{userEmail}</p>}
-              </div>
-            </div>
-            <div className="flex flex-col items-end gap-2 text-right text-xs text-muted-foreground">
-              <div>
-                <p>Total one-time rewards available</p>
-                <p className="text-lg font-semibold text-foreground">₹{totalAvailable}</p>
-              </div>
-              <Link
-                to="/withdraw-points"
-                className="rounded-md bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700"
-              >
-                Withdraw Points →
-              </Link>
-            </div>
-          </div>
-          {!userId && (
-            <div className="mt-4 rounded-lg border border-dashed border-emerald-300 bg-white/60 p-3 text-sm">
-              <Link
-                to="/auth"
-                className="font-semibold text-emerald-700 underline-offset-2 hover:underline"
-              >
-                Sign in
-              </Link>{" "}
-              to start earning.
-            </div>
-          )}
-        </section>
+        {/* Wallet summary card */}
+        <WalletSummaryCard
+          balance={state.balance}
+          userEmail={userEmail}
+          totalAvailable={totalAvailable}
+          userId={userId}
+        />
 
         {/* Social Tasks */}
         {socialTasks.length > 0 && (

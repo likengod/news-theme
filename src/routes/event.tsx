@@ -1,20 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import {
-  Sparkles,
-  Calendar,
-  MapPin,
-  Trophy,
-  Award,
-  Send,
-  Loader2,
-  CheckCircle2,
-  Lock,
-  ArrowRight,
-  ShieldCheck,
-  Flame,
-  Users,
-} from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -22,6 +7,10 @@ import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { getSiteSettingsServer, buildPageHead, defaultSettings, type SiteSettings } from "@/lib/site-content";
 import { authClient } from "@/lib/auth-client";
 import { submitEventRegistration } from "@/lib/inbox.functions";
+import { FestiveDivider } from "@/components/event/FestiveDivider";
+import { EventHeroSection } from "@/components/event/EventHeroSection";
+import { EventHighlightsSection } from "@/components/event/EventHighlightsSection";
+import { EventRegistrationForm } from "@/components/event/EventRegistrationForm";
 
 export const Route = createFileRoute("/event")({
   loader: async (): Promise<{ settings: SiteSettings }> => {
@@ -49,21 +38,6 @@ export const Route = createFileRoute("/event")({
   component: EventPage,
 });
 
-/** Symmetrical Festive Flourish Divider */
-function FestiveDivider({ title = "॥ শুভ শারদীয়া ॥" }: { title?: string }) {
-  return (
-    <div className="flex items-center justify-center gap-3 py-8" aria-hidden="true">
-      <div className="h-[1px] flex-1 max-w-[140px] bg-gradient-to-r from-transparent via-amber-400 to-amber-600 dark:via-amber-500 dark:to-amber-400" />
-      <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300 font-serif font-bold text-xs sm:text-sm tracking-wider">
-        <span className="text-red-600 dark:text-red-400">✦</span>
-        <span>{title}</span>
-        <span className="text-red-600 dark:text-red-400">✦</span>
-      </div>
-      <div className="h-[1px] flex-1 max-w-[140px] bg-gradient-to-l from-transparent via-amber-400 to-amber-600 dark:via-amber-500 dark:to-amber-400" />
-    </div>
-  );
-}
-
 function EventPage() {
   const s = useSiteSettings();
 
@@ -71,7 +45,6 @@ function EventPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [userDisplayName, setUserDisplayName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
 
   // Form state
   const [name, setName] = useState("");
@@ -98,7 +71,7 @@ function EventPage() {
           setName(dName);
         }
       })
-      .finally(() => setAuthLoading(false));
+      .catch(() => {});
   }, []);
 
   const eventTitle = s.eventTitle || "শারদ সম্মান ২০২৬";
@@ -183,327 +156,66 @@ function EventPage() {
       <Header />
 
       <main className="mx-auto max-w-5xl px-4 py-8 md:py-14 flex-1 w-full">
-        {/* ─── Seamless Festive Hero Section (No Card Box) ─── */}
-        <section className="relative text-center py-6 md:py-10">
-          {/* Ambient Festive Aura & Warm Golden Glow */}
-          <div
-            className="pointer-events-none absolute left-1/2 -top-12 -translate-x-1/2 w-full max-w-3xl h-80 bg-gradient-to-b from-amber-400/20 via-red-500/10 to-transparent blur-3xl -z-10 dark:from-amber-600/15 dark:via-red-900/10"
-            aria-hidden="true"
-          />
+        {/* Hero Section */}
+        <EventHeroSection
+          eventTitle={eventTitle}
+          eventSubtitle={eventSubtitle}
+          eventDesc={eventDesc}
+          eventDate={eventDate}
+          eventLocation={eventLocation}
+          eventImageUrl={eventImageUrl}
+          eventGreeting={eventGreeting}
+          buttonText={buttonText}
+          isButtonEnabled={isButtonEnabled}
+          isFormEnabled={isFormEnabled}
+        />
 
-          {/* Durga Face Artwork (Natural & Cardless) */}
-          {eventImageUrl && (
-            <div className="mx-auto mb-4 flex justify-center">
-              <img
-                src={eventImageUrl}
-                alt={eventTitle}
-                className="h-28 sm:h-36 md:h-44 w-auto object-contain select-none"
-              />
-            </div>
-          )}
-
-          {/* Festive Sacred Salutation */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-red-500/15 to-amber-500/10 px-4 py-1.5 text-xs sm:text-sm font-serif font-bold text-amber-900 dark:text-amber-200 mb-4 tracking-wide shadow-xs">
-            <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-            <span>{eventGreeting}</span>
-            <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-          </div>
-
-          {/* Grand Festive Headline */}
-          <h1 className="font-serif text-3xl font-black tracking-tight text-red-800 dark:text-red-400 sm:text-5xl md:text-6xl drop-shadow-xs">
-            {eventTitle}
-          </h1>
-
-          {/* Festive Subtitle */}
-          <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base font-semibold text-amber-900 dark:text-amber-200">
-            {eventSubtitle}
-          </p>
-
-          {/* Event Narrative */}
-          <p className="mx-auto mt-4 max-w-3xl text-xs sm:text-sm leading-relaxed text-stone-700 dark:text-stone-300">
-            {eventDesc}
-          </p>
-
-          {/* Date & Location Badges */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs font-semibold">
-            <div className="flex items-center gap-2 rounded-full bg-amber-50 border border-amber-300/80 px-4 py-2 text-amber-950 dark:bg-[#20180b] dark:border-amber-700/60 dark:text-amber-200 shadow-xs">
-              <Calendar className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
-              <span>{eventDate}</span>
-            </div>
-            <div className="flex items-center gap-2 rounded-full bg-red-50 border border-red-300/80 px-4 py-2 text-red-950 dark:bg-[#230f0f] dark:border-red-800/60 dark:text-red-200 shadow-xs">
-              <MapPin className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
-              <span>{eventLocation}</span>
-            </div>
-          </div>
-
-          {/* Festive CTA Button */}
-          {isButtonEnabled && isFormEnabled && (
-            <div className="mt-8">
-              <a
-                href="#register"
-                className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-red-700 via-crimson-600 to-amber-600 px-8 py-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-red-700/25 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-red-600/30 border border-amber-300/40"
-              >
-                <Flame className="h-4 w-4 text-amber-200 transition-transform group-hover:rotate-12" />
-                <span>{buttonText}</span>
-              </a>
-            </div>
-          )}
-        </section>
-
-        {/* ─── Decorative Alpana Divider ─── */}
+        {/* Divider */}
         <FestiveDivider title={eventSection1Divider} />
 
-        {/* ─── Highlights & Criteria Showcase (Seamless Columns, No Card Boxes) ─── */}
-        <section className="py-4">
-          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-amber-300/40 dark:divide-amber-800/40">
-            {/* Column 1: Prizes */}
-            <div className="pt-6 md:pt-0 md:px-6 first:pl-0">
-              <div className="flex items-center gap-2.5 text-red-800 dark:text-red-400 mb-3 font-serif font-bold text-base">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-700 dark:bg-red-950/70 dark:text-red-300 border border-red-300/60 dark:border-red-800/60">
-                  <Trophy className="h-4 w-4" />
-                </div>
-                <span>{eventPrizesTitle}</span>
-              </div>
-              <ul className="space-y-2.5 text-xs sm:text-sm text-stone-700 dark:text-stone-300">
-                {prizeList.map((prize, idx) => (
-                  <li key={idx} className="flex items-start gap-2 leading-relaxed">
-                    <span className="text-amber-500 font-bold text-sm leading-none mt-0.5">✦</span>
-                    <span>{prize}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+        {/* Highlights & Criteria */}
+        <EventHighlightsSection
+          eventPrizesTitle={eventPrizesTitle}
+          prizeList={prizeList}
+          eventCriteriaTitle={eventCriteriaTitle}
+          criteriaList={criteriaList}
+          eventGuidelinesTitle={eventGuidelinesTitle}
+          eventGuidelinesText={eventGuidelinesText}
+          eventGuidelinesBadge={eventGuidelinesBadge}
+        />
 
-            {/* Column 2: Criteria */}
-            <div className="pt-6 md:pt-0 md:px-6">
-              <div className="flex items-center gap-2.5 text-amber-800 dark:text-amber-300 mb-3 font-serif font-bold text-base">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300/60 dark:border-amber-800/60">
-                  <Award className="h-4 w-4" />
-                </div>
-                <span>{eventCriteriaTitle}</span>
-              </div>
-              <ul className="space-y-2.5 text-xs sm:text-sm text-stone-700 dark:text-stone-300">
-                {criteriaList.map((criterion, idx) => (
-                  <li key={idx} className="flex items-start gap-2 leading-relaxed">
-                    <span className="text-amber-500 font-bold text-sm leading-none mt-0.5">✦</span>
-                    <span>{criterion}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Column 3: Guidelines */}
-            <div className="pt-6 md:pt-0 md:px-6 last:pr-0 sm:col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-200 mb-3 font-serif font-bold text-base">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300/60 dark:border-amber-800/60">
-                  <Users className="h-4 w-4" />
-                </div>
-                <span>{eventGuidelinesTitle}</span>
-              </div>
-              <p className="text-xs sm:text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
-                {eventGuidelinesText}
-              </p>
-              {eventGuidelinesBadge && (
-                <div className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-300/80 px-3.5 py-1.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800/60 dark:text-emerald-300">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>{eventGuidelinesBadge}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* ─── Decorative Alpana Divider ─── */}
+        {/* Divider */}
         <FestiveDivider title={eventSection2Divider} />
 
-        {/* ─── Festive Registration Form (Seamless, No Card Effect) ─── */}
-        <section id="register" className="relative scroll-mt-10 my-10 max-w-2xl mx-auto px-2">
-          {/* Inscription Header */}
-          <div className="text-center mb-8">
-            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-700 dark:bg-red-950/80 dark:text-red-300">
-              <Flame className="h-5 w-5" />
-            </div>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-red-800 dark:text-red-400">
-              {eventFormTitle}
-            </h2>
-            <p className="mt-1 text-xs sm:text-sm text-stone-600 dark:text-stone-300">
-              {eventFormSubtitle}
-            </p>
-          </div>
-
-            {/* Form Content */}
-            {!isFormEnabled ? (
-              /* When form is disabled by admin */
-              <div className="py-8 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-                  <Lock className="h-6 w-6" />
-                </div>
-                <h3 className="mt-3 text-sm font-bold text-stone-900 dark:text-stone-100">
-                  অনলাইন নিবন্ধন আপাতত বন্ধ রয়েছে
-                </h3>
-                <p className="mt-1 text-xs text-stone-500">
-                  শারদ সম্মান প্রতিযোগিতার নিবন্ধন সাময়িকভাবে স্থগিত বা সম্পন্ন হয়েছে।
-                </p>
-              </div>
-            ) : submitted ? (
-              /* Success Message */
-              <div className="py-8 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
-                  <CheckCircle2 className="h-10 w-10" />
-                </div>
-                <h3 className="mt-4 font-serif text-lg font-bold text-stone-900 dark:text-stone-100">
-                  ধন্যবাদ! আপনার নিবন্ধন সফল হয়েছে
-                </h3>
-                <p className="mx-auto mt-2 max-w-md text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
-                  আপনার ক্লাবের নাম ও আবেদনপত্র অ্যাডমিন ইনবক্সে জমা হয়েছে। আমাদের শারদ সম্মান টিম
-                  শীঘ্রই আপনার সাথে যোগাযোগ করবে।
-                </p>
-                <button
-                  onClick={() => {
-                    setSubmitted(false);
-                    setPhone("");
-                    setAddress("");
-                    setCustomField("");
-                  }}
-                  className="mt-6 rounded-full border border-amber-400 px-6 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-100/50 dark:border-amber-700 dark:text-amber-200 transition-colors"
-                >
-                  আরেকটি নিবন্ধন জমা দিন
-                </button>
-              </div>
-            ) : !userId ? (
-              /* When user is NOT logged in */
-              <div className="py-6 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-                  <Lock className="h-6 w-6" />
-                </div>
-                <h3 className="mt-3 font-serif text-base font-bold text-stone-900 dark:text-stone-100">
-                  নিবন্ধন করতে লগইন করা আবশ্যক
-                </h3>
-                <p className="mx-auto mt-1 max-w-md text-xs text-stone-600 dark:text-stone-400">
-                  শুধুমাত্র নিবন্ধিত ও লগইন করা ব্যবহারকারীগণ শারদ সম্মানে নিজেদের ক্লাবের নাম
-                  অন্তর্ভুক্ত করতে পারবেন।
-                </p>
-                <div className="mt-5">
-                  <Link
-                    to="/auth"
-                    search={{ redirect: "/event" }}
-                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red-700 to-amber-700 px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md hover:from-red-800 hover:to-amber-800 transition-all"
-                  >
-                    <span>লগইন / সাইন আপ করুন</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              /* Authenticated User Registration Form */
-              <form onSubmit={handleSubmit} className="space-y-5 max-w-2xl mx-auto">
-                {/* Logged in badge */}
-                <div className="flex items-center justify-between rounded-xl bg-amber-100/70 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-800/60 px-4 py-2.5 text-xs text-amber-950 dark:text-amber-200">
-                  <span className="flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>
-                      লগইন আছেন: <strong>{userDisplayName || "User"}</strong> ({userEmail})
-                    </span>
-                  </span>
-                  <span className="text-[10px] text-amber-800 dark:text-amber-300 font-bold uppercase tracking-wider bg-amber-200/60 dark:bg-amber-900/60 px-2 py-0.5 rounded-md">
-                    Verified
-                  </span>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {/* Full Name */}
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                      আপনার নাম (Full Name) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="আপনার পুরো নাম লিখুন"
-                      className="w-full rounded-xl border border-amber-300/70 bg-white/90 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-red-600 focus:ring-2 focus:ring-amber-400/20 focus:outline-none dark:bg-zinc-900/90 dark:border-amber-700/60 dark:text-stone-100"
-                    />
-                  </div>
-
-                  {/* Phone Number */}
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                      ফোন নম্বর (Phone Number) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="যেমন: +91 98765 43210"
-                      className="w-full rounded-xl border border-amber-300/70 bg-white/90 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-red-600 focus:ring-2 focus:ring-amber-400/20 focus:outline-none dark:bg-zinc-900/90 dark:border-amber-700/60 dark:text-stone-100"
-                    />
-                  </div>
-                </div>
-
-                {/* Custom Field (Club Name) */}
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                    {customLabel} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={customField}
-                    onChange={(e) => setCustomField(e.target.value)}
-                    placeholder="যেমন: ভারত রত্ন সংঘ / মিলন সংঘ / ইত্যাদি"
-                    className="w-full rounded-xl border border-amber-300/70 bg-white/90 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-red-600 focus:ring-2 focus:ring-amber-400/20 focus:outline-none dark:bg-zinc-900/90 dark:border-amber-700/60 dark:text-stone-100"
-                  />
-                  <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
-                    আপনার পূজা কমিটি বা ক্লাবের আনুষ্ঠানিক নাম উল্লেখ করুন।
-                  </p>
-                </div>
-
-                {/* Address */}
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                    পূজামণ্ডপ / ক্লাবের পূর্ণ ঠিকানা (Address) <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    required
-                    rows={3}
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="রাস্তা, এলাকা, পাড়া, পিনকোড ও জেলা উল্লেখ করুন..."
-                    className="w-full rounded-xl border border-amber-300/70 bg-white/90 p-3 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-red-600 focus:ring-2 focus:ring-amber-400/20 focus:outline-none dark:bg-zinc-900/90 dark:border-amber-700/60 dark:text-stone-100"
-                  />
-                </div>
-
-                {/* Submit Button */}
-                {isButtonEnabled ? (
-                  <div className="pt-3 text-center">
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-700 via-crimson-600 to-amber-600 px-10 py-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-red-700/25 hover:from-red-800 hover:to-amber-700 disabled:opacity-50 transition-all border border-amber-300/40"
-                    >
-                      {submitting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>জমা দেওয়া হচ্ছে...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4" />
-                          <span>{buttonText}</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="rounded-xl bg-amber-50 p-3 text-xs text-amber-800 border border-amber-200 text-center">
-                    নিবন্ধন বাটনটি বর্তমানে নিষ্ক্রিয় রাখা হয়েছে।
-                  </div>
-                )}
-              </form>
-            )}
-        </section>
+        {/* Registration Form */}
+        <EventRegistrationForm
+          isFormEnabled={isFormEnabled}
+          submitted={submitted}
+          onResetSubmitted={() => {
+            setSubmitted(false);
+            setPhone("");
+            setAddress("");
+            setCustomField("");
+          }}
+          userId={userId}
+          userDisplayName={userDisplayName}
+          userEmail={userEmail}
+          name={name}
+          setName={setName}
+          phone={phone}
+          setPhone={setPhone}
+          address={address}
+          setAddress={setAddress}
+          customField={customField}
+          setCustomField={setCustomField}
+          customLabel={customLabel}
+          submitting={submitting}
+          onSubmit={handleSubmit}
+          isButtonEnabled={isButtonEnabled}
+          buttonText={buttonText}
+          eventFormTitle={eventFormTitle}
+          eventFormSubtitle={eventFormSubtitle}
+        />
       </main>
 
       <Footer />
