@@ -1,4 +1,4 @@
-import { query } from "./db.server";
+﻿import { query } from "./db.server";
 import { execSync } from "child_process";
 import path from "path";
 import fs from "fs";
@@ -6,7 +6,7 @@ import { APP_VERSION } from "./version";
 
 const ROOT = process.cwd();
 
-// ─── Permanent Git Repository & PAT Defaults ─────────────────────────────────
+// â”€â”€â”€ Permanent Git Repository & PAT Defaults â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const PERMANENT_GIT_REPO =
   process.env.GIT_REMOTE_URL || "https://github.com/likengod/news-theme.git";
 export const PERMANENT_GIT_PAT = process.env.GIT_ACCESS_TOKEN || "";
@@ -29,7 +29,7 @@ export function getAuthenticatedGitUrl(customRepo?: string, customPat?: string):
   return rawRepo;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function parseSemver(v: string) {
   const parts = v
@@ -47,7 +47,7 @@ export function git(cmd: string): string {
   }
 }
 
-// ─── DB Table (auto-create) ──────────────────────────────────────────────────
+// â”€â”€â”€ DB Table (auto-create) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function ensureDeployTable() {
   await query(`
@@ -65,7 +65,7 @@ export async function ensureDeployTable() {
   `);
 }
 
-// ─── Git Status ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Git Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 let gitStatusCache: { data: any; expiry: number } | null = null;
 const GIT_STATUS_CACHE_TTL = 60 * 1000; // 1 minute cache
@@ -220,7 +220,7 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
   return result;
 }
 
-// ─── Git Pull ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Git Pull â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function executeGitPullCore() {
   await ensureDeployTable();
@@ -316,6 +316,11 @@ export async function executeGitPullCore() {
       console.error("[Deploy] Auto-restart spawn error:", err);
     }
     try {
+      const fs = await import("fs");
+      const path = await import("path");
+      const tmpDir = path.join(ROOT, "tmp");
+      if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+      fs.writeFileSync(path.join(tmpDir, "restart.txt"), new Date().toISOString());
       process.exit(0);
     } catch {}
   }, 1200);
@@ -339,7 +344,7 @@ export async function executeGitPullCore() {
   };
 }
 
-// ─── Build Project ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Build Project â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function executeBuildProjectCore() {
   await ensureDeployTable();
@@ -386,7 +391,12 @@ export async function executeBuildProjectCore() {
   if (status === "Success") {
     setTimeout(() => {
       try {
-        process.exit(0);
+        const fs = await import("fs");
+      const path = await import("path");
+      const tmpDir = path.join(ROOT, "tmp");
+      if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+      fs.writeFileSync(path.join(tmpDir, "restart.txt"), new Date().toISOString());
+      process.exit(0);
       } catch {}
     }, 1500);
   }
@@ -394,7 +404,7 @@ export async function executeBuildProjectCore() {
   return { success: status === "Success", status, buildLog: buildLog.slice(-3000), deployId };
 }
 
-// ─── Deployment History ──────────────────────────────────────────────────────
+// â”€â”€â”€ Deployment History â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function executeGetDeployHistoryCore() {
   await ensureDeployTable();
@@ -404,7 +414,7 @@ export async function executeGetDeployHistoryCore() {
   return { deployments: rows };
 }
 
-// ─── Deployment Log ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Deployment Log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function executeGetDeployLogCore(id: number) {
   const rows = await query("SELECT * FROM deployments WHERE id = ?", [id]);
@@ -412,7 +422,7 @@ export async function executeGetDeployLogCore(id: number) {
   return rows[0];
 }
 
-// ─── Initialize Git Repository ───────────────────────────────────────────────
+// â”€â”€â”€ Initialize Git Repository â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function executeInitializeGitRepoCore() {
   try {
@@ -448,3 +458,4 @@ export async function executeInitializeGitRepoCore() {
     return { success: false, log: err.message };
   }
 }
+
