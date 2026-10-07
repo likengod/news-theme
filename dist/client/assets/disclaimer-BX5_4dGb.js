@@ -1,0 +1,2 @@
+import{t as e}from"./jsx-runtime-CMgEUHpv.js";import{t}from"./PolicyLayout-DO8G30sw.js";import{f as n}from"./index-CzK4uf0J.js";var r=e();function i(){let e=n.useLoaderData();return(0,r.jsx)(t,{title:e?.title||``,intro:e?.intro||``,sections:e?.sections&&e.sections.length>0?e.sections.map(e=>({heading:e.heading,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e.body}})})):[{heading:e?.title||``,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e?.body||``}})}]})}export{i as component};
+//# sourceMappingURL=disclaimer-BX5_4dGb.js.map

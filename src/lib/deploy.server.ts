@@ -316,8 +316,8 @@ export async function executeGitPullCore() {
       console.error("[Deploy] Auto-restart spawn error:", err);
     }
     try {
-      const fs = await import("fs");
-      const path = await import("path");
+      
+      
       const tmpDir = path.join(ROOT, "tmp");
       if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
       fs.writeFileSync(path.join(tmpDir, "restart.txt"), new Date().toISOString());
@@ -391,8 +391,8 @@ export async function executeBuildProjectCore() {
   if (status === "Success") {
     setTimeout(() => {
       try {
-        const fs = await import("fs");
-      const path = await import("path");
+        
+      
       const tmpDir = path.join(ROOT, "tmp");
       if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
       fs.writeFileSync(path.join(tmpDir, "restart.txt"), new Date().toISOString());
