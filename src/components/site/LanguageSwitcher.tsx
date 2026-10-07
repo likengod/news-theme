@@ -1,12 +1,6 @@
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/lib/i18n";
 import { Globe } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 
 declare global {
   interface Window {
@@ -17,6 +11,8 @@ declare global {
 
 export function LanguageSwitcher() {
   const { i18n } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const loadGoogleTranslate = () => {
     if (typeof window === "undefined" || document.getElementById("google-translate-script")) return;
@@ -43,14 +39,25 @@ export function LanguageSwitcher() {
   };
 
   useEffect(() => {
-    // Only load during initial mount if the visitor has a pre-existing translation cookie
     if (typeof document !== "undefined" && document.cookie.includes("googtrans=")) {
       loadGoogleTranslate();
     }
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+    setOpen(false);
 
     if (lng === "en") {
       document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -89,31 +96,38 @@ export function LanguageSwitcher() {
         `}
       </style>
       <div id="google_translate_element" style={{ display: "none" }}></div>
-      <DropdownMenu
-        onOpenChange={(open) => {
-          if (open) loadGoogleTranslate();
-        }}
-      >
-        <DropdownMenuTrigger asChild>
-          <button
-            className="grid h-7 w-7 place-items-center border border-border text-foreground hover:bg-muted transition-colors focus:outline-none"
-            title="Select Language"
-          >
-            <Globe className="h-4 w-4" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32 bg-background z-50">
-          {languages.map((lng) => (
-            <DropdownMenuItem
-              key={lng.code}
-              onClick={() => changeLanguage(lng.code)}
-              className={`cursor-pointer ${i18n.language === lng.code ? "bg-muted font-bold" : ""}`}
-            >
-              {lng.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="relative inline-block" ref={containerRef}>
+        <button
+          type="button"
+          onClick={() => {
+            if (!open) loadGoogleTranslate();
+            setOpen((v) => !v);
+          }}
+          aria-expanded={open}
+          aria-haspopup="true"
+          className="grid h-7 w-7 place-items-center border border-border text-foreground hover:bg-muted transition-colors focus:outline-none"
+          title="Select Language"
+        >
+          <Globe className="h-4 w-4" />
+        </button>
+
+        {open && (
+          <div className="absolute right-0 top-full mt-1 w-32 rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg z-50">
+            {languages.map((lng) => (
+              <button
+                key={lng.code}
+                type="button"
+                onClick={() => changeLanguage(lng.code)}
+                className={`w-full text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors cursor-pointer ${
+                  i18n.language === lng.code ? "bg-muted font-bold text-foreground" : "text-muted-foreground"
+                }`}
+              >
+                {lng.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </>
   );
 }

@@ -129,43 +129,13 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
   };
 
   if (!user) {
-    if (variant === "mobile") {
-      return (
-        <div className="flex flex-col gap-2">
-          <Link to="/auth" className="hover:text-foreground">
-            Sign in
-          </Link>
-        </div>
-      );
-    }
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            type="button"
-            className="flex items-center gap-1.5 font-semibold text-foreground underline-offset-2 hover:underline focus:outline-none"
-          >
-            <span>Sign in</span>
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem asChild>
-            <Link to="/auth" className="cursor-pointer font-semibold">
-              <UserIcon className="mr-2 h-4 w-4" />
-              Sign in / Register
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer">
-            {isDark ? (
-              <Sun className="mr-2 h-4 w-4 text-amber-500" />
-            ) : (
-              <Moon className="mr-2 h-4 w-4 text-slate-700" />
-            )}
-            <span>{isDark ? "Day Mode" : "Night Mode"}</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Link
+        to="/auth"
+        className="flex items-center gap-1.5 font-semibold text-foreground underline-offset-2 hover:underline focus:outline-none"
+      >
+        <span>Sign in</span>
+      </Link>
     );
   }
 

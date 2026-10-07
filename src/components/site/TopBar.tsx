@@ -8,7 +8,7 @@ import { SearchBox } from "./SearchModal";
 import { sections, slugify } from "@/lib/news-data";
 import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
 import { loadSettings, defaultSettings } from "@/lib/site-content";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/lib/i18n";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useTheme } from "@/lib/theme";
 import { getAccessibleLogoColor } from "@/lib/color-utils";

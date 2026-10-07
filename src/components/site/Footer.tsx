@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { SocialIcons } from "@/components/site/SocialIcons";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { AttributionGuard } from "@/components/site/AttributionGuard";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/lib/i18n";
 import { cleanCopyright, isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
 import { useTheme } from "@/lib/theme";
 import { getAccessibleLogoColor } from "@/lib/color-utils";

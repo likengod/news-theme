@@ -1,16 +1,18 @@
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import heroMarkets from "@/assets/hero-markets.webp";
 import { Header } from "@/components/site/Header";
 import { HeroBoard } from "@/components/site/HeroBoard";
-import { Columnists } from "@/components/site/Columnists";
 import { LazySection } from "@/components/site/LazySection";
 import { getHomepageArticles } from "@/lib/articles.functions";
 import { getTags } from "@/lib/taxonomy.functions";
 import { getSiteSettingsServer } from "@/lib/site-content";
 import { getArticleImage } from "@/lib/news-data";
 
-// Below-the-fold sections: code-split so they aren't in the initial JS bundle.
+// Below-the-fold / non-critical sections: code-split so they aren't in the initial JS bundle.
+const Columnists = lazy(() =>
+  import("@/components/site/Columnists").then((m) => ({ default: m.Columnists })),
+);
 const NewsGrid = lazy(() =>
   import("@/components/site/NewsGrid").then((m) => ({ default: m.NewsGrid })),
 );
@@ -113,14 +115,18 @@ function Home() {
       <main className="mx-auto max-w-7xl px-4 py-4 md:py-10 w-full max-w-full min-w-0 overflow-x-clip">
         {/* On Mobile Devices (< md): Render Watch section directly below Header */}
         <div className="block md:hidden border-b border-border mb-2 pb-2 overflow-hidden">
-          <Columnists hideTitle />
+          <Suspense fallback={null}>
+            <Columnists hideTitle />
+          </Suspense>
         </div>
 
         <HeroBoard articles={dbArticles} tags={dbTags} />
 
         {/* On Desktop Devices (>= md): Render Watch section after HeroBoard */}
         <div className="hidden md:block">
-          <Columnists />
+          <Suspense fallback={null}>
+            <Columnists />
+          </Suspense>
         </div>
 
         <NewsGrid articles={dbArticles} usedIds={usedIds} />

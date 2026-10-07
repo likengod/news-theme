@@ -15,7 +15,10 @@ import { HeroSidebarLeft } from "./hero/HeroSidebarLeft";
 import { HeroMain } from "./hero/HeroMain";
 import { HeroBottomGrid } from "./hero/HeroBottomGrid";
 import { HeroCultureRow } from "./hero/HeroCultureRow";
-import { HeroSidebarRight } from "./hero/HeroSidebarRight";
+
+const HeroSidebarRight = React.lazy(() =>
+  import("./hero/HeroSidebarRight").then((m) => ({ default: m.HeroSidebarRight })),
+);
 
 function formatUtcDate(dateStr: string | Date): string {
   const d = new Date(dateStr);
@@ -182,12 +185,14 @@ export const HeroBoard = React.memo(function HeroBoard({
           <HeroBottomGrid cfg={cfg} activeBottomItems={activeBottomItems} />
           <HeroCultureRow cfg={cfg} activeCultureItems={activeCultureItems} />
         </div>
-        <HeroSidebarRight
-          cfg={cfg}
-          activeOpinionItems={activeOpinionItems}
-          activePopularItems={activePopularItems}
-          tags={tags}
-        />
+        <React.Suspense fallback={null}>
+          <HeroSidebarRight
+            cfg={cfg}
+            activeOpinionItems={activeOpinionItems}
+            activePopularItems={activePopularItems}
+            tags={tags}
+          />
+        </React.Suspense>
       </div>
     </AnimatedContainer>
   );

@@ -1,0 +1,1 @@
+import{t as e}from"./news._slug-BJABrsMU.js";export{e as notFoundComponent};
