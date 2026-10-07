@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   createFileRoute,
   Outlet,
@@ -10,11 +10,12 @@ import { authClient as supabase } from "@/lib/auth-client";
 import { getUserServer, getCurrentUserRole } from "@/lib/auth.functions";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { isEnterprisePlusLicense } from "@/lib/site-content";
-import { getGitStatus } from "@/lib/deploy.functions";
-import { APP_VERSION } from "@/lib/version";
 import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
 import { AdminTopBar } from "@/components/admin/layout/AdminTopBar";
 import { AdminUpdatePrompt } from "@/components/admin/layout/AdminUpdatePrompt";
+import { getAdminUserDisplayInfo } from "@/components/admin/layout/adminUserUtils";
+import { useAdminTheme } from "@/components/admin/hooks/useAdminTheme";
+import { useAdminUpdateChecker } from "@/components/admin/hooks/useAdminUpdateChecker";
 
 // In-memory cache of verified admin tokens (never trusted from forgeable sessionStorage)
 const verifiedAdminTokens = new Map<string, number>();
@@ -82,150 +83,14 @@ function AdminLayout() {
   const s = useSiteSettings();
   const isEnterprisePlus = isEnterprisePlusLicense(s);
 
-  // Force light theme inside admin only
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.remove("dark");
-    root.style.colorScheme = "light";
-    return () => {
-      // Re-apply correct theme from localStorage when leaving admin panel
-      const storedTheme = localStorage.getItem("fs-theme") || "light";
-      if (storedTheme === "dark") {
-        root.classList.add("dark");
-        root.style.colorScheme = "dark";
-      } else {
-        root.classList.remove("dark");
-        root.style.colorScheme = "light";
-      }
-    };
-  }, []);
+  useAdminTheme();
+  const { updateStatus, dismissed, setDismissed } = useAdminUpdateChecker(pathname);
+  const { email, initials, firstName } = getAdminUserDisplayInfo(user);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate({ to: "/auth" });
   };
-
-  const email = user?.email ?? "admin@northeast.com";
-  const initials = email.slice(0, 2).toUpperCase();
-
-  const firstName = (() => {
-    const rawName =
-      (user as any)?.user_metadata?.full_name ||
-      (user as any)?.user_metadata?.name ||
-      (user as any)?.name ||
-      (user as any)?.display_name;
-    if (rawName && typeof rawName === "string" && rawName.trim()) {
-      return rawName.trim().split(" ")[0];
-    }
-    if (email && email.includes("@")) {
-      const local = email
-        .split("@")[0]
-        .replace(/[._0-9-]/g, " ")
-        .trim();
-      const first = local.split(" ")[0];
-      if (first) {
-        return first.charAt(0).toUpperCase() + first.slice(1);
-      }
-    }
-    return "Admin";
-  })();
-
-  const [updateStatus, setUpdateStatus] = useState<{
-    hasUpdate: boolean;
-    currentVersion?: string;
-    latestVersion?: string;
-    checked: boolean;
-  }>({ hasUpdate: false, checked: false });
-
-  const [dismissed, setDismissed] = useState(() => {
-    if (typeof window !== "undefined") {
-      return sessionStorage.getItem("admin_update_dismissed") === "1";
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    let mounted = true;
-
-    const syncFromSession = () => {
-      if (typeof window !== "undefined") {
-        try {
-          const cached = sessionStorage.getItem("admin_update_status");
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (parsed.currentVersion && parsed.latestVersion && parsed.currentVersion === parsed.latestVersion && (!parsed.behind || parsed.behind <= 0)) {
-              parsed.hasUpdate = false;
-            }
-            setUpdateStatus(parsed);
-          }
-        } catch {}
-      }
-    };
-
-    if (typeof window !== "undefined") {
-      window.addEventListener("admin_update_synced", syncFromSession);
-    }
-
-    // Check if cached update status exists in this session
-    if (typeof window !== "undefined") {
-      const lastCheck = sessionStorage.getItem("admin_update_check_time");
-      const cachedStatus = sessionStorage.getItem("admin_update_status");
-      // Only trust cache if checked recently and NOT on the updates page
-      if (lastCheck && cachedStatus && Date.now() - parseInt(lastCheck) < 3 * 60 * 1000 && pathname !== "/admin/updates") {
-        try {
-          const parsed = JSON.parse(cachedStatus);
-          if (parsed.currentVersion && parsed.latestVersion && parsed.currentVersion === parsed.latestVersion && (!parsed.behind || parsed.behind <= 0)) {
-            parsed.hasUpdate = false;
-          }
-          setUpdateStatus(parsed);
-          return () => {
-            mounted = false;
-            if (typeof window !== "undefined") {
-              window.removeEventListener("admin_update_synced", syncFromSession);
-            }
-          };
-        } catch {}
-      }
-    }
-
-    getGitStatus({ data: { forceRefresh: pathname === "/admin/updates" } })
-      .then((res) => {
-        if (!mounted) return;
-        const cur = res?.version || APP_VERSION;
-        const latest = res?.latestVersion || cur;
-        const isSimulated =
-          typeof window !== "undefined" &&
-          (new URLSearchParams(window.location.search).get("test_update") === "1" ||
-            localStorage.getItem("force_update_lock") === "1");
-        const hasUpdate =
-          isSimulated || Boolean(res?.hasNewVersion || (res?.behind && res.behind > 0));
-        const statusObj = {
-          hasUpdate,
-          currentVersion: cur,
-          latestVersion: isSimulated
-            ? res?.latestVersion && res.latestVersion !== cur
-              ? res.latestVersion
-              : "v2.0.0"
-            : latest,
-          checked: true,
-        };
-        setUpdateStatus(statusObj);
-        if (typeof window !== "undefined") {
-          sessionStorage.setItem("admin_update_status", JSON.stringify(statusObj));
-          sessionStorage.setItem("admin_update_check_time", Date.now().toString());
-        }
-      })
-      .catch((e) => {
-        console.error("Version check notice:", e);
-      });
-
-    return () => {
-      mounted = false;
-      if (typeof window !== "undefined") {
-        window.removeEventListener("admin_update_synced", syncFromSession);
-      }
-    };
-  }, [pathname]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
@@ -258,12 +123,7 @@ function AdminLayout() {
               firstName={firstName}
               currentVersion={updateStatus.currentVersion}
               latestVersion={updateStatus.latestVersion}
-              onDismiss={() => {
-                setDismissed(true);
-                if (typeof window !== "undefined") {
-                  sessionStorage.setItem("admin_update_dismissed", "1");
-                }
-              }}
+              onDismiss={() => setDismissed()}
             />
           ) : (
             <Outlet />
