@@ -1,17 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
-  Link,
   createRootRouteWithContext,
-  useRouter,
-  HeadContent,
-  Scripts,
   redirect,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
 
-import appCss from "../styles.css?url";
-import { ThemeProvider, themeInitScript } from "../lib/theme";
+import { ThemeProvider } from "../lib/theme";
 import { Toaster } from "@/components/ui/sonner";
 import { AnalyticsInjector } from "@/components/site/AnalyticsInjector";
 import { AdSettingsProvider } from "@/components/site/AdSettingsContext";
@@ -21,73 +15,26 @@ import {
   getRedirectRulesServer,
   incrementRedirectHitServer,
   defaultSettings,
-  defaultAdSlides,
-  defaultAdSlidesHome2,
-  defaultAdSlidesAd3,
-  defaultAdSlidesPopup,
-  defaultAdSlidesLeaderboard,
 } from "@/lib/site-content";
 import { getHomepageConfigServer, defaultHomepageConfig } from "@/lib/homepage-config";
 import {
   getFontConfigServer,
   defaultFontConfig,
-  buildGoogleFontsUrl,
-  buildFontFaceCss,
-  buildSectionCssVars,
-  FONT_CONFIG_KEY,
 } from "@/lib/font-config";
-import type { FontConfiguration } from "@/lib/font-config";
 import { getCategories } from "@/lib/taxonomy.functions";
 import "@/lib/i18n";
-import { initFormAccessibility } from "@/lib/form-a11y";
 
 import { NotFound } from "@/components/site/NotFound";
+import { ErrorComponent } from "@/components/layout/ErrorComponent";
+import { RootShell } from "@/components/layout/RootShell";
+import { generateRootHead } from "@/components/layout/rootHead";
+import { useRootEffects } from "@/components/layout/useRootEffects";
+import { buildAdConfigData } from "@/components/layout/rootUtils";
+import { checkSetupStatus } from "@/lib/setup.functions";
 
 function NotFoundComponent() {
   return <NotFound />;
 }
-
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
-  const router = useRouter();
-
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        {error?.message && (
-          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-md text-xs font-mono text-left break-all">
-            {error.message}
-          </div>
-        )}
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50"
-          >
-            Go home
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-import { checkSetupStatus } from "@/lib/setup.functions";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ location }) => {
@@ -109,14 +56,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         if (!isSetupPage) {
           throw redirect({ to: "/setup" });
         }
-        // If setup is required and already on /setup, skip redirects/DB rules
         return;
       }
       if (!status.required && isSetupPage) {
         throw redirect({ to: "/" });
       }
     } catch (err: any) {
-      // Re-throw TanStack Router redirects
       if (
         err.isRedirect ||
         err.status === 301 ||
@@ -181,404 +126,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       };
     }
   },
-  head: ({ loaderData }) => {
-    const s = loaderData?.settings;
-    const siteTitle = s?.siteName || "News Timeline";
-    const tagline = s?.tagline || "Breaking News";
-    const title = s?.siteName
-      ? `${s.siteName} – ${tagline}`
-      : "News Timeline – Breaking News | Finance | Business | Market";
-
-    const desc =
-      s?.metaDescription ||
-      "News Timeline delivers breaking news, market intelligence, and sharp business analysis covering finance, technology, energy and global markets.";
-
-    const robotsIndex = s?.seoRobotsIndex === false ? "noindex" : "index";
-    const robotsFollow = s?.seoRobotsFollow === false ? "nofollow" : "follow";
-    const robotsContent = `${robotsIndex}, ${robotsFollow}`;
-
-    const canonicalBase = s?.seoCanonicalBaseUrl ? s.seoCanonicalBaseUrl.replace(/\/$/, "") : "";
-    const ogImage = s?.seoOgImage || (canonicalBase ? `${canonicalBase}/og-image.jpg` : "/og-image.jpg");
-    const rawTwitter = s?.twitter || "";
-    let twitterHandle = "@NewsTimeline";
-    if (rawTwitter) {
-      const cleaned = rawTwitter.replace(/^https?:\/\/(www\.)?(twitter|x)\.com\//i, "").replace(/^@/, "").trim();
-      if (cleaned) twitterHandle = `@${cleaned}`;
-    }
-
-    const metaTags: Array<Record<string, any>> = [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: title },
-      { name: "description", content: desc },
-      { name: "robots", content: robotsContent },
-      { name: "author", content: siteTitle },
-      { property: "og:title", content: title },
-      { property: "og:description", content: desc },
-      { property: "og:type", content: "website" },
-      { property: "og:image", content: ogImage },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: twitterHandle },
-      { name: "twitter:creator", content: twitterHandle },
-      { name: "twitter:title", content: title },
-      { name: "twitter:description", content: desc },
-      { name: "twitter:image", content: ogImage },
-    ];
-
-    if (s?.seoKeywords) {
-      metaTags.push({ name: "keywords", content: s.seoKeywords });
-    }
-
-    if (s?.seoGooglebotNews ?? true) {
-      metaTags.push({
-        name: "googlebot-news",
-        content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
-      });
-      metaTags.push({
-        name: "googlebot",
-        content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
-      });
-    }
-
-    if (s?.forceHttps) {
-      metaTags.push({ httpEquiv: "Content-Security-Policy", content: "upgrade-insecure-requests" });
-    }
-
-    if (s?.googleSiteVerification) {
-      metaTags.push({ name: "google-site-verification", content: s.googleSiteVerification });
-    }
-    if (s?.bingSiteVerification) {
-      metaTags.push({ name: "msvalidate.01", content: s.bingSiteVerification });
-    }
-    if (s?.facebookDomainVerification) {
-      metaTags.push({
-        name: "facebook-domain-verification",
-        content: s.facebookDomainVerification,
-      });
-    }
-    if (s?.pinterestSiteVerification) {
-      metaTags.push({ name: "p:domain_verify", content: s.pinterestSiteVerification });
-    }
-    if (s?.yandexVerification) {
-      metaTags.push({ name: "yandex-verification", content: s.yandexVerification });
-    }
-
-    // Build Google Fonts URL dynamically from font config
-    const fontConfig = loaderData?.fontConfig ?? defaultFontConfig;
-    const activeSectionFontIds = Object.values(fontConfig.sectionMapping || {});
-    const googleFontsUrl = buildGoogleFontsUrl(fontConfig.fonts, activeSectionFontIds);
-
-    const links: Array<Record<string, any>> = [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: appCss },
-      {
-        rel: "alternate",
-        type: "application/rss+xml",
-        title: `${siteTitle} RSS Feed`,
-        href: "/rss.xml",
-      },
-    ];
-
-
-    const orgSchema: Record<string, any> = {
-      "@context": "https://schema.org",
-      "@type": s?.seoOrganizationType || "NewsMediaOrganization",
-      name: s?.seoNewsPublicationName || siteTitle,
-      url: canonicalBase || "http://localhost:3099",
-      description: desc,
-    };
-    if (s?.logoLight || canonicalBase) {
-      orgSchema.logo = s?.logoLight || `${canonicalBase}/logo.png`;
-    }
-    if (s?.seoEditorialContactEmail || s?.contactEmail) {
-      orgSchema.contactPoint = {
-        "@type": "ContactPoint",
-        email: s?.seoEditorialContactEmail || s?.contactEmail,
-        contactType: "editorial",
-      };
-    }
-    orgSchema.publishingPrinciples = s?.seoEditorialPolicyUrl || "/editorial-policy";
-    orgSchema.correctionsPolicy = s?.seoCorrectionsPolicyUrl || "/contact";
-    orgSchema.diversityPolicy = s?.seoFactCheckingPolicyUrl || "/fact-checking-policy";
-
-    const scripts: Array<Record<string, any>> = [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify(orgSchema),
-      },
-    ];
-
-    if (googleFontsUrl && typeof googleFontsUrl === "string" && googleFontsUrl.trim()) {
-      links.push({
-        rel: "preload",
-        as: "style",
-        href: googleFontsUrl,
-      });
-      links.push({
-        rel: "stylesheet",
-        href: googleFontsUrl,
-        media: "print",
-        onLoad: "this.media='all'",
-      });
-    }
-
-    return {
-      meta: metaTags,
-      links: links,
-      scripts: scripts,
-    };
-  },
+  head: ({ loaderData }) => generateRootHead(loaderData),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
 
-const chunkRecoveryScript = `
-(function() {
-  function handleChunkError(err) {
-    try {
-      var msg = (err && (err.message || (err.reason && err.reason.message) || String(err.reason || err))) || '';
-      if (/failed to fetch dynamically imported module/i.test(msg) || 
-          /importing a module script failed/i.test(msg) || 
-          /loading chunk/i.test(msg) || 
-          /error #418/i.test(msg) ||
-          /error #423/i.test(msg) ||
-          /error #425/i.test(msg)) {
-        var key = 'chunk_reload_ts';
-        var last = Number(sessionStorage.getItem(key) || 0);
-        var now = Date.now();
-        if (now - last > 10000) {
-          sessionStorage.setItem(key, String(now));
-          window.location.reload();
-        }
-      }
-    } catch(e) {}
-  }
-  window.addEventListener('vite:preloadError', function(event) {
-    try {
-      if (event && event.preventDefault) event.preventDefault();
-      var key = 'chunk_reload_ts';
-      var last = Number(sessionStorage.getItem(key) || 0);
-      var now = Date.now();
-      if (now - last > 10000) {
-        sessionStorage.setItem(key, String(now));
-        window.location.reload();
-      }
-    } catch(e) {}
-  });
-  window.addEventListener('error', handleChunkError);
-  window.addEventListener('unhandledrejection', handleChunkError);
-})();
-`;
-
-function RootShell({ children }: { children: ReactNode }) {
-  return (
-    <html lang="en" suppressHydrationWarning className="overflow-x-clip max-w-full">
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        <HeadContent />
-      </head>
-      <body className="overflow-x-clip max-w-full min-h-screen">
-        {children}
-        <script dangerouslySetInnerHTML={{ __html: chunkRecoveryScript }} />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var ls=document.querySelectorAll('link[media="print"]');for(var i=0;i<ls.length;i++){ls[i].media='all';}})();`,
-          }}
-        />
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const loaderData = Route.useLoaderData();
 
-  useEffect(() => {
-    if (
-      loaderData?.settings?.forceHttps &&
-      window.location.protocol === "http:" &&
-      window.location.hostname !== "localhost"
-    ) {
-      window.location.protocol = "https:";
-    }
-    if (typeof window === "undefined" || !loaderData) return;
-    const { settings, homepageConfig, adsConfig, fontConfig } = loaderData;
-    if (settings) {
-      localStorage.setItem("nt:site-settings", JSON.stringify(settings));
-    }
-    if (fontConfig) {
-      localStorage.setItem(FONT_CONFIG_KEY, JSON.stringify(fontConfig));
-    }
-    if (homepageConfig) {
-      localStorage.setItem("nt:homepage-config:v1", JSON.stringify(homepageConfig));
-    }
-    if (adsConfig) {
-      if (adsConfig.slots) {
-        Object.keys(adsConfig.slots).forEach((slot) => {
-          const slotAds = (adsConfig.slots as any)[slot];
-          if (Array.isArray(slotAds) && slotAds.length > 0) {
-            localStorage.setItem(`nt:ads:v2:${slot}`, JSON.stringify(slotAds));
-            const legacyKey = slot === "home1" ? "nt:site-ads" : `nt:site-ads-${slot}`;
-            localStorage.setItem(legacyKey, JSON.stringify(slotAds));
-          }
-        });
-      }
-      if (adsConfig.modes) {
-        localStorage.setItem("nt:ad-slot-mode", JSON.stringify(adsConfig.modes));
-      }
-      if (adsConfig.scripts) {
-        localStorage.setItem("nt:ad-slot-script", JSON.stringify(adsConfig.scripts));
-      }
-      if (adsConfig.rotations) {
-        localStorage.setItem("nt:site-ads-rotation", JSON.stringify(adsConfig.rotations));
-      }
-      if (adsConfig.popupConfig) {
-        localStorage.setItem("nt:popup-ad-config", JSON.stringify(adsConfig.popupConfig));
-      }
+  useRootEffects(loaderData);
 
-      window.dispatchEvent(new Event("nt:ads-updated"));
-      window.dispatchEvent(new Event("nt:homepage-updated"));
-    }
-  }, [loaderData]);
-
-  // Inject dynamic font styles (uploaded @font-face + section CSS variable overrides)
   const fontConfig = loaderData?.fontConfig ?? defaultFontConfig;
-  useEffect(() => {
-    // @font-face for uploaded fonts
-    const faceCss = buildFontFaceCss(fontConfig.fonts);
-    let faceStyle = document.getElementById("nt-font-face") as HTMLStyleElement | null;
-    if (!faceStyle) {
-      faceStyle = document.createElement("style");
-      faceStyle.id = "nt-font-face";
-      document.head.appendChild(faceStyle);
-    }
-    faceStyle.textContent = faceCss;
-
-    // Section CSS variable overrides
-    const varsCss = buildSectionCssVars(fontConfig);
-    let varsStyle = document.getElementById("nt-font-vars") as HTMLStyleElement | null;
-    if (!varsStyle) {
-      varsStyle = document.createElement("style");
-      varsStyle.id = "nt-font-vars";
-      document.head.appendChild(varsStyle);
-    }
-    varsStyle.textContent = varsCss;
-
-    // Google Fonts asynchronous non-blocking stylesheet attachment
-    const activeSectionFontIds = Object.values(fontConfig.sectionMapping || {});
-    const googleFontsUrl = buildGoogleFontsUrl(fontConfig.fonts, activeSectionFontIds);
-    let fontLink = document.getElementById("nt-google-fonts") as HTMLLinkElement | null;
-    if (googleFontsUrl) {
-      if (!fontLink) {
-        fontLink = document.createElement("link");
-        fontLink.id = "nt-google-fonts";
-        fontLink.rel = "stylesheet";
-        fontLink.href = googleFontsUrl;
-        document.head.appendChild(fontLink);
-      } else if (fontLink.href !== googleFontsUrl) {
-        fontLink.href = googleFontsUrl;
-      }
-    }
-
-    return () => {
-      faceStyle?.remove();
-      varsStyle?.remove();
-    };
-  }, [fontConfig]);
-
-  // Re-apply font vars on settings update from admin
-  useEffect(() => {
-    const handleFontUpdate = (e: Event) => {
-      try {
-        const detail = (e as CustomEvent).detail;
-        if (detail) {
-          const fc = typeof detail === "string" ? JSON.parse(detail) : detail;
-          const varsCss = buildSectionCssVars(fc);
-          const varsStyle = document.getElementById("nt-font-vars");
-          if (varsStyle) varsStyle.textContent = varsCss;
-        }
-      } catch {}
-    };
-    window.addEventListener("nt:fonts-updated", handleFontUpdate);
-    return () => window.removeEventListener("nt:fonts-updated", handleFontUpdate);
-  }, []);
-
-  // Ensure all form controls have valid id/name and accessible labels across the entire site
-  useEffect(() => {
-    return initFormAccessibility();
-  }, []);
-
-  // Auto-recover if browser holds stale client JS and receives unexpected HTML / 404 on server functions
-  useEffect(() => {
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      const reason = event?.reason;
-      const msg = String(reason?.message || reason || "");
-      if (
-        msg.includes("Unexpected token '<'") ||
-        msg.includes("<!DOCTYPE") ||
-        msg.includes("is not valid JSON")
-      ) {
-        console.warn(
-          "[App Auto-Recovery] Stale bundle / server response mismatch detected. Reloading page...",
-        );
-        const lastReload = sessionStorage.getItem("app_cache_bust_reload");
-        const now = Date.now();
-        if (!lastReload || now - parseInt(lastReload, 10) > 8000) {
-          sessionStorage.setItem("app_cache_bust_reload", now.toString());
-          window.location.reload();
-        }
-      }
-    };
-
-    window.addEventListener("unhandledrejection", handleUnhandledRejection);
-    return () => window.removeEventListener("unhandledrejection", handleUnhandledRejection);
-  }, []);
-
-  const defaultSlots = {
-    home1: defaultAdSlides,
-    home2: defaultAdSlidesHome2,
-    ad3: defaultAdSlidesAd3,
-    popup: defaultAdSlidesPopup,
-    leaderboard: defaultAdSlidesLeaderboard,
-    hero_showcase: [],
-    reel_ads: [],
-  };
-
-  const adConfigData = loaderData?.adsConfig
-    ? {
-        ...loaderData.adsConfig,
-        slots: {
-          ...defaultSlots,
-          ...(loaderData.adsConfig.slots || {}),
-        },
-      }
-    : {
-        slots: defaultSlots,
-        modes: {
-          home1: "image",
-          home2: "image",
-          ad3: "image",
-          popup: "image",
-          leaderboard: "image",
-          hero_showcase: "image",
-          reel_ads: "image",
-        },
-        scripts: { home1: "", home2: "", ad3: "", popup: "", leaderboard: "", hero_showcase: "", reel_ads: "" },
-        rotations: {
-          home1: 5,
-          home2: 5,
-          ad3: 5,
-          popup: 6,
-          leaderboard: 5,
-          hero_showcase: 5,
-          reel_ads: 5,
-        },
-      };
+  const adConfigData = buildAdConfigData(loaderData?.adsConfig);
 
   const contextValue = {
     settings: loaderData?.settings ?? defaultSettings,
