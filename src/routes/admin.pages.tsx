@@ -14,11 +14,11 @@ import {
   type SiteSettings,
 } from "@/lib/site-content";
 import { Card, Field } from "@/components/admin/settings/SettingsHelpers";
-import SectionEditorItem, { htmlToNormalText } from "@/components/admin/pages/SectionEditorItem";
 import { PagesSidebar } from "@/components/admin/pages/PagesSidebar";
 import { EventPageSettingsCard } from "@/components/admin/pages/EventPageSettingsCard";
 import { subscriptionFields, workWithUsFields } from "@/components/admin/pages/pageFields";
-import { PageSeoForm } from "@/components/admin/pages/PageSeoForm";
+import { PageEditorSeoTab } from "@/components/admin/pages/PageEditorSeoTab";
+import { StandardPageContentEditor } from "@/components/admin/pages/StandardPageContentEditor";
 
 export const Route = createFileRoute("/admin/pages")({
   component: PagesPage,
@@ -88,7 +88,6 @@ function PagesPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-        {/* Sidebar list */}
         <PagesSidebar
           pages={pages}
           activeSlug={activeSlug}
@@ -168,208 +167,45 @@ function PagesPage() {
           </div>
 
           {editorTab === "seo" ? (
-            isSubscription ? (
-              <PageSeoForm
-                pageTitle={settings.subscriptionTitle || "Subscription"}
-                pageIntro={settings.subscriptionIntro || ""}
-                pageContent={settings.subscriptionFeatures || settings.subscriptionIntro || ""}
-                pageSlug="subscription"
-                seo={{
-                  metaTitle: settings.subscriptionMetaTitle,
-                  metaDescription: settings.subscriptionMetaDescription,
-                  ogImage: settings.subscriptionOgImage,
-                  metaKeywords: settings.subscriptionKeywords,
-                  canonicalUrl: settings.subscriptionCanonicalUrl,
-                  noIndex: settings.subscriptionNoIndex,
-                }}
-                onChange={(k, v) => {
-                  const map = {
-                    metaTitle: "subscriptionMetaTitle",
-                    metaDescription: "subscriptionMetaDescription",
-                    ogImage: "subscriptionOgImage",
-                    metaKeywords: "subscriptionKeywords",
-                    canonicalUrl: "subscriptionCanonicalUrl",
-                    noIndex: "subscriptionNoIndex",
-                  } as const;
-                  updateSetting(map[k] as any, v);
-                }}
-                siteName={settings.siteName || "News Theme"}
-              />
-            ) : isWorkWithUs ? (
-              <PageSeoForm
-                pageTitle={settings.workWithUsHeroTitle || "Work With Us"}
-                pageIntro={settings.workWithUsHeroIntro || ""}
-                pageContent={[
-                  settings.workWithUsHeroIntro,
-                  settings.workWithUsRules,
-                  settings.workWithUsTiers,
-                  settings.workWithUsFaqs,
-                ]
-                  .filter(Boolean)
-                  .join("\n\n")}
-                pageSlug="work-with-us"
-                seo={{
-                  metaTitle: settings.workWithUsMetaTitle,
-                  metaDescription: settings.workWithUsMetaDescription,
-                  ogImage: settings.workWithUsOgImage,
-                  metaKeywords: settings.workWithUsKeywords,
-                  canonicalUrl: settings.workWithUsCanonicalUrl,
-                  noIndex: settings.workWithUsNoIndex,
-                }}
-                onChange={(k, v) => {
-                  const map = {
-                    metaTitle: "workWithUsMetaTitle",
-                    metaDescription: "workWithUsMetaDescription",
-                    ogImage: "workWithUsOgImage",
-                    metaKeywords: "workWithUsKeywords",
-                    canonicalUrl: "workWithUsCanonicalUrl",
-                    noIndex: "workWithUsNoIndex",
-                  } as const;
-                  updateSetting(map[k] as any, v);
-                }}
-                siteName={settings.siteName || "News Theme"}
-              />
-            ) : isEvent ? (
-              <PageSeoForm
-                pageTitle={settings.eventTitle || "Sharad Samman Event"}
-                pageIntro={settings.eventSubtitle || settings.eventDescription || ""}
-                pageContent={[
-                  settings.eventSubtitle,
-                  settings.eventDescription,
-                  settings.eventPrizes,
-                  settings.eventCriteria,
-                  settings.eventGuidelinesText,
-                ]
-                  .filter(Boolean)
-                  .join("\n\n")}
-                pageSlug="event"
-                seo={{
-                  metaTitle: settings.eventMetaTitle,
-                  metaDescription: settings.eventMetaDescription,
-                  ogImage: settings.eventOgImage || settings.eventImageUrl,
-                  metaKeywords: settings.eventKeywords,
-                  canonicalUrl: settings.eventCanonicalUrl,
-                  noIndex: settings.eventNoIndex,
-                }}
-                onChange={(k, v) => {
-                  const map = {
-                    metaTitle: "eventMetaTitle",
-                    metaDescription: "eventMetaDescription",
-                    ogImage: "eventOgImage",
-                    metaKeywords: "eventKeywords",
-                    canonicalUrl: "eventCanonicalUrl",
-                    noIndex: "eventNoIndex",
-                  } as const;
-                  updateSetting(map[k] as any, v);
-                }}
-                siteName={settings.siteName || "News Theme"}
-              />
-            ) : (
-              <PageSeoForm
-                pageTitle={active?.title || "Page"}
-                pageIntro={active?.intro || ""}
-                pageContent={
-                  active?.sections && active.sections.length > 0
-                    ? active.sections
-                        .map((s) => `${s.heading}:\n${htmlToNormalText(s.body)}`)
-                        .join("\n\n")
-                    : htmlToNormalText(active?.body || "")
-                }
-                pageSlug={activeSlug}
-                seo={{
-                  metaTitle: active?.metaTitle,
-                  metaDescription: active?.metaDescription,
-                  ogImage: active?.ogImage,
-                  metaKeywords: active?.metaKeywords,
-                  canonicalUrl: active?.canonicalUrl,
-                  noIndex: active?.noIndex,
-                }}
-                onChange={(k, v) => update(k as any, v as any)}
-                siteName={settings.siteName || "News Theme"}
-              />
-            )
-          ) : (
-            <>
-
-          {isEvent ? (
-            <EventPageSettingsCard
+            <PageEditorSeoTab
+              activeSlug={activeSlug}
+              active={active}
               settings={settings}
               updateSetting={updateSetting}
+              update={update}
             />
-          ) : isSubscription ? (
-            <Card
-              title="Subscription Setup"
-              subtitle="Configure the /subscription page content and pricing."
-            >
-              {subscriptionFields.map((f) => (
-                <Field key={f.key} f={f} s={settings} update={updateSetting} />
-              ))}
-            </Card>
-          ) : isWorkWithUs ? (
-            <Card
-              title="Work With Us Setup"
-              subtitle="Configure the content on the /work-with-us page."
-            >
-              {workWithUsFields.map((f) => (
-                <Field key={f.key} f={f} s={settings} update={updateSetting} />
-              ))}
-            </Card>
-          ) : active ? (
-            <div className="space-y-8">
-              <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">
-                  Page Subtitle / Intro
-                </label>
-                <input
-                  type="text"
-                  value={active.intro || ""}
-                  onChange={(e) => update("intro", e.target.value)}
-                  className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none"
+          ) : (
+            <>
+              {isEvent ? (
+                <EventPageSettingsCard
+                  settings={settings}
+                  updateSetting={updateSetting}
                 />
-              </div>
-
-              {activeSlug === "contact" ? (
-                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                  <strong>Note:</strong> The Contact Us page relies on a hardcoded layout with a
-                  contact form. Only the subtitle/intro above can be updated here.
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <label className="block text-sm font-bold text-slate-800">Page Sections</label>
-                    <button
-                      onClick={() => {
-                        const newSections = [
-                          ...(active.sections || []),
-                          { heading: "New Section", body: "" },
-                        ];
-                        update("sections", newSections);
-                      }}
-                      className="text-xs font-bold text-blue-600 hover:text-blue-700"
-                    >
-                      + Add Section
-                    </button>
-                  </div>
-
-                  {(active.sections || []).length === 0 && (
-                    <div className="text-sm text-slate-500 italic">
-                      No sections added. Click "+ Add Section" to add content.
-                    </div>
-                  )}
-
-                  {(active.sections || []).map((sec, idx) => (
-                    <SectionEditorItem
-                      key={idx}
-                      sec={sec}
-                      idx={idx}
-                      activeSections={active.sections || []}
-                      update={update}
-                    />
+              ) : isSubscription ? (
+                <Card
+                  title="Subscription Setup"
+                  subtitle="Configure the /subscription page content and pricing."
+                >
+                  {subscriptionFields.map((f) => (
+                    <Field key={f.key} f={f} s={settings} update={updateSetting} />
                   ))}
-                </div>
-              )}
-            </div>
-          ) : null}
+                </Card>
+              ) : isWorkWithUs ? (
+                <Card
+                  title="Work With Us Setup"
+                  subtitle="Configure the content on the /work-with-us page."
+                >
+                  {workWithUsFields.map((f) => (
+                    <Field key={f.key} f={f} s={settings} update={updateSetting} />
+                  ))}
+                </Card>
+              ) : active ? (
+                <StandardPageContentEditor
+                  active={active}
+                  activeSlug={activeSlug}
+                  update={update}
+                />
+              ) : null}
             </>
           )}
         </main>

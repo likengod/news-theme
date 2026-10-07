@@ -9,14 +9,14 @@ export const Route = createFileRoute("/sitemap.xml")({
       GET: async () => {
         try {
           // Resolve domain origin
-          let origin = "";
+          let origin = "https://vanguardtripura.com";
           try {
             const req = getRequest();
-            const proto = req.headers.get("x-forwarded-proto") ?? "http";
-            const host = req.headers.get("host") ?? "localhost:3099";
+            const proto = req.headers.get("x-forwarded-proto") ?? "https";
+            const host = req.headers.get("host") ?? "vanguardtripura.com";
             origin = `${proto}://${host}`;
           } catch {
-            origin = "http://localhost:3099";
+            origin = "https://vanguardtripura.com";
           }
 
           // Check if custom canonical domain is set in settings

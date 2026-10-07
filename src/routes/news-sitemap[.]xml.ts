@@ -8,26 +8,33 @@ export const Route = createFileRoute("/news-sitemap.xml")({
       GET: async () => {
         try {
           // Resolve domain origin
-          let origin = "";
-          let publicationName = "News Theme";
+          let origin = "https://vanguardtripura.com";
+          let publicationName = "News Vanguard 24x7";
+          let publicationLang = "en";
+
           try {
             const req = getRequest();
-            const proto = req.headers.get("x-forwarded-proto") ?? "http";
-            const host = req.headers.get("host") ?? "localhost:3099";
+            const proto = req.headers.get("x-forwarded-proto") ?? "https";
+            const host = req.headers.get("host") ?? "vanguardtripura.com";
             origin = `${proto}://${host}`;
           } catch {
-            origin = "http://localhost:3099";
+            origin = "https://vanguardtripura.com";
           }
 
-          // Check settings for siteName and canonical domain
+          // Check settings for siteName, publicationName, and canonical domain
           try {
             const settingRows = await query(
               "SELECT value FROM site_settings WHERE setting_key = 'site_settings_data'",
             );
             if (settingRows.length > 0 && settingRows[0].value) {
               const parsed = JSON.parse(settingRows[0].value);
-              if (parsed?.siteName) {
+              if (parsed?.seoNewsPublicationName) {
+                publicationName = parsed.seoNewsPublicationName;
+              } else if (parsed?.siteName) {
                 publicationName = parsed.siteName;
+              }
+              if (parsed?.defaultLanguage) {
+                publicationLang = parsed.defaultLanguage.toLowerCase().slice(0, 2);
               }
               if (
                 parsed?.seoCanonicalBaseUrl &&
@@ -42,7 +49,7 @@ export const Route = createFileRoute("/news-sitemap.xml")({
           let articles: any[] = [];
           try {
             articles = await query(
-              "SELECT slug, title, category, date FROM articles WHERE status = 'Published' AND date >= NOW() - INTERVAL 48 HOUR ORDER BY date DESC, id DESC LIMIT 100",
+              "SELECT slug, title, category, date, updated_at FROM articles WHERE status = 'Published' AND date >= NOW() - INTERVAL 48 HOUR ORDER BY date DESC, id DESC LIMIT 100",
             );
           } catch {}
 
@@ -50,7 +57,7 @@ export const Route = createFileRoute("/news-sitemap.xml")({
           if (!articles || articles.length === 0) {
             try {
               articles = await query(
-                "SELECT slug, title, category, date FROM articles WHERE status = 'Published' ORDER BY date DESC, id DESC LIMIT 25",
+                "SELECT slug, title, category, date, updated_at FROM articles WHERE status = 'Published' ORDER BY date DESC, id DESC LIMIT 25",
               );
             } catch {}
           }
@@ -72,7 +79,7 @@ export const Route = createFileRoute("/news-sitemap.xml")({
     <news:news>
       <news:publication>
         <news:name>${escapeXml(publicationName)}</news:name>
-        <news:language>en</news:language>
+        <news:language>${escapeXml(publicationLang)}</news:language>
       </news:publication>
       <news:publication_date>${pubDate}</news:publication_date>
       <news:title>${cleanTitle}</news:title>

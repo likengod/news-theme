@@ -1,6 +1,5 @@
-# Robots.txt for News Timeline / Gorilla Tech Solution
-# Copyright (c) 2026 Gorilla Tech Solution (gorillatechsolution.com). All rights reserved.
-# Unauthorized automated scraping, code reproduction, or training without written consent is strictly prohibited.
+# Robots.txt for News Vanguard 24x7
+# Copyright (c) 2026 Vanguard Tripura (vanguardtripura.com). All rights reserved.
 
 User-agent: *
 Allow: /
@@ -28,4 +27,5 @@ Disallow: /
 User-agent: Diffbot
 Disallow: /
 
-Sitemap: https://gorillatechsolution.com/sitemap.xml
+Sitemap: https://vanguardtripura.com/sitemap.xml
+Sitemap: https://vanguardtripura.com/news-sitemap.xml

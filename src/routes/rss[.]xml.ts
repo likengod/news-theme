@@ -8,18 +8,19 @@ export const Route = createFileRoute("/rss.xml")({
       GET: async () => {
         try {
           // Resolve domain origin
-          let origin = "";
-          let siteName = "News Theme";
+          let origin = "https://vanguardtripura.com";
+          let siteName = "News Vanguard 24x7";
           let siteDesc =
-            "Breaking news, market intelligence, and sharp business analysis from News Theme.";
+            "Breaking news, local updates, and market intelligence from News Vanguard 24x7.";
+          let language = "en-US";
 
           try {
             const req = getRequest();
-            const proto = req.headers.get("x-forwarded-proto") ?? "http";
-            const host = req.headers.get("host") ?? "localhost:3099";
+            const proto = req.headers.get("x-forwarded-proto") ?? "https";
+            const host = req.headers.get("host") ?? "vanguardtripura.com";
             origin = `${proto}://${host}`;
           } catch {
-            origin = "http://localhost:3099";
+            origin = "https://vanguardtripura.com";
           }
 
           // Check settings
@@ -29,8 +30,12 @@ export const Route = createFileRoute("/rss.xml")({
             );
             if (settingRows.length > 0 && settingRows[0].value) {
               const parsed = JSON.parse(settingRows[0].value);
-              if (parsed?.siteName) siteName = parsed.siteName;
+              if (parsed?.seoNewsPublicationName) siteName = parsed.seoNewsPublicationName;
+              else if (parsed?.siteName) siteName = parsed.siteName;
               if (parsed?.metaDescription) siteDesc = parsed.metaDescription;
+              if (parsed?.defaultLanguage) {
+                language = parsed.defaultLanguage.toLowerCase() === "bn" ? "bn-IN" : "en-US";
+              }
               if (
                 parsed?.seoCanonicalBaseUrl &&
                 !parsed.seoCanonicalBaseUrl.includes("domainname.com")
@@ -57,7 +62,7 @@ export const Route = createFileRoute("/rss.xml")({
     <description>${escapeXml(siteDesc)}</description>
     <link>${origin}</link>
     <atom:link href="${origin}/rss.xml" rel="self" type="application/rss+xml" />
-    <language>en-US</language>
+    <language>${escapeXml(language)}</language>
     <lastBuildDate>${lastBuildDate}</lastBuildDate>
 `;
 
