@@ -63,9 +63,7 @@ export function generateRootHead(loaderData: any) {
     });
   }
 
-  if (s?.forceHttps) {
-    metaTags.push({ httpEquiv: "Content-Security-Policy", content: "upgrade-insecure-requests" });
-  }
+  metaTags.push({ httpEquiv: "Content-Security-Policy", content: "upgrade-insecure-requests" });
 
   if (s?.googleSiteVerification) {
     metaTags.push({ name: "google-site-verification", content: s.googleSiteVerification });

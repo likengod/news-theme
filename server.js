@@ -47,10 +47,44 @@ function getMainCssLink() {
   return cachedCssLink;
 }
 
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "SAMEORIGIN",
+  "X-XSS-Protection": "1; mode=block",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+  "Content-Security-Policy":
+    "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: fonts.gstatic.com; frame-src 'self' https:; frame-ancestors 'self';",
+};
+
+function applySecurityHeaders(res) {
+  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+    res.setHeader(key, value);
+  }
+}
+
 const server = createServer(async (req, res) => {
 
   try {
     const rawUrl = req.url || "/";
+    const host = req.headers.host || "127.0.0.1:3000";
+    const proto = (req.headers["x-forwarded-proto"] || "http").toLowerCase();
+
+    // 1. HTTP to HTTPS Redirection (Lighthouse: "Redirects HTTP traffic to HTTPS")
+    if (
+      proto === "http" &&
+      !host.startsWith("localhost") &&
+      !host.startsWith("127.0.0.1") &&
+      !host.startsWith("0.0.0.0")
+    ) {
+      applySecurityHeaders(res);
+      res.statusCode = 301;
+      res.setHeader("Location", `https://${host}${rawUrl}`);
+      res.end();
+      return;
+    }
+
     const parsedPath = rawUrl.split("?")[0];
 
     // Special handling for favicon.ico so it never falls into SSR route matching
@@ -222,16 +256,7 @@ const server = createServer(async (req, res) => {
         res.setHeader("X-Cache", "HIT");
         res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         res.setHeader("Pragma", "no-cache");
-        res.setHeader("Expires", "0");
-        res.setHeader("X-Content-Type-Options", "nosniff");
-        res.setHeader("X-Frame-Options", "SAMEORIGIN");
-        res.setHeader("X-XSS-Protection", "1; mode=block");
-        res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-        res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-        res.setHeader(
-          "Content-Security-Policy",
-          "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: fonts.gstatic.com; frame-src 'self' https:;"
-        );
+        applySecurityHeaders(res);
         const cssLink = getMainCssLink();
         if (cssLink) res.setHeader("Link", cssLink);
 
@@ -271,16 +296,7 @@ const server = createServer(async (req, res) => {
       res.setHeader(key, value);
     });
 
-    // Essential HTTP Security Headers
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("X-Frame-Options", "SAMEORIGIN");
-    res.setHeader("X-XSS-Protection", "1; mode=block");
-    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-    res.setHeader(
-      "Content-Security-Policy",
-      "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: fonts.gstatic.com; frame-src 'self' https:;"
-    );
+    applySecurityHeaders(res);
 
     const contentType = response.headers.get("content-type") || "";
     console.log(`[SSR] Content-Type: "${contentType}", Status: ${response.status}, isPublicGet: ${isPublicGet}`);
