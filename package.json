@@ -1,6 +1,6 @@
 {
   "name": "news-timeline",
-  "version": "1.1.33",
+  "version": "1.1.34",
   "private": true,
   "sideEffects": false,
   "type": "module",

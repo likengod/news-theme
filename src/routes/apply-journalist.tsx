@@ -3,22 +3,21 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   Newspaper,
-  Upload,
   CheckCircle2,
   Lock,
   ArrowRight,
   ShieldCheck,
-  Image as ImageIcon,
-  X,
   Loader2,
-  User,
-  MapPin,
-  FileText,
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { authClient } from "@/lib/auth-client";
 import { submitJournalistApplication } from "@/lib/inbox.functions";
+
+import { PersonalInfoStep } from "@/components/journalist-application/PersonalInfoStep";
+import { IdVerificationStep } from "@/components/journalist-application/IdVerificationStep";
+import { AvatarStep } from "@/components/journalist-application/AvatarStep";
+import { AddressStep } from "@/components/journalist-application/AddressStep";
 
 export const Route = createFileRoute("/apply-journalist")({
   head: () => ({
@@ -291,378 +290,53 @@ function ApplyJournalistPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
-              {/* Personal Details */}
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-1.5">
-                  <User className="h-3.5 w-3.5" />
-                  <span>1. Personal Information</span>
-                </h3>
+              <PersonalInfoStep
+                displayName={displayName}
+                setDisplayName={setDisplayName}
+                email={email}
+                setEmail={setEmail}
+                phone={phone}
+                setPhone={setPhone}
+                fatherName={fatherName}
+                setFatherName={setFatherName}
+                motherName={motherName}
+                setMotherName={setMotherName}
+                gender={gender}
+                setGender={setGender}
+                maritalStatus={maritalStatus}
+                setMaritalStatus={setMaritalStatus}
+                husbandName={husbandName}
+                setHusbandName={setHusbandName}
+                bloodGroup={bloodGroup}
+                setBloodGroup={setBloodGroup}
+              />
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Full Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="e.g. Kiran Nath"
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3.5 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    />
-                  </div>
+              <IdVerificationStep
+                documentType={documentType}
+                setDocumentType={setDocumentType}
+                documentUrl={documentUrl}
+                docFileInputRef={docFileInputRef}
+                handleDocumentFile={handleDocumentFile}
+                clearDocument={clearDocument}
+              />
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Email Address <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="journalist@example.com"
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3.5 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    />
-                  </div>
+              <AvatarStep
+                avatarUrl={avatarUrl}
+                fileInputRef={fileInputRef}
+                handleAvatarFile={handleAvatarFile}
+                clearAvatar={clearAvatar}
+              />
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Contact Phone <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+91 9436121106"
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3.5 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Father's Name
-                    </label>
-                    <input
-                      type="text"
-                      value={fatherName}
-                      onChange={(e) => setFatherName(e.target.value)}
-                      placeholder="Father's full name"
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3.5 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Mother's Name
-                    </label>
-                    <input
-                      type="text"
-                      value={motherName}
-                      onChange={(e) => setMotherName(e.target.value)}
-                      placeholder="Mother's full name"
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3.5 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Gender
-                    </label>
-                    <select
-                      value={gender}
-                      onChange={(e) => {
-                        const g = e.target.value;
-                        setGender(g);
-                        if (g !== "Female") setHusbandName("");
-                      }}
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 bg-white"
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Marital Status
-                    </label>
-                    <select
-                      value={maritalStatus}
-                      onChange={(e) => {
-                        const s = e.target.value;
-                        setMaritalStatus(s);
-                        if (s !== "Married") setHusbandName("");
-                      }}
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 bg-white"
-                    >
-                      <option value="">Select Marital Status</option>
-                      <option value="Single">Single / Unmarried</option>
-                      <option value="Married">Married</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-
-                  {gender === "Female" && maritalStatus === "Married" && (
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                        Husband's Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={husbandName}
-                        onChange={(e) => setHusbandName(e.target.value)}
-                        placeholder="Husband's full name"
-                        className="h-10 w-full rounded-lg border border-slate-200 px-3.5 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                      />
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Blood Group
-                    </label>
-                    <select
-                      value={bloodGroup}
-                      onChange={(e) => setBloodGroup(e.target.value)}
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 bg-white"
-                    >
-                      <option value="">Select Blood Group</option>
-                      <option value="A+">A+</option>
-                      <option value="A-">A-</option>
-                      <option value="B+">B+</option>
-                      <option value="B-">B-</option>
-                      <option value="AB+">AB+</option>
-                      <option value="AB-">AB-</option>
-                      <option value="O+">O+</option>
-                      <option value="O-">O-</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Document Verification Section */}
-              <div className="pt-2 border-t border-slate-100">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
-                  <FileText className="h-3.5 w-3.5" />
-                  <span>2. Identity Document Verification</span>
-                </h3>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Which document you can provide? <span className="text-slate-400 font-normal">(Select one)</span>
-                    </label>
-                    <select
-                      value={documentType}
-                      onChange={(e) => setDocumentType(e.target.value)}
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 bg-white"
-                    >
-                      <option value="">Select Valid Document</option>
-                      <option value="Voter ID">Voter ID</option>
-                      <option value="Aadhaar Card">Aadhaar Card</option>
-                      <option value="Passport">Passport</option>
-                    </select>
-                    <p className="mt-1 text-[11px] text-slate-500">
-                      Choose any valid government-issued document for official verification.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Upload Document Image <span className="text-slate-400 font-normal">(&lt; 1 MB)</span>
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => docFileInputRef.current?.click()}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-                      >
-                        <Upload className="h-3.5 w-3.5 text-slate-500" />
-                        <span>{documentUrl ? "Change Document" : "Upload Document"}</span>
-                      </button>
-                      {documentUrl && (
-                        <button
-                          type="button"
-                          onClick={clearDocument}
-                          className="text-xs font-medium text-red-600 hover:underline px-2 py-1 cursor-pointer"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
-                    <p className="mt-1 text-[11px] text-slate-500">
-                      Upload image size less than 1 MB (JPG, PNG, WEBP).
-                    </p>
-                    <input
-                      ref={docFileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleDocumentFile(e.target.files?.[0])}
-                    />
-                  </div>
-                </div>
-
-                {documentUrl && (
-                  <div className="mt-3 flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50/50 p-3">
-                    <img
-                      src={documentUrl}
-                      alt="Document Preview"
-                      className="h-20 w-32 object-contain rounded-lg border border-slate-200 bg-white shrink-0 shadow-xs"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="rounded-full bg-blue-100 text-blue-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-                          {documentType || "ID Document"}
-                        </span>
-                        <span className="text-[11px] font-semibold text-emerald-600">✓ Ready to submit (&lt; 1 MB)</span>
-                      </div>
-                      <p className="mt-1 text-xs text-slate-600">
-                        {documentType ? `${documentType} image loaded.` : "Document image loaded."} Official accreditation proof.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Avatar Upload */}
-              <div className="pt-2 border-t border-slate-100">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
-                  <ImageIcon className="h-3.5 w-3.5" />
-                  <span>3. Profile Photo / Press Avatar</span>
-                </h3>
-
-                <div className="flex flex-col sm:flex-row items-start gap-4">
-                  {/* Preview Box */}
-                  <div className="h-28 w-28 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 relative group">
-                    {avatarUrl ? (
-                      <>
-                        <img
-                          src={avatarUrl}
-                          alt="Avatar Preview"
-                          className="h-full w-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={clearAvatar}
-                          className="absolute right-1 top-1 bg-red-600 text-white rounded-full p-1 opacity-90 hover:opacity-100 shadow-sm transition"
-                          title="Remove photo"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </>
-                    ) : (
-                      <div className="text-center p-2 text-slate-400">
-                        <ImageIcon className="h-7 w-7 mx-auto mb-1 text-slate-300" />
-                        <span className="text-[10px]">No Photo</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Upload Controls */}
-                  <div className="flex-1 space-y-2">
-                    <p className="text-xs text-slate-600">
-                      Upload a clear, passport-style square photo (400×400 px recommended). This
-                      will be printed on your digital Press ID card upon accreditation.
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-                      >
-                        <Upload className="h-3.5 w-3.5 text-slate-500" />
-                        <span>{avatarUrl ? "Change Photo" : "Upload Photo"}</span>
-                      </button>
-                      {avatarUrl && (
-                        <button
-                          type="button"
-                          onClick={clearAvatar}
-                          className="text-xs font-medium text-red-600 hover:underline px-2 py-1 cursor-pointer"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleAvatarFile(e.target.files?.[0])}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Address & Location */}
-              <div className="pt-2 border-t border-slate-100">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-1.5">
-                  <MapPin className="h-3.5 w-3.5" />
-                  <span>4. Address & Jurisdiction</span>
-                </h3>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Full Address
-                    </label>
-                    <input
-                      type="text"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      placeholder="e.g. Radhanagar Road, Agartala"
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3.5 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      State / Province
-                    </label>
-                    <input
-                      type="text"
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
-                      placeholder="e.g. Tripura"
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3.5 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Country
-                    </label>
-                    <input
-                      type="text"
-                      value={country}
-                      onChange={(e) => setCountry(e.target.value)}
-                      placeholder="e.g. India"
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3.5 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Pin / ZIP Code
-                    </label>
-                    <input
-                      type="text"
-                      value={pinCode}
-                      onChange={(e) => setPinCode(e.target.value)}
-                      placeholder="e.g. 799006"
-                      className="h-10 w-full rounded-lg border border-slate-200 px-3.5 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    />
-                  </div>
-                </div>
-              </div>
-
+              <AddressStep
+                address={address}
+                setAddress={setAddress}
+                state={state}
+                setState={setState}
+                country={country}
+                setCountry={setCountry}
+                pinCode={pinCode}
+                setPinCode={setPinCode}
+              />
 
               {/* Submit Button */}
               <div className="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3.5">
