@@ -41,7 +41,7 @@ export function parseSemver(v: string) {
 
 export function git(cmd: string): string {
   try {
-    return execSync(`git ${cmd}`, { cwd: ROOT, encoding: "utf-8", timeout: 20000 }).trim();
+    return execSync(`git ${cmd}`, { cwd: ROOT, encoding: "utf-8", timeout: 60000 }).trim();
   } catch (err: any) {
     return err.stderr?.trim() || err.message || "unknown error";
   }
@@ -250,16 +250,27 @@ export async function executeGitPullCore() {
   // 3. Automatically run build so compiled .output matches the new server functions
   let buildLog = "";
   let buildSuccess = true;
+  
+  let hasNpm = false;
   try {
-    buildLog = execSync("npm install --no-audit --no-fund && npm run build 2>&1", {
-      cwd: ROOT,
-      encoding: "utf-8",
-      timeout: 120000,
-    });
-  } catch (bErr: any) {
-    buildLog = bErr.stdout || bErr.stderr || bErr.message || "";
-    buildSuccess = false;
-    console.error("[Deploy] Build after pull error:", bErr);
+    execSync("npm --version", { cwd: ROOT, encoding: "utf-8", timeout: 5000 });
+    hasNpm = true;
+  } catch {}
+
+  if (hasNpm) {
+    try {
+      buildLog = execSync("npm install --no-audit --no-fund && npm run build 2>&1", {
+        cwd: ROOT,
+        encoding: "utf-8",
+        timeout: 120000,
+      });
+    } catch (bErr: any) {
+      buildLog = bErr.stdout || bErr.stderr || bErr.message || "";
+      buildSuccess = false;
+      console.error("[Deploy] Build after pull error:", bErr);
+    }
+  } else {
+    buildLog = "npm is not installed on this runtime environment. Build skipped. Serving pre-compiled dist folder directly from Git.";
   }
 
   const afterHash = git("rev-parse --short HEAD");
@@ -346,15 +357,25 @@ export async function executeBuildProjectCore() {
 
   let buildLog = "";
   let status = "Success";
+  let hasNpm = false;
   try {
-    buildLog = execSync("npm install --no-audit --no-fund && npm run build 2>&1", {
-      cwd: ROOT,
-      encoding: "utf-8",
-      timeout: 120000,
-    });
-  } catch (err: any) {
-    buildLog = err.stdout || err.stderr || err.message;
-    status = "Failed";
+    execSync("npm --version", { cwd: ROOT, encoding: "utf-8", timeout: 5000 });
+    hasNpm = true;
+  } catch {}
+
+  if (hasNpm) {
+    try {
+      buildLog = execSync("npm install --no-audit --no-fund && npm run build 2>&1", {
+        cwd: ROOT,
+        encoding: "utf-8",
+        timeout: 120000,
+      });
+    } catch (err: any) {
+      buildLog = err.stdout || err.stderr || err.message;
+      status = "Failed";
+    }
+  } else {
+    buildLog = "npm is not installed. Manual build is impossible inside the Node environment. Please use GitHub auto-deploy.";
   }
 
   await query(
