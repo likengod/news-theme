@@ -1,0 +1,2 @@
+import{t as e}from"./jsx-runtime-CMgEUHpv.js";import{t}from"./PolicyLayout-Cl4hB1Fz.js";import{v as n}from"./index-DBDTTuhf.js";var r=e();function i(){let e=n.useLoaderData();return(0,r.jsx)(t,{title:e?.title||``,intro:e?.intro||``,sections:e?.sections&&e.sections.length>0?e.sections.map(e=>({heading:e.heading,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e.body}})})):[{heading:e?.title||``,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e?.body||``}})}]})}export{i as component};
+//# sourceMappingURL=refund-policy-JEi8078P.js.map

@@ -66,11 +66,6 @@ export default function ArticleSettingsTab({
                   ))}
                 </optgroup>
               )}
-              <optgroup label="Editorial Desks">
-                <option value="Newsroom Desk">Newsroom Desk</option>
-                <option value="Editorial Desk">Editorial Desk</option>
-                <option value="Today Tripura Bureau">Today Tripura Bureau</option>
-              </optgroup>
             </select>
 
             <input
@@ -171,3 +166,4 @@ export default function ArticleSettingsTab({
     </div>
   );
 }
+
