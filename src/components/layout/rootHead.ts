@@ -92,9 +92,10 @@ export function generateRootHead(loaderData: any) {
   const googleFontsUrl = buildGoogleFontsUrl(fontConfig.fonts, activeSectionFontIds);
 
   const links: Array<Record<string, any>> = [
+    { rel: "preload", as: "style", href: appCss, fetchPriority: "high" },
+    { rel: "stylesheet", href: appCss },
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
     { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-    { rel: "stylesheet", href: appCss },
     {
       rel: "alternate",
       type: "application/rss+xml",

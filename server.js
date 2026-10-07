@@ -31,6 +31,22 @@ const MIME_TYPES = {
 
 const SSR_CACHE = new Map();
 
+let cachedCssLink = "";
+function getMainCssLink() {
+  if (cachedCssLink) return cachedCssLink;
+  try {
+    const assetsDir = path.join(__dirname, "dist/client/assets");
+    if (fs.existsSync(assetsDir)) {
+      const files = fs.readdirSync(assetsDir);
+      const cssFile = files.find((f) => f.startsWith("styles-") && f.endsWith(".css"));
+      if (cssFile) {
+        cachedCssLink = `</assets/${cssFile}>; rel=preload; as=style`;
+      }
+    }
+  } catch {}
+  return cachedCssLink;
+}
+
 const server = createServer(async (req, res) => {
 
   try {
@@ -216,6 +232,8 @@ const server = createServer(async (req, res) => {
           "Content-Security-Policy",
           "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: fonts.gstatic.com; frame-src 'self' https:;"
         );
+        const cssLink = getMainCssLink();
+        if (cssLink) res.setHeader("Link", cssLink);
 
         const acceptEncoding = (req.headers["accept-encoding"] || "").toLowerCase();
         if (acceptEncoding.includes("gzip") && cached.gzipped) {
@@ -268,6 +286,8 @@ const server = createServer(async (req, res) => {
     console.log(`[SSR] Content-Type: "${contentType}", Status: ${response.status}, isPublicGet: ${isPublicGet}`);
     const isHtml = contentType.includes("text/html");
     if (isHtml) {
+      const cssLink = getMainCssLink();
+      if (cssLink) res.setHeader("Link", cssLink);
       res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
       res.setHeader("Pragma", "no-cache");
       res.setHeader("Expires", "0");
@@ -286,14 +306,14 @@ const server = createServer(async (req, res) => {
       bodyBuffer = Buffer.concat(chunks);
     }
 
-    // Save to SSR Micro-Cache if eligible (30-second TTL)
+    // Save to SSR Micro-Cache if eligible (120-second TTL)
     if (isPublicGet && response.status === 200 && isHtml && bodyBuffer.length > 0) {
       try {
         const gzipped = zlib.gzipSync(bodyBuffer, { level: 6 });
         SSR_CACHE.set(cacheKey, {
           html: bodyBuffer,
           gzipped,
-          expiry: now + 30 * 1000,
+          expiry: now + 120 * 1000,
         });
         if (SSR_CACHE.size > 200) {
           // Prune oldest

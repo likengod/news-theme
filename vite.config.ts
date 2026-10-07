@@ -19,6 +19,7 @@ export default defineConfig({
     sourcemap: true,
     modulePreload: true,
     cssCodeSplit: true,
+    cssMinify: "lightningcss",
     chunkSizeWarningLimit: 1000,
   },
 
