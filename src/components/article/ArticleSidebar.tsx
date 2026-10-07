@@ -83,7 +83,7 @@ export function ArticleSidebar({ trending = [], currentSlug }: Props) {
       )}
 
       {/* সেরা শিরোনাম / Top Headlines Section - ABP Ananda style */}
-      {showTrending && (
+      {showTrending && activeItems.length > 0 && (
         <div className="w-full">
           <div className="mb-4 border-b-2 border-red-600 pb-1.5 flex items-center justify-between">
             <h3 className="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-tight flex items-center gap-2">
@@ -95,80 +95,59 @@ export function ArticleSidebar({ trending = [], currentSlug }: Props) {
             </span>
           </div>
 
-          {activeItems.length > 0 ? (
-            <div className="space-y-3.5">
-              {activeItems.map((item) => {
-                const rawImg = item.featuredImage || item.hero;
-                const img = typeof rawImg === 'string' && rawImg.trim() !== '' ? rawImg.trim() : null;
-                const firstCat = (item.category || "খবর").split(",")[0].trim();
-                const snippet = getArticleSnippet(item);
+          <div className="space-y-3.5">
+            {activeItems.map((item) => {
+              const rawImg = item.featuredImage || item.hero;
+              const img = typeof rawImg === 'string' && rawImg.trim() !== '' ? rawImg.trim() : null;
+              const firstCat = (item.category || "খবর").split(",")[0].trim();
+              const snippet = getArticleSnippet(item);
 
-                return (
-                  <article
-                    key={item.slug}
-                    className="group flex flex-col gap-1 border-b border-slate-100 dark:border-slate-800/80 pb-3 last:border-b-0"
-                  >
-                    {firstCat && (
-                      <span className="text-[11px] font-bold text-red-600 dark:text-red-500 uppercase tracking-wide">
-                        {firstCat}
-                      </span>
+              return (
+                <article
+                  key={item.slug}
+                  className="group flex flex-col gap-1 border-b border-slate-100 dark:border-slate-800/80 pb-3 last:border-b-0"
+                >
+                  {firstCat && (
+                    <span className="text-[11px] font-bold text-red-600 dark:text-red-500 uppercase tracking-wide">
+                      {firstCat}
+                    </span>
+                  )}
+                  <div className="flex items-start gap-3">
+                    {img && (
+                      <Link
+                        to="/news/$slug"
+                        params={{ slug: item.slug }}
+                        className="shrink-0 overflow-hidden rounded bg-muted block"
+                      >
+                        <img
+                          src={img}
+                          alt={item.title}
+                          className="h-16 w-24 object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      </Link>
                     )}
-                    <div className="flex items-start gap-3">
-                      {img && (
-                        <Link
-                          to="/news/$slug"
-                          params={{ slug: item.slug }}
-                          className="shrink-0 overflow-hidden rounded bg-muted block"
-                        >
-                          <img
-                            src={img}
-                            alt={item.title}
-                            className="h-16 w-24 object-cover transition-transform duration-300 group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        </Link>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <Link
-                          to="/news/$slug"
-                          params={{ slug: item.slug }}
-                          className="block"
-                        >
-                          <p className="text-xs sm:text-sm font-semibold leading-snug text-slate-900 dark:text-slate-100 line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
-                            {item.title}
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        to="/news/$slug"
+                        params={{ slug: item.slug }}
+                        className="block"
+                      >
+                        <p className="text-xs sm:text-sm font-semibold leading-snug text-slate-900 dark:text-slate-100 line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+                          {item.title}
+                        </p>
+                        {snippet && (
+                          <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground line-clamp-2">
+                            {snippet}
                           </p>
-                          {snippet && (
-                            <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground line-clamp-2">
-                              {snippet}
-                            </p>
-                          )}
-                        </Link>
-                      </div>
+                        )}
+                      </Link>
                     </div>
-                  </article>
-                );
-              })}
-            </div>
-          ) : (
-            <ol className="space-y-3">
-              {FALLBACK_TRENDING.map((t, i) => (
-                <li key={t} className="flex gap-3 border-b border-slate-100 dark:border-slate-800/60 pb-2.5 last:border-b-0">
-                  <span className="font-sans text-xl font-bold text-red-600 dark:text-red-500 shrink-0 w-6">
-                    {i + 1}
-                  </span>
-                  <Link
-                    to="/news/$slug"
-                    params={{
-                      slug: slugify(t),
-                    }}
-                    className="line-clamp-2 text-xs sm:text-sm font-semibold leading-snug text-slate-900 dark:text-slate-100 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                  >
-                    {t}
-                  </Link>
-                </li>
-              ))}
-            </ol>
-          )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </div>
       )}
 

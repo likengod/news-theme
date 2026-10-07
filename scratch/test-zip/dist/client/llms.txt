@@ -1,0 +1,16 @@
+# Today Tripura
+
+> Today Tripura is a premier digital news portal providing breaking news, local reporting, investigative journalism, politics, business, entertainment, technology, culture, and sports coverage across Tripura and Northeast India.
+
+## Core Pages
+- [Home](https://todaytripura.com): Front page with breaking headlines, top stories, and editorial coverage.
+- [About Us](https://todaytripura.com/about): Editorial mission, values, leadership, and newsroom guidelines.
+- [Contact](https://todaytripura.com/contact): Reach our editorial desk, report a news tip, or contact our team.
+- [Editorial Policy](https://todaytripura.com/editorial-policy): Editorial independence, code of conduct, and standards.
+- [Fact-Checking Policy](https://todaytripura.com/fact-checking-policy): Our verification, sourcing, and fact-checking methodology.
+- [Terms & Conditions](https://todaytripura.com/terms-and-conditions): Terms of service for readers and subscribers.
+- [Privacy Policy](https://todaytripura.com/privacy-policy): Privacy practices and data protection disclosures.
+
+## Feeds & Resources
+- [RSS Feed](https://todaytripura.com/rss.xml): Real-time XML RSS feed of recently published articles.
+- [Sitemap](https://todaytripura.com/sitemap.xml): Search engine and AI crawler XML sitemap index.

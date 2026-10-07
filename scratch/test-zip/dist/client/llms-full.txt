@@ -1,0 +1,17 @@
+# Today Tripura - Full Documentation
+
+> Complete publication directory and guidelines for Today Tripura (https://todaytripura.com).
+
+## Sections
+- [Politics](https://todaytripura.com/news?category=politics): Political reporting, policy, governance, and civic affairs.
+- [Business](https://todaytripura.com/news?category=business): Market updates, commerce, local enterprise, and economy.
+- [Technology](https://todaytripura.com/news?category=technology): Tech news, innovation, and digital trends.
+- [Entertainment](https://todaytripura.com/news?category=entertainment): Culture, cinema, arts, and lifestyle.
+- [Sports](https://todaytripura.com/news?category=sports): Sports tournaments, local athletics, and national games.
+
+## Legal & Compliance
+- [Privacy Policy](https://todaytripura.com/privacy-policy)
+- [Terms of Service](https://todaytripura.com/terms-and-conditions)
+- [Cookie Policy](https://todaytripura.com/cookie-policy)
+- [DMCA Disclosures](https://todaytripura.com/dmca)
+- [Data Deletion Policy](https://todaytripura.com/data-deletion-policy)

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <rect width="800" height="450" fill="#f1f5f9"/>
+  <rect x="350" y="175" width="100" height="100" rx="10" fill="#e2e8f0"/>
+  <path d="M380 230 L395 210 L405 220 L420 200 L430 235 Z" fill="#94a3b8"/>
+  <circle cx="390" cy="200" r="5" fill="#94a3b8"/>
+  <text x="400" y="310" font-family="'Inter', sans-serif" font-size="14" font-weight="600" fill="#94a3b8" text-anchor="middle">
+    Today Tripura
+  </text>
+</svg>

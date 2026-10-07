@@ -251,7 +251,7 @@ export async function executeGitPullCore() {
   let buildLog = "";
   let buildSuccess = true;
   try {
-    buildLog = execSync("npm run build 2>&1", {
+    buildLog = execSync("npm install --no-audit --no-fund && npm run build 2>&1", {
       cwd: ROOT,
       encoding: "utf-8",
       timeout: 120000,
@@ -347,7 +347,7 @@ export async function executeBuildProjectCore() {
   let buildLog = "";
   let status = "Success";
   try {
-    buildLog = execSync("npm run build 2>&1", {
+    buildLog = execSync("npm install --no-audit --no-fund && npm run build 2>&1", {
       cwd: ROOT,
       encoding: "utf-8",
       timeout: 120000,
