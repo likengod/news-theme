@@ -1,32 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
-import { toast } from "sonner";
-import { Save, Lock } from "lucide-react";
+import { useMemo, useRef, useState, useEffect } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Save } from "lucide-react";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
-import {
-  loadAds,
-  saveAds,
-  trashAds,
-  loadTrash,
-  restoreFromTrash,
-  purgeFromTrash,
-  deleteAdStaticFilesServer,
-  processExpiredAds,
-  loadAdRotation,
-  saveAdRotation,
-  loadAdSlotMode,
-  saveAdSlotMode,
-  loadAdSlotScript,
-  saveAdSlotScript,
-  loadPopupConfig,
-  savePopupConfig,
-  type PopupConfig,
-  defaultPopupConfig,
-  type AdSlideItem,
-  type AdSlot,
-  type AdSlotMode,
-} from "@/lib/site-content";
+import { saveAdSlotMode } from "@/lib/site-content";
 import { PopupTimingCard } from "@/components/admin/advertisements/PopupTimingCard";
 import { ScriptAdEditor } from "@/components/admin/advertisements/ScriptAdEditor";
 import { AdTrashDrawer } from "@/components/admin/advertisements/AdTrashDrawer";
@@ -36,7 +13,9 @@ import { AdItemCard } from "@/components/admin/advertisements/AdItemCard";
 import { AdSlotsNavBar } from "@/components/admin/advertisements/AdSlotsNavBar";
 import { AdSlotToolbar } from "@/components/admin/advertisements/AdSlotToolbar";
 import { AdSlotEmptyState } from "@/components/admin/advertisements/AdSlotEmptyState";
-import { SLOTS, SAMPLE_GOOGLE_ADSENSE, type Tab } from "@/components/admin/advertisements/types";
+import { AdLicenseGuard } from "@/components/admin/advertisements/AdLicenseGuard";
+import { useAdminAdsManager } from "@/components/admin/advertisements/useAdminAdsManager";
+import { SLOTS, SAMPLE_GOOGLE_ADSENSE } from "@/components/admin/advertisements/types";
 
 const formatExpiresAt = (expiresVal: any): string => {
   if (!expiresVal) return "";
@@ -59,56 +38,46 @@ export const Route = createFileRoute("/admin/advertisements")({
   component: AdvertisementsPage,
 });
 
-function uid() {
-  return `prm-${Math.random().toString(36).slice(2, 9)}`;
-}
-
 function AdvertisementsPage() {
-  const navigate = useNavigate();
-  const router = useRouter();
   const s = useSiteSettings();
   const isEnterprise = isEnterpriseLicense(s);
   const isEnterprisePlus = isEnterprisePlusLicense(s);
 
-  const [tab, setTab] = useState<Tab>("home1");
-  const [ads, setAds] = useState<AdSlideItem[]>([]);
-  const [trash, setTrash] = useState<AdSlideItem[]>([]);
-  const [rotation, setRotation] = useState<number>(5);
-  const [popupConfig, setPopupConfig] = useState<PopupConfig>(defaultPopupConfig);
-  const [slotMode, setSlotMode] = useState<AdSlotMode>("image");
-  const [slotScript, setSlotScript] = useState<string>("");
-  const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
+  const {
+    tab,
+    setTab,
+    ads,
+    trash,
+    rotation,
+    setRotation,
+    popupConfig,
+    setPopupConfig,
+    slotMode,
+    setSlotMode,
+    slotScript,
+    setSlotScript,
+    newlyAddedId,
+    isTrash,
+    slot,
+    activeSlot,
+    slotCounts,
+    update,
+    moveAd,
+    toggleFeatured,
+    remove,
+    handleAddAd,
+    onSave,
+    onRestore,
+    onPurge,
+  } = useAdminAdsManager(isEnterprise);
+
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const tableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    processExpiredAds();
-    setAds(loadAds("home1"));
-    setTrash(loadTrash());
-    setSlotMode(loadAdSlotMode("home1"));
-    setSlotScript(loadAdSlotScript("home1"));
-    setPopupConfig(loadPopupConfig());
-  }, []);
-
-  useEffect(() => {
-    if (tab === "trash") {
-      setTrash(loadTrash());
-    } else {
-      setAds(loadAds(tab));
-      setRotation(loadAdRotation(tab));
-      let mode = loadAdSlotMode(tab);
-      if ((tab === "popup" || tab === "leaderboard") && !isEnterprise) {
-        mode = "script";
-      }
-      setSlotMode(mode);
-      setSlotScript(loadAdSlotScript(tab));
-      if (tab === "popup") {
-        setPopupConfig(loadPopupConfig());
-      }
-      setPage(1);
-    }
-  }, [tab, isEnterprise]);
+    setPage(1);
+  }, [tab]);
 
   const filteredAds = useMemo(() => {
     if (!searchQuery.trim()) return ads;
@@ -124,124 +93,17 @@ function AdvertisementsPage() {
   const paginatedAds = filteredAds.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
   const totalPages = Math.max(1, Math.ceil(filteredAds.length / ITEMS_PER_PAGE));
 
-  const isTrash = tab === "trash";
-  const slot = (isTrash ? "home1" : tab) as AdSlot;
-  const activeSlot = SLOTS.find((s) => s.key === slot);
-
-  const slotCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    SLOTS.forEach((s) => {
-      counts[s.key] = loadAds(s.key).length;
-    });
-    return counts;
-  }, [ads, tab]);
-
-  const update = (id: string, patch: Partial<AdSlideItem>) =>
-    setAds((prev) => prev.map((a) => (a.id === id ? { ...a, ...patch } : a)));
-
-  const moveAd = (index: number, direction: "up" | "down") => {
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= ads.length) return;
-    const next = [...ads];
-    const temp = next[index];
-    next[index] = next[targetIndex];
-    next[targetIndex] = temp;
-    setAds(next);
-  };
-
-  const toggleFeatured = (id: string) => {
-    setAds((prev) => prev.map((a) => (a.id === id ? { ...a, isFeatured: !a.isFeatured } : a)));
-  };
-
-  const remove = (id: string) => {
-    trashAds([id], slot);
-    router.invalidate();
-    setAds(loadAds(slot));
-    setTrash(loadTrash());
-    toast.success("Moved to Trash (recoverable for 30 days)");
-  };
-
-  const handleAddAd = () => {
-    if (!isEnterprise && ads.length >= 1) {
-      toast.error("You must have an Enterprise license to add multiple ads in a single slot.");
-      return;
-    }
-    const newId = uid();
-    setAds((prev) => [
-      ...prev,
-      {
-        id: newId,
-        type: "image",
-        scriptCode: "",
-        image: "",
-        href: "#",
-        label: "Sponsored",
-        expiresAt: null,
-      },
-    ]);
-    setNewlyAddedId(newId);
-    toast.success(`New ad slide added to ${activeSlot?.label ?? slot}!`);
-    setTimeout(() => {
+  const handleAddWithScroll = () => {
+    handleAddAd(() => {
       if (tableRef.current) {
         tableRef.current.scrollTop = tableRef.current.scrollHeight;
       }
-    }, 100);
+    });
   };
 
-  const onSave = () => {
-    try {
-      saveAdSlotMode(slot, slotMode);
-      if (slotMode === "script") {
-        saveAdSlotScript(slot, slotScript);
-        toast.success(`Saved 3rd Party Script Ad integration for ${activeSlot?.label ?? slot}`);
-      } else {
-        if (tab === "popup") {
-          savePopupConfig(popupConfig);
-        }
-        const cleaned = ads.filter(
-          (a) => (a.image || a.imagePortrait || a.imageLandscape || "").trim().length > 0,
-        );
-        saveAds(cleaned, slot);
-        saveAdRotation(slot, rotation);
-        setAds(cleaned);
-        const slotLabel = activeSlot?.label ?? slot;
-        toast.success(
-          `Saved ${cleaned.length} custom banner slide${cleaned.length === 1 ? "" : "s"} to ${slotLabel} (rotates every ${rotation}s)`,
-        );
-      }
-      router.invalidate();
-    } catch (err: any) {
-      console.error("[onSave] Failed to save advertisements:", err);
-      toast.error("Failed to save advertisements: " + (err?.message || "Storage error"));
-    }
-  };
-
-  const onRestore = (id: string) => {
-    restoreFromTrash(id);
-    router.invalidate();
-    setTrash(loadTrash());
-    toast.success("Restored ad slide");
-  };
-
-  const onPurge = async (id: string) => {
-    const item = trash.find((t) => t.id === id);
-    if (item) {
-      const urlsToDelete = [item.image, item.imagePortrait, item.imageLandscape].filter(
-        (url): url is string => !!url && typeof url === "string" && (url.startsWith("/uploads/ads/") || url.startsWith("/uploads/promos/")),
-      );
-      if (urlsToDelete.length > 0) {
-        try {
-          await deleteAdStaticFilesServer({ data: urlsToDelete });
-        } catch (err) {
-          console.error("Failed to delete static files:", err);
-        }
-      }
-    }
-    purgeFromTrash(id);
-    router.invalidate();
-    setTrash(loadTrash());
-    toast.success("Permanently deleted");
-  };
+  const isLocked =
+    ((tab === "hero_showcase" || tab === "reel_ads") && !isEnterprisePlus) ||
+    (tab === "post_ads" && !isEnterprise && !isEnterprisePlus);
 
   return (
     <div className="space-y-3.5 sm:space-y-5 pb-12">
@@ -256,7 +118,7 @@ function AdvertisementsPage() {
         </div>
       </div>
 
-      {/* WebP Format Notice Banner (Desktop / Tablet only) */}
+      {/* WebP Format Notice Banner */}
       <div className="hidden sm:flex items-start sm:items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/80 p-3 sm:px-4 sm:py-2.5 text-xs text-emerald-950 shadow-2xs">
         <span className="rounded-md bg-emerald-600 px-2 py-0.5 text-[9.5px] sm:text-[10px] font-extrabold uppercase tracking-wider text-white shadow-xs shrink-0 whitespace-nowrap mt-0.5 sm:mt-0">
           WebP Only
@@ -286,39 +148,13 @@ function AdvertisementsPage() {
       />
 
       {/* Main Tab Content */}
-      {(tab === "hero_showcase" || tab === "reel_ads") && !isEnterprisePlus ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
-            <Lock className="h-8 w-8 text-slate-400" />
-          </div>
-          <h3 className="mt-4 text-base font-semibold text-slate-800">Premium Feature Locked</h3>
-          <p className="mt-1 max-w-sm text-sm text-slate-500">
-            The {SLOTS.find((s) => s.key === tab)?.label} advertisement slot is exclusively
-            available on Enterprise Plus licenses. Please upgrade your license to unlock this slot.
-          </p>
-          <button
-            onClick={() => navigate({ to: "/admin/settings", search: { tab: "activate" } })}
-            className="mt-6 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-          >
-            Activate Website
-          </button>
-        </div>
-      ) : tab === "post_ads" && !isEnterprise && !isEnterprisePlus ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50">
-            <Lock className="h-8 w-8 text-amber-600" />
-          </div>
-          <h3 className="mt-4 text-base font-semibold text-slate-800">Enterprise Feature Locked</h3>
-          <p className="mt-1 max-w-sm text-sm text-slate-500">
-            The Post Ads advertisement slot is exclusively available for Enterprise and Enterprise Plus licenses. Please upgrade your license to unlock this slot.
-          </p>
-          <button
-            onClick={() => navigate({ to: "/admin/settings", search: { tab: "activate" } })}
-            className="mt-6 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-          >
-            Activate Website
-          </button>
-        </div>
+      {isLocked ? (
+        <AdLicenseGuard
+          tab={tab}
+          activeSlot={activeSlot}
+          isEnterprise={isEnterprise}
+          isEnterprisePlus={isEnterprisePlus}
+        />
       ) : isTrash ? (
         <AdTrashDrawer
           trash={trash}
@@ -335,7 +171,6 @@ function AdvertisementsPage() {
         />
       ) : (
         <div className="space-y-4">
-          {/* Popup Timing & Frequency Settings */}
           {tab === "popup" && (
             <PopupTimingCard
               popupConfig={popupConfig}
@@ -345,13 +180,9 @@ function AdvertisementsPage() {
             />
           )}
 
-          {/* Reel Ads guidance banner */}
           {tab === "reel_ads" && <ReelAdsGuidanceCard />}
-
-          {/* Post Ads guidance banner */}
           {tab === "post_ads" && <PostAdsGuidanceCard />}
 
-          {/* Ad Count Bar & Controls */}
           <AdSlotToolbar
             adsCount={ads.length}
             slotLabel={activeSlot?.label}
@@ -364,7 +195,7 @@ function AdvertisementsPage() {
               setSearchQuery(q);
               setPage(1);
             }}
-            onAddAd={handleAddAd}
+            onAddAd={handleAddWithScroll}
             onClearSearch={() => setSearchQuery("")}
           />
 
@@ -372,7 +203,7 @@ function AdvertisementsPage() {
             <AdSlotEmptyState
               label={activeSlot?.label}
               shownOn={activeSlot?.shownOn}
-              onAddAd={handleAddAd}
+              onAddAd={handleAddWithScroll}
             />
           ) : (
             <div ref={tableRef} className="space-y-4">
