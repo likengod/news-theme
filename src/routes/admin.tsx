@@ -23,6 +23,8 @@ const verifiedAdminTokens = new Map<string, number>();
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
+  pendingComponent: AdminPendingFallback,
+  errorComponent: AdminErrorFallback,
   beforeLoad: async () => {
     const { data } = await supabase.auth.getSession();
     if (!data.session?.user || !data.session?.access_token) throw redirect({ to: "/auth" });
@@ -151,6 +153,49 @@ function AdminLayout() {
 
           <Outlet />
         </main>
+      </div>
+    </div>
+  );
+}
+
+function AdminPendingFallback() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-800 p-4">
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-red-600" />
+        <p className="text-sm font-semibold text-slate-600">Connecting to Admin Dashboard...</p>
+      </div>
+    </div>
+  );
+}
+
+function AdminErrorFallback() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-900 p-4 text-center">
+      <div className="max-w-md w-full rounded-2xl bg-white p-6 sm:p-8 shadow-xs border border-slate-200">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+          <Rocket className="h-7 w-7" />
+        </div>
+        <h2 className="text-lg font-bold text-slate-900 mb-2">Reconnecting to Server</h2>
+        <p className="text-xs sm:text-sm text-slate-600 mb-6 leading-relaxed">
+          The server is applying an update or restarting. Please click retry once the server completes rebooting.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-2.5 justify-center">
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined") window.location.reload();
+            }}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-red-600 text-white font-semibold text-xs hover:bg-red-700 transition"
+          >
+            Retry Connection
+          </button>
+          <a
+            href="/auth"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition"
+          >
+            Return to Login
+          </a>
+        </div>
       </div>
     </div>
   );

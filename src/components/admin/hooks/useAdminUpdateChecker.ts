@@ -102,7 +102,9 @@ export function useAdminUpdateChecker(pathname: string) {
           (new URLSearchParams(window.location.search).get("test_update") === "1" ||
             localStorage.getItem("force_update_lock") === "1");
         const hasUpdate =
-          isSimulated || Boolean(res?.hasNewVersion || (res?.behind && res.behind > 0));
+          isSimulated ||
+          (cur !== latest &&
+            Boolean(res?.hasNewVersion || (res?.behind && res.behind > 0)));
         const statusObj: AdminUpdateStatus = {
           hasUpdate,
           currentVersion: cur,

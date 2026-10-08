@@ -170,6 +170,15 @@ const server = createServer(async (req, res) => {
 
     const parsedPath = rawUrl.split("?")[0];
 
+    // Fast-path health check endpoint (used by updater to verify server alive before reload)
+    if (parsedPath === "/api/health" || parsedPath === "/healthz") {
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.end(JSON.stringify({ status: "ok", time: Date.now() }));
+      return;
+    }
+
     // Special handling for favicon.ico so it never falls into SSR route matching
     if (parsedPath === "/favicon.ico") {
       const icoDirs = [

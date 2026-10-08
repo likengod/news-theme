@@ -185,6 +185,8 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
   const hasNewVersion = parseSemver(latestVersion) > parseSemver(version);
   if (hasNewVersion && behind === 0) {
     behind = 1;
+  } else if (!hasNewVersion) {
+    behind = 0;
   }
 
   const payload = {

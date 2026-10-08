@@ -31,7 +31,7 @@ import {
   getDeployLog,
   initializeGitRepo,
 } from "@/lib/deploy.functions";
-import { APP_VERSION } from "@/lib/version";
+import { APP_VERSION, parseSemver } from "@/lib/version";
 
 export const Route = createFileRoute("/admin/updates")({
   component: UpdatesPage,
@@ -100,7 +100,11 @@ function UpdatesPage() {
       if (typeof window !== "undefined") {
         const cur = statusRes?.version || APP_VERSION;
         const latest = statusRes?.latestVersion || cur;
-        const hasUpdate = Boolean(statusRes?.hasNewVersion || ((statusRes?.behind ?? 0) > 0));
+        const hasUpdate = Boolean(
+          statusRes?.hasNewVersion &&
+            cur !== latest &&
+            parseSemver(latest) > parseSemver(cur)
+        );
         const statusObj = {
           hasUpdate,
           currentVersion: cur,
@@ -134,11 +138,27 @@ function UpdatesPage() {
           sessionStorage.removeItem("admin_update_status");
           sessionStorage.removeItem("admin_update_check_time");
           sessionStorage.removeItem("admin_update_dismissed");
+          localStorage.removeItem("admin_update_status");
+          localStorage.removeItem("admin_update_dismissed");
         }
-        toast.success(`Updated and built latest release! Restarting server and reloading in 8 seconds...`);
-        setTimeout(() => {
-          window.location.reload();
-        }, 8000);
+        toast.success(`Update installed! Waiting for server restart...`);
+
+        let attempts = 0;
+        const checkInterval = setInterval(async () => {
+          attempts++;
+          try {
+            const ping = await fetch("/api/health?t=" + Date.now());
+            if (ping.ok || attempts >= 10) {
+              clearInterval(checkInterval);
+              window.location.reload();
+            }
+          } catch {
+            if (attempts >= 10) {
+              clearInterval(checkInterval);
+              window.location.reload();
+            }
+          }
+        }, 1500);
       } else {
         toast.info("System core is already up to date");
         await refresh();
@@ -174,10 +194,23 @@ function UpdatesPage() {
       const res: any = await buildProject();
       setBuildOutput(res?.buildLog || "");
       if (res?.success) {
-        toast.success("Build completed successfully! Restarting server and reloading in 8 seconds...");
-        setTimeout(() => {
-          window.location.reload();
-        }, 8000);
+        toast.success("Build completed successfully! Waiting for server restart...");
+        let attempts = 0;
+        const checkInterval = setInterval(async () => {
+          attempts++;
+          try {
+            const ping = await fetch("/api/health?t=" + Date.now());
+            if (ping.ok || attempts >= 15) {
+              clearInterval(checkInterval);
+              window.location.reload();
+            }
+          } catch {
+            if (attempts >= 15) {
+              clearInterval(checkInterval);
+              window.location.reload();
+            }
+          }
+        }, 1500);
       } else {
         toast.error("Build failed — check log below");
         await refresh();
@@ -206,10 +239,14 @@ function UpdatesPage() {
 
   const currentVersion = gitStatus?.version || APP_VERSION;
   const latestVersion = gitStatus?.latestVersion || currentVersion;
-  const hasNewVersion = Boolean(gitStatus?.hasNewVersion || (gitStatus && latestVersion !== currentVersion));
-  const updatesAvailable = !loading && ((gitStatus?.behind ?? 0) > 0 || hasNewVersion);
-  const updatesCount =
-    gitStatus?.behind && gitStatus.behind > 0 ? gitStatus.behind : hasNewVersion ? 1 : 0;
+  const hasNewVersion = Boolean(
+    latestVersion !== currentVersion &&
+      parseSemver(latestVersion) > parseSemver(currentVersion),
+  );
+  const updatesAvailable = !loading && hasNewVersion;
+  const updatesCount = hasNewVersion
+    ? (gitStatus?.behind && gitStatus.behind > 0 ? gitStatus.behind : 1)
+    : 0;
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-12">
