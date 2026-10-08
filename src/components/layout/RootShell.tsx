@@ -50,11 +50,6 @@ export function RootShell({ children }: { children: ReactNode }) {
       <body className="overflow-x-clip max-w-full min-h-screen">
         {children}
         <script dangerouslySetInnerHTML={{ __html: chunkRecoveryScript }} />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var ls=document.querySelectorAll('link[media="print"]');for(var i=0;i<ls.length;i++){ls[i].media='all';}})();`,
-          }}
-        />
         <Scripts />
       </body>
     </html>

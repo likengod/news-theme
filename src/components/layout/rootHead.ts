@@ -140,7 +140,7 @@ export function generateRootHead(loaderData: any) {
         href: googleFontsUrl,
       });
       scripts.push({
-        children: `(function(){var l=document.createElement('link');l.rel='stylesheet';l.href=${JSON.stringify(googleFontsUrl)};document.head.appendChild(l);})();`,
+        children: `(function(){var append=function(){var l=document.createElement('link');l.rel='stylesheet';l.href=${JSON.stringify(googleFontsUrl)};document.head.appendChild(l);};if(typeof requestAnimationFrame==='function'){requestAnimationFrame(append);}else{setTimeout(append,0);}})();`,
       });
     } else {
       // Standard render-blocking stylesheet
