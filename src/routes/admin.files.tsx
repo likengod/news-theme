@@ -1,10 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Upload, ShieldCheck, FileArchive, FolderArchive } from "lucide-react";
+import Papa from "papaparse";
+import {
+  Upload,
+  Download,
+  ShieldCheck,
+  FileArchive,
+  FolderArchive,
+  FileSpreadsheet,
+  ChevronDown,
+  ArrowUpDown,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { mediaLibrary, trackUpload, formatBytes, type MediaItem } from "@/lib/media-library";
 import { MediaGrid } from "@/components/admin/files/MediaGrid";
-import { CsvImportExport } from "@/components/admin/CsvImportExport";
 import { extractAndImportZip, exportMediaZip } from "@/lib/media-zip";
 
 export const Route = createFileRoute("/admin/files")({
@@ -15,6 +32,7 @@ function FileManagerPage() {
   const [items, setItems] = useState<MediaItem[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const zipFileRef = useRef<HTMLInputElement>(null);
+  const csvFileRef = useRef<HTMLInputElement>(null);
 
   const refresh = () => setItems(mediaLibrary.list());
 
@@ -130,6 +148,69 @@ function FileManagerPage() {
     );
   };
 
+  const handleExportCsv = () => {
+    if (!items.length) {
+      toast.info("No media items to export.");
+      return;
+    }
+    const exportData = items.map((m) => ({
+      id: m.id,
+      name: m.name,
+      url: m.dataUrl || (m as any).url,
+      altText: m.altText || "",
+      description: m.description || "",
+      size: m.size,
+      type: m.type,
+      createdAt: m.createdAt,
+    }));
+    const csv = Papa.unparse(exportData);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `media-library-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("CSV export successful!");
+  };
+
+  const handleImportCsv = (file: File) => {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results: any) => {
+        const rows = results.data as any[];
+        if (!rows || rows.length === 0) {
+          toast.info("No rows found in CSV.");
+          return;
+        }
+        let imported = 0;
+        for (const item of rows) {
+          if (!item.id || !item.name) continue;
+          if (!mediaLibrary.get(item.id)) {
+            mediaLibrary.add({
+              name: item.name,
+              type: item.type || "image/webp",
+              size: Number(item.size) || 0,
+              dataUrl: item.url || item.dataUrl || "",
+              usage: (item.usage as any) || "other",
+              altText: item.altText,
+              description: item.description,
+            });
+            imported++;
+          }
+        }
+        if (imported > 0) {
+          toast.success(`Imported ${imported} media items from CSV`);
+          refresh();
+        } else {
+          toast.info("No new items to import from CSV");
+        }
+      },
+      error: () => toast.error("Failed to parse CSV file"),
+    });
+  };
+
   const handleDelete = (id: string) => {
     if (!confirm("Delete this file permanently?")) return;
     mediaLibrary.remove(id);
@@ -191,28 +272,7 @@ function FileManagerPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
-          <CsvImportExport
-            data={items}
-            filename="media-library"
-            onImport={(data) => {
-              if (!data || data.length === 0) return;
-              let imported = 0;
-              for (const item of data) {
-                if (!item.id || !item.name) continue;
-                // Avoid duplicates by ID
-                if (!mediaLibrary.get(item.id)) {
-                  mediaLibrary.add(item);
-                  imported++;
-                }
-              }
-              if (imported > 0) {
-                toast.success(`Imported ${imported} new media items`);
-                refresh();
-              } else {
-                toast.info("No new items to import");
-              }
-            }}
-          />
+          {/* Verify Scanner - Standalone */}
           <Link
             to="/verify-image"
             target="_blank"
@@ -222,23 +282,73 @@ function FileManagerPage() {
             <ShieldCheck className="h-3.5 w-3.5 text-indigo-600" />
             Verify Scanner
           </Link>
-          {/* ZIP Backup & Restore */}
-          <button
-            onClick={handleExportZip}
-            title="Download complete ZIP backup of all actual images and manifest"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50/80 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 transition whitespace-nowrap shadow-2xs cursor-pointer"
-          >
-            <FileArchive className="h-3.5 w-3.5 text-amber-600" />
-            Export ZIP Backup
-          </button>
-          <button
-            onClick={() => zipFileRef.current?.click()}
-            title="Upload a ZIP file to extract and import all media files automatically"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/80 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition whitespace-nowrap shadow-2xs cursor-pointer"
-          >
-            <FolderArchive className="h-3.5 w-3.5 text-indigo-600" />
-            Import ZIP
-          </button>
+
+          {/* Import / Export Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                title="Import / Export CSV or ZIP backups"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition whitespace-nowrap shadow-2xs cursor-pointer"
+              >
+                <ArrowUpDown className="h-3.5 w-3.5 text-slate-600" />
+                <span className="hidden sm:inline">Import / Export</span>
+                <ChevronDown className="h-3 w-3 text-slate-400" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 p-1">
+              <DropdownMenuLabel className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-2 py-1">
+                CSV Data
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => csvFileRef.current?.click()}
+                className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
+              >
+                <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+                Import CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleExportCsv}
+                className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
+              >
+                <Download className="h-4 w-4 text-emerald-600" />
+                Export CSV
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator className="my-1" />
+
+              <DropdownMenuLabel className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-2 py-1">
+                ZIP Images & Backup
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => zipFileRef.current?.click()}
+                className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
+              >
+                <FolderArchive className="h-4 w-4 text-indigo-600" />
+                Import ZIP Archive
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleExportZip}
+                className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
+              >
+                <FileArchive className="h-4 w-4 text-amber-600" />
+                Export ZIP Backup
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Hidden Inputs for CSV and ZIP */}
+          <input
+            ref={csvFileRef}
+            type="file"
+            accept=".csv,text/csv"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleImportCsv(file);
+              if (csvFileRef.current) csvFileRef.current.value = "";
+            }}
+            className="hidden"
+          />
           <input
             ref={zipFileRef}
             type="file"
