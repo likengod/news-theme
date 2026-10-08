@@ -1,8 +1,5 @@
-import { useState } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { User, Clock, Check } from "lucide-react";
 import { Field, JournalistPicker } from "@/components/admin/articles/ArticleSubComponents";
 import { formatDateTimeLocal, type Row } from "./types";
 
@@ -17,11 +14,33 @@ interface ArticleSettingsTabProps {
 export default function ArticleSettingsTab({
   row,
   onChange,
-  currentUserAuthor,
-  authorOptions,
+  currentUserAuthor = "Admin User",
+  authorOptions = [],
   isEnterprisePlus,
 }: ArticleSettingsTabProps) {
-  const [authorOpen, setAuthorOpen] = useState(false);
+  // Built-in editorial desk defaults
+  const editorialDefaults = [
+    currentUserAuthor,
+    "Newsroom Desk",
+    "Staff Reporter",
+    "Editorial Desk",
+    "Special Correspondent",
+  ].filter(Boolean);
+
+  const allAuthorNames = Array.from(
+    new Set([
+      currentUserAuthor,
+      ...editorialDefaults,
+      ...(authorOptions || []).map((a) => a.name),
+    ])
+  ).filter(Boolean);
+
+  const handleSetNow = () => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const localNow = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    onChange("date", localNow);
+  };
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -46,93 +65,85 @@ export default function ArticleSettingsTab({
 
         <Field label="Author *">
           <div className="space-y-1.5">
-            <Popover open={authorOpen} onOpenChange={setAuthorOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={authorOpen}
-                  className="w-full justify-between font-normal text-slate-700 bg-slate-50/80 hover:bg-slate-100 px-2.5 py-1.5 h-auto text-xs"
-                >
-                  {row.author || "Select author / admin profile..."}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[400px] p-0" align="start">
-                <Command
-                  filter={(value, search) => {
-                    const option = authorOptions?.find((a) => a.id === value);
-                    if (!option && currentUserAuthor?.toLowerCase() !== value) return 0;
-                    
-                    const searchTerms = search.toLowerCase().split(" ");
-                    const targetString = option 
-                      ? `${option.name} ${option.email || ""} ${option.phone || ""} ${option.username || ""} ${option.role}`.toLowerCase()
-                      : `${currentUserAuthor} your profile`.toLowerCase();
-                      
-                    return searchTerms.every(t => targetString.includes(t)) ? 1 : 0;
-                  }}
-                >
-                  <CommandInput placeholder="Search name, email, phone, or role..." />
-                  <CommandList>
-                    <CommandEmpty>No author found.</CommandEmpty>
-                    <CommandGroup heading="Admin & Editorial Users">
-                      {currentUserAuthor && (
-                        <CommandItem
-                          value={currentUserAuthor.toLowerCase()}
-                          onSelect={() => {
-                            onChange("author", currentUserAuthor);
-                            setAuthorOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={`mr-2 h-4 w-4 ${
-                              row.author === currentUserAuthor ? "opacity-100" : "opacity-0"
-                            }`}
-                          />
-                          🟢 {currentUserAuthor} (Your Profile)
-                        </CommandItem>
-                      )}
-                      
-                      {authorOptions?.map((a) => (
-                        <CommandItem
-                          key={a.id}
-                          value={a.id}
-                          onSelect={() => {
-                            onChange("author", a.name);
-                            setAuthorOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={`mr-2 h-4 w-4 ${
-                              row.author === a.name ? "opacity-100" : "opacity-0"
-                            }`}
-                          />
-                          <div className="flex flex-col">
-                            <span>{a.name} ({a.role}{a.username ? ` • @${a.username}` : ""})</span>
-                            {(a.email || a.phone) && (
-                              <span className="text-xs text-slate-500">
-                                {a.email} {a.phone ? `• ${a.phone}` : ""}
-                              </span>
-                            )}
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            {/* Quick Author Pills */}
+            <div className="flex flex-wrap items-center gap-1 pb-1">
+              <span className="text-[10px] uppercase font-bold text-slate-400 mr-0.5">Quick:</span>
+              {editorialDefaults.slice(0, 4).map((name) => {
+                const isSelected = row.author?.trim().toLowerCase() === name.trim().toLowerCase();
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => onChange("author", name)}
+                    className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-medium transition cursor-pointer border ${
+                      isSelected
+                        ? "border-slate-900 bg-slate-900 text-white"
+                        : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span>{name === currentUserAuthor ? `🟢 ${name}` : name}</span>
+                    {isSelected && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                  </button>
+                );
+              })}
+            </div>
 
-            <input
-              id="article-author"
-              name="author"
-              aria-label="Author"
-              autoComplete="off"
-              value={row.author}
-              placeholder="e.g. Admin User"
-              onChange={(e) => onChange("author", e.target.value)}
-              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
-            />
+            {/* Author Dropdown Selector */}
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-1.5 items-center">
+              <select
+                aria-label="Select author profile"
+                value={allAuthorNames.includes(row.author) ? row.author : ""}
+                onChange={(e) => {
+                  if (e.target.value) onChange("author", e.target.value);
+                }}
+                className="w-full rounded-md border border-slate-200 bg-slate-50/80 px-2.5 py-1.5 text-xs text-slate-700 focus:bg-white focus:outline-none"
+              >
+                <option value="">⚡ Select profile / desk...</option>
+                {currentUserAuthor && (
+                  <option value={currentUserAuthor}>👤 {currentUserAuthor} (Your Profile)</option>
+                )}
+                {authorOptions && authorOptions.length > 0 && (
+                  <optgroup label="Registered Profiles">
+                    {authorOptions.map((a) => (
+                      <option key={a.id} value={a.name}>
+                        {a.name} ({a.role}{a.username ? ` • @${a.username}` : ""})
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                <optgroup label="Editorial Desks">
+                  <option value="Newsroom Desk">Newsroom Desk</option>
+                  <option value="Staff Reporter">Staff Reporter</option>
+                  <option value="Editorial Desk">Editorial Desk</option>
+                  <option value="Special Correspondent">Special Correspondent</option>
+                </optgroup>
+              </select>
+
+              <span className="text-[11px] text-slate-400 hidden sm:inline">or type:</span>
+            </div>
+
+            {/* Free-form Author Input */}
+            <div className="relative">
+              <input
+                id="article-author"
+                name="author"
+                aria-label="Author"
+                autoComplete="off"
+                list="author-datalist"
+                value={row.author}
+                placeholder="e.g. Admin User, Staff Reporter..."
+                onChange={(e) => onChange("author", e.target.value)}
+                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
+              />
+              <datalist id="author-datalist">
+                {allAuthorNames.map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              Select an author above or type any custom reporter / agency name.
+            </p>
           </div>
         </Field>
 
@@ -166,15 +177,31 @@ export default function ArticleSettingsTab({
         </Field>
 
         <Field label="Publish Date">
-          <input
-            id="article-publish-date"
-            name="date"
-            aria-label="Publish Date"
-            type="datetime-local"
-            value={formatDateTimeLocal(row.date)}
-            onChange={(e) => onChange("date", e.target.value)}
-            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-          />
+          <div className="space-y-1.5">
+            <div className="flex gap-2 items-center">
+              <input
+                id="article-publish-date"
+                name="date"
+                aria-label="Publish Date"
+                type="datetime-local"
+                value={formatDateTimeLocal(row.date)}
+                onChange={(e) => onChange("date", e.target.value)}
+                className="flex-1 rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleSetNow}
+                className="shrink-0 inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 hover:bg-slate-100 px-2.5 py-2 text-xs font-semibold text-slate-700 transition cursor-pointer"
+                title="Set publish date to current local date and time"
+              >
+                <Clock className="h-3.5 w-3.5 text-slate-500" />
+                <span>Now</span>
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              Articles set to now or in the past appear immediately. Future dates schedule the article.
+            </p>
+          </div>
         </Field>
 
         {isEnterprisePlus && (

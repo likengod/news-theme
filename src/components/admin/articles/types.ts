@@ -50,31 +50,45 @@ export const fullUrl = (r: Row) => {
 };
 
 export const formatDateTimeLocal = (dateVal: any): string => {
-  if (!dateVal) return "";
+  const getNowLocal = () => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  };
+
+  if (!dateVal) return getNowLocal();
+
   try {
     if (typeof dateVal === "string") {
       const s = dateVal.trim();
-      // If already YYYY-MM-DDTHH:mm, return first 16 chars
-      if (s.includes("T")) {
-        const d = new Date(s);
-        if (!isNaN(d.getTime())) {
-          const pad = (n: number) => String(n).padStart(2, "0");
-          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-        }
-        return s.slice(0, 16);
+      if (!s) return getNowLocal();
+
+      // If YYYY-MM-DD (10 chars), append current local time
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        const now = new Date();
+        const pad = (n: number) => String(n).padStart(2, "0");
+        return `${s}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
       }
-      // If MySQL 'YYYY-MM-DD HH:mm:ss' format
-      if (s.includes(" ")) {
-        const iso = s.replace(" ", "T");
-        const d = new Date(iso);
-        if (!isNaN(d.getTime())) {
-          const pad = (n: number) => String(n).padStart(2, "0");
-          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-        }
-        return iso.slice(0, 16);
+
+      // If already local datetime YYYY-MM-DD HH:mm...
+      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(s)) {
+        return s.slice(0, 16).replace(" ", "T");
       }
-      return s.slice(0, 16);
+
+      // If YYYY-MM-DDTHH:mm without Z
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) {
+        return s;
+      }
+
+      // If ISO string with Z or timestamp
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        const pad = (n: number) => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      }
+      return s.slice(0, 16).replace(" ", "T");
     }
+
     if (dateVal instanceof Date && !isNaN(dateVal.getTime())) {
       const pad = (n: number) => String(n).padStart(2, "0");
       return `${dateVal.getFullYear()}-${pad(dateVal.getMonth() + 1)}-${pad(dateVal.getDate())}T${pad(dateVal.getHours())}:${pad(dateVal.getMinutes())}`;
@@ -82,7 +96,7 @@ export const formatDateTimeLocal = (dateVal: any): string => {
   } catch (e) {
     console.error("formatDateTimeLocal error:", e);
   }
-  return "";
+  return getNowLocal();
 };
 
 export type ArticleStatus = Row["status"];

@@ -16,7 +16,7 @@ export const blankRow = (defaultAuthor?: string, defaultCategory: string = "Unca
   author: defaultAuthor || "Admin User",
   views: 0,
   status: "Draft",
-  date: new Date().toISOString().slice(0, 10),
+  date: new Date().toISOString(),
   excerpt: "",
   content: "",
   featuredImage: "",

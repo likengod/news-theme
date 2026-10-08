@@ -171,7 +171,11 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
     let formattedDate = new Date().toISOString().slice(0, 19).replace("T", " ");
     if (r.date) {
       let rawDate = String(r.date).replace("T", " ").replace("Z", "").trim();
-      if (rawDate.length === 16) {
+      if (rawDate.length === 10) {
+        const now = new Date();
+        const pad = (n: number) => String(n).padStart(2, "0");
+        rawDate += ` ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      } else if (rawDate.length === 16) {
         rawDate += ":00";
       }
       formattedDate = rawDate.substring(0, 19);

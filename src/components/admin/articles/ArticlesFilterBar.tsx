@@ -25,12 +25,11 @@ export function ArticlesFilterBar({
 }: ArticlesFilterBarProps) {
   const dbCats = useCategories();
   const allCategoryOptions = React.useMemo(() => {
-    const s = new Set<string>();
-    sections.forEach((sec) => s.add(sec));
-    (dbCats || []).forEach((c) => {
-      if (c?.name) s.add(c.name);
-    });
-    return Array.from(s);
+    if (dbCats && dbCats.length > 0) {
+      const names = dbCats.map((c) => c?.name?.trim()).filter(Boolean) as string[];
+      return Array.from(new Set(names));
+    }
+    return sections;
   }, [dbCats]);
 
   return (

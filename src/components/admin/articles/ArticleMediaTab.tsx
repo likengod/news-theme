@@ -22,22 +22,47 @@ export default function ArticleMediaTab({ row, onChange }: ArticleMediaTabProps)
   const defaultSiteName = settings?.siteName || "Today Tripura";
   const activeCredit = row.imageCredit?.trim() || defaultSiteName;
 
-  const PRESET_CAPTIONS = [
-    { label: "প্রতীকী ছবি", value: "প্রতীকী ছবি" },
-    { label: "Representative Image", value: "Representative Image" },
-    { label: "ফাইল ছবি", value: "ফাইল ছবি" },
-    { label: "ছবি: সংগৃহীত", value: "ছবি: সংগৃহীত" },
-    { label: "ছবি: সোশ্যাল মিডিয়া", value: "ছবি: সোশ্যাল মিডিয়া" },
-    { label: "নিজস্ব চিত্র", value: "নিজস্ব চিত্র" },
-  ];
+  // Auto-detect Bengali from title, content, or excerpt
+  const isAutoBengali = /[\u0980-\u09FF]/.test(
+    (row.title || "") + " " + (row.content || "") + " " + (row.excerpt || "")
+  );
 
-  const PRESET_CREDITS = [
-    { label: defaultSiteName, value: defaultSiteName, icon: Building2, desc: "Website / Newsroom" },
-    { label: "Newsroom Desk", value: "Newsroom Desk", icon: Camera, desc: "Staff Photographer" },
-    { label: "Social Media", value: "Social Media", icon: Share2, desc: "Collected from Social Media" },
-    { label: "AI Generated", value: "AI Generated", icon: Sparkles, desc: "Generated with AI" },
-    { label: "Collected from Web", value: "Collected from Web", icon: Globe, desc: "Online Source" },
-  ];
+  const [langOverride, setLangOverride] = useState<"auto" | "bn" | "en">("auto");
+  const isBengali = langOverride === "auto" ? isAutoBengali : langOverride === "bn";
+
+  const PRESET_CAPTIONS = isBengali
+    ? [
+        { label: "প্রতীকী ছবি", value: "প্রতীকী ছবি" },
+        { label: "ফাইল ছবি", value: "ফাইল ছবি" },
+        { label: "ছবি: সংগৃহীত", value: "ছবি: সংগৃহীত" },
+        { label: "ছবি: সোশ্যাল মিডিয়া", value: "ছবি: সোশ্যাল মিডিয়া" },
+        { label: "নিজস্ব চিত্র", value: "নিজস্ব চিত্র" },
+        { label: "সংগৃহীত", value: "সংগৃহীত" },
+      ]
+    : [
+        { label: "Representative Image", value: "Representative Image" },
+        { label: "File Photo", value: "File Photo" },
+        { label: "Staff Photo", value: "Staff Photo" },
+        { label: "Social Media Photo", value: "Social Media Photo" },
+        { label: "Collected from Web", value: "Collected from Web" },
+        { label: "Press Handout", value: "Press Handout" },
+      ];
+
+  const PRESET_CREDITS = isBengali
+    ? [
+        { label: defaultSiteName, value: defaultSiteName, icon: Building2, desc: "ওয়েবসাইট / নিউজরুম" },
+        { label: "নিউজরুম ডেস্ক", value: "নিউজরুম ডেস্ক", icon: Camera, desc: "নিউজরুম স্টাফ" },
+        { label: "সোশ্যাল মিডিয়া", value: "সোশ্যাল মিডিয়া", icon: Share2, desc: "সোশ্যাল মিডিয়া থেকে প্রাপ্ত" },
+        { label: "ওয়েব থেকে সংগৃহীত", value: "ওয়েব থেকে সংগৃহীত", icon: Globe, desc: "অনলাইন উৎস" },
+        { label: "এআই নির্মিত", value: "এআই নির্মিত", icon: Sparkles, desc: "কৃত্রিম বুদ্ধিমত্তা দ্বারা নির্মিত" },
+      ]
+    : [
+        { label: defaultSiteName, value: defaultSiteName, icon: Building2, desc: "Website / Newsroom" },
+        { label: "Newsroom Desk", value: "Newsroom Desk", icon: Camera, desc: "Staff Photographer" },
+        { label: "Social Media", value: "Social Media", icon: Share2, desc: "Collected from Social Media" },
+        { label: "Collected from Web", value: "Collected from Web", icon: Globe, desc: "Online Source" },
+        { label: "AI Generated", value: "AI Generated", icon: Sparkles, desc: "Generated with AI" },
+      ];
 
   return (
     <div className="space-y-5">
@@ -65,12 +90,25 @@ export default function ArticleMediaTab({ row, onChange }: ArticleMediaTabProps)
 
           {/* Image Caption Input & Presets */}
           <div className="space-y-1.5">
-            <label
-              htmlFor="article-image-caption"
-              className="block text-xs font-semibold text-slate-700"
-            >
-              Photo Caption / Description
-            </label>
+            <div className="flex items-center justify-between">
+              <label
+                htmlFor="article-image-caption"
+                className="block text-xs font-semibold text-slate-700"
+              >
+                Photo Caption / Description
+              </label>
+              <div className="flex items-center gap-1 text-[11px] text-slate-500">
+                <span className="text-[10px] uppercase font-bold text-slate-400">Language:</span>
+                <button
+                  type="button"
+                  onClick={() => setLangOverride(langOverride === "bn" ? "en" : "bn")}
+                  className="rounded border border-slate-200 bg-white px-2 py-0.5 font-medium text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                  title="Toggle preset language between Bengali and English"
+                >
+                  {isBengali ? "🇧🇩 বাংলা (Bengali)" : "🇬🇧 English"}
+                </button>
+              </div>
+            </div>
 
             {/* Quick Caption Preset Chips */}
             <div className="flex flex-wrap items-center gap-1.5 pb-1">
@@ -112,11 +150,17 @@ export default function ArticleMediaTab({ row, onChange }: ArticleMediaTabProps)
               type="text"
               value={row.imageCaption || ""}
               onChange={(e) => onChange("imageCaption", e.target.value)}
-              placeholder="e.g. প্রতীকী ছবি / Representative Image, or enter custom caption..."
+              placeholder={
+                isBengali
+                  ? "যেমন: প্রতীকী ছবি, ফাইল ছবি, বা নিজস্ব ক্যাপশন লিখুন..."
+                  : "e.g. Representative Image, File Photo, or enter custom caption..."
+              }
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
             />
             <p className="text-[11px] text-slate-400">
-              Select a quick preset above or type your own description.
+              {isBengali
+                ? "উপরের দ্রুত বিকল্প নির্বাচন করুন অথবা আপনার নিজস্ব ক্যাপশন লিখুন।"
+                : "Select a quick preset above or type your own description."}
             </p>
           </div>
 
