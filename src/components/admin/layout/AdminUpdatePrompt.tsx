@@ -24,18 +24,17 @@ export function AdminUpdatePrompt({
           <Rocket className="h-10 w-10 animate-bounce" />
         </div>
 
-        <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-red-600 mb-3">
+        <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-amber-600 mb-3">
           <AlertTriangle className="h-4 w-4" />
-          <span>Update Required</span>
+          <span>New Update Available</span>
         </div>
 
         <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          Dear <span className="text-red-600">{firstName}</span>,
+          Dear <span className="text-indigo-600">{firstName}</span>,
         </h1>
 
         <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-600 leading-relaxed">
-          Without update you can't use the website. A new version is available, please
-          update website.
+          A newer version of the website is available. You can update now to install the latest features and fixes, or continue straight to the admin panel.
         </p>
 
         <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm font-semibold text-slate-500">

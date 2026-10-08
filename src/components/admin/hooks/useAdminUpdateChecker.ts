@@ -17,7 +17,10 @@ export function useAdminUpdateChecker(pathname: string) {
 
   const [dismissed, setDismissed] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
-      return sessionStorage.getItem("admin_update_dismissed") === "1";
+      return (
+        sessionStorage.getItem("admin_update_dismissed") === "1" ||
+        localStorage.getItem("admin_update_dismissed") === "1"
+      );
     }
     return false;
   });
@@ -26,6 +29,7 @@ export function useAdminUpdateChecker(pathname: string) {
     setDismissed(true);
     if (typeof window !== "undefined") {
       sessionStorage.setItem("admin_update_dismissed", "1");
+      localStorage.setItem("admin_update_dismissed", "1");
     }
   };
 
