@@ -85,6 +85,17 @@ export default function ArticleSettingsTab({
     );
   });
 
+  React.useEffect(() => {
+    if (!row.author) {
+      setIsCustomAuthor(false);
+    } else {
+      const isKnown = allAuthorNames.some(
+        (n) => n.trim().toLowerCase() === row.author.trim().toLowerCase(),
+      );
+      setIsCustomAuthor(!isKnown);
+    }
+  }, [row.id, row.author]);
+
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -188,11 +199,14 @@ export default function ArticleSettingsTab({
             ) : (
               <div className="relative">
                 <input
-                  id="article-author"
-                  name="author"
+                  id="article-custom-author"
+                  name="article_custom_byline"
                   aria-label="Author"
                   type="text"
-                  autoComplete="off"
+                  autoComplete="new-password"
+                  data-lpignore="true"
+                  data-form-type="other"
+                  spellCheck={false}
                   value={row.author}
                   placeholder="Enter author or agency name (e.g. PTI, Staff Reporter)..."
                   onChange={(e) => onChange("author", e.target.value)}
