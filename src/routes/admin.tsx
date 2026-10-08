@@ -159,11 +159,43 @@ function AdminLayout() {
 }
 
 function AdminPendingFallback() {
+  const [takingLong, setTakingLong] = React.useState(false);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setTakingLong(true);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-800 p-4">
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-3 text-center max-w-sm">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-red-600" />
-        <p className="text-sm font-semibold text-slate-600">Connecting to Admin Dashboard...</p>
+        <p className="text-sm font-semibold text-slate-700">Connecting to Admin Dashboard...</p>
+        {takingLong && (
+          <div className="mt-3 flex flex-col items-center gap-2 animate-in fade-in duration-300">
+            <p className="text-xs text-slate-500">
+              Update was applied. Click below to load the new version.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  if ("caches" in window) {
+                    caches.keys().then((keys) => {
+                      keys.forEach((k) => caches.delete(k));
+                    }).catch(() => {});
+                  }
+                  window.location.reload();
+                }
+              }}
+              className="px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-bold shadow-xs hover:bg-red-700 transition cursor-pointer"
+            >
+              Refresh Dashboard
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

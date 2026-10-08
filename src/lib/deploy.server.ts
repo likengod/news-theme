@@ -330,7 +330,7 @@ export async function executeGitPullCore() {
       fs.writeFileSync(path.join(tmpDir, "restart.txt"), new Date().toISOString());
       process.exit(0);
     } catch {}
-  }, 1200);
+  }, 2500);
 
   invalidateGitStatusCache();
 
