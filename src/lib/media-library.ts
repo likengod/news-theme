@@ -25,6 +25,8 @@ import {
   getMediaListServer,
   uploadMediaServer,
   updateMediaServer,
+  replaceMediaFileServer,
+  batchUpdateAltTextServer,
   deleteMediaServer,
 } from "./media.functions";
 import {
@@ -33,6 +35,30 @@ import {
   type ProtectedImagePayload,
 } from "./image-protection";
 
+/**
+ * Automatically cleans and formats a raw file name into a human-friendly Alt Text for SEO
+ * e.g., "rahul_gandhi-speech (1).webp" -> "Rahul Gandhi Speech"
+ */
+export function deriveAltText(filename: string): string {
+  if (!filename) return "";
+  // Remove file extension
+  let name = filename.replace(/\.[a-zA-Z0-9]+$/, "");
+  // Replace numbers in parenthesis e.g. (1), [2], (6)
+  name = name.replace(/[\(\[\{]\d+[\)\]\}]/g, " ");
+  // Replace underscores, dashes, dots, pluses with spaces
+  name = name.replace(/[_\-\.\+]/g, " ");
+  // Remove duplicate spaces
+  name = name.replace(/\s+/g, " ").trim();
+  if (!name) return filename;
+  // Capitalize words nicely
+  return name
+    .split(" ")
+    .map((w) => {
+      if (w.length <= 3 && w.toUpperCase() === w) return w;
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
 
 let memoryCache: MediaItem[] = [];
 
@@ -58,6 +84,7 @@ export const mediaLibrary = {
   },
   async add(item: Omit<MediaItem, "id" | "createdAt">): Promise<MediaItem> {
     const id = `m_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const effectiveAltText = item.altText || deriveAltText(item.name);
 
     // Call server to persist and get public URL
     const res = await uploadMediaServer({
@@ -68,6 +95,7 @@ export const mediaLibrary = {
         size: item.size,
         dataUrl: item.dataUrl,
         usage: item.usage,
+        altText: effectiveAltText,
         description: item.description,
       },
     });
@@ -75,6 +103,7 @@ export const mediaLibrary = {
     const full: MediaItem = {
       ...item,
       id,
+      altText: effectiveAltText,
       dataUrl: res.url, // replace base64 with public URL
       createdAt: Date.now(),
     };
@@ -93,6 +122,58 @@ export const mediaLibrary = {
     memoryCache = memoryCache.map((m) => (m.id === id ? { ...m, ...patch } : m));
     notifyChange();
     await updateMediaServer({ data: { id, ...patch } });
+  },
+  async replace(
+    id: string,
+    file: File,
+    customName?: string,
+    customAltText?: string,
+  ): Promise<MediaItem> {
+    const dataUrl = await fileToDataUrl(file);
+    const size = Math.round(dataUrl.length * 0.75);
+    const type = file.type.startsWith("image/") ? "image/webp" : file.type || "application/octet-stream";
+    const existing = this.get(id);
+    const effectiveName = customName || (existing ? existing.name : file.name);
+    const effectiveAltText = customAltText || (existing?.altText ? existing.altText : deriveAltText(effectiveName));
+
+    const res = await replaceMediaFileServer({
+      data: {
+        id,
+        dataUrl,
+        size,
+        type,
+        name: effectiveName,
+        altText: effectiveAltText,
+      },
+    });
+
+    const updated: MediaItem = {
+      ...(existing || { id, usage: "other", createdAt: Date.now() }),
+      name: effectiveName,
+      altText: effectiveAltText,
+      dataUrl: res.url,
+      size,
+      type,
+    };
+
+    memoryCache = memoryCache.map((m) => (m.id === id ? updated : m));
+    notifyChange();
+    return updated;
+  },
+  async autoFillMissingAltTexts(): Promise<number> {
+    const missing = memoryCache.filter((m) => !m.altText || m.altText.trim() === "");
+    if (!missing.length) return 0;
+    const updates = missing.map((m) => ({
+      id: m.id,
+      altText: deriveAltText(m.name),
+    }));
+    memoryCache = memoryCache.map((m) => {
+      const u = updates.find((x) => x.id === m.id);
+      return u ? { ...m, altText: u.altText } : m;
+    });
+    notifyChange();
+    await batchUpdateAltTextServer({ data: { items: updates } });
+    return updates.length;
   },
   async remove(id: string) {
     memoryCache = memoryCache.filter((m) => m.id !== id);
@@ -220,6 +301,7 @@ export async function trackUpload(
   customName?: string,
   customDescription?: string,
   watermarkData?: string,
+  customAltText?: string,
 ): Promise<MediaItem> {
   if (file.size > MAX_MEDIA_FILE_SIZE) {
     throw new Error(
@@ -227,12 +309,16 @@ export async function trackUpload(
     );
   }
   const dataUrl = await fileToDataUrl(file, watermarkData);
+  const effectiveName = customName || file.name;
+  const effectiveAltText = customAltText || deriveAltText(effectiveName);
+
   return await mediaLibrary.add({
-    name: customName || file.name,
+    name: effectiveName,
     type: file.type.startsWith("image/") ? "image/webp" : file.type || "application/octet-stream",
     size: Math.round(dataUrl.length * 0.75),
     dataUrl,
     usage,
+    altText: effectiveAltText,
     description: customDescription,
   });
 }

@@ -85,6 +85,31 @@ function FileManagerPage() {
     refresh();
   };
 
+  const handleReplace = async (
+    id: string,
+    file: File,
+    name: string,
+    altText?: string,
+    description?: string,
+  ) => {
+    try {
+      await mediaLibrary.replace(id, file, name, altText);
+      if (description) {
+        await mediaLibrary.update(id, { description });
+      }
+      toast.success("File replaced successfully");
+      refresh();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to replace file");
+    }
+  };
+
+  const handleAutoFillAltTexts = async (): Promise<number> => {
+    const updatedCount = await mediaLibrary.autoFillMissingAltTexts();
+    refresh();
+    return updatedCount;
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -157,6 +182,8 @@ function FileManagerPage() {
           altText: m.altText,
           description: m.description,
           size: formatBytes(m.size),
+          rawSize: m.size,
+          uploadedAt: m.createdAt ? new Date(m.createdAt).toLocaleDateString() : undefined,
           type: m.type.startsWith("video/")
             ? "video"
             : m.type.startsWith("image/")
@@ -165,6 +192,8 @@ function FileManagerPage() {
         }))}
         onDelete={handleDelete}
         onEdit={handleEdit}
+        onReplace={handleReplace}
+        onAutoFillAltTexts={handleAutoFillAltTexts}
       />
     </div>
   );
