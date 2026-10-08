@@ -1,10 +1,11 @@
 import React from "react";
-import { Files, CheckCircle2, FileText, Clock, Trash2 } from "lucide-react";
+import { Files, CheckCircle2, CalendarClock, FileText, Clock, Trash2 } from "lucide-react";
 import type { ArticleStatus } from "./types";
 
 export const STATUS_TABS: { key: "All" | ArticleStatus; label: string; icon: typeof FileText }[] = [
   { key: "All", label: "All", icon: Files },
   { key: "Published", label: "Published", icon: CheckCircle2 },
+  { key: "Scheduled", label: "Scheduled", icon: CalendarClock },
   { key: "Draft", label: "Drafts", icon: FileText },
   { key: "Review", label: "In Review", icon: Clock },
   { key: "Trash", label: "Trash", icon: Trash2 },
@@ -15,15 +16,23 @@ interface ArticlesStatusTabsProps {
   setStatus: (s: "All" | ArticleStatus) => void;
   total: number;
   trashCount?: number;
+  scheduledCount?: number;
 }
 
-export function ArticlesStatusTabs({ status, setStatus, total, trashCount = 0 }: ArticlesStatusTabsProps) {
+export function ArticlesStatusTabs({
+  status,
+  setStatus,
+  total,
+  trashCount = 0,
+  scheduledCount = 0,
+}: ArticlesStatusTabsProps) {
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white p-2">
       {STATUS_TABS.map((t) => {
         const active = status === t.key;
         const Icon = t.icon;
         const isTrash = t.key === "Trash";
+        const isScheduled = t.key === "Scheduled";
         return (
           <button
             key={t.key}
@@ -32,14 +41,27 @@ export function ArticlesStatusTabs({ status, setStatus, total, trashCount = 0 }:
               active
                 ? isTrash
                   ? "bg-rose-700 text-white"
-                  : "bg-slate-900 text-white"
+                  : isScheduled
+                    ? "bg-blue-600 text-white"
+                    : "bg-slate-900 text-white"
                 : isTrash
                   ? "text-rose-600 hover:bg-rose-50"
-                  : "text-slate-600 hover:bg-slate-100"
+                  : isScheduled
+                    ? "text-blue-600 hover:bg-blue-50"
+                    : "text-slate-600 hover:bg-slate-100"
             }`}
           >
             <Icon className="h-3.5 w-3.5" />
             <span>{t.label}</span>
+            {isScheduled && scheduledCount > 0 && (
+              <span
+                className={`ml-1 rounded-full px-1.5 py-0.2 text-[11px] font-semibold ${
+                  active ? "bg-white text-blue-700" : "bg-blue-100 text-blue-700"
+                }`}
+              >
+                {scheduledCount}
+              </span>
+            )}
             {isTrash && trashCount > 0 && (
               <span
                 className={`ml-1 rounded-full px-1.5 py-0.2 text-[11px] font-semibold ${
@@ -53,7 +75,7 @@ export function ArticlesStatusTabs({ status, setStatus, total, trashCount = 0 }:
         );
       })}
       <span className="ml-auto rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-        {total} {status === "Trash" ? "in trash" : "total"}
+        {total} {status === "Trash" ? "in trash" : status === "Scheduled" ? "scheduled" : "total"}
       </span>
     </div>
   );

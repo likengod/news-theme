@@ -49,7 +49,7 @@ export const Route = createFileRoute("/rss.xml")({
           let articles: any[] = [];
           try {
             articles = await query(
-              "SELECT * FROM articles WHERE status = 'Published' AND date <= NOW() ORDER BY date DESC, id DESC LIMIT 50",
+              "SELECT * FROM articles WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW() ORDER BY date DESC, id DESC LIMIT 50",
             );
           } catch {}
 

@@ -302,7 +302,7 @@ export const searchUnifiedPublic = createServerFn({ method: "GET" })
             a.category LIKE CONCAT('%, ', c.name, ',%') OR
             a.category LIKE CONCAT('%,', c.name) OR 
             a.category LIKE CONCAT('%,', c.name, ',%')
-          ) AND a.status = 'Published'
+          ) AND (a.status = 'Published' OR a.status = 'Scheduled') AND a.date <= NOW()
           WHERE (c.name LIKE ? OR c.slug LIKE ? OR c.description LIKE ?)
           GROUP BY c.id
           ORDER BY (c.name LIKE ?) DESC, c.sort_order ASC, c.name ASC

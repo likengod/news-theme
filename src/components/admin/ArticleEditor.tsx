@@ -6,6 +6,7 @@ import {
   Settings as SettingsIcon,
   Share2,
   Sparkles,
+  CalendarClock,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -293,16 +294,26 @@ export default function ArticleEditor({
               <>
                 <button
                   onClick={() => handleSave("Draft")}
-                  className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-100"
+                  className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-100 cursor-pointer"
                 >
                   Save as Draft
                 </button>
-                <button
-                  onClick={() => handleSave("Published")}
-                  className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-                >
-                  Publish
-                </button>
+                {r.status === "Scheduled" || (r.date && new Date(r.date).getTime() > Date.now()) ? (
+                  <button
+                    onClick={() => handleSave("Scheduled")}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition shadow-sm cursor-pointer"
+                  >
+                    <CalendarClock className="h-4 w-4" />
+                    <span>Schedule Post</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleSave("Published")}
+                    className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 cursor-pointer"
+                  >
+                    Publish
+                  </button>
+                )}
               </>
             )}
           </div>

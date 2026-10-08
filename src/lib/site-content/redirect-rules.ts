@@ -125,7 +125,7 @@ export const scanBrokenLinksServer = createServerFn({ method: "GET" })
 
     // 3. Fetch articles
     const articlesRows = await query(
-      "SELECT id, title, slug, content FROM articles WHERE status = 'Published'",
+      "SELECT id, title, slug, content FROM articles WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW()",
     );
     const articleSlugsMap = new Map<string, { id: number; title: string }>();
     articlesRows.forEach((r: any) => {

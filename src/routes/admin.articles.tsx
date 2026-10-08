@@ -65,6 +65,7 @@ function ArticlesPage() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [trashCount, setTrashCount] = useState(0);
+  const [scheduledCount, setScheduledCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // Filters (server-side)
@@ -133,6 +134,7 @@ function ArticlesPage() {
       setTotal(res.total ?? 0);
       setTotalPages(res.totalPages ?? 1);
       setTrashCount(res.trashCount ?? 0);
+      setScheduledCount(res.scheduledCount ?? 0);
     } catch (err: any) {
       toast.error(err.message || "Failed to load articles");
     } finally {
@@ -366,7 +368,13 @@ function ArticlesPage() {
       </div>
 
       {/* Status tabs */}
-      <ArticlesStatusTabs status={status} setStatus={setStatus} total={total} trashCount={trashCount} />
+      <ArticlesStatusTabs
+        status={status}
+        setStatus={setStatus}
+        total={total}
+        trashCount={trashCount}
+        scheduledCount={scheduledCount}
+      />
 
       {/* Search + category filter bar */}
       <ArticlesFilterBar

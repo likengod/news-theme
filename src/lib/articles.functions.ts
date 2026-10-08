@@ -38,67 +38,93 @@ export const getAdminArticles = createServerFn({ method: "GET" })
     (data: { q?: string; category?: string; status?: string; page?: number; limit?: number }) =>
       data,
   )
-  .handler(async ({ data }): Promise<{ rows: ArticleRow[]; total: number; totalPages: number }> => {
-    const { q = "", category = "All", status = "All", page = 1, limit = 20 } = data;
-    // Safety cap â€” never return more than 200 rows in one admin request
-    const safeLimit = Math.min(Math.max(1, limit), 200);
-    const offset = (Math.max(1, page) - 1) * safeLimit;
+  .handler(
+    async ({
+      data,
+    }): Promise<{
+      rows: ArticleRow[];
+      total: number;
+      totalPages: number;
+      trashCount: number;
+      scheduledCount: number;
+    }> => {
+      const { q = "", category = "All", status = "All", page = 1, limit = 20 } = data;
+      // Auto-publish any past scheduled posts before fetching
+      await query(
+        "UPDATE articles SET status = 'Published' WHERE status = 'Scheduled' AND date <= NOW()",
+      ).catch(() => {});
 
-    let filterSql = " WHERE 1=1";
-    const params: any[] = [];
+      // Safety cap — never return more than 200 rows in one admin request
+      const safeLimit = Math.min(Math.max(1, limit), 200);
+      const offset = (Math.max(1, page) - 1) * safeLimit;
 
-    const cleanQ = (q || "").trim();
-    if (cleanQ) {
-      // Split by whitespace so typing multiple words matches any/all words
-      const words = cleanQ.split(/\s+/).filter(Boolean);
-      if (words.length > 1) {
-        // Multi-word search: match each word or full phrase
-        const wordConditions: string[] = [];
-        for (const w of words) {
-          const wTerm = `%${w}%`;
-          wordConditions.push("(title LIKE ? OR slug LIKE ? OR excerpt LIKE ? OR tags LIKE ?)");
-          params.push(wTerm, wTerm, wTerm, wTerm);
+      let filterSql = " WHERE 1=1";
+      const params: any[] = [];
+
+      const cleanQ = (q || "").trim();
+      if (cleanQ) {
+        // Split by whitespace so typing multiple words matches any/all words
+        const words = cleanQ.split(/\s+/).filter(Boolean);
+        if (words.length > 1) {
+          // Multi-word search: match each word or full phrase
+          const wordConditions: string[] = [];
+          for (const w of words) {
+            const wTerm = `%${w}%`;
+            wordConditions.push("(title LIKE ? OR slug LIKE ? OR excerpt LIKE ? OR tags LIKE ?)");
+            params.push(wTerm, wTerm, wTerm, wTerm);
+          }
+          filterSql += ` AND (${wordConditions.join(" AND ")})`;
+        } else {
+          filterSql += " AND (title LIKE ? OR slug LIKE ? OR excerpt LIKE ? OR tags LIKE ?)";
+          const term = `%${cleanQ}%`;
+          params.push(term, term, term, term);
         }
-        filterSql += ` AND (${wordConditions.join(" AND ")})`;
-      } else {
-        filterSql += " AND (title LIKE ? OR slug LIKE ? OR excerpt LIKE ? OR tags LIKE ?)";
-        const term = `%${cleanQ}%`;
-        params.push(term, term, term, term);
       }
-    }
-    if (category && category !== "All") {
-      filterSql += " AND (LOWER(category) = LOWER(?) OR LOWER(category) LIKE LOWER(?) OR LOWER(category) LIKE LOWER(?) OR LOWER(category) LIKE LOWER(?) OR LOWER(category) LIKE LOWER(?))";
-      params.push(category, `${category},%`, `%, ${category}`, `%, ${category},%`, `%,${category},%`);
-    }
-    if (status && status !== "All") {
-      filterSql += " AND status = ?";
-      params.push(status);
-    } else {
-      filterSql += " AND (status IS NULL OR status != 'Trash')";
-    }
+      if (category && category !== "All") {
+        filterSql += " AND (LOWER(category) = LOWER(?) OR LOWER(category) LIKE LOWER(?) OR LOWER(category) LIKE LOWER(?) OR LOWER(category) LIKE LOWER(?) OR LOWER(category) LIKE LOWER(?))";
+        params.push(category, `${category},%`, `%, ${category}`, `%, ${category},%`, `%,${category},%`);
+      }
+      if (status && status !== "All") {
+        if (status === "Scheduled") {
+          filterSql += " AND (status = 'Scheduled' OR (status = 'Published' AND date > NOW()))";
+        } else if (status === "Published") {
+          filterSql += " AND status = 'Published' AND date <= NOW()";
+        } else {
+          filterSql += " AND status = ?";
+          params.push(status);
+        }
+      } else {
+        filterSql += " AND (status IS NULL OR status != 'Trash')";
+      }
 
-    // Run count, data, and trash queries in parallel for speed
-    const [countRes, rows, trashRes] = await Promise.all([
-      query(`SELECT COUNT(*) AS total FROM articles${filterSql}`, params),
-      query(
-        `SELECT id, title, slug, category, city, state, country, author, views, status, date,
-                excerpt, content, featuredImage, ogImage, imageCaption, imageCredit, metaTitle, metaDescription, tags,
-                featured, newsType, journalistId, journalistName, access_level
-         FROM articles${filterSql} ORDER BY date DESC, id DESC LIMIT ? OFFSET ?`,
-        [...params, safeLimit, offset],
-      ),
-      query("SELECT COUNT(*) AS total FROM articles WHERE status = 'Trash'"),
-    ]);
+      // Run count, data, trash, and scheduled queries in parallel for speed
+      const [countRes, rows, trashRes, scheduledRes] = await Promise.all([
+        query(`SELECT COUNT(*) AS total FROM articles${filterSql}`, params),
+        query(
+          `SELECT id, title, slug, category, city, state, country, author, views, status, date,
+                  excerpt, content, featuredImage, ogImage, imageCaption, imageCredit, metaTitle, metaDescription, tags,
+                  featured, newsType, journalistId, journalistName, access_level
+           FROM articles${filterSql} ORDER BY date DESC, id DESC LIMIT ? OFFSET ?`,
+          [...params, safeLimit, offset],
+        ),
+        query("SELECT COUNT(*) AS total FROM articles WHERE status = 'Trash'"),
+        query(
+          "SELECT COUNT(*) AS total FROM articles WHERE status = 'Scheduled' OR (status = 'Published' AND date > NOW())",
+        ),
+      ]);
 
-    const total = Number(countRes[0]?.total ?? 0);
-    const trashCount = Number(trashRes[0]?.total ?? 0);
-    return {
-      rows: rows.map((r: any) => ({ ...r, featured: Boolean(r.featured) })),
-      total,
-      trashCount,
-      totalPages: Math.max(1, Math.ceil(total / safeLimit)),
-    };
-  });
+      const total = Number(countRes[0]?.total ?? 0);
+      const trashCount = Number(trashRes[0]?.total ?? 0);
+      const scheduledCount = Number(scheduledRes[0]?.total ?? 0);
+      return {
+        rows: rows.map((r: any) => ({ ...r, featured: Boolean(r.featured) })),
+        total,
+        trashCount,
+        scheduledCount,
+        totalPages: Math.max(1, Math.ceil(total / safeLimit)),
+      };
+    },
+  );
 
 // Admin only: get single article by ID with all fields
 export const getAdminArticleById = createServerFn({ method: "GET" })
@@ -188,6 +214,11 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
       formattedDate = String(existingRow.date).replace("T", " ").replace("Z", "").substring(0, 19);
     }
 
+    let finalStatus = r.status || (existingRow?.status ?? "Draft");
+    if (finalStatus === "Published" && new Date(formattedDate).getTime() > Date.now()) {
+      finalStatus = "Scheduled";
+    }
+
     const values = [
       r.title || (existingRow?.title ?? ""),
       slug,
@@ -197,7 +228,7 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
       r.country ?? (existingRow?.country ?? ""),
       r.author || (existingRow?.author ?? "Admin User"),
       Number(r.views ?? existingRow?.views ?? 0) || 0,
-      r.status || (existingRow?.status ?? "Draft"),
+      finalStatus,
       formattedDate,
       r.excerpt ?? (existingRow?.excerpt ?? ""),
       r.content ?? (existingRow?.content ?? ""),
@@ -467,8 +498,8 @@ export const searchPublicArticles = createServerFn({ method: "GET" })
     const offset = (page - 1) * limit;
 
     let countSql =
-      "SELECT COUNT(*) as total FROM articles WHERE status = 'Published' AND date <= NOW()";
-    let selectSql = `SELECT ${PUBLIC_CARD_COLUMNS} FROM articles WHERE status = 'Published' AND date <= NOW()`;
+      "SELECT COUNT(*) as total FROM articles WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW()";
+    let selectSql = `SELECT ${PUBLIC_CARD_COLUMNS} FROM articles WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW()`;
     const params: any[] = [];
 
     let filterSql = "";
@@ -517,14 +548,24 @@ export const getPublicArticleBySlug = createServerFn({ method: "GET" })
     ]);
     if (rows.length === 0) return null;
 
+    const row = rows[0];
+    if (row.status === "Trash") return null;
+    if (
+      (row.status === "Scheduled" || row.status === "Published") &&
+      row.date &&
+      new Date(row.date).getTime() > Date.now()
+    ) {
+      return null;
+    }
+
     // Increment view count in background
-    query("UPDATE articles SET views = views + 1 WHERE id = ?", [rows[0].id]).catch((err) => {
+    query("UPDATE articles SET views = views + 1 WHERE id = ?", [row.id]).catch((err) => {
       console.error("[MySQL] Failed to increment views:", err);
     });
 
     return {
-      ...rows[0],
-      featured: Boolean(rows[0].featured),
+      ...row,
+      featured: Boolean(row.featured),
     };
   });
 
@@ -540,7 +581,7 @@ export const getPublicRelatedArticles = createServerFn({ method: "GET" })
     if (category && category !== "All" && category.trim()) {
       rows = await query(
         `SELECT ${PUBLIC_CARD_COLUMNS} FROM articles 
-         WHERE status = 'Published' AND date <= NOW() AND slug != ?
+         WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW() AND slug != ?
          AND (category = ? OR category LIKE ? OR category LIKE ? OR category LIKE ? OR category LIKE ?)
          ORDER BY date DESC, id DESC LIMIT ?`,
         [
@@ -563,10 +604,10 @@ export const getPublicRelatedArticles = createServerFn({ method: "GET" })
       const fillSql =
         excludeSlugs.length > 0
           ? `SELECT ${PUBLIC_CARD_COLUMNS} FROM articles 
-           WHERE status = 'Published' AND date <= NOW() AND slug NOT IN (${placeholders})
+           WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW() AND slug NOT IN (${placeholders})
            ORDER BY date DESC, id DESC LIMIT ?`
           : `SELECT ${PUBLIC_CARD_COLUMNS} FROM articles 
-           WHERE status = 'Published' AND date <= NOW()
+           WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW()
            ORDER BY date DESC, id DESC LIMIT ?`;
       const fillParams = excludeSlugs.length > 0 ? [...excludeSlugs, needed] : [needed];
       const fillRows = await query(fillSql, fillParams);
@@ -588,9 +629,9 @@ export const getPublicArchiveArticles = createServerFn({ method: "GET" })
     const { year, month, day, page = 1, limit = 15 } = data;
     const offset = (page - 1) * limit;
 
-    let sql = `SELECT ${PUBLIC_CARD_COLUMNS} FROM articles WHERE status = 'Published' AND date <= NOW()`;
+    let sql = `SELECT ${PUBLIC_CARD_COLUMNS} FROM articles WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW()`;
     let countSql =
-      "SELECT COUNT(*) as total FROM articles WHERE status = 'Published' AND date <= NOW()";
+      "SELECT COUNT(*) as total FROM articles WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW()";
     const params: any[] = [];
 
     if (year) {
@@ -656,7 +697,7 @@ export const getHomepageArticles = createServerFn({ method: "GET" })
         `SELECT id, title, slug, category, city, state, country, author, views, status, date,
                 excerpt, SUBSTRING(content, 1, 2500) AS content, featuredImage, ogImage, tags, featured, newsType, journalistId, journalistName, access_level
          FROM articles 
-         WHERE status = 'Published' AND date <= NOW() 
+         WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW() 
          ORDER BY date DESC, id DESC 
          LIMIT ?`,
         [limitNum],

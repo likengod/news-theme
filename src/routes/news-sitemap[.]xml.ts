@@ -49,7 +49,7 @@ export const Route = createFileRoute("/news-sitemap.xml")({
           let articles: any[] = [];
           try {
             articles = await query(
-              "SELECT slug, title, category, date, updated_at FROM articles WHERE status = 'Published' AND date >= NOW() - INTERVAL 48 HOUR ORDER BY date DESC, id DESC LIMIT 100",
+              "SELECT slug, title, category, date, updated_at FROM articles WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW() AND date >= NOW() - INTERVAL 48 HOUR ORDER BY date DESC, id DESC LIMIT 100",
             );
           } catch {}
 
@@ -57,7 +57,7 @@ export const Route = createFileRoute("/news-sitemap.xml")({
           if (!articles || articles.length === 0) {
             try {
               articles = await query(
-                "SELECT slug, title, category, date, updated_at FROM articles WHERE status = 'Published' ORDER BY date DESC, id DESC LIMIT 25",
+                "SELECT slug, title, category, date, updated_at FROM articles WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW() ORDER BY date DESC, id DESC LIMIT 25",
               );
             } catch {}
           }

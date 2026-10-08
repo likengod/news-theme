@@ -10,7 +10,7 @@ export type Row = {
   country: string;
   author: string;
   views: number;
-  status: "Published" | "Draft" | "Review" | "Trash";
+  status: "Published" | "Draft" | "Review" | "Trash" | "Scheduled";
   date: string;
   excerpt: string;
   content: string;
@@ -33,6 +33,7 @@ export const statusStyle: Record<Row["status"], string> = {
   Draft: "bg-slate-100 text-slate-700 border-slate-200",
   Review: "bg-amber-50 text-amber-700 border-amber-200",
   Trash: "bg-rose-50 text-rose-700 border-rose-200",
+  Scheduled: "bg-blue-50 text-blue-700 border-blue-200",
 };
 
 export type Tab = "content" | "media" | "seo" | "settings";

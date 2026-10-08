@@ -54,7 +54,7 @@ export const getCategories = createServerFn({ method: "GET" })
           a.category LIKE CONCAT('%, ', c.name, ',%') OR
           a.category LIKE CONCAT('%,', c.name) OR 
           a.category LIKE CONCAT('%,', c.name, ',%')
-        ) AND a.status = 'Published'
+        ) AND (a.status = 'Published' OR a.status = 'Scheduled') AND a.date <= NOW()
       `;
       const params: any[] = [];
       if (q) {

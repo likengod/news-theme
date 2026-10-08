@@ -39,7 +39,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           let articles: any[] = [];
           try {
             articles = await query(
-              "SELECT slug, date, updated_at FROM articles WHERE status = 'Published' ORDER BY date DESC, id DESC LIMIT 1000",
+              "SELECT slug, date, updated_at FROM articles WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW() ORDER BY date DESC, id DESC LIMIT 1000",
             );
           } catch {}
 

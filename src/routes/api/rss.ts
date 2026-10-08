@@ -8,7 +8,7 @@ export const Route = createFileRoute("/api/rss")({
         try {
           // Fetch latest 50 published articles
           const articles = await query(
-            "SELECT * FROM articles WHERE status = 'Published' AND date <= NOW() ORDER BY date DESC, id DESC LIMIT 50",
+            "SELECT * FROM articles WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW() ORDER BY date DESC, id DESC LIMIT 50",
           );
 
           const origin = "https://northeasttimeline.com"; // default site origin

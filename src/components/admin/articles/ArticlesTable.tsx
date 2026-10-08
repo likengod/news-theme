@@ -7,6 +7,7 @@ import {
   Loader2,
   Image as ImageIcon,
   RotateCcw,
+  CalendarClock,
 } from "lucide-react";
 import type { Row } from "./types";
 
@@ -117,9 +118,22 @@ export function ArticlesTable({
                         <p className="truncate font-medium" title={r.title}>
                           {r.title}
                         </p>
-                        {r.status === "Published" && new Date(r.date) > new Date() && (
-                          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 border border-blue-200 whitespace-nowrap">
-                            Scheduled
+                        {(r.status === "Scheduled" || (r.status === "Published" && new Date(r.date) > new Date())) && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 border border-blue-200 whitespace-nowrap"
+                            title={`Scheduled for ${new Date(r.date).toLocaleString()}`}
+                          >
+                            <CalendarClock className="h-3 w-3 text-blue-600" />
+                            <span>
+                              Scheduled (
+                              {new Date(r.date).toLocaleDateString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                              )
+                            </span>
                           </span>
                         )}
                       </div>

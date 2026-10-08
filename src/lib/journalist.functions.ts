@@ -81,7 +81,7 @@ export const listJournalists = createServerFn({ method: "GET" })
     const stats = await query(
       `SELECT journalistId, COUNT(*) as count 
        FROM articles 
-       WHERE status = 'Published' AND journalistId IS NOT NULL 
+       WHERE (status = 'Published' OR status = 'Scheduled') AND date <= NOW() AND journalistId IS NOT NULL 
        GROUP BY journalistId`,
     );
     const countMap = new Map<string, number>();
