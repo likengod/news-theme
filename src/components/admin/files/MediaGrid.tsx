@@ -13,10 +13,12 @@ import {
   Sparkles,
   ArrowUpDown,
   SlidersHorizontal,
+  FileArchive,
 } from "lucide-react";
 import { toast } from "sonner";
 import { EditMediaModal } from "./EditMediaModal";
 import { formatBytes, MAX_MEDIA_FILE_SIZE } from "@/lib/media-library";
+import { exportMediaZip } from "@/lib/media-zip";
 
 export type MediaItemDef = {
   id: string;
@@ -328,6 +330,12 @@ export function MediaGrid({
     }
   };
 
+  const handleExportSelectedZip = async () => {
+    if (selectedIds.size === 0) return;
+    const selectedItems = items.filter((it) => selectedIds.has(it.id));
+    await exportMediaZip(selectedItems, `selected-media-${new Date().toISOString().slice(0, 10)}.zip`);
+  };
+
   return (
     <div className="space-y-4">
       {/* Hidden file input for quick replace button */}
@@ -369,6 +377,15 @@ export function MediaGrid({
                 Select All Library ({items.length})
               </button>
             )}
+            <button
+              type="button"
+              onClick={handleExportSelectedZip}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-white px-2.5 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-50 transition shadow-2xs cursor-pointer"
+              title="Download selected files in a ZIP archive"
+            >
+              <FileArchive className="h-3.5 w-3.5 text-amber-600" />
+              Export ZIP ({selectedIds.size})
+            </button>
             <button
               type="button"
               onClick={clearSelection}

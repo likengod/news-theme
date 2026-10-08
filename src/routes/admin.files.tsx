@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Upload, ShieldCheck } from "lucide-react";
+import { Upload, ShieldCheck, FileArchive, FolderArchive } from "lucide-react";
 import { toast } from "sonner";
 import { mediaLibrary, trackUpload, formatBytes, type MediaItem } from "@/lib/media-library";
 import { MediaGrid } from "@/components/admin/files/MediaGrid";
 import { CsvImportExport } from "@/components/admin/CsvImportExport";
+import { extractAndImportZip, exportMediaZip } from "@/lib/media-zip";
 
 export const Route = createFileRoute("/admin/files")({
   component: FileManagerPage,
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/admin/files")({
 function FileManagerPage() {
   const [items, setItems] = useState<MediaItem[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
+  const zipFileRef = useRef<HTMLInputElement>(null);
 
   const refresh = () => setItems(mediaLibrary.list());
 
@@ -31,23 +33,53 @@ function FileManagerPage() {
 
     // Auto-fetch domain name
     const domain = window.location.hostname;
-
     const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
 
     for (const f of Array.from(files)) {
+      // Check if uploaded file is a ZIP archive
+      if (f.name.toLowerCase().endsWith(".zip") || f.type.includes("zip")) {
+        const toastId = toast.loading(`Reading & extracting archive "${f.name}"...`);
+        try {
+          const res = await extractAndImportZip(f, (cur, tot, msg) => {
+            toast.loading(msg, { id: toastId });
+          });
+          if (res.imported > 0) {
+            toast.success(
+              `Successfully extracted and imported ${res.imported} file${res.imported > 1 ? "s" : ""} from "${f.name}"!`,
+              { id: toastId },
+            );
+            count += res.imported;
+          } else {
+            toast.info(`No valid media files found in "${f.name}".`, { id: toastId });
+          }
+          if (res.errors.length > 0) {
+            toast.error(
+              `${res.errors.length} file(s) failed or exceeded 1 MB limit.`,
+            );
+          }
+        } catch (zErr: any) {
+          toast.error(zErr?.message || `Failed to extract "${f.name}"`, { id: toastId });
+        }
+        continue;
+      }
+
+      // Regular single or multiple media files
       if (f.size > MAX_FILE_SIZE) {
         toast.error(`"${f.name}" (${formatBytes(f.size)}) exceeds 1 MB. File size must be less than 1 MB.`);
         continue;
       }
       try {
         const defaultName = f.name.split(".").slice(0, -1).join(".") || f.name;
-        let customName = window.prompt(
-          `Enter a custom name for ${f.name} (or leave blank to keep original):`,
-          defaultName,
-        );
-        if (customName === null) continue; // Cancelled
-
-        customName = customName.trim() || f.name;
+        let customName = defaultName;
+        // Only prompt for single manual upload to avoid repeated popups on multi-select
+        if (files.length === 1) {
+          const prompted = window.prompt(
+            `Enter a custom name for ${f.name} (or leave blank to keep original):`,
+            defaultName,
+          );
+          if (prompted === null) continue; // Cancelled
+          customName = prompted.trim() || f.name;
+        }
 
         const timestamp = new Date().toLocaleString();
         const customDescription = `Uploaded at: ${timestamp} | Source: ${domain}`;
@@ -68,8 +100,34 @@ function FileManagerPage() {
       }
     }
     if (fileRef.current) fileRef.current.value = "";
+    if (zipFileRef.current) zipFileRef.current.value = "";
     if (count) toast.success(`Uploaded ${count} file${count > 1 ? "s" : ""}`);
     refresh();
+  };
+
+  const handleExportZip = async () => {
+    if (!items.length) {
+      toast.info("No files in media library to export.");
+      return;
+    }
+    await exportMediaZip(
+      items.map((m) => ({
+        id: m.id,
+        name: m.name,
+        url: m.dataUrl || (m as any).url,
+        altText: m.altText,
+        description: m.description,
+        size: formatBytes(m.size),
+        rawSize: m.size,
+        type: m.type.startsWith("video/")
+          ? "video"
+          : m.type.startsWith("image/")
+            ? "image"
+            : "document",
+        createdAt: m.createdAt,
+      })),
+      `media-library-backup-${new Date().toISOString().slice(0, 10)}.zip`,
+    );
   };
 
   const handleDelete = (id: string) => {
@@ -164,21 +222,46 @@ function FileManagerPage() {
             <ShieldCheck className="h-3.5 w-3.5 text-indigo-600" />
             Verify Scanner
           </Link>
+          {/* ZIP Backup & Restore */}
+          <button
+            onClick={handleExportZip}
+            title="Download complete ZIP backup of all actual images and manifest"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50/80 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 transition whitespace-nowrap shadow-2xs cursor-pointer"
+          >
+            <FileArchive className="h-3.5 w-3.5 text-amber-600" />
+            Export ZIP Backup
+          </button>
+          <button
+            onClick={() => zipFileRef.current?.click()}
+            title="Upload a ZIP file to extract and import all media files automatically"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/80 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition whitespace-nowrap shadow-2xs cursor-pointer"
+          >
+            <FolderArchive className="h-3.5 w-3.5 text-indigo-600" />
+            Import ZIP
+          </button>
+          <input
+            ref={zipFileRef}
+            type="file"
+            accept=".zip,application/zip,application/x-zip-compressed"
+            onChange={(e) => onUpload(e.target.files)}
+            className="hidden"
+          />
+
           <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 whitespace-nowrap">
             {items.length} files ({formatBytes(totalSize)})
           </span>
           <button
             onClick={() => fileRef.current?.click()}
-            title="Upload Files (Max 1 MB per file)"
-            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg bg-slate-900 px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 transition whitespace-nowrap shadow-xs"
+            title="Upload Files or ZIP Archive (Max 1 MB per file)"
+            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg bg-slate-900 px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 transition whitespace-nowrap shadow-xs cursor-pointer"
           >
-            <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Upload Files (&lt; 1 MB)
+            <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Upload Files / ZIP (&lt; 1 MB)
           </button>
           <input
             ref={fileRef}
             type="file"
             multiple
-            accept="image/*,video/*,.pdf"
+            accept="image/*,video/*,.pdf,.zip,application/zip,application/x-zip-compressed"
             onChange={(e) => onUpload(e.target.files)}
             className="hidden"
           />
