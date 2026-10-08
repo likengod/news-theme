@@ -159,6 +159,7 @@ export default function ArticleSettingsTab({
             <option>Published</option>
             <option>Draft</option>
             <option>Review</option>
+            {row.status === "Trash" && <option>Trash</option>}
           </select>
         </Field>
 

@@ -73,10 +73,12 @@ export const getAdminArticles = createServerFn({ method: "GET" })
     if (status && status !== "All") {
       filterSql += " AND status = ?";
       params.push(status);
+    } else {
+      filterSql += " AND (status IS NULL OR status != 'Trash')";
     }
 
-    // Run count and data queries in parallel for speed
-    const [countRes, rows] = await Promise.all([
+    // Run count, data, and trash queries in parallel for speed
+    const [countRes, rows, trashRes] = await Promise.all([
       query(`SELECT COUNT(*) AS total FROM articles${filterSql}`, params),
       query(
         `SELECT id, title, slug, category, city, state, country, author, views, status, date,
@@ -85,12 +87,15 @@ export const getAdminArticles = createServerFn({ method: "GET" })
          FROM articles${filterSql} ORDER BY date DESC, id DESC LIMIT ? OFFSET ?`,
         [...params, safeLimit, offset],
       ),
+      query("SELECT COUNT(*) AS total FROM articles WHERE status = 'Trash'"),
     ]);
 
     const total = Number(countRes[0]?.total ?? 0);
+    const trashCount = Number(trashRes[0]?.total ?? 0);
     return {
       rows: rows.map((r: any) => ({ ...r, featured: Boolean(r.featured) })),
       total,
+      trashCount,
       totalPages: Math.max(1, Math.ceil(total / safeLimit)),
     };
   });
@@ -268,8 +273,28 @@ export const getAdminAuthorProfiles = createServerFn({ method: "GET" })
     }
   });
 
-// Admin only: delete article
-export const deleteAdminArticle = createServerFn({ method: "POST" })
+// Admin only: move article to trash (soft-delete)
+export const trashAdminArticle = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .validator((id: number) => id)
+  .handler(async ({ data: id }) => {
+    await query("UPDATE articles SET status = 'Trash' WHERE id = ?", [id]);
+    Object.keys(HOMEPAGE_CACHE).forEach((k) => delete HOMEPAGE_CACHE[k as any]);
+    return { success: true };
+  });
+
+// Admin only: restore article from trash (reverts to Draft)
+export const restoreAdminArticle = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .validator((id: number) => id)
+  .handler(async ({ data: id }) => {
+    await query("UPDATE articles SET status = 'Draft' WHERE id = ?", [id]);
+    Object.keys(HOMEPAGE_CACHE).forEach((k) => delete HOMEPAGE_CACHE[k as any]);
+    return { success: true };
+  });
+
+// Admin only: permanently delete article from database
+export const deletePermanentlyAdminArticle = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .validator((id: number) => id)
   .handler(async ({ data: id }) => {
@@ -278,14 +303,53 @@ export const deleteAdminArticle = createServerFn({ method: "POST" })
     return { success: true };
   });
 
-// Admin only: bulk delete articles
-export const deleteAdminArticlesBulk = createServerFn({ method: "POST" })
+// Admin only: delete article (defaults to moving to trash)
+export const deleteAdminArticle = trashAdminArticle;
+
+// Admin only: bulk move to trash
+export const trashAdminArticlesBulk = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .validator((ids: number[]) => ids)
+  .handler(async ({ data: ids }) => {
+    if (ids.length === 0) return { success: true };
+    const placeholders = ids.map(() => "?").join(",");
+    await query(`UPDATE articles SET status = 'Trash' WHERE id IN (${placeholders})`, ids);
+    Object.keys(HOMEPAGE_CACHE).forEach((k) => delete HOMEPAGE_CACHE[k as any]);
+    return { success: true };
+  });
+
+// Admin only: bulk restore from trash
+export const restoreAdminArticlesBulk = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .validator((ids: number[]) => ids)
+  .handler(async ({ data: ids }) => {
+    if (ids.length === 0) return { success: true };
+    const placeholders = ids.map(() => "?").join(",");
+    await query(`UPDATE articles SET status = 'Draft' WHERE id IN (${placeholders})`, ids);
+    Object.keys(HOMEPAGE_CACHE).forEach((k) => delete HOMEPAGE_CACHE[k as any]);
+    return { success: true };
+  });
+
+// Admin only: bulk permanently delete from database
+export const deletePermanentlyAdminArticlesBulk = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .validator((ids: number[]) => ids)
   .handler(async ({ data: ids }) => {
     if (ids.length === 0) return { success: true };
     const placeholders = ids.map(() => "?").join(",");
     await query(`DELETE FROM articles WHERE id IN (${placeholders})`, ids);
+    Object.keys(HOMEPAGE_CACHE).forEach((k) => delete HOMEPAGE_CACHE[k as any]);
+    return { success: true };
+  });
+
+// Admin only: bulk delete (defaults to moving to trash)
+export const deleteAdminArticlesBulk = trashAdminArticlesBulk;
+
+// Admin only: empty all articles in trash
+export const emptyTrashAdminArticles = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .handler(async () => {
+    await query("DELETE FROM articles WHERE status = 'Trash'");
     Object.keys(HOMEPAGE_CACHE).forEach((k) => delete HOMEPAGE_CACHE[k as any]);
     return { success: true };
   });

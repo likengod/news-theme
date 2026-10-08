@@ -11,8 +11,13 @@ import {
   getAdminArticles,
   getAdminArticleById,
   saveAdminArticle,
-  deleteAdminArticle,
-  deleteAdminArticlesBulk,
+  trashAdminArticle,
+  restoreAdminArticle,
+  deletePermanentlyAdminArticle,
+  trashAdminArticlesBulk,
+  restoreAdminArticlesBulk,
+  deletePermanentlyAdminArticlesBulk,
+  emptyTrashAdminArticles,
   getAllAdminArticles,
   importAdminArticles,
   getAdminAuthorProfiles,
@@ -46,14 +51,20 @@ function ArticlesPage() {
   const fetchArticlesFn = useServerFn(getAdminArticles);
   const fetchArticleByIdFn = useServerFn(getAdminArticleById);
   const saveArticleFn = useServerFn(saveAdminArticle);
-  const deleteArticleFn = useServerFn(deleteAdminArticle);
-  const deleteArticlesBulkFn = useServerFn(deleteAdminArticlesBulk);
+  const trashArticleFn = useServerFn(trashAdminArticle);
+  const restoreArticleFn = useServerFn(restoreAdminArticle);
+  const deletePermanentlyArticleFn = useServerFn(deletePermanentlyAdminArticle);
+  const trashArticlesBulkFn = useServerFn(trashAdminArticlesBulk);
+  const restoreArticlesBulkFn = useServerFn(restoreAdminArticlesBulk);
+  const deletePermanentlyArticlesBulkFn = useServerFn(deletePermanentlyAdminArticlesBulk);
+  const emptyTrashFn = useServerFn(emptyTrashAdminArticles);
   const getAllArticlesFn = useServerFn(getAllAdminArticles);
   const importArticlesFn = useServerFn(importAdminArticles);
 
   const [rows, setRows] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [trashCount, setTrashCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // Filters (server-side)
@@ -121,6 +132,7 @@ function ArticlesPage() {
       setRows((res.rows ?? []) as Row[]);
       setTotal(res.total ?? 0);
       setTotalPages(res.totalPages ?? 1);
+      setTrashCount(res.trashCount ?? 0);
     } catch (err: any) {
       toast.error(err.message || "Failed to load articles");
     } finally {
@@ -172,48 +184,144 @@ function ArticlesPage() {
     });
   };
 
-  // Delete (single)
+  // Delete / Trash (single)
   const requestDelete = (id: number, title: string) => {
-    setConfirmAction({
-      title: "Delete Article?",
-      message: `"${title}" will be permanently deleted. This cannot be undone.`,
-      confirmLabel: "Delete",
-      onConfirm: async () => {
-        setConfirmAction(null);
-        try {
-          await deleteArticleFn({ data: id });
-          router.invalidate();
-          setSelected((prev) => {
-            const n = new Set(prev);
-            n.delete(id);
-            return n;
-          });
-          toast.success("Article deleted");
-          fetchArticles();
-        } catch (err: any) {
-          toast.error(err.message || "Failed to delete article");
-        }
-      },
-    });
+    if (status === "Trash") {
+      setConfirmAction({
+        title: "Delete Permanently?",
+        message: `"${title}" will be permanently removed from the database. This cannot be undone.`,
+        confirmLabel: "Delete Permanently",
+        onConfirm: async () => {
+          setConfirmAction(null);
+          try {
+            await deletePermanentlyArticleFn({ data: id });
+            router.invalidate();
+            setSelected((prev) => {
+              const n = new Set(prev);
+              n.delete(id);
+              return n;
+            });
+            toast.success("Article permanently deleted");
+            fetchArticles();
+          } catch (err: any) {
+            toast.error(err.message || "Failed to delete article");
+          }
+        },
+      });
+    } else {
+      setConfirmAction({
+        title: "Move to Trash?",
+        message: `"${title}" will be moved to the Trash. You can restore it anytime or delete it permanently.`,
+        confirmLabel: "Move to Trash",
+        onConfirm: async () => {
+          setConfirmAction(null);
+          try {
+            await trashArticleFn({ data: id });
+            router.invalidate();
+            setSelected((prev) => {
+              const n = new Set(prev);
+              n.delete(id);
+              return n;
+            });
+            toast.success("Article moved to Trash");
+            fetchArticles();
+          } catch (err: any) {
+            toast.error(err.message || "Failed to move article to Trash");
+          }
+        },
+      });
+    }
   };
 
-  // Delete (bulk)
+  // Restore (single)
+  const requestRestore = async (id: number, title: string) => {
+    try {
+      await restoreArticleFn({ data: id });
+      router.invalidate();
+      setSelected((prev) => {
+        const n = new Set(prev);
+        n.delete(id);
+        return n;
+      });
+      toast.success(`"${title}" restored to Draft`);
+      fetchArticles();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to restore article");
+    }
+  };
+
+  // Delete / Trash (bulk)
   const requestBulkDelete = () => {
     if (selected.size === 0) return;
+    if (status === "Trash") {
+      setConfirmAction({
+        title: `Delete ${selected.size} article(s) permanently?`,
+        message: "All selected articles will be permanently deleted from the database. This cannot be undone.",
+        confirmLabel: `Delete Permanently (${selected.size})`,
+        onConfirm: async () => {
+          setConfirmAction(null);
+          try {
+            await deletePermanentlyArticlesBulkFn({ data: Array.from(selected) });
+            router.invalidate();
+            toast.success(`${selected.size} article(s) permanently deleted`);
+            setSelected(new Set());
+            fetchArticles();
+          } catch (err: any) {
+            toast.error(err.message || "Failed to delete articles");
+          }
+        },
+      });
+    } else {
+      setConfirmAction({
+        title: `Move ${selected.size} article(s) to Trash?`,
+        message: "Selected articles will be moved to the Trash. You can restore them anytime.",
+        confirmLabel: `Move to Trash (${selected.size})`,
+        onConfirm: async () => {
+          setConfirmAction(null);
+          try {
+            await trashArticlesBulkFn({ data: Array.from(selected) });
+            router.invalidate();
+            toast.success(`${selected.size} article(s) moved to Trash`);
+            setSelected(new Set());
+            fetchArticles();
+          } catch (err: any) {
+            toast.error(err.message || "Failed to move articles to Trash");
+          }
+        },
+      });
+    }
+  };
+
+  // Restore (bulk)
+  const requestBulkRestore = async () => {
+    if (selected.size === 0) return;
+    try {
+      await restoreArticlesBulkFn({ data: Array.from(selected) });
+      router.invalidate();
+      toast.success(`${selected.size} article(s) restored to Draft`);
+      setSelected(new Set());
+      fetchArticles();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to restore articles");
+    }
+  };
+
+  // Empty trash
+  const requestEmptyTrash = () => {
     setConfirmAction({
-      title: `Delete ${selected.size} article(s)?`,
-      message: "All selected articles will be permanently deleted. This cannot be undone.",
-      confirmLabel: `Delete ${selected.size}`,
+      title: "Empty Trash?",
+      message: "All articles currently in the Trash will be permanently deleted. This cannot be undone.",
+      confirmLabel: "Empty Trash",
       onConfirm: async () => {
         setConfirmAction(null);
         try {
-          await deleteArticlesBulkFn({ data: Array.from(selected) });
+          await emptyTrashFn();
           router.invalidate();
-          toast.success(`${selected.size} article(s) deleted`);
+          toast.success("Trash emptied");
           setSelected(new Set());
           fetchArticles();
         } catch (err: any) {
-          toast.error(err.message || "Failed to delete articles");
+          toast.error(err.message || "Failed to empty trash");
         }
       },
     });
@@ -258,7 +366,7 @@ function ArticlesPage() {
       </div>
 
       {/* Status tabs */}
-      <ArticlesStatusTabs status={status} setStatus={setStatus} total={total} />
+      <ArticlesStatusTabs status={status} setStatus={setStatus} total={total} trashCount={trashCount} />
 
       {/* Search + category filter bar */}
       <ArticlesFilterBar
@@ -268,7 +376,11 @@ function ArticlesPage() {
         category={cat}
         setCategory={setCat}
         selectedCount={selected.size}
+        currentStatus={status}
+        trashCount={trashCount}
         onRequestBulkDelete={requestBulkDelete}
+        onRequestBulkRestore={requestBulkRestore}
+        onRequestEmptyTrash={requestEmptyTrash}
       />
 
       {/* Table */}
@@ -293,6 +405,7 @@ function ArticlesPage() {
           }
         }}
         onRequestDelete={requestDelete}
+        onRestore={requestRestore}
         page={page}
         totalPages={totalPages}
         total={total}

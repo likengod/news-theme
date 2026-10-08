@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Pencil,
   Trash2,
@@ -7,6 +6,7 @@ import {
   ChevronRight,
   Loader2,
   Image as ImageIcon,
+  RotateCcw,
 } from "lucide-react";
 import type { Row } from "./types";
 
@@ -19,6 +19,7 @@ interface ArticlesTableProps {
   onToggleOne: (id: number) => void;
   onEdit: (row: Row) => void;
   onRequestDelete: (id: number, title: string) => void;
+  onRestore?: (id: number, title: string) => void;
   page: number;
   totalPages: number;
   total: number;
@@ -35,6 +36,7 @@ export function ArticlesTable({
   onToggleOne,
   onEdit,
   onRequestDelete,
+  onRestore,
   page,
   totalPages,
   total,
@@ -149,21 +151,48 @@ export function ArticlesTable({
                   </span>
                 </td>
                 <td className="px-5 py-3 text-right">
-                  <div className="inline-flex gap-2">
-                    <button
-                      onClick={() => onEdit(r)}
-                      className="grid h-8 w-8 place-items-center rounded-md border border-slate-200 hover:bg-slate-100"
-                      aria-label="Edit"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => onRequestDelete(r.id, r.title)}
-                      className="grid h-8 w-8 place-items-center rounded-md border border-slate-200 text-red-600 hover:bg-red-50"
-                      aria-label="Delete"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                  <div className="inline-flex items-center gap-1.5">
+                    {r.status === "Trash" ? (
+                      <>
+                        <button
+                          onClick={() => onRestore?.(r.id, r.title)}
+                          className="inline-flex items-center gap-1 h-8 px-2.5 rounded-md border border-emerald-200 bg-emerald-50 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 transition-colors shadow-sm"
+                          aria-label="Restore"
+                          title="Restore article to Draft"
+                        >
+                          <RotateCcw className="h-3.5 w-3.5" />
+                          <span>Restore</span>
+                        </button>
+                        <button
+                          onClick={() => onRequestDelete(r.id, r.title)}
+                          className="inline-flex items-center gap-1 h-8 px-2.5 rounded-md border border-rose-200 bg-rose-50 text-xs font-semibold text-rose-700 hover:bg-rose-100 hover:text-rose-800 transition-colors shadow-sm"
+                          aria-label="Delete Permanently"
+                          title="Permanently Delete this article"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          <span>Delete Permanently</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => onEdit(r)}
+                          className="grid h-8 w-8 place-items-center rounded-md border border-slate-200 hover:bg-slate-100 text-slate-700"
+                          aria-label="Edit"
+                          title="Edit article"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => onRequestDelete(r.id, r.title)}
+                          className="grid h-8 w-8 place-items-center rounded-md border border-slate-200 text-rose-600 hover:bg-rose-50 hover:border-rose-200"
+                          aria-label="Move to Trash"
+                          title="Move to Trash"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>

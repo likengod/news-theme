@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, Loader2, Trash2 } from "lucide-react";
+import { Search, Loader2, Trash2, RotateCcw } from "lucide-react";
 import { sections } from "@/lib/news-data";
 
 import { useCategories } from "@/components/site/AdSettingsContext";
@@ -11,7 +11,11 @@ interface ArticlesFilterBarProps {
   category: string;
   setCategory: (cat: string) => void;
   selectedCount: number;
+  currentStatus?: string;
+  trashCount?: number;
   onRequestBulkDelete: () => void;
+  onRequestBulkRestore?: () => void;
+  onRequestEmptyTrash?: () => void;
 }
 
 export function ArticlesFilterBar({
@@ -21,7 +25,11 @@ export function ArticlesFilterBar({
   category,
   setCategory,
   selectedCount,
+  currentStatus,
+  trashCount,
   onRequestBulkDelete,
+  onRequestBulkRestore,
+  onRequestEmptyTrash,
 }: ArticlesFilterBarProps) {
   const dbCats = useCategories();
   const allCategoryOptions = React.useMemo(() => {
@@ -60,13 +68,46 @@ export function ArticlesFilterBar({
         ))}
       </select>
 
-      {selectedCount > 0 && (
-        <button
-          onClick={onRequestBulkDelete}
-          className="inline-flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
-        >
-          <Trash2 className="h-3.5 w-3.5" /> Delete ({selectedCount})
-        </button>
+      {currentStatus === "Trash" ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {selectedCount > 0 && (
+            <>
+              <button
+                type="button"
+                onClick={onRequestBulkRestore}
+                className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors shadow-xs"
+              >
+                <RotateCcw className="h-3.5 w-3.5" /> Restore ({selectedCount})
+              </button>
+              <button
+                type="button"
+                onClick={onRequestBulkDelete}
+                className="inline-flex items-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100 transition-colors shadow-xs"
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Delete Permanently ({selectedCount})
+              </button>
+            </>
+          )}
+          {(trashCount ?? 0) > 0 && onRequestEmptyTrash && (
+            <button
+              type="button"
+              onClick={onRequestEmptyTrash}
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition-colors shadow-xs"
+            >
+              <Trash2 className="h-3.5 w-3.5" /> Empty Trash
+            </button>
+          )}
+        </div>
+      ) : (
+        selectedCount > 0 && (
+          <button
+            type="button"
+            onClick={onRequestBulkDelete}
+            className="inline-flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100 transition-colors shadow-xs"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Move to Trash ({selectedCount})
+          </button>
+        )
       )}
     </div>
   );
