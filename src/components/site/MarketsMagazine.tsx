@@ -465,29 +465,33 @@ export function MarketsMagazine({
                 <ScriptAdRenderer code={slotScript} />
               </div>
             ) : (
-              slides.map((s, i) => (
-                <a
-                  key={s.id}
-                  href={s.href || "#"}
-                  aria-hidden={i !== slideIdx}
-                  tabIndex={i === slideIdx ? 0 : -1}
-                  aria-label={(s as any).title || "Advertisement"}
-                  className="absolute inset-0 block transition-opacity duration-300"
-                  style={{
-                    opacity: i === slideIdx ? 1 : 0,
-                    pointerEvents: i === slideIdx ? "auto" : "none",
-                  }}
-                >
-                  <img
-                    src={s.image}
-                    alt=""
-                    aria-hidden="true"
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover"
-                  />
-                </a>
-              ))
+              slides.map((s, i) => {
+                const isActive = i === slideIdx;
+                return (
+                  <a
+                    key={s.id}
+                    href={isActive ? (s.href || "#") : undefined}
+                    aria-hidden={!isActive ? "true" : undefined}
+                    tabIndex={isActive ? 0 : -1}
+                    aria-label={(s as any).title || "Advertisement"}
+                    className="absolute inset-0 block transition-opacity duration-300"
+                    style={{
+                      opacity: isActive ? 1 : 0,
+                      pointerEvents: isActive ? "auto" : "none",
+                      visibility: isActive ? "visible" : "hidden",
+                    }}
+                  >
+                    <img
+                      src={s.image}
+                      alt=""
+                      aria-hidden="true"
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover"
+                    />
+                  </a>
+                );
+              })
             )}
           </aside>
         )}

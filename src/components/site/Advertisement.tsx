@@ -235,6 +235,7 @@ export default function Advertisement({
           href={currentItem?.href ?? href}
           target="_blank"
           rel="noopener sponsored"
+          aria-label={currentItem?.title || label || "Advertisement"}
           className="group block border border-border bg-muted/30"
         >
           <div className="relative w-full overflow-hidden" style={{ aspectRatio }}>

@@ -42,7 +42,7 @@ export function TopBar() {
   const [settings, setSettings] = useState(defaultSettings);
   const [mounted, setMounted] = useState(false);
   const [showCustom, setShowCustom] = useState(false);
-  const [localAqi, setLocalAqi] = useState("DEL 165 AQI");
+  const [localAqi, setLocalAqi] = useState("AGT 58 AQI");
   const navigate = useNavigate();
   const dbCats = useCategories();
   const allItems: { name: string; slug: string; redirectUrl?: string | null }[] =
@@ -63,41 +63,17 @@ export function TopBar() {
     setSettings(loadSettings());
     setMounted(true);
 
-    // Check cached AQI first to avoid unnecessary network roundtrips
+    // Check cached AQI if present
     try {
       const cached = sessionStorage.getItem("nt:cached-aqi");
       if (cached) setLocalAqi(cached);
     } catch {}
-
-    // Fetch user location for AQI in the background after page has settled
-    const timer = setTimeout(() => {
-      if (typeof window === "undefined") return;
-      try {
-        if (sessionStorage.getItem("nt:cached-aqi")) return;
-      } catch {}
-
-      fetch("https://get.geojs.io/v1/ip/geo.json")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && data.city) {
-            const cityCode = data.city.substring(0, 3).toUpperCase();
-            const aqi = Math.floor(Math.random() * 100) + 40;
-            const aqiStr = `${cityCode} ${aqi} AQI`;
-            setLocalAqi(aqiStr);
-            try {
-              sessionStorage.setItem("nt:cached-aqi", aqiStr);
-            } catch {}
-          }
-        })
-        .catch(() => {});
-    }, 3500);
 
     const handleUpdate = () => {
       setSettings(loadSettings());
     };
     window.addEventListener("nt:settings-updated", handleUpdate);
     return () => {
-      clearTimeout(timer);
       window.removeEventListener("nt:settings-updated", handleUpdate);
     };
   }, []);
