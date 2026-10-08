@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Check, ChevronsUpDown } from "lucide-react";
@@ -21,6 +21,8 @@ export default function ArticleSettingsTab({
   authorOptions,
   isEnterprisePlus,
 }: ArticleSettingsTabProps) {
+  const [authorOpen, setAuthorOpen] = useState(false);
+
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -52,7 +54,7 @@ export default function ArticleSettingsTab({
                   aria-expanded={authorOpen}
                   className="w-full justify-between font-normal text-slate-700 bg-slate-50/80 hover:bg-slate-100 px-2.5 py-1.5 h-auto text-xs"
                 >
-                  ? Select author / admin profile...
+                  {row.author || "Select author / admin profile..."}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -87,7 +89,7 @@ export default function ArticleSettingsTab({
                               row.author === currentUserAuthor ? "opacity-100" : "opacity-0"
                             }`}
                           />
-                          ?? {currentUserAuthor} (Your Profile)
+                          🟢 {currentUserAuthor} (Your Profile)
                         </CommandItem>
                       )}
                       
@@ -219,6 +221,3 @@ export default function ArticleSettingsTab({
     </div>
   );
 }
-
-
-

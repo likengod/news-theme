@@ -1,0 +1,2 @@
+import{on as e}from"./vendor-lucide-Cm1xF1qh.js";import{R as t}from"./vendor-radix-DCzOHGV5.js";import{t as n}from"./news-data-Cw9hwDz_.js";var r=t();function i({count:t,className:i=``}){return(0,r.jsxs)(`span`,{className:`inline-flex items-center gap-1 text-[11px] text-muted-foreground ${i}`,children:[(0,r.jsx)(e,{className:`h-3 w-3 shrink-0`}),(0,r.jsxs)(`span`,{children:[n(t),` views`]})]})}export{i as t};
+//# sourceMappingURL=Views-BlASJ-b7.js.map

@@ -1,0 +1,2 @@
+import{i as e}from"./rolldown-runtime-aKtaBQYM.js";import{br as t}from"./vendor-lucide-Cm1xF1qh.js";import{R as n,s as r}from"./vendor-radix-DCzOHGV5.js";import{t as i}from"./utils-B6KiDbIe.js";import{t as a}from"./dist-C1RJhgYD.js";var o=e(t()),s=n(),c=a(`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`),l=o.forwardRef(({className:e,...t},n)=>(0,s.jsx)(r,{ref:n,className:i(c(),e),...t}));l.displayName=r.displayName;export{l as t};
+//# sourceMappingURL=label-CfZN9-E_.js.map

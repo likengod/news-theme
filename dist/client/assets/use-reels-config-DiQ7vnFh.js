@@ -1,0 +1,2 @@
+import{i as e}from"./rolldown-runtime-aKtaBQYM.js";import{br as t}from"./vendor-lucide-Cm1xF1qh.js";import{a as n,c as r,s as i}from"./reels-config-BGCVc6AF.js";var a=e(t());function o(){let[e,t]=(0,a.useState)(()=>i());return(0,a.useEffect)(()=>{let e=r(()=>t(i()));return n().then(e=>{if(e&&(t(e),typeof window<`u`))try{localStorage.setItem(`nt:reels-config:v2`,JSON.stringify(e))}catch{}}).catch(()=>{}),e},[]),e}export{o as t};
+//# sourceMappingURL=use-reels-config-DiQ7vnFh.js.map

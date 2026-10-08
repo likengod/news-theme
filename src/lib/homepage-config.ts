@@ -2,7 +2,20 @@
 // Each section has a label/title (text rendered as the heading), font size,
 // color, and optionally a category that drives "latest news" content.
 
-import { sections as ALL_CATEGORIES, lead, top, grid, type Article } from "./news-data";
+// Inline categories to avoid a synchronous import chain to news-data.ts
+// which pulls in image assets and adds ~1.2s to the critical path.
+const ALL_CATEGORIES = [
+  "Northeast",
+  "Breaking",
+  "Global",
+  "Politics",
+  "Business",
+  "Crime",
+  "Tech",
+  "Sports",
+  "Opinion",
+  "Others",
+];
 
 export type SectionStyle = {
   title: string;
@@ -179,10 +192,4 @@ export function styleFor(s: SectionStyle): React.CSSProperties {
 }
 
 /** Pick items matching a category (kicker substring match), latest first. */
-export function articlesByCategory(category?: string): Article[] {
-  const pool: Article[] = [lead as Article, ...(top as Article[]), ...(grid as Article[])];
-  if (!category || category === "Auto (Latest)") return pool;
-  const c = category.toLowerCase();
-  const matched = pool.filter((a) => (a.kicker ?? "").toLowerCase().includes(c));
-  return matched.length > 0 ? matched : pool;
-}
+export { articlesByCategory } from "./news-data-helpers";

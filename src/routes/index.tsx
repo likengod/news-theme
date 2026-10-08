@@ -124,19 +124,28 @@ function Home() {
 
         {/* On Desktop Devices (>= md): Render Watch section after HeroBoard */}
         <div className="hidden md:block">
-          <Suspense fallback={null}>
+          <LazySection minHeight={200} rootMargin="400px">
             <Columnists />
-          </Suspense>
+          </LazySection>
         </div>
 
-        <NewsGrid articles={dbArticles} usedIds={usedIds} />
+        {/* Below-the-fold sections: defer loading until user scrolls near them */}
+        <LazySection minHeight={600} rootMargin="400px">
+          <NewsGrid articles={dbArticles} usedIds={usedIds} />
+        </LazySection>
 
-        <ReelsSection />
+        <LazySection minHeight={400} rootMargin="300px">
+          <ReelsSection />
+        </LazySection>
 
-        <MarketsMagazine articles={dbArticles} usedIds={usedIds} />
+        <LazySection minHeight={500} rootMargin="300px">
+          <MarketsMagazine articles={dbArticles} usedIds={usedIds} />
+        </LazySection>
       </main>
 
-      <Footer />
+      <LazySection minHeight={300} rootMargin="200px">
+        <Footer />
+      </LazySection>
     </div>
   );
 }
