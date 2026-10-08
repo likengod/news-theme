@@ -1,2 +1,0 @@
-import{R as e}from"./vendor-radix-DfyW4Fqo.js";import{C as t}from"./index-CE0c6M0K.js";import{t as n}from"./PolicyLayout-DN-DgGP9.js";var r=e();function i(){let e=t.useLoaderData();return(0,r.jsx)(n,{title:e?.title||``,intro:e?.intro||``,sections:e?.sections&&e.sections.length>0?e.sections.map(e=>({heading:e.heading,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e.body}})})):[{heading:e?.title||``,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e?.body||``}})}]})}export{i as component};
-//# sourceMappingURL=refund-policy-BH63c3fD.js.map

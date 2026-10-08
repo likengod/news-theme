@@ -106,6 +106,32 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // Instant fast-path for /robots.txt (prevents crawler/Lighthouse timeout)
+    if (parsedPath === "/robots.txt") {
+      const robotsDirs = [
+        path.join(__dirname, "public/robots.txt"),
+        path.join(__dirname, "dist/client/robots.txt"),
+      ];
+      for (const rPath of robotsDirs) {
+        if (fs.existsSync(rPath)) {
+          const content = fs.readFileSync(rPath, "utf-8");
+          applySecurityHeaders(res);
+          res.statusCode = 200;
+          res.setHeader("Content-Type", "text/plain; charset=utf-8");
+          res.setHeader("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
+          res.end(content);
+          return;
+        }
+      }
+      // Fallback valid robots.txt if physical file is missing
+      applySecurityHeaders(res);
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.end("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\nDisallow: /api/*\nDisallow: /setup\nSitemap: https://" + host + "/sitemap.xml\n");
+      return;
+    }
+
     // Static assets handling from dist/client, public, uploads, or historical assets
     const staticDirs = [
       path.join(__dirname, "dist/client"),
