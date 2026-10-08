@@ -152,7 +152,6 @@ const server = createServer(async (req, res) => {
         const imageExts = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
         if (imageExts.includes(ext)) {
           const referer = req.headers.referer || "";
-          const host = req.headers.host || "";
 
           if (referer) {
             try {
@@ -232,8 +231,6 @@ const server = createServer(async (req, res) => {
       return;
     }
 
-    const host = req.headers.host || "127.0.0.1:3000";
-    const proto = req.headers["x-forwarded-proto"] || "http";
     const url = new URL(rawUrl, `${proto}://${host}`);
     process.env.APP_ORIGIN = `${proto}://${host}`;
 
