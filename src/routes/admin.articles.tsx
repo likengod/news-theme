@@ -25,6 +25,8 @@ import { ArticlesFilterBar } from "@/components/admin/articles/ArticlesFilterBar
 import { ArticlesTable } from "@/components/admin/articles/ArticlesTable";
 import type { ArticleStatus } from "@/components/admin/articles/types";
 
+import { useCategories } from "@/components/site/AdSettingsContext";
+
 const ArticleEditor = lazy(() => import("@/components/admin/ArticleEditor"));
 
 export const Route = createFileRoute("/admin/articles")({
@@ -82,6 +84,10 @@ function ArticlesPage() {
   const [currentUserAuthor, setCurrentUserAuthor] = useState("Admin User");
   const [authorOptions, setAuthorOptions] = useState<{ id: string; name: string; username?: string; email?: string; phone?: string; role: string }[]>([]);
   const fetchAuthorProfilesFn = useServerFn(getAdminAuthorProfiles);
+
+  const dbCats = useCategories();
+  const defaultCategory =
+    dbCats?.find((c) => c?.name?.toLowerCase() === "uncategorized")?.name || "Uncategorized";
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -305,7 +311,7 @@ function ArticlesPage() {
         >
           <ArticleEditor
             key={editing ? `edit-${editing.id}` : "create-article"}
-            initial={editing ?? blankRow(currentUserAuthor)}
+            initial={editing ?? blankRow(currentUserAuthor, defaultCategory)}
             currentUserAuthor={currentUserAuthor}
             authorOptions={authorOptions}
             onClose={() => {

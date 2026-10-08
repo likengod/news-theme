@@ -126,7 +126,7 @@ export function ArticlesTable({
                 </td>
                 <td className="px-5 py-3 text-slate-600">
                   <div className="flex flex-wrap gap-1 max-w-[220px]">
-                    {(r.category || "General").split(",").map((c, i) => (
+                    {(r.category || "Uncategorized").split(",").map((c, i) => (
                       <span
                         key={i}
                         className={`inline-block rounded px-1.5 py-0.5 text-[11px] font-medium ${

@@ -48,16 +48,17 @@ export default function MultiCategorySelector({
     };
   }, []);
 
-  // Parse selected categories array
+  // Parse selected categories array (WordPress style: defaults to Uncategorized if empty)
   const selectedCategories = useMemo(() => {
-    if (!value) return [];
-    return value
+    if (!value || !value.trim()) return ["Uncategorized"];
+    const list = value
       .split(",")
       .map((c) => c.trim())
       .filter(Boolean);
+    return list.length > 0 ? list : ["Uncategorized"];
   }, [value]);
 
-  // Combine all available categories (DB categories only — no hardcoded defaults)
+  // Combine all available categories (DB categories + Uncategorized fallback)
   const allAvailableCategories = useMemo(() => {
     const set = new Set<string>();
     // Context categories (from root loader)
@@ -68,10 +69,29 @@ export default function MultiCategorySelector({
     (fetchedCats || []).forEach((c) => {
       if (c?.name) set.add(c.name);
     });
-    // Also include any currently selected categories (even custom ones)
+    // Always include Uncategorized as a standard option
+    set.add("Uncategorized");
+    // Also include any currently selected categories
     selectedCategories.forEach((s) => set.add(s));
     return Array.from(set);
   }, [contextCats, fetchedCats, selectedCategories]);
+
+  // Quick suggestions: prioritize live DB categories over static fallbacks
+  const quickSuggestions = useMemo(() => {
+    const list: string[] = [];
+    (contextCats || []).forEach((c) => {
+      if (c?.name && !list.includes(c.name) && c.name.toLowerCase() !== "uncategorized") {
+        list.push(c.name);
+      }
+    });
+    (fetchedCats || []).forEach((c) => {
+      if (c?.name && !list.includes(c.name) && c.name.toLowerCase() !== "uncategorized") {
+        list.push(c.name);
+      }
+    });
+    if (list.length > 0) return list.slice(0, 10);
+    return POPULAR_SUGGESTIONS;
+  }, [contextCats, fetchedCats]);
 
   // Filtered by search
   const filteredCategories = useMemo(() => {
@@ -105,13 +125,27 @@ export default function MultiCategorySelector({
     const trimmed = cat.trim();
     if (!trimmed) return;
     if (selectedCategories.includes(trimmed)) return;
-    const next = [...selectedCategories, trimmed];
+    // WordPress style: if only "Uncategorized" is selected and user selects a specific category, replace it
+    let next: string[];
+    const isOnlyUncategorized =
+      selectedCategories.length === 1 &&
+      selectedCategories[0].toLowerCase() === "uncategorized";
+    if (isOnlyUncategorized && trimmed.toLowerCase() !== "uncategorized") {
+      next = [trimmed];
+    } else {
+      next = [...selectedCategories, trimmed];
+    }
     onChange(next.join(", "));
   };
 
   const removeCategory = (cat: string) => {
     const next = selectedCategories.filter((c) => c !== cat);
-    onChange(next.join(", "));
+    // WordPress style: if all categories are removed, fall back to "Uncategorized"
+    if (next.length === 0) {
+      onChange("Uncategorized");
+    } else {
+      onChange(next.join(", "));
+    }
   };
 
   const makePrimary = (cat: string) => {
@@ -362,7 +396,7 @@ export default function MultiCategorySelector({
       {/* Quick Suggestions Chips */}
       <div className="flex flex-wrap items-center gap-1 text-xs">
         <span className="text-[11px] text-slate-400 mr-0.5">Quick add:</span>
-        {POPULAR_SUGGESTIONS.map((cat) => {
+        {quickSuggestions.map((cat) => {
           const isSelected = selectedCategories.includes(cat);
           if (isSelected) return null;
           return (

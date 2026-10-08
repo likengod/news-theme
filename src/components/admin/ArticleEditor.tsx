@@ -50,7 +50,7 @@ export default function ArticleEditor({
     ...raw,
     title: raw.title || "",
     slug: raw.slug || "",
-    category: raw.category || "",
+    category: raw.category || "Uncategorized",
     city: raw.city || "",
     state: raw.state || "",
     country: raw.country || "",

@@ -367,8 +367,25 @@ export const getCategoryData = createServerFn({ method: "GET" })
         "SELECT * FROM categories WHERE slug = ? OR slug = ? OR name = ? OR name = ? LIMIT 1",
         [decodedSlug, rawSlug, decodedSlug, rawSlug],
       );
-      if (!Array.isArray(catRows) || catRows.length === 0) return null;
-      const cat = catRows[0];
+      let cat = null;
+      if (Array.isArray(catRows) && catRows.length > 0) {
+        cat = catRows[0];
+      } else if (
+        decodedSlug.toLowerCase() === "uncategorized" ||
+        rawSlug.toLowerCase() === "uncategorized"
+      ) {
+        cat = {
+          id: 0,
+          name: "Uncategorized",
+          slug: "uncategorized",
+          description: "Archive of uncategorized articles.",
+          meta_title: "Uncategorized Articles",
+          meta_description: "Archive of uncategorized articles.",
+          show_in_header: 0,
+          sort_order: 999,
+        };
+      }
+      if (!cat) return null;
 
       const catWhere = `(
         category = ? OR category = ? OR

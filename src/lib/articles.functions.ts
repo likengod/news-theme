@@ -182,7 +182,7 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
     const values = [
       r.title || (existingRow?.title ?? ""),
       slug,
-      r.category || (existingRow?.category ?? "Tripura"),
+      r.category || (existingRow?.category ?? "Uncategorized"),
       r.city ?? (existingRow?.city ?? ""),
       r.state ?? (existingRow?.state ?? ""),
       r.country ?? (existingRow?.country ?? ""),
@@ -343,7 +343,7 @@ export const importAdminArticles = createServerFn({ method: "POST" })
       const values = [
         r.title || "Untitled",
         finalSlug,
-        r.category || "General",
+        r.category || "Uncategorized",
         r.city || "",
         r.state || "",
         r.country || "",

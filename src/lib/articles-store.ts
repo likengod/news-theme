@@ -5,11 +5,11 @@ import type { Row } from "@/components/admin/ArticleEditor";
 
 const KEY = "nt:articles:v1";
 
-export const blankRow = (defaultAuthor?: string): Row => ({
+export const blankRow = (defaultAuthor?: string, defaultCategory: string = "Uncategorized"): Row => ({
   id: 0,
   title: "",
   slug: "",
-  category: sections[0],
+  category: defaultCategory || "Uncategorized",
   city: "",
   state: "",
   country: "",
