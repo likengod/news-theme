@@ -78,6 +78,75 @@ function applySecurityHeaders(res) {
   }
 }
 
+function sendStaticFile(filePath, req, res, host, parsedPath) {
+  const ext = path.extname(filePath).toLowerCase();
+
+  // HOTLINK PROTECTION START
+  const imageExts = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif"];
+  if (imageExts.includes(ext)) {
+    const referer = req.headers.referer || "";
+    if (referer) {
+      try {
+        const refUrl = new URL(referer);
+        const refHost = refUrl.hostname.toLowerCase();
+        const myHost = (host || "").split(":")[0].toLowerCase();
+        const allowedDomains = [
+          myHost,
+          "localhost",
+          "127.0.0.1",
+          "0.0.0.0",
+          "facebook.com",
+          "twitter.com",
+          "t.co",
+          "linkedin.com",
+          "pinterest.com",
+          "google.",
+          "bing.com",
+          "yahoo.com",
+        ];
+        const isAllowed = allowedDomains.some((domain) => refHost.includes(domain));
+        if (!isAllowed) {
+          res.statusCode = 403;
+          res.setHeader("Content-Type", "text/plain");
+          res.end("403 Forbidden: Hotlinking is disabled on this server.");
+          return;
+        }
+      } catch (e) {}
+    }
+  }
+  // HOTLINK PROTECTION END
+
+  if (MIME_TYPES[ext]) {
+    res.setHeader("Content-Type", MIME_TYPES[ext]);
+  }
+  if (
+    parsedPath.startsWith("/assets/") ||
+    parsedPath.startsWith("/fonts/") ||
+    [".woff2", ".woff", ".ttf", ".otf"].includes(ext)
+  ) {
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  } else if (
+    parsedPath.startsWith("/uploads/") ||
+    [".ico", ".svg", ".webp", ".jpg", ".jpeg", ".png", ".gif"].includes(ext)
+  ) {
+    res.setHeader("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
+  } else {
+    res.setHeader("Cache-Control", "public, max-age=86400");
+  }
+
+  const compressibleExts = [".css", ".js", ".json", ".svg", ".txt", ".xml", ".html"];
+  const acceptEncoding = (req.headers["accept-encoding"] || "").toLowerCase();
+  if (compressibleExts.includes(ext) && acceptEncoding.includes("gzip")) {
+    res.setHeader("Content-Encoding", "gzip");
+    res.setHeader("Vary", "Accept-Encoding");
+    const gzip = zlib.createGzip({ level: 6 });
+    fs.createReadStream(filePath).pipe(gzip).pipe(res);
+    return;
+  }
+
+  fs.createReadStream(filePath).pipe(res);
+}
+
 const server = createServer(async (req, res) => {
 
   try {
@@ -146,20 +215,93 @@ const server = createServer(async (req, res) => {
       return;
     }
 
-    // Static assets handling from dist/client, public, uploads, or historical assets
-    const staticDirs = [
-      path.join(__dirname, "dist/client"),
-      path.join(__dirname, "public"),
-      path.join(__dirname, "uploads"),
-      path.join(__dirname, "assets"),
-    ];
-
     let safeParsedPath = "";
     try {
       safeParsedPath = path.normalize(decodeURIComponent(parsedPath)).replace(/\0/g, "");
     } catch {
       safeParsedPath = path.normalize(parsedPath).replace(/\0/g, "");
     }
+
+    // 1. Comprehensive uploads resolution (promos, ads, documents, media)
+    if (parsedPath.startsWith("/uploads/")) {
+      const uploadSubPath = safeParsedPath.replace(/^[/\\]uploads[/\\]?/, "");
+      const fileNameOnly = path.basename(uploadSubPath);
+      const possibleUploadPaths = [
+        path.join(__dirname, "uploads", uploadSubPath),
+        path.join(__dirname, "public", "uploads", uploadSubPath),
+        path.join(__dirname, "dist", "client", "uploads", uploadSubPath),
+        path.join(__dirname, "uploads", "promos", fileNameOnly),
+        path.join(__dirname, "uploads", "ads", fileNameOnly),
+        path.join(__dirname, "uploads", "documents", fileNameOnly),
+        path.join(__dirname, "uploads", fileNameOnly),
+        path.join(__dirname, "public", "uploads", "promos", fileNameOnly),
+        path.join(__dirname, "public", "uploads", "ads", fileNameOnly),
+        path.join(__dirname, "dist", "client", "uploads", "promos", fileNameOnly),
+        path.join(__dirname, "dist", "client", "uploads", "ads", fileNameOnly),
+      ];
+
+      for (const candidate of possibleUploadPaths) {
+        if (fs.existsSync(candidate)) {
+          try {
+            if (fs.statSync(candidate).isFile()) {
+              sendStaticFile(candidate, req, res, host, parsedPath);
+              return;
+            }
+          } catch {}
+        }
+      }
+    }
+
+    // 2. Direct media file fallback for /media_*.webp / .png / .jpg
+    const ext = path.extname(safeParsedPath).toLowerCase();
+    if (
+      !parsedPath.startsWith("/api/") &&
+      !parsedPath.startsWith("/admin") &&
+      [".webp", ".png", ".jpg", ".jpeg", ".svg", ".gif", ".avif"].includes(ext)
+    ) {
+      const fileNameOnly = path.basename(safeParsedPath);
+      const mediaCandidates = [
+        path.join(__dirname, "uploads", "promos", fileNameOnly),
+        path.join(__dirname, "uploads", "ads", fileNameOnly),
+        path.join(__dirname, "uploads", "documents", fileNameOnly),
+        path.join(__dirname, "uploads", fileNameOnly),
+        path.join(__dirname, "public", "uploads", "promos", fileNameOnly),
+        path.join(__dirname, "dist", "client", "uploads", "promos", fileNameOnly),
+      ];
+      for (const candidate of mediaCandidates) {
+        if (fs.existsSync(candidate)) {
+          try {
+            if (fs.statSync(candidate).isFile()) {
+              sendStaticFile(candidate, req, res, host, parsedPath);
+              return;
+            }
+          } catch {}
+        }
+      }
+    }
+
+    // 3. Stylesheet hash fallback: if older styles-*.css is requested by cached HTML, serve active CSS
+    if (parsedPath.startsWith("/assets/styles-") && parsedPath.endsWith(".css")) {
+      const assetsDir = path.join(__dirname, "dist/client/assets");
+      if (fs.existsSync(assetsDir)) {
+        const files = fs.readdirSync(assetsDir);
+        const currentCss = files.find((f) => f.startsWith("styles-") && f.endsWith(".css"));
+        if (currentCss) {
+          const fallbackPath = path.join(assetsDir, currentCss);
+          if (fs.existsSync(fallbackPath)) {
+            sendStaticFile(fallbackPath, req, res, host, parsedPath);
+            return;
+          }
+        }
+      }
+    }
+
+    // 4. General static assets handling from dist/client, public, assets
+    const staticDirs = [
+      path.join(__dirname, "dist/client"),
+      path.join(__dirname, "public"),
+      path.join(__dirname, "assets"),
+    ];
 
     for (const baseDir of staticDirs) {
       const safeBase = path.resolve(baseDir);
@@ -186,78 +328,7 @@ const server = createServer(async (req, res) => {
       }
 
       if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-        const ext = path.extname(filePath).toLowerCase();
-
-        // HOTLINK PROTECTION START
-        const imageExts = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
-        if (imageExts.includes(ext)) {
-          const referer = req.headers.referer || "";
-
-          if (referer) {
-            try {
-              const refUrl = new URL(referer);
-              const refHost = refUrl.hostname.toLowerCase();
-              const myHost = host.split(":")[0].toLowerCase(); // remove port
-
-              // Allowlist of allowed referers (social media & search engines)
-              const allowedDomains = [
-                myHost,
-                "localhost",
-                "facebook.com",
-                "twitter.com",
-                "t.co",
-                "linkedin.com",
-                "pinterest.com",
-                "google.", // google.com, google.co.in, etc.
-                "bing.com",
-                "yahoo.com",
-              ];
-
-              const isAllowed = allowedDomains.some((domain) => refHost.includes(domain));
-
-              if (!isAllowed) {
-                // Block the hotlink request
-                res.statusCode = 403;
-                res.setHeader("Content-Type", "text/plain");
-                res.end("403 Forbidden: Hotlinking is disabled on this server.");
-                return;
-              }
-            } catch (e) {
-              // Invalid referer URL, let it pass or block it (passing is safer)
-            }
-          }
-        }
-        // HOTLINK PROTECTION END
-
-        if (MIME_TYPES[ext]) {
-          res.setHeader("Content-Type", MIME_TYPES[ext]);
-        }
-        if (
-          parsedPath.startsWith("/assets/") ||
-          parsedPath.startsWith("/fonts/") ||
-          [".woff2", ".woff", ".ttf", ".otf"].includes(ext)
-        ) {
-          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-        } else if (
-          parsedPath.startsWith("/uploads/") ||
-          [".ico", ".svg", ".webp", ".jpg", ".jpeg", ".png", ".gif"].includes(ext)
-        ) {
-          res.setHeader("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
-        } else {
-          res.setHeader("Cache-Control", "public, max-age=86400");
-        }
-
-        const compressibleExts = [".css", ".js", ".json", ".svg", ".txt", ".xml", ".html"];
-        const acceptEncoding = (req.headers["accept-encoding"] || "").toLowerCase();
-        if (compressibleExts.includes(ext) && acceptEncoding.includes("gzip")) {
-          res.setHeader("Content-Encoding", "gzip");
-          res.setHeader("Vary", "Accept-Encoding");
-          const gzip = zlib.createGzip({ level: 6 });
-          fs.createReadStream(filePath).pipe(gzip).pipe(res);
-          return;
-        }
-
-        fs.createReadStream(filePath).pipe(res);
+        sendStaticFile(filePath, req, res, host, parsedPath);
         return;
       }
     }
