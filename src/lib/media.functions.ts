@@ -125,3 +125,13 @@ export const deleteMediaServer = createServerFn({ method: "POST" })
     await query("DELETE FROM media_library WHERE id = ?", [data.id]);
     return { success: true };
   });
+
+export const deleteMultipleMediaServer = createServerFn({ method: "POST" })
+  .validator((data: { ids: string[] }) => data)
+  .handler(async ({ data }) => {
+    if (!data.ids || data.ids.length === 0) return { success: true, count: 0 };
+    const placeholders = data.ids.map(() => "?").join(",");
+    await query(`DELETE FROM media_library WHERE id IN (${placeholders})`, data.ids);
+    return { success: true, count: data.ids.length };
+  });
+

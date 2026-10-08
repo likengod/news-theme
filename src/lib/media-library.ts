@@ -28,6 +28,7 @@ import {
   replaceMediaFileServer,
   batchUpdateAltTextServer,
   deleteMediaServer,
+  deleteMultipleMediaServer,
 } from "./media.functions";
 import {
   protectCanvasAndExport,
@@ -179,6 +180,13 @@ export const mediaLibrary = {
     memoryCache = memoryCache.filter((m) => m.id !== id);
     notifyChange();
     await deleteMediaServer({ data: { id } });
+  },
+  async removeMultiple(ids: string[]) {
+    if (!ids || ids.length === 0) return;
+    const set = new Set(ids);
+    memoryCache = memoryCache.filter((m) => !set.has(m.id));
+    notifyChange();
+    await deleteMultipleMediaServer({ data: { ids } });
   },
   clear() {
     memoryCache = [];

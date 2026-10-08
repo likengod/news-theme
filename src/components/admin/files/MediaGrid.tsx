@@ -11,7 +11,8 @@ import {
   AlertTriangle,
   RefreshCw,
   Sparkles,
-  Upload,
+  ArrowUpDown,
+  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { EditMediaModal } from "./EditMediaModal";
@@ -26,6 +27,7 @@ export type MediaItemDef = {
   size?: string;
   rawSize?: number;
   uploadedAt?: string;
+  createdAt?: number;
   type?: "image" | "video" | "document";
 };
 
@@ -50,20 +52,46 @@ function SafeImage({ src, alt, className, ...props }: any) {
   );
 }
 
+function getItemByteSize(item: MediaItemDef): number {
+  if (typeof item.rawSize === "number" && !isNaN(item.rawSize) && item.rawSize > 0) {
+    return item.rawSize;
+  }
+  if (!item.size || item.size === "-") return 0;
+  const match = item.size.match(/([\d\.]+)\s*(MB|KB|B|bytes)/i);
+  if (!match) return 0;
+  const val = parseFloat(match[1]);
+  const unit = match[2].toUpperCase();
+  if (unit === "MB") return val * 1024 * 1024;
+  if (unit === "KB") return val * 1024;
+  return val;
+}
+
 type Props = {
   items: MediaItemDef[];
   onDelete?: (id: string) => void;
+  onDeleteMultiple?: (ids: string[]) => Promise<void> | void;
   onEdit?: (id: string, name: string, altText?: string, description?: string) => void;
   onReplace?: (id: string, file: File, name: string, altText?: string, description?: string) => Promise<void> | void;
   onAutoFillAltTexts?: () => Promise<number>;
 };
 
-export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTexts }: Props) {
+export function MediaGrid({
+  items,
+  onDelete,
+  onDeleteMultiple,
+  onEdit,
+  onReplace,
+  onAutoFillAltTexts,
+}: Props) {
   const [filter, setFilter] = useState<"all" | "image" | "video" | "document" | "duplicates" | "no-alt">("all");
+  const [sizeFilter, setSizeFilter] = useState<"all" | "large" | "medium" | "small">("all");
+  const [sortBy, setSortBy] = useState<"size-desc" | "size-asc" | "date-desc" | "date-asc" | "name-asc" | "name-desc">("size-desc");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [q, setQ] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [editingItem, setEditingItem] = useState<MediaItemDef | null>(null);
   const [fillingAlt, setFillingAlt] = useState(false);
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const quickReplaceInputRef = useRef<HTMLInputElement>(null);
   const [quickReplaceTargetId, setQuickReplaceTargetId] = useState<string | null>(null);
 
@@ -177,19 +205,128 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
     }
   };
 
-  const filtered = items.filter((it) => {
-    const matchesQ = `${it.name}${it.url || ""}${it.altText || ""}`.toLowerCase().includes(q.toLowerCase());
-    if (!matchesQ) return false;
+  // Filtered and Sorted list
+  const filteredAndSorted = useMemo(() => {
+    let result = items.filter((it) => {
+      const matchesQ = `${it.name}${it.url || ""}${it.altText || ""}`.toLowerCase().includes(q.toLowerCase());
+      if (!matchesQ) return false;
 
-    if (filter === "duplicates") {
-      return duplicateInfo.has(it.id);
+      // Type filter
+      if (filter === "duplicates") {
+        if (!duplicateInfo.has(it.id)) return false;
+      } else if (filter === "no-alt") {
+        if (it.altText && it.altText.trim() !== "") return false;
+      } else if (filter !== "all") {
+        if ((it.type || "image") !== filter) return false;
+      }
+
+      // Size filter
+      const byteSize = getItemByteSize(it);
+      if (sizeFilter === "large") {
+        if (byteSize < 500 * 1024) return false; // > 500 KB
+      } else if (sizeFilter === "medium") {
+        if (byteSize < 100 * 1024 || byteSize >= 500 * 1024) return false; // 100 - 500 KB
+      } else if (sizeFilter === "small") {
+        if (byteSize >= 100 * 1024) return false; // < 100 KB
+      }
+
+      return true;
+    });
+
+    // Sorting
+    result = [...result].sort((a, b) => {
+      if (sortBy === "size-desc") {
+        return getItemByteSize(b) - getItemByteSize(a);
+      }
+      if (sortBy === "size-asc") {
+        return getItemByteSize(a) - getItemByteSize(b);
+      }
+      if (sortBy === "date-desc") {
+        return (b.createdAt || 0) - (a.createdAt || 0);
+      }
+      if (sortBy === "date-asc") {
+        return (a.createdAt || 0) - (b.createdAt || 0);
+      }
+      if (sortBy === "name-asc") {
+        return (a.name || "").localeCompare(b.name || "");
+      }
+      if (sortBy === "name-desc") {
+        return (b.name || "").localeCompare(a.name || "");
+      }
+      return 0;
+    });
+
+    return result;
+  }, [items, q, filter, sizeFilter, sortBy, duplicateInfo]);
+
+  // Selection handlers
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const isAllVisibleSelected =
+    filteredAndSorted.length > 0 &&
+    filteredAndSorted.every((it) => selectedIds.has(it.id));
+
+  const toggleSelectAllVisible = () => {
+    if (isAllVisibleSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        filteredAndSorted.forEach((it) => next.delete(it.id));
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        filteredAndSorted.forEach((it) => next.add(it.id));
+        return next;
+      });
     }
-    if (filter === "no-alt") {
-      return !it.altText || it.altText.trim() === "";
+  };
+
+  const selectAllLibrary = () => {
+    setSelectedIds(new Set(items.map((it) => it.id)));
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+  };
+
+  const selectedBytes = useMemo(() => {
+    let total = 0;
+    for (const it of items) {
+      if (selectedIds.has(it.id)) {
+        total += getItemByteSize(it);
+      }
     }
-    if (filter === "all") return true;
-    return (it.type || "image") === filter;
-  });
+    return total;
+  }, [items, selectedIds]);
+
+  const handleBatchDelete = async () => {
+    if (selectedIds.size === 0) return;
+    const ids = Array.from(selectedIds);
+    if (!confirm(`Are you sure you want to permanently delete all ${ids.length} selected files?`)) {
+      return;
+    }
+    setIsDeletingBulk(true);
+    try {
+      if (onDeleteMultiple) {
+        await onDeleteMultiple(ids);
+      } else if (onDelete) {
+        for (const id of ids) {
+          onDelete(id);
+        }
+      }
+      setSelectedIds(new Set());
+    } finally {
+      setIsDeletingBulk(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -202,15 +339,65 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
         className="hidden"
       />
 
+      {/* Batch Selection Banner */}
+      {selectedIds.size > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-3 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-rose-600 text-white text-xs font-bold shadow-2xs">
+              ✓
+            </span>
+            <span className="text-xs sm:text-sm font-bold text-rose-950">
+              {selectedIds.size} file{selectedIds.size > 1 ? "s" : ""} selected
+              <span className="ml-1.5 font-normal text-rose-700">({formatBytes(selectedBytes)})</span>
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleSelectAllVisible}
+              className="rounded-lg border border-rose-300 bg-white px-2.5 py-1 text-xs font-semibold text-rose-900 hover:bg-rose-100 transition shadow-2xs cursor-pointer"
+            >
+              {isAllVisibleSelected ? "Deselect Filtered" : `Select Filtered (${filteredAndSorted.length})`}
+            </button>
+            {items.length > filteredAndSorted.length && (
+              <button
+                type="button"
+                onClick={selectAllLibrary}
+                className="rounded-lg border border-rose-300 bg-white px-2.5 py-1 text-xs font-semibold text-rose-900 hover:bg-rose-100 transition shadow-2xs cursor-pointer"
+              >
+                Select All Library ({items.length})
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={clearSelection}
+              className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition shadow-2xs cursor-pointer"
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              onClick={handleBatchDelete}
+              disabled={isDeletingBulk}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-700 transition shadow-xs disabled:opacity-50 cursor-pointer"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              {isDeletingBulk ? "Deleting..." : `Delete Selected (${selectedIds.size})`}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Filter Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-xs">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-xs">
         <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
           <input
             type="text"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search media files by name or alt text..."
-            className="h-9 w-full sm:w-64 rounded-xl border border-slate-200 px-3 text-xs focus:border-slate-900 focus:outline-none"
+            className="h-9 w-full sm:w-56 md:w-64 rounded-xl border border-slate-200 px-3 text-xs focus:border-slate-900 focus:outline-none"
           />
 
           {/* Filter Pills */}
@@ -226,7 +413,7 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
               <button
                 key={t.key}
                 onClick={() => setFilter(t.key)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-semibold capitalize transition ${
+                className={`rounded-lg px-2.5 py-1 text-xs font-semibold capitalize transition cursor-pointer ${
                   filter === t.key
                     ? "bg-slate-900 text-white"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -239,7 +426,7 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
             {/* Duplicate Filter Tab */}
             <button
               onClick={() => setFilter(filter === "duplicates" ? "all" : "duplicates")}
-              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
                 filter === "duplicates"
                   ? "bg-amber-600 text-white"
                   : duplicateCount > 0
@@ -256,7 +443,7 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
             {missingAltCount > 0 && (
               <button
                 onClick={() => setFilter(filter === "no-alt" ? "all" : "no-alt")}
-                className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
                   filter === "no-alt"
                     ? "bg-rose-600 text-white"
                     : "bg-rose-50 text-rose-700 hover:bg-rose-100"
@@ -269,24 +456,58 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
           </div>
         </div>
 
-        {/* Right Action Tools */}
-        <div className="flex items-center gap-2">
+        {/* Right Action Tools: Size Filter, Sort Dropdown, Auto-fill, Grid/List */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Size Filter Dropdown */}
+          <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50/80 px-2 py-1">
+            <SlidersHorizontal className="h-3.5 w-3.5 text-slate-500" />
+            <select
+              value={sizeFilter}
+              onChange={(e) => setSizeFilter(e.target.value as any)}
+              className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
+              title="Filter by file size"
+            >
+              <option value="all">All Sizes</option>
+              <option value="large">Large (&gt; 500 KB)</option>
+              <option value="medium">Medium (100–500 KB)</option>
+              <option value="small">Small (&lt; 100 KB)</option>
+            </select>
+          </div>
+
+          {/* Sort By Dropdown */}
+          <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50/80 px-2 py-1">
+            <ArrowUpDown className="h-3.5 w-3.5 text-slate-500" />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
+              title="Sort items"
+            >
+              <option value="size-desc">Size: Largest (1 MB → 0)</option>
+              <option value="size-asc">Size: Smallest (0 → 1 MB)</option>
+              <option value="date-desc">Date: Newest</option>
+              <option value="date-asc">Date: Oldest</option>
+              <option value="name-asc">Name: A → Z</option>
+              <option value="name-desc">Name: Z → A</option>
+            </select>
+          </div>
+
           {onAutoFillAltTexts && missingAltCount > 0 && (
             <button
               onClick={handleAutoFillAllAlt}
               disabled={fillingAlt}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/80 px-3 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-2xs cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/80 px-2.5 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-2xs cursor-pointer disabled:opacity-50"
               title="Automatically generate Alt Text for all items without alt text"
             >
               <Sparkles className={`h-3.5 w-3.5 text-indigo-600 ${fillingAlt ? "animate-spin" : ""}`} />
-              Auto-fill Alt Texts ({missingAltCount})
+              <span className="hidden sm:inline">Auto-fill Alt</span> ({missingAltCount})
             </button>
           )}
 
           <div className="flex items-center gap-1 border-l border-slate-200 pl-2">
             <button
               onClick={() => setViewMode("grid")}
-              className={`rounded-lg p-1.5 transition ${
+              className={`rounded-lg p-1.5 transition cursor-pointer ${
                 viewMode === "grid"
                   ? "bg-slate-900 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -297,7 +518,7 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`rounded-lg p-1.5 transition ${
+              className={`rounded-lg p-1.5 transition cursor-pointer ${
                 viewMode === "list"
                   ? "bg-slate-900 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -313,28 +534,45 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
       {/* Content */}
       {viewMode === "grid" ? (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {filtered.map((m) => {
+          {filteredAndSorted.map((m) => {
             const isDup = duplicateInfo.has(m.id);
             const dupData = duplicateInfo.get(m.id);
+            const isSelected = selectedIds.has(m.id);
 
             return (
               <div
                 key={m.id || m.url}
                 className={`group relative overflow-hidden rounded-2xl border bg-white shadow-2xs transition hover:shadow-md ${
-                  isDup ? "border-amber-300 ring-1 ring-amber-300/50" : "border-slate-200"
+                  isSelected
+                    ? "border-rose-400 ring-2 ring-rose-400/70 bg-rose-50/10"
+                    : isDup
+                      ? "border-amber-300 ring-1 ring-amber-300/50"
+                      : "border-slate-200"
                 }`}
               >
-                {/* Duplicate Badge */}
-                {isDup && (
-                  <div
-                    onClick={() => setQ(dupData?.groupKey || m.name)}
-                    className="absolute top-2 left-2 z-10 flex items-center gap-1 rounded-md bg-amber-500/90 text-white px-2 py-0.5 text-[10px] font-bold shadow-xs cursor-pointer hover:bg-amber-600 transition backdrop-blur-xs"
-                    title={`Click to filter duplicate group: ${dupData?.reason}`}
-                  >
-                    <AlertTriangle className="h-3 w-3" />
-                    Duplicate ({dupData?.count})
-                  </div>
-                )}
+                {/* Checkbox and Duplicate Badge */}
+                <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => toggleSelect(m.id)}
+                    className="h-4 w-4 rounded border-slate-300 bg-white/95 text-rose-600 focus:ring-rose-500 shadow-xs cursor-pointer"
+                    title="Select file"
+                  />
+                  {isDup && (
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setQ(dupData?.groupKey || m.name);
+                      }}
+                      className="flex items-center gap-1 rounded-md bg-amber-500/90 text-white px-2 py-0.5 text-[10px] font-bold shadow-xs cursor-pointer hover:bg-amber-600 transition backdrop-blur-xs"
+                      title={`Click to filter duplicate group: ${dupData?.reason}`}
+                    >
+                      <AlertTriangle className="h-3 w-3" />
+                      Duplicate ({dupData?.count})
+                    </div>
+                  )}
+                </div>
 
                 <div className="aspect-video w-full bg-slate-100 overflow-hidden relative grid place-items-center">
                   {(m.url && m.url.match(/\.(mp4|webm)$/i)) || m.type === "video" ? (
@@ -371,11 +609,15 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
                       <span className="italic text-rose-500 font-medium">No alt text</span>
                     )}
                   </p>
+                  <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400">
+                    <span className="font-mono text-slate-500">{m.size || "-"}</span>
+                    <span>{m.uploadedAt || ""}</span>
+                  </div>
 
                   <div className="mt-2.5 flex items-center justify-between border-t border-slate-100 pt-2">
                     <button
                       onClick={() => copyUrl(m.url)}
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 hover:text-slate-900"
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 hover:text-slate-900 cursor-pointer"
                     >
                       <Copy className="h-3 w-3" /> Copy
                     </button>
@@ -383,16 +625,16 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
                       {onReplace && (
                         <button
                           onClick={() => handleQuickReplaceTrigger(m.id)}
-                          className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                          className="rounded-md p-1 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-800 transition cursor-pointer"
                           title="Replace Image File (< 1 MB)"
                         >
-                          <RefreshCw className="h-3.5 w-3.5 text-indigo-600" />
+                          <RefreshCw className="h-3.5 w-3.5" />
                         </button>
                       )}
                       {onEdit && (
                         <button
                           onClick={() => setEditingItem(m)}
-                          className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                          className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
                           title="Edit Details & Alt Text"
                         >
                           <Edit2 className="h-3.5 w-3.5" />
@@ -401,7 +643,7 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
                       {onDelete && (
                         <button
                           onClick={() => onDelete(m.id)}
-                          className="rounded-md p-1 text-red-400 hover:bg-red-50 hover:text-red-600 transition"
+                          className="rounded-md p-1 text-red-400 hover:bg-red-50 hover:text-red-600 transition cursor-pointer"
                           title="Delete Media"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -419,7 +661,16 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50/80 text-slate-500 text-[11px] uppercase font-bold tracking-wider border-b border-slate-200/80">
               <tr>
-                <th className="px-4 py-3">Preview</th>
+                <th className="px-3 py-3 w-10 text-center">
+                  <input
+                    type="checkbox"
+                    checked={isAllVisibleSelected}
+                    onChange={toggleSelectAllVisible}
+                    title="Select all visible files"
+                    className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
+                  />
+                </th>
+                <th className="px-3 py-3 w-20">Preview</th>
                 <th className="px-4 py-3">File Name & Alt Text</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Type</th>
@@ -428,18 +679,31 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filtered.map((m) => {
+              {filteredAndSorted.map((m) => {
                 const isDup = duplicateInfo.has(m.id);
                 const dupData = duplicateInfo.get(m.id);
+                const isSelected = selectedIds.has(m.id);
 
                 return (
                   <tr
                     key={m.id || m.url}
-                    className={`transition hover:bg-slate-50/60 ${
-                      isDup ? "bg-amber-50/20" : ""
+                    className={`transition ${
+                      isSelected
+                        ? "bg-rose-50/70 hover:bg-rose-50"
+                        : isDup
+                          ? "bg-amber-50/20 hover:bg-amber-50/40"
+                          : "hover:bg-slate-50/60"
                     }`}
                   >
-                    <td className="px-4 py-3 w-20">
+                    <td className="px-3 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelect(m.id)}
+                        className="h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500 cursor-pointer"
+                      />
+                    </td>
+                    <td className="px-3 py-3 w-20">
                       <div className="h-12 w-16 bg-slate-100 rounded-lg overflow-hidden grid place-items-center border border-slate-200/70">
                         {(m.url && m.url.match(/\.(mp4|webm)$/i)) || m.type === "video" ? (
                           <Video className="h-5 w-5 text-slate-400" />
@@ -487,12 +751,12 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
                       )}
                     </td>
                     <td className="px-4 py-3 text-slate-500 text-xs capitalize">{m.type || "image"}</td>
-                    <td className="px-4 py-3 text-slate-500 text-xs font-mono">{m.size || "-"}</td>
+                    <td className="px-4 py-3 text-slate-500 text-xs font-mono font-medium">{m.size || "-"}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => copyUrl(m.url)}
-                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
                           title="Copy URL"
                         >
                           <Copy className="h-4 w-4" />
@@ -500,7 +764,7 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
                         {onReplace && (
                           <button
                             onClick={() => handleQuickReplaceTrigger(m.id)}
-                            className="rounded-lg p-1.5 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-800 transition"
+                            className="rounded-lg p-1.5 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-800 transition cursor-pointer"
                             title="Replace Image File (< 1 MB)"
                           >
                             <RefreshCw className="h-4 w-4" />
@@ -509,7 +773,7 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
                         {onEdit && (
                           <button
                             onClick={() => setEditingItem(m)}
-                            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
                             title="Edit Details & Alt Text"
                           >
                             <Edit2 className="h-4 w-4" />
@@ -518,7 +782,7 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
                         {onDelete && (
                           <button
                             onClick={() => onDelete(m.id)}
-                            className="rounded-lg p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 transition"
+                            className="rounded-lg p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 transition cursor-pointer"
                             title="Delete"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -534,9 +798,9 @@ export function MediaGrid({ items, onDelete, onEdit, onReplace, onAutoFillAltTex
         </div>
       )}
 
-      {filtered.length === 0 && (
+      {filteredAndSorted.length === 0 && (
         <div className="col-span-full py-12 text-center text-xs text-slate-400">
-          No media files found matching your search.
+          No media files found matching your search and filter criteria.
         </div>
       )}
 

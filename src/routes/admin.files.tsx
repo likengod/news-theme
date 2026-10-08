@@ -79,6 +79,18 @@ function FileManagerPage() {
     refresh();
   };
 
+  const handleDeleteMultiple = async (ids: string[]) => {
+    if (!ids.length) return;
+    if (!confirm(`Delete ${ids.length} selected file${ids.length > 1 ? "s" : ""} permanently?`)) return;
+    try {
+      await mediaLibrary.removeMultiple(ids);
+      toast.success(`Deleted ${ids.length} file${ids.length > 1 ? "s" : ""}`);
+      refresh();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to delete files");
+    }
+  };
+
   const handleEdit = (id: string, name: string, altText?: string, description?: string) => {
     mediaLibrary.update(id, { name, altText, description });
     toast.success("File details updated");
@@ -183,6 +195,7 @@ function FileManagerPage() {
           description: m.description,
           size: formatBytes(m.size),
           rawSize: m.size,
+          createdAt: m.createdAt,
           uploadedAt: m.createdAt ? new Date(m.createdAt).toLocaleDateString() : undefined,
           type: m.type.startsWith("video/")
             ? "video"
@@ -191,6 +204,7 @@ function FileManagerPage() {
               : "document",
         }))}
         onDelete={handleDelete}
+        onDeleteMultiple={handleDeleteMultiple}
         onEdit={handleEdit}
         onReplace={handleReplace}
         onAutoFillAltTexts={handleAutoFillAltTexts}
