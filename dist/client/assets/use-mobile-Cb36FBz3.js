@@ -1,2 +1,0 @@
-import{i as e}from"./rolldown-runtime-aKtaBQYM.js";import{br as t}from"./vendor-lucide-Cm1xF1qh.js";var n=e(t()),r=768;function i(){let[e,t]=n.useState(!1);return n.useEffect(()=>{let e=window.matchMedia(`(max-width: ${r-1}px)`),n=e=>{t(e.matches)};return e.addEventListener(`change`,n),t(e.matches),()=>{e.removeEventListener(`change`,n)}},[]),!!e}export{i as t};
-//# sourceMappingURL=use-mobile-Cb36FBz3.js.map

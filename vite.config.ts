@@ -39,14 +39,6 @@ export default defineConfig({
           ) {
             return "vendor-tanstack-query";
           }
-          // Group all Lucide icons into a single chunk instead of 14+ individual files
-          if (id.includes("node_modules/lucide-react")) {
-            return "vendor-lucide";
-          }
-          // Group all Radix UI primitives into one chunk
-          if (id.includes("node_modules/@radix-ui/")) {
-            return "vendor-radix";
-          }
         },
       },
     },
