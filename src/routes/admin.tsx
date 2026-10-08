@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   createFileRoute,
   Outlet,
@@ -159,9 +159,9 @@ function AdminLayout() {
 }
 
 function AdminPendingFallback() {
-  const [takingLong, setTakingLong] = React.useState(false);
+  const [takingLong, setTakingLong] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       setTakingLong(true);
     }, 4000);
