@@ -72,17 +72,17 @@ export const formatDateTimeLocal = (dateVal: any): string => {
         return `${s}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
       }
 
-      // If already local datetime YYYY-MM-DD HH:mm...
-      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(s)) {
-        return s.slice(0, 16).replace(" ", "T");
-      }
-
-      // If YYYY-MM-DDTHH:mm without Z
+      // If YYYY-MM-DDTHH:mm without seconds or timezone
       if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) {
         return s;
       }
 
-      // If ISO string with Z or timestamp
+      // If YYYY-MM-DD HH:mm...
+      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(s)) {
+        return s.slice(0, 16).replace(" ", "T");
+      }
+
+      // Parse with Date for ISO strings with Z or offsets
       const d = new Date(s);
       if (!isNaN(d.getTime())) {
         const pad = (n: number) => String(n).padStart(2, "0");

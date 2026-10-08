@@ -8,6 +8,9 @@ import {
   Image as ImageIcon,
   RotateCcw,
   CalendarClock,
+  CheckCircle2,
+  FileText,
+  Clock,
 } from "lucide-react";
 import type { Row } from "./types";
 
@@ -62,6 +65,7 @@ export function ArticlesTable({
               />
             </th>
             <th className="px-5 py-3">Title</th>
+            <th className="px-5 py-3">Status</th>
             <th className="px-5 py-3">Category</th>
             <th className="px-5 py-3">Author</th>
             <th className="px-5 py-3">Views</th>
@@ -71,7 +75,7 @@ export function ArticlesTable({
         <tbody className="divide-y divide-slate-100">
           {loading && (
             <tr>
-              <td colSpan={6} className="px-5 py-12 text-center text-slate-500">
+              <td colSpan={7} className="px-5 py-12 text-center text-slate-500">
                 <div className="flex items-center justify-center gap-2">
                   <Loader2 className="h-5 w-5 animate-spin" />
                   <span>Loading articles...</span>
@@ -139,6 +143,57 @@ export function ArticlesTable({
                       </div>
                     </div>
                   </div>
+                </td>
+                <td className="px-5 py-3 whitespace-nowrap">
+                  {r.status === "Scheduled" || (r.date && new Date(r.date).getTime() > Date.now() + 60 * 1000) ? (
+                    <div className="space-y-0.5">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 border border-blue-200">
+                        <CalendarClock className="h-3 w-3 text-blue-600" />
+                        <span>Scheduled</span>
+                      </span>
+                      {r.date && (
+                        <p className="text-[10px] text-slate-500 font-medium">
+                          {new Date(r.date).toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  ) : r.status === "Published" ? (
+                    <div className="space-y-0.5">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200">
+                        <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                        <span>Published</span>
+                      </span>
+                      {r.date && (
+                        <p className="text-[10px] text-slate-400">
+                          {new Date(r.date).toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  ) : r.status === "Trash" ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-semibold text-rose-700 border border-rose-200">
+                      <Trash2 className="h-3 w-3 text-rose-600" />
+                      <span>Trash</span>
+                    </span>
+                  ) : r.status === "Review" ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200">
+                      <Clock className="h-3 w-3 text-amber-600" />
+                      <span>In Review</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700 border border-slate-200">
+                      <FileText className="h-3 w-3 text-slate-500" />
+                      <span>Draft</span>
+                    </span>
+                  )}
                 </td>
                 <td className="px-5 py-3 text-slate-600">
                   <div className="flex flex-wrap gap-1 max-w-[220px]">
@@ -213,7 +268,7 @@ export function ArticlesTable({
             ))}
           {!loading && rows.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-5 py-8 text-center text-slate-500">
+              <td colSpan={7} className="px-5 py-8 text-center text-slate-500">
                 No articles found.
               </td>
             </tr>

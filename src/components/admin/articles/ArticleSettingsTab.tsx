@@ -1,5 +1,6 @@
 import React from "react";
 import { User, Clock, Check, CalendarClock } from "lucide-react";
+import { toast } from "sonner";
 import { Field, JournalistPicker } from "@/components/admin/articles/ArticleSubComponents";
 import { formatDateTimeLocal, type Row } from "./types";
 
@@ -40,9 +41,8 @@ export default function ArticleSettingsTab({
     const pad = (n: number) => String(n).padStart(2, "0");
     const localNow = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
     onChange("date", localNow);
-    if (row.status === "Scheduled") {
-      onChange("status", "Published");
-    }
+    onChange("status", "Published");
+    toast.success("Publish date set to Now · Status set to Published");
   };
 
   const handleSchedulePlus1Hr = () => {
@@ -51,6 +51,7 @@ export default function ArticleSettingsTab({
     const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     onChange("date", local);
     onChange("status", "Scheduled");
+    toast.info("Scheduled for +1 hour");
   };
 
   const handleScheduleTomorrowMorning = () => {
@@ -61,6 +62,7 @@ export default function ArticleSettingsTab({
     const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T09:00`;
     onChange("date", local);
     onChange("status", "Scheduled");
+    toast.info("Scheduled for tomorrow 9:00 AM");
   };
 
   const handleScheduleTomorrowEvening = () => {
@@ -71,10 +73,11 @@ export default function ArticleSettingsTab({
     const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T18:00`;
     onChange("date", local);
     onChange("status", "Scheduled");
+    toast.info("Scheduled for tomorrow 6:00 PM");
   };
 
   const isFutureDate = Boolean(
-    row.date && !isNaN(new Date(row.date).getTime()) && new Date(row.date).getTime() > Date.now(),
+    row.date && !isNaN(new Date(row.date).getTime()) && new Date(row.date).getTime() > Date.now() + 60 * 1000,
   );
   const isScheduled = row.status === "Scheduled" || isFutureDate;
 
@@ -230,8 +233,30 @@ export default function ArticleSettingsTab({
             name="status"
             aria-label="Status"
             value={row.status}
-            onChange={(e) => onChange("status", e.target.value as Row["status"])}
-            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+            onChange={(e) => {
+              const nextStatus = e.target.value as Row["status"];
+              onChange("status", nextStatus);
+              const now = new Date();
+              const pad = (n: number) => String(n).padStart(2, "0");
+              const localNow = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+              if (nextStatus === "Scheduled") {
+                const currentTime = row.date ? new Date(row.date).getTime() : 0;
+                if (!currentTime || currentTime <= Date.now() + 60 * 1000) {
+                  const plus1Hr = new Date(Date.now() + 60 * 60 * 1000);
+                  const scheduledTime = `${plus1Hr.getFullYear()}-${pad(plus1Hr.getMonth() + 1)}-${pad(plus1Hr.getDate())}T${pad(plus1Hr.getHours())}:${pad(plus1Hr.getMinutes())}`;
+                  onChange("date", scheduledTime);
+                  toast.info("Status set to Scheduled · Date set to +1 hour");
+                }
+              } else if (nextStatus === "Published") {
+                const currentTime = row.date ? new Date(row.date).getTime() : 0;
+                if (currentTime > Date.now() + 60 * 1000) {
+                  onChange("date", localNow);
+                  toast.info("Status set to Published · Date set to Now");
+                }
+              }
+            }}
+            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
           >
             <option>Published</option>
             <option>Scheduled</option>
@@ -265,10 +290,16 @@ export default function ArticleSettingsTab({
                 type="datetime-local"
                 value={formatDateTimeLocal(row.date)}
                 onChange={(e) => {
-                  onChange("date", e.target.value);
-                  const selectedTime = new Date(e.target.value).getTime();
-                  if (selectedTime > Date.now()) {
-                    onChange("status", "Scheduled");
+                  const val = e.target.value;
+                  onChange("date", val);
+                  if (val) {
+                    const selectedTime = new Date(val).getTime();
+                    const nowTime = Date.now();
+                    if (selectedTime > nowTime + 60 * 1000) {
+                      onChange("status", "Scheduled");
+                    } else if (row.status === "Scheduled") {
+                      onChange("status", "Published");
+                    }
                   }
                 }}
                 className="flex-1 rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
@@ -276,8 +307,8 @@ export default function ArticleSettingsTab({
               <button
                 type="button"
                 onClick={handleSetNow}
-                className="shrink-0 inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 hover:bg-slate-100 px-2.5 py-2 text-xs font-semibold text-slate-700 transition cursor-pointer"
-                title="Set publish date to current local date and time"
+                className="shrink-0 inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 hover:bg-slate-100 px-2.5 py-2 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-xs active:scale-95"
+                title="Set publish date to current local date and time and status to Published"
               >
                 <Clock className="h-3.5 w-3.5 text-slate-500" />
                 <span>Now</span>
@@ -292,7 +323,7 @@ export default function ArticleSettingsTab({
               <button
                 type="button"
                 onClick={handleSchedulePlus1Hr}
-                className="inline-flex items-center gap-1 rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700 hover:bg-blue-100 transition cursor-pointer"
+                className="inline-flex items-center gap-1 rounded border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-700 hover:bg-blue-100 transition cursor-pointer shadow-xs active:scale-95"
               >
                 <CalendarClock className="h-3 w-3" />
                 <span>+1 Hr</span>
@@ -300,14 +331,14 @@ export default function ArticleSettingsTab({
               <button
                 type="button"
                 onClick={handleScheduleTomorrowMorning}
-                className="inline-flex items-center gap-1 rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700 hover:bg-blue-100 transition cursor-pointer"
+                className="inline-flex items-center gap-1 rounded border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-700 hover:bg-blue-100 transition cursor-pointer shadow-xs active:scale-95"
               >
                 <span>Tomorrow 9 AM</span>
               </button>
               <button
                 type="button"
                 onClick={handleScheduleTomorrowEvening}
-                className="inline-flex items-center gap-1 rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700 hover:bg-blue-100 transition cursor-pointer"
+                className="inline-flex items-center gap-1 rounded border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-700 hover:bg-blue-100 transition cursor-pointer shadow-xs active:scale-95"
               >
                 <span>Tomorrow 6 PM</span>
               </button>
@@ -315,28 +346,38 @@ export default function ArticleSettingsTab({
 
             {/* Scheduled preview info */}
             {isScheduled && (
-              <div className="rounded-lg border border-blue-200 bg-blue-50/70 p-2.5 text-xs text-blue-900 flex items-start gap-2 shadow-xs">
-                <CalendarClock className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-                <div className="space-y-0.5">
-                  <div className="font-semibold text-blue-800">
-                    Scheduled for auto-publishing:
-                  </div>
-                  <div className="text-slate-600">
-                    {new Date(row.date).toLocaleString(undefined, {
-                      weekday: "short",
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+              <div className="rounded-lg border border-blue-200 bg-blue-50/80 p-3 text-xs text-blue-900 flex items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-start gap-2.5 min-w-0">
+                  <CalendarClock className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5 min-w-0">
+                    <div className="font-semibold text-blue-900">
+                      Scheduled for auto-publishing:
+                    </div>
+                    <div className="text-slate-700 font-medium truncate">
+                      {new Date(row.date).toLocaleString(undefined, {
+                        weekday: "short",
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleSetNow}
+                  className="shrink-0 rounded-md border border-blue-300 bg-white hover:bg-blue-100/70 px-2.5 py-1 text-[11px] font-semibold text-blue-800 transition cursor-pointer shadow-xs active:scale-95"
+                  title="Override schedule and publish immediately"
+                >
+                  Publish Now Instead
+                </button>
               </div>
             )}
 
             <p className="text-[11px] text-slate-400">
-              Articles set to now or in the past appear immediately. Future dates schedule the article to go live automatically.
+              Articles set to Now or in the past appear immediately. Future dates schedule the article to go live automatically at the selected time.
             </p>
           </div>
         </Field>

@@ -7,6 +7,7 @@ import {
   Share2,
   Sparkles,
   CalendarClock,
+  Send,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -105,10 +106,29 @@ export default function ArticleEditor({
     toast.success("AI Content applied successfully!");
   };
 
-  const handleSave = (status?: Row["status"]) => {
+  const isScheduled =
+    r.status === "Scheduled" ||
+    Boolean(
+      r.date &&
+        !isNaN(new Date(r.date).getTime()) &&
+        new Date(r.date).getTime() > Date.now() + 60 * 1000,
+    );
+
+  const handleSave = (status?: Row["status"], explicitDate?: string) => {
     if (!r.title.trim()) return toast.error("Title is required");
     if (!r.author.trim()) return toast.error("Author is required");
-    onSave(status ? { ...r, status } : r);
+    onSave({
+      ...r,
+      ...(status ? { status } : {}),
+      ...(explicitDate ? { date: explicitDate } : {}),
+    });
+  };
+
+  const handlePublishNow = () => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const localNow = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    handleSave("Published", localNow);
   };
 
   const url = fullUrl(r);
@@ -178,20 +198,59 @@ export default function ArticleEditor({
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => handleSave("Published")}
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition-colors shadow-sm"
+                type="button"
+                onClick={() => handleSave("Draft")}
+                className="hidden md:inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-xs cursor-pointer"
+                title="Save current progress as draft"
               >
-                Publish
+                <FileText className="h-3.5 w-3.5 text-slate-500" />
+                <span>Save Draft</span>
               </button>
+
+              {isScheduled ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handlePublishNow}
+                    className="hidden lg:inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-100 transition shadow-xs cursor-pointer"
+                    title="Override schedule and publish immediately"
+                  >
+                    <span>Publish Now</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSave("Scheduled")}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 transition shadow-sm cursor-pointer"
+                    title="Save as scheduled post"
+                  >
+                    <CalendarClock className="h-3.5 w-3.5" />
+                    <span>Schedule Post</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleSave("Published")}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition shadow-sm cursor-pointer"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                  <span>Publish</span>
+                </button>
+              )}
+
               <button
+                type="button"
                 onClick={() => setShowAiModal(true)}
-                className="flex items-center gap-1.5 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 hover:text-indigo-900 transition-colors border border-indigo-100 shadow-sm"
+                className="flex items-center gap-1.5 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 hover:text-indigo-900 transition-colors border border-indigo-100 shadow-xs cursor-pointer"
               >
-                <Sparkles className="h-3.5 w-3.5" /> AI News Assistant
+                <Sparkles className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">AI News Assistant</span>
               </button>
               <button
+                type="button"
                 onClick={onClose}
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-md hover:bg-slate-100"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition cursor-pointer"
+                aria-label="Close"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -293,23 +352,36 @@ export default function ArticleEditor({
             {isLast && (
               <>
                 <button
+                  type="button"
                   onClick={() => handleSave("Draft")}
-                  className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-100 cursor-pointer"
+                  className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer"
                 >
                   Save as Draft
                 </button>
-                {r.status === "Scheduled" || (r.date && new Date(r.date).getTime() > Date.now()) ? (
-                  <button
-                    onClick={() => handleSave("Scheduled")}
-                    className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition shadow-sm cursor-pointer"
-                  >
-                    <CalendarClock className="h-4 w-4" />
-                    <span>Schedule Post</span>
-                  </button>
+                {isScheduled ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handlePublishNow}
+                      className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-100 cursor-pointer shadow-xs"
+                      title="Override schedule and publish immediately"
+                    >
+                      Publish Now
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSave("Scheduled")}
+                      className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition shadow-sm cursor-pointer"
+                    >
+                      <CalendarClock className="h-4 w-4" />
+                      <span>Schedule Post</span>
+                    </button>
+                  </>
                 ) : (
                   <button
+                    type="button"
                     onClick={() => handleSave("Published")}
-                    className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 cursor-pointer"
+                    className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 cursor-pointer shadow-sm"
                   >
                     Publish
                   </button>

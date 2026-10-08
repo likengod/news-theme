@@ -198,25 +198,65 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
       }
     }
 
+    const getNowSql = () => {
+      const now = new Date();
+      const pad = (n: number) => String(n).padStart(2, "0");
+      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    };
+
     // Format date carefully: preserve original date if existing and not modified
-    let formattedDate = new Date().toISOString().slice(0, 19).replace("T", " ");
+    let formattedDate = getNowSql();
     if (r.date) {
-      let rawDate = String(r.date).replace("T", " ").replace("Z", "").trim();
-      if (rawDate.length === 10) {
-        const now = new Date();
-        const pad = (n: number) => String(n).padStart(2, "0");
-        rawDate += ` ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      } else if (rawDate.length === 16) {
-        rawDate += ":00";
+      const rawDate = String(r.date).trim();
+      if (rawDate.includes("Z") || /[+-]\d{2}:\d{2}$/.test(rawDate)) {
+        const d = new Date(rawDate);
+        if (!isNaN(d.getTime())) {
+          const pad = (n: number) => String(n).padStart(2, "0");
+          formattedDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        }
+      } else {
+        let clean = rawDate.replace("T", " ").trim();
+        if (clean.length === 10) {
+          const now = new Date();
+          const pad = (n: number) => String(n).padStart(2, "0");
+          clean += ` ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        } else if (clean.length === 16) {
+          clean += ":00";
+        }
+        formattedDate = clean.substring(0, 19);
       }
-      formattedDate = rawDate.substring(0, 19);
     } else if (existingRow?.date) {
-      formattedDate = String(existingRow.date).replace("T", " ").replace("Z", "").substring(0, 19);
+      const d = new Date(existingRow.date);
+      if (!isNaN(d.getTime())) {
+        const pad = (n: number) => String(n).padStart(2, "0");
+        formattedDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      } else {
+        formattedDate = String(existingRow.date).replace("T", " ").replace("Z", "").substring(0, 19);
+      }
     }
 
     let finalStatus = r.status || (existingRow?.status ?? "Draft");
-    if (finalStatus === "Published" && new Date(formattedDate).getTime() > Date.now()) {
-      finalStatus = "Scheduled";
+    const parsedArticleTime = new Date(formattedDate.replace(" ", "T")).getTime();
+    const nowTime = Date.now();
+    const isFuture = !isNaN(parsedArticleTime) && parsedArticleTime > nowTime + 60 * 1000;
+
+    if (finalStatus === "Published") {
+      if (!isFuture) {
+        // Current or past time: if clock skew made it slightly ahead, cap to current timestamp so MySQL date <= NOW() matches immediately
+        if (parsedArticleTime > nowTime) {
+          formattedDate = getNowSql();
+        }
+      } else {
+        // Genuinely set more than 1 minute in the future
+        finalStatus = "Scheduled";
+      }
+    } else if (finalStatus === "Scheduled") {
+      if (!isFuture) {
+        // Scheduled post with past/current date: advance to +1 hour so it remains scheduled
+        const plus1Hr = new Date(nowTime + 60 * 60 * 1000);
+        const pad = (n: number) => String(n).padStart(2, "0");
+        formattedDate = `${plus1Hr.getFullYear()}-${pad(plus1Hr.getMonth() + 1)}-${pad(plus1Hr.getDate())} ${pad(plus1Hr.getHours())}:${pad(plus1Hr.getMinutes())}:00`;
+      }
     }
 
     const values = [
