@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { FONT_SIZES, escapeHtml } from "./editorConstants";
 
 interface UseRichEditorSelectionProps {
@@ -25,25 +25,54 @@ export function useRichEditorSelection({
 
   const focus = () => ref.current?.focus();
 
+  const isEditorNode = (node: Node | null): boolean => {
+    if (!node || !ref.current) return false;
+    return ref.current === node || ref.current.contains(node);
+  };
+
   const saveSelection = () => {
     const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0 && ref.current) {
+    if (!sel || sel.rangeCount === 0 || !ref.current) return;
+    try {
       const range = sel.getRangeAt(0);
-      if (ref.current.contains(range.commonAncestorContainer)) {
-        savedSelection.current = range.cloneRange();
+      // Handles both normal selection and Ctrl+A / Select All
+      if (
+        isEditorNode(range.commonAncestorContainer) ||
+        isEditorNode(range.startContainer) ||
+        isEditorNode(range.endContainer) ||
+        (range.commonAncestorContainer && range.commonAncestorContainer.contains(ref.current))
+      ) {
+        // If range spans outside the editor (e.g. Ctrl+A caught outer wrapper), clamp to editor
+        if (!isEditorNode(range.commonAncestorContainer)) {
+          const clamped = document.createRange();
+          clamped.selectNodeContents(ref.current);
+          savedSelection.current = clamped;
+        } else {
+          savedSelection.current = range.cloneRange();
+        }
       }
-    }
+    } catch {}
   };
 
   const restoreSelection = () => {
     focus();
+    const sel = window.getSelection();
+    if (!sel || !ref.current) return;
+
     if (savedSelection.current) {
-      const sel = window.getSelection();
-      if (sel) {
+      try {
         sel.removeAllRanges();
         sel.addRange(savedSelection.current);
-      }
+        return;
+      } catch {}
     }
+
+    // Fallback: if no saved selection, default to selecting all content if editor has children
+    const range = document.createRange();
+    range.selectNodeContents(ref.current);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    savedSelection.current = range.cloneRange();
   };
 
   const exec = (cmd: string, val?: string) => {
@@ -71,8 +100,8 @@ export function useRichEditorSelection({
           const tagName = el.tagName.toLowerCase();
           if (["h2", "h3", "h4"].includes(tagName)) {
             el.style.fontSize = "";
-            el.querySelectorAll<HTMLElement>("span, font, [style*='font-size']").forEach((child) => {
-              child.style.fontSize = "";
+            el.querySelectorAll<HTMLElement>("*").forEach((child) => {
+              if (child.style && child.style.fontSize) child.style.fontSize = "";
             });
             break;
           }
@@ -97,55 +126,48 @@ export function useRichEditorSelection({
   };
 
   const setFontFamily = (f: string) => {
-    if (f === "Default") return;
     restoreSelection();
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0 || !ref.current) return;
 
-    const fontValue = `'${f}', serif`;
+    const fontValue = f === "Default" ? "" : `'${f}', system-ui, sans-serif`;
     const range = sel.getRangeAt(0);
 
-    if (range.collapsed) {
-      let node: Node | null = range.startContainer;
-      while (node && node !== ref.current) {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          const el = node as HTMLElement;
-          const tagName = el.tagName.toLowerCase();
-          if (["p", "div", "li", "h1", "h2", "h3", "h4", "blockquote"].includes(tagName)) {
-            el.style.fontFamily = fontValue;
-            emit();
-            saveSelection();
-            return;
-          }
-        }
-        node = node.parentNode;
-      }
-      return;
-    }
-
-    const allBlocks = ref.current.querySelectorAll<HTMLElement>("p, h2, h3, h4, li, blockquote");
+    const blockSelector = "p, div, h1, h2, h3, h4, li, blockquote, pre, td, th";
+    const allBlocks = ref.current.querySelectorAll<HTMLElement>(blockSelector);
     const selectedBlocks: HTMLElement[] = [];
     allBlocks.forEach((b) => {
       if (sel.containsNode(b, true)) selectedBlocks.push(b);
     });
 
-    if (selectedBlocks.length > 1) {
+    if (selectedBlocks.length > 0) {
       selectedBlocks.forEach((b) => {
         b.style.fontFamily = fontValue;
+        b.querySelectorAll<HTMLElement>("*").forEach((child) => {
+          if (child.style && child.style.fontFamily) child.style.fontFamily = "";
+        });
       });
       emit();
       saveSelection();
       return;
     }
 
-    document.execCommand("fontName", false, f);
-    const fontTags = ref.current.querySelectorAll(`font[face='${f}']`);
-    fontTags.forEach((font) => {
+    if (!range.collapsed) {
+      const fragment = range.extractContents();
+      fragment.querySelectorAll<HTMLElement>("*").forEach((child) => {
+        if (child.style && child.style.fontFamily) child.style.fontFamily = "";
+      });
       const span = document.createElement("span");
-      span.style.fontFamily = fontValue;
-      while (font.firstChild) span.appendChild(font.firstChild);
-      font.parentNode?.replaceChild(span, font);
-    });
+      if (fontValue) span.style.fontFamily = fontValue;
+      span.appendChild(fragment);
+      range.insertNode(span);
+
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+      savedSelection.current = newRange.cloneRange();
+    }
     emit();
     saveSelection();
   };
@@ -158,7 +180,21 @@ export function useRichEditorSelection({
     if (!sel || sel.rangeCount === 0 || !ref.current) return;
 
     const range = sel.getRangeAt(0);
+    const targetSize = `${px}px`;
 
+    // Helper: strip all conflicting font-size / font tags inside an element
+    const cleanInnerFontSizes = (el: HTMLElement) => {
+      el.querySelectorAll<HTMLElement>("*").forEach((child) => {
+        if (child.style && child.style.fontSize) {
+          child.style.fontSize = "";
+        }
+        if (child.tagName.toLowerCase() === "font") {
+          child.removeAttribute("size");
+        }
+      });
+    };
+
+    // Case 1: Range is collapsed (cursor with no selection)
     if (range.collapsed) {
       let node: Node | null = range.startContainer;
       let blockEl: HTMLElement | null = null;
@@ -166,7 +202,7 @@ export function useRichEditorSelection({
         if (node.nodeType === Node.ELEMENT_NODE) {
           const el = node as HTMLElement;
           const t = el.tagName.toLowerCase();
-          if (["p", "div", "li", "h2", "h3", "h4", "blockquote"].includes(t)) {
+          if (["p", "div", "li", "h2", "h3", "h4", "blockquote", "td", "th"].includes(t)) {
             blockEl = el;
             break;
           }
@@ -175,13 +211,11 @@ export function useRichEditorSelection({
       }
 
       if (blockEl) {
-        blockEl.style.fontSize = `${px}px`;
-        blockEl.querySelectorAll<HTMLElement>("span[style*='font-size'], font").forEach((s) => {
-          s.style.fontSize = "";
-        });
+        blockEl.style.fontSize = targetSize;
+        cleanInnerFontSizes(blockEl);
       } else {
         const span = document.createElement("span");
-        span.style.fontSize = `${px}px`;
+        span.style.fontSize = targetSize;
         span.innerHTML = "&#8203;";
         range.insertNode(span);
         const newRange = document.createRange();
@@ -195,7 +229,9 @@ export function useRichEditorSelection({
       return;
     }
 
-    const allBlocks = ref.current.querySelectorAll<HTMLElement>("p, h2, h3, h4, li, blockquote");
+    // Case 2: Multi-block or Select All (Ctrl+A)
+    const blockSelector = "p, div, h1, h2, h3, h4, li, blockquote, pre, td, th";
+    const allBlocks = ref.current.querySelectorAll<HTMLElement>(blockSelector);
     const selectedBlocks: HTMLElement[] = [];
     allBlocks.forEach((block) => {
       if (sel.containsNode(block, true)) {
@@ -211,38 +247,58 @@ export function useRichEditorSelection({
 
     if (isAllOrMultiBlock) {
       selectedBlocks.forEach((block) => {
-        block.style.fontSize = `${px}px`;
-        block.querySelectorAll<HTMLElement>("span, font").forEach((child) => {
-          if (child.style.fontSize) child.style.fontSize = "";
-        });
+        block.style.fontSize = targetSize;
+        cleanInnerFontSizes(block);
       });
       emit();
       saveSelection();
       return;
     }
 
+    // Case 3: Partial text selection within a block or single node
     try {
-      document.execCommand("styleWithCSS", false, "true");
-    } catch {}
+      const fragment = range.extractContents();
+      // Clean any nested font-size on elements inside the extracted fragment
+      fragment.querySelectorAll<HTMLElement>("*").forEach((child) => {
+        if (child.style && child.style.fontSize) {
+          child.style.fontSize = "";
+        }
+        if (child.tagName.toLowerCase() === "font") {
+          child.removeAttribute("size");
+        }
+      });
 
-    document.execCommand("fontSize", false, "7");
-
-    const fontTags = ref.current.querySelectorAll("font[size='7']");
-    fontTags.forEach((f) => {
       const span = document.createElement("span");
-      span.style.fontSize = `${px}px`;
-      while (f.firstChild) {
-        span.appendChild(f.firstChild);
-      }
-      f.parentNode?.replaceChild(span, f);
-    });
+      span.style.fontSize = targetSize;
+      span.appendChild(fragment);
+      range.insertNode(span);
 
-    const styledSpans = ref.current.querySelectorAll<HTMLElement>(
-      "span[style*='-webkit-xxx-large'], span[style*='xxx-large'], span[style*='font-size: 7']",
-    );
-    styledSpans.forEach((s) => {
-      s.style.fontSize = `${px}px`;
-    });
+      // Smoothly re-select the newly styled span so user maintains their selection
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+      savedSelection.current = newRange.cloneRange();
+    } catch {
+      // Fallback if range.extractContents() fails on cross-boundary edge cases
+      try {
+        document.execCommand("styleWithCSS", false, "true");
+        document.execCommand("fontSize", false, "7");
+        ref.current.querySelectorAll("font[size='7']").forEach((f) => {
+          const span = document.createElement("span");
+          span.style.fontSize = targetSize;
+          while (f.firstChild) span.appendChild(f.firstChild);
+          f.parentNode?.replaceChild(span, f);
+        });
+        ref.current
+          .querySelectorAll<HTMLElement>(
+            "span[style*='-webkit-xxx-large'], span[style*='xxx-large'], span[style*='font-size: 7']",
+          )
+          .forEach((s) => {
+            s.style.fontSize = targetSize;
+          });
+      } catch {}
+    }
 
     emit();
     saveSelection();
@@ -267,6 +323,7 @@ export function useRichEditorSelection({
     }
   };
 
+  // Clean pasted content from Word, Google Docs, external websites
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
     const clipboardData = e.clipboardData;
@@ -279,23 +336,58 @@ export function useRichEditorSelection({
       const parser = new DOMParser();
       const doc = parser.parseFromString(htmlData, "text/html");
 
+      // 1. Remove scripts, styles, metadata, tracking comments
+      doc
+        .querySelectorAll("script, style, meta, link, noscript, title, xml, [class*='Mso']")
+        .forEach((el) => {
+          if (el.tagName.toLowerCase() === "style" || el.tagName.toLowerCase() === "script") {
+            el.remove();
+          }
+        });
+
+      // 2. Unwrap font tags to standard spans
+      doc.querySelectorAll("font").forEach((font) => {
+        const span = doc.createElement("span");
+        while (font.firstChild) span.appendChild(font.firstChild);
+        font.parentNode?.replaceChild(span, font);
+      });
+
+      // 3. Clean all elements: strip hardcoded font sizes, font families, and Word junk
       doc.body.querySelectorAll("*").forEach((el) => {
         const tag = el.tagName.toLowerCase();
-        if (tag !== "h2" && tag !== "h3" && tag !== "h4") {
-          if (["p", "li", "div"].includes(tag)) {
-            (el as HTMLElement).style.fontSize = "14px";
-            (el as HTMLElement).style.lineHeight = "1.75";
-          } else if (tag === "span" || tag === "font") {
-            (el as HTMLElement).style.fontSize = "";
-          }
-          (el as HTMLElement).style.fontFamily = "";
-        } else {
-          (el as HTMLElement).style.fontSize = "";
+        const htmlEl = el as HTMLElement;
+
+        // Clean Microsoft Word and web attributes
+        htmlEl.removeAttribute("class");
+        htmlEl.removeAttribute("lang");
+        htmlEl.removeAttribute("dir");
+
+        if (htmlEl.style) {
+          // Remove restrictive inline typography that blocks editor toolbar
+          htmlEl.style.fontSize = "";
+          htmlEl.style.fontFamily = "";
+          htmlEl.style.lineHeight = "";
+          htmlEl.style.margin = "";
+          htmlEl.style.padding = "";
+        }
+
+        // Convert divs without sub-blocks into standard paragraphs
+        if (tag === "div" && !htmlEl.querySelector("p, h1, h2, h3, h4, ul, ol, table")) {
+          const p = doc.createElement("p");
+          p.innerHTML = htmlEl.innerHTML;
+          htmlEl.parentNode?.replaceChild(p, htmlEl);
         }
       });
 
-      const cleanHtml = doc.body.innerHTML;
-      if (cleanHtml.trim()) {
+      // 4. Normalize paragraphs to clean 14px default styling
+      doc.querySelectorAll("p").forEach((p) => {
+        p.style.fontSize = "14px";
+        p.style.lineHeight = "1.75";
+        p.style.margin = "0.5rem 0";
+      });
+
+      const cleanHtml = doc.body.innerHTML.trim();
+      if (cleanHtml) {
         document.execCommand("insertHTML", false, cleanHtml);
         emit();
         saveSelection();

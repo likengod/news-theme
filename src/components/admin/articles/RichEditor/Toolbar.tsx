@@ -179,10 +179,13 @@ export function Toolbar({
                   if (ref.current) {
                     const sel = window.getSelection();
                     if (sel && sel.rangeCount > 0) {
-                      ref.current.querySelectorAll<HTMLElement>("span, font").forEach((s) => {
+                      ref.current.querySelectorAll<HTMLElement>("*").forEach((s) => {
                         if (sel.containsNode(s, true)) {
                           s.style.fontSize = "";
                           s.style.fontFamily = "";
+                          s.style.backgroundColor = "";
+                          s.style.color = "";
+                          s.style.lineHeight = "";
                         }
                       });
                     }
