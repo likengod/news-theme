@@ -32,15 +32,29 @@ const MIME_TYPES = {
 const SSR_CACHE = new Map();
 
 let cachedCssLink = "";
+let lastCssCheck = 0;
 function getMainCssLink() {
-  if (cachedCssLink) return cachedCssLink;
+  const now = Date.now();
+  if (cachedCssLink && now - lastCssCheck < 30000) return cachedCssLink;
+  lastCssCheck = now;
   try {
     const assetsDir = path.join(__dirname, "dist/client/assets");
     if (fs.existsSync(assetsDir)) {
       const files = fs.readdirSync(assetsDir);
-      const cssFile = files.find((f) => f.startsWith("styles-") && f.endsWith(".css"));
-      if (cssFile) {
-        cachedCssLink = `</assets/${cssFile}>; rel=preload; as=style`;
+      const cssFiles = files
+        .filter((f) => f.startsWith("styles-") && f.endsWith(".css"))
+        .map((f) => {
+          try {
+            const stat = fs.statSync(path.join(assetsDir, f));
+            return { name: f, mtime: stat.mtimeMs };
+          } catch {
+            return { name: f, mtime: 0 };
+          }
+        })
+        .sort((a, b) => b.mtime - a.mtime);
+
+      if (cssFiles.length > 0) {
+        cachedCssLink = `</assets/${cssFiles[0].name}>; rel=preload; as=style`;
       }
     }
   } catch {}
