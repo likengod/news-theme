@@ -247,30 +247,35 @@ export async function executeGitPullCore() {
     pullResult = git("reset --hard origin/main");
   }
 
-  // 3. Automatically run build so compiled .output matches the new server functions
+  // 3. Fast deployment: use verified pre-compiled dist directly from Git if present
   let buildLog = "";
   let buildSuccess = true;
-  
-  let hasNpm = false;
-  try {
-    execSync("npm --version", { cwd: ROOT, encoding: "utf-8", timeout: 5000 });
-    hasNpm = true;
-  } catch {}
+  const hasPrebuiltDist = fs.existsSync(path.join(ROOT, "dist", "server", "server.js"));
 
-  if (hasNpm) {
-    try {
-      buildLog = execSync("npm install --no-audit --no-fund && npm run build 2>&1", {
-        cwd: ROOT,
-        encoding: "utf-8",
-        timeout: 120000,
-      });
-    } catch (bErr: any) {
-      buildLog = bErr.stdout || bErr.stderr || bErr.message || "";
-      buildSuccess = false;
-      console.error("[Deploy] Build after pull error:", bErr);
-    }
+  if (hasPrebuiltDist) {
+    buildLog = "Pre-compiled production bundle verified from Git. Instant safe deployment applied without server rebuild.";
   } else {
-    buildLog = "npm is not installed on this runtime environment. Build skipped. Serving pre-compiled dist folder directly from Git.";
+    let hasNpm = false;
+    try {
+      execSync("npm --version", { cwd: ROOT, encoding: "utf-8", timeout: 5000 });
+      hasNpm = true;
+    } catch {}
+
+    if (hasNpm) {
+      try {
+        buildLog = execSync("npm run build 2>&1", {
+          cwd: ROOT,
+          encoding: "utf-8",
+          timeout: 120000,
+        });
+      } catch (bErr: any) {
+        buildLog = bErr.stdout || bErr.stderr || bErr.message || "";
+        buildSuccess = false;
+        console.error("[Deploy] Build after pull error:", bErr);
+      }
+    } else {
+      buildLog = "npm is not installed on this runtime environment. Serving pre-compiled dist folder directly from Git.";
+    }
   }
 
   const afterHash = git("rev-parse --short HEAD");

@@ -1,2 +1,0 @@
-import{t as e}from"./vendor-react-DlFibgBI.js";import{C as t}from"./index-C_--juI-.js";import{t as n}from"./PolicyLayout-Cnzm5jYv.js";var r=e();function i(){let e=t.useLoaderData();return(0,r.jsx)(n,{title:e?.title||``,intro:e?.intro||``,sections:e?.sections&&e.sections.length>0?e.sections.map(e=>({heading:e.heading,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e.body}})})):[{heading:e?.title||``,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e?.body||``}})}]})}export{i as component};
-//# sourceMappingURL=refund-policy-DS_LNJ4j.js.map
