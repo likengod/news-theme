@@ -78,6 +78,13 @@ export default function ArticleSettingsTab({
   );
   const isScheduled = row.status === "Scheduled" || isFutureDate;
 
+  const [isCustomAuthor, setIsCustomAuthor] = React.useState<boolean>(() => {
+    if (!row.author) return false;
+    return !allAuthorNames.some(
+      (n) => n.trim().toLowerCase() === row.author.trim().toLowerCase(),
+    );
+  });
+
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -100,49 +107,72 @@ export default function ArticleSettingsTab({
         </Field>
 
         <Field label="Author *">
-          <div className="space-y-1.5">
-            {/* Quick Author Pills */}
-            <div className="flex flex-wrap items-center gap-1 pb-1">
-              <span className="text-[10px] uppercase font-bold text-slate-400 mr-0.5">Quick:</span>
-              {editorialDefaults.slice(0, 4).map((name) => {
-                const isSelected = row.author?.trim().toLowerCase() === name.trim().toLowerCase();
-                return (
-                  <button
-                    key={name}
-                    type="button"
-                    onClick={() => onChange("author", name)}
-                    className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-medium transition cursor-pointer border ${
-                      isSelected
-                        ? "border-slate-900 bg-slate-900 text-white"
-                        : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                    }`}
-                  >
-                    <span>{name === currentUserAuthor ? `🟢 ${name}` : name}</span>
-                    {isSelected && <Check className="h-2.5 w-2.5 stroke-[3]" />}
-                  </button>
-                );
-              })}
+          <div className="space-y-2">
+            {/* Quick Author Pills + Toggle Switch */}
+            <div className="flex items-center justify-between gap-2 pb-0.5">
+              <div className="flex flex-wrap items-center gap-1">
+                <span className="text-[10px] uppercase font-bold text-slate-400 mr-0.5">Quick:</span>
+                {editorialDefaults.slice(0, 3).map((name) => {
+                  const isSelected = row.author?.trim().toLowerCase() === name.trim().toLowerCase();
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => {
+                        onChange("author", name);
+                        setIsCustomAuthor(false);
+                      }}
+                      className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-medium transition cursor-pointer border ${
+                        isSelected
+                          ? "border-slate-900 bg-slate-900 text-white"
+                          : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                      }`}
+                    >
+                      <span>{name === currentUserAuthor ? `🟢 ${name}` : name}</span>
+                      {isSelected && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsCustomAuthor((prev) => !prev)}
+                className="text-[11px] font-medium text-blue-600 hover:text-blue-800 transition cursor-pointer shrink-0 underline"
+              >
+                {isCustomAuthor ? "Choose from list" : "Type custom"}
+              </button>
             </div>
 
-            {/* Author Dropdown Selector */}
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-1.5 items-center">
+            {/* Author Selector: Clean Dropdown or Clean Input */}
+            {!isCustomAuthor ? (
               <select
-                aria-label="Select author profile"
-                value={allAuthorNames.includes(row.author) ? row.author : ""}
+                id="article-author-select"
+                name="author"
+                aria-label="Author Profile"
+                value={
+                  allAuthorNames.some((n) => n.trim().toLowerCase() === row.author?.trim().toLowerCase())
+                    ? allAuthorNames.find((n) => n.trim().toLowerCase() === row.author?.trim().toLowerCase()) || ""
+                    : ""
+                }
                 onChange={(e) => {
-                  if (e.target.value) onChange("author", e.target.value);
+                  if (e.target.value === "__custom__") {
+                    setIsCustomAuthor(true);
+                  } else if (e.target.value) {
+                    onChange("author", e.target.value);
+                  }
                 }}
-                className="w-full rounded-md border border-slate-200 bg-slate-50/80 px-2.5 py-1.5 text-xs text-slate-700 focus:bg-white focus:outline-none"
+                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-900 focus:outline-none"
               >
-                <option value="">⚡ Select profile / desk...</option>
+                <option value="">⚡ Select profile or editorial desk...</option>
                 {currentUserAuthor && (
-                  <option value={currentUserAuthor}>👤 {currentUserAuthor} (Your Profile)</option>
+                  <option value={currentUserAuthor}>🟢 {currentUserAuthor} (Your Profile)</option>
                 )}
                 {authorOptions && authorOptions.length > 0 && (
-                  <optgroup label="Registered Profiles">
+                  <optgroup label="Registered Authors">
                     {authorOptions.map((a) => (
                       <option key={a.id} value={a.name}>
-                        {a.name} ({a.role}{a.username ? ` • @${a.username}` : ""})
+                        👤 {a.name} ({a.role}{a.username ? ` • @${a.username}` : ""})
                       </option>
                     ))}
                   </optgroup>
@@ -153,32 +183,29 @@ export default function ArticleSettingsTab({
                   <option value="Editorial Desk">Editorial Desk</option>
                   <option value="Special Correspondent">Special Correspondent</option>
                 </optgroup>
+                <option value="__custom__">✏️ Custom Author Name (Type custom)...</option>
               </select>
+            ) : (
+              <div className="relative">
+                <input
+                  id="article-author"
+                  name="author"
+                  aria-label="Author"
+                  type="text"
+                  autoComplete="off"
+                  value={row.author}
+                  placeholder="Enter author or agency name (e.g. PTI, Staff Reporter)..."
+                  onChange={(e) => onChange("author", e.target.value)}
+                  className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
+                  autoFocus
+                />
+              </div>
+            )}
 
-              <span className="text-[11px] text-slate-400 hidden sm:inline">or type:</span>
-            </div>
-
-            {/* Free-form Author Input */}
-            <div className="relative">
-              <input
-                id="article-author"
-                name="author"
-                aria-label="Author"
-                autoComplete="off"
-                list="author-datalist"
-                value={row.author}
-                placeholder="e.g. Admin User, Staff Reporter..."
-                onChange={(e) => onChange("author", e.target.value)}
-                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
-              />
-              <datalist id="author-datalist">
-                {allAuthorNames.map((name) => (
-                  <option key={name} value={name} />
-                ))}
-              </datalist>
-            </div>
             <p className="text-[11px] text-slate-400">
-              Select an author above or type any custom reporter / agency name.
+              {isCustomAuthor
+                ? "Type any reporter or agency name. Click 'Choose from list' to select a profile."
+                : `Selected author: ${row.author || "None"} — Click 'Type custom' to type any custom byline.`}
             </p>
           </div>
         </Field>
