@@ -39,12 +39,6 @@ export default defineConfig({
           ) {
             return "vendor-tanstack-query";
           }
-          if (
-            id.includes("node_modules/@radix-ui/") ||
-            id.includes("node_modules/@floating-ui/")
-          ) {
-            return "vendor-radix";
-          }
         },
       },
     },

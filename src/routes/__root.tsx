@@ -5,18 +5,44 @@ import {
   redirect,
 } from "@tanstack/react-router";
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { ThemeProvider } from "../lib/theme";
 const Toaster = lazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
+
+function LazyToaster() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if ("requestIdleCallback" in window) {
+      const id = (window as any).requestIdleCallback(() => setMounted(true));
+      return () => (window as any).cancelIdleCallback(id);
+    } else {
+      const t = setTimeout(() => setMounted(true), 2000);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
+  if (!mounted) return null;
+  return (
+    <Suspense fallback={null}>
+      <Toaster />
+    </Suspense>
+  );
+}
+
 import { AnalyticsInjector } from "@/components/site/AnalyticsInjector";
 import { AdSettingsProvider } from "@/components/site/AdSettingsContext";
 import {
   getSiteSettingsServer,
+  defaultSettings,
+} from "@/lib/site-content/site-settings";
+import {
   getAdConfigurationServer,
+} from "@/lib/site-content/ads-storage";
+import {
   getRedirectRulesServer,
   incrementRedirectHitServer,
-  defaultSettings,
-} from "@/lib/site-content";
+} from "@/lib/site-content/redirect-rules";
 import { getHomepageConfigServer, defaultHomepageConfig } from "@/lib/homepage-config";
 import {
   getFontConfigServer,
@@ -156,9 +182,7 @@ function RootComponent() {
       <ThemeProvider>
         <AdSettingsProvider value={contextValue}>
           <Outlet />
-          <Suspense fallback={null}>
-            <Toaster />
-          </Suspense>
+          <LazyToaster />
           <AnalyticsInjector />
         </AdSettingsProvider>
       </ThemeProvider>

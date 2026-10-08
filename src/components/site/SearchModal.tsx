@@ -307,7 +307,7 @@ export function SearchBox({ className }: { className?: string }) {
       >
         <Search className="h-5 w-5" />
       </button>
-      <SearchModal open={open} onClose={() => setOpen(false)} />
+      {open && <SearchModal open={open} onClose={() => setOpen(false)} />}
     </>
   );
 }

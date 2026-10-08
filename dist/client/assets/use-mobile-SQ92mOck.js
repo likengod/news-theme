@@ -1,2 +1,0 @@
-import{i as e}from"./rolldown-runtime-aKtaBQYM.js";import{B as t}from"./vendor-radix-DfyW4Fqo.js";var n=e(t()),r=768;function i(){let[e,t]=n.useState(!1);return n.useEffect(()=>{let e=window.matchMedia(`(max-width: ${r-1}px)`),n=e=>{t(e.matches)};return e.addEventListener(`change`,n),t(e.matches),()=>{e.removeEventListener(`change`,n)}},[]),!!e}export{i as t};
-//# sourceMappingURL=use-mobile-SQ92mOck.js.map

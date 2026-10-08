@@ -1,2 +1,0 @@
-import{R as e}from"./vendor-radix-DfyW4Fqo.js";import{t}from"./news-data-Cw9hwDz_.js";import{t as n}from"./eye-CxbMgRh7.js";var r=e();function i({count:e,className:i=``}){return(0,r.jsxs)(`span`,{className:`inline-flex items-center gap-1 text-[11px] text-muted-foreground ${i}`,children:[(0,r.jsx)(n,{className:`h-3 w-3 shrink-0`}),(0,r.jsxs)(`span`,{children:[t(e),` views`]})]})}export{i as t};
-//# sourceMappingURL=Views-DR9vN_lP.js.map
