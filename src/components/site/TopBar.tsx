@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { Home, Menu, Search } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { lazy, Suspense } from "react";
 import { ThemeToggle } from "./ThemeToggle";
-import { UserMenu } from "./UserMenu";
+const UserMenu = lazy(() => import("./UserMenu").then((m) => ({ default: m.UserMenu })));
 import { SearchBox } from "./SearchModal";
 import { sections, slugify } from "@/lib/news-data";
 import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
@@ -203,7 +204,9 @@ export function TopBar() {
             {t("nav.subscribe")}
           </Link>
           <span aria-hidden="true" className="hidden text-muted-foreground/40 sm:inline select-none">|</span>
-          <UserMenu />
+          <Suspense fallback={<div className="h-7 w-7" />}>
+            <UserMenu />
+          </Suspense>
           <SearchBox className="grid h-7 w-7 place-items-center text-foreground hover:bg-muted transition-colors rounded-sm" />
 
           <Sheet open={open} onOpenChange={setOpen}>
@@ -322,7 +325,9 @@ export function TopBar() {
                     <span>{t("nav.nightMode")}</span>
                     <ThemeToggle />
                   </div>
-                  <UserMenu variant="mobile" />
+                  <Suspense fallback={null}>
+                    <UserMenu variant="mobile" />
+                  </Suspense>
                   <Link
                     to="/subscription"
                     className="hover:text-foreground"

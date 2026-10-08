@@ -29,7 +29,8 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                 <div className="overflow-hidden bg-muted">
                   <img
                     src={activeBottomItems[0].img}
-                    alt={activeBottomItems[0].title}
+                    alt=""
+                    aria-hidden="true"
                     loading="lazy"
                     decoding="async"
                     width={400}
@@ -67,7 +68,8 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                 <div className="hidden md:block overflow-hidden bg-muted">
                   <img
                     src={activeBottomItems[1].img}
-                    alt={activeBottomItems[1].title}
+                    alt=""
+                    aria-hidden="true"
                     loading="lazy"
                     decoding="async"
                     width={400}

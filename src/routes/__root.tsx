@@ -5,8 +5,9 @@ import {
   redirect,
 } from "@tanstack/react-router";
 
+import { lazy, Suspense } from "react";
 import { ThemeProvider } from "../lib/theme";
-import { Toaster } from "@/components/ui/sonner";
+const Toaster = lazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
 import { AnalyticsInjector } from "@/components/site/AnalyticsInjector";
 import { AdSettingsProvider } from "@/components/site/AdSettingsContext";
 import {
@@ -155,7 +156,9 @@ function RootComponent() {
       <ThemeProvider>
         <AdSettingsProvider value={contextValue}>
           <Outlet />
-          <Toaster />
+          <Suspense fallback={null}>
+            <Toaster />
+          </Suspense>
           <AnalyticsInjector />
         </AdSettingsProvider>
       </ThemeProvider>

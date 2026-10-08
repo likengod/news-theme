@@ -69,7 +69,8 @@ export default function HeroFeaturedSlider({
           <div className="overflow-hidden relative rounded-xl border border-border/40 bg-black/5 dark:bg-black/30 flex items-center justify-center">
             <img
               src={featured.img}
-              alt={featured.title}
+              alt=""
+              aria-hidden="true"
               loading={index === 0 ? "eager" : "lazy"}
               fetchPriority={index === 0 ? "high" : "auto"}
               decoding={index === 0 ? "sync" : "async"}

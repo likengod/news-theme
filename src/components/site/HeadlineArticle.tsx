@@ -49,7 +49,8 @@ export function HeadlineArticle({
         <div className="mb-3 overflow-hidden">
           <img
             src={item.img}
-            alt={item.title}
+            alt=""
+            aria-hidden="true"
             loading="lazy"
             fetchPriority="auto"
             decoding="async"

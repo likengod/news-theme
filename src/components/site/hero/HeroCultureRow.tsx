@@ -25,7 +25,8 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
             <div className="relative overflow-hidden rounded-lg">
               <img
                 src={c.img}
-                alt={c.title}
+                alt=""
+                aria-hidden="true"
                 loading="lazy"
                 decoding="async"
                 width={400}

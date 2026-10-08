@@ -95,7 +95,8 @@ export function HeroMain({ activeLeads, cfg }: any) {
         <div className="overflow-hidden relative rounded-xl border border-border/40 bg-black/5 dark:bg-black/30 flex items-center justify-center">
           <img
             src={featured.img}
-            alt={featured.title}
+            alt=""
+            aria-hidden="true"
             loading="eager"
             fetchPriority="high"
             decoding="sync"

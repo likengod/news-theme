@@ -191,7 +191,8 @@ function MagazineCard1({ p1 }: { p1: any }) {
       <div className="grid gap-4 md:grid-cols-[194px_1fr] items-start">
         <img
           src={getArticleImage(p1.featuredImage, 1)}
-          alt={p1.title}
+          alt=""
+          aria-hidden="true"
           loading="lazy"
           decoding="async"
           width={194}
@@ -469,6 +470,8 @@ export function MarketsMagazine({
                   key={s.id}
                   href={s.href || "#"}
                   aria-hidden={i !== slideIdx}
+                  tabIndex={i === slideIdx ? 0 : -1}
+                  aria-label={(s as any).title || "Advertisement"}
                   className="absolute inset-0 block transition-opacity duration-300"
                   style={{
                     opacity: i === slideIdx ? 1 : 0,
@@ -478,6 +481,7 @@ export function MarketsMagazine({
                   <img
                     src={s.image}
                     alt=""
+                    aria-hidden="true"
                     loading="lazy"
                     decoding="async"
                     className="h-full w-full object-cover"

@@ -197,7 +197,8 @@ export const NewsGrid = React.memo(function NewsGrid({
                 <div className="relative overflow-hidden bg-muted">
                   <img
                     src={col.img}
-                    alt={col.lead}
+                    alt=""
+                    aria-hidden="true"
                     loading="lazy"
                     decoding="async"
                     width={400}

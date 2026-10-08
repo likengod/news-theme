@@ -57,7 +57,8 @@ export function RelatedNews({ currentSlug, category }: RelatedNewsProps) {
               <div className="overflow-hidden rounded-md bg-muted aspect-[16/9]">
                 <img
                   src={displayImage}
-                  alt={it.title}
+                  alt=""
+                  aria-hidden="true"
                   loading="lazy"
                   decoding="async"
                   className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"

@@ -21,6 +21,33 @@ export default defineConfig({
     cssCodeSplit: true,
     cssMinify: "lightningcss",
     chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) {
+            return "vendor-react";
+          }
+          if (
+            id.includes("node_modules/@tanstack/react-router") ||
+            id.includes("node_modules/@tanstack/router-core")
+          ) {
+            return "vendor-tanstack-router";
+          }
+          if (
+            id.includes("node_modules/@tanstack/react-query") ||
+            id.includes("node_modules/@tanstack/query-core")
+          ) {
+            return "vendor-tanstack-query";
+          }
+          if (
+            id.includes("node_modules/@radix-ui/") ||
+            id.includes("node_modules/@floating-ui/")
+          ) {
+            return "vendor-radix";
+          }
+        },
+      },
+    },
   },
 
   plugins: [
