@@ -5,14 +5,15 @@ import {
   redirect,
   useNavigate,
   useLocation,
+  Link,
 } from "@tanstack/react-router";
+import { Rocket } from "lucide-react";
 import { authClient as supabase } from "@/lib/auth-client";
 import { getUserServer, getCurrentUserRole } from "@/lib/auth.functions";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { isEnterprisePlusLicense } from "@/lib/site-content";
 import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
 import { AdminTopBar } from "@/components/admin/layout/AdminTopBar";
-import { AdminUpdatePrompt } from "@/components/admin/layout/AdminUpdatePrompt";
 import { getAdminUserDisplayInfo } from "@/components/admin/layout/adminUserUtils";
 import { useAdminTheme } from "@/components/admin/hooks/useAdminTheme";
 import { useAdminUpdateChecker } from "@/components/admin/hooks/useAdminUpdateChecker";
@@ -118,16 +119,37 @@ function AdminLayout() {
         />
 
         <main className="p-4 sm:p-6 lg:p-8">
-          {updateStatus.hasUpdate && !dismissed && pathname !== "/admin/updates" ? (
-            <AdminUpdatePrompt
-              firstName={firstName}
-              currentVersion={updateStatus.currentVersion}
-              latestVersion={updateStatus.latestVersion}
-              onDismiss={() => setDismissed()}
-            />
-          ) : (
-            <Outlet />
+          {updateStatus.hasUpdate && !dismissed && pathname !== "/admin/updates" && (
+            <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 rounded-xl border border-indigo-200 bg-indigo-50/80 p-3.5 sm:p-4 text-indigo-950 shadow-xs">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white">
+                  <Rocket className="h-4 w-4" />
+                </div>
+                <div className="text-xs sm:text-sm">
+                  <span className="font-semibold text-indigo-900">System Update Available: </span>
+                  Version <span className="font-mono font-bold text-indigo-700">{updateStatus.latestVersion}</span> is available (current: <span className="font-mono">{updateStatus.currentVersion}</span>).
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
+                <Link
+                  to="/admin/updates"
+                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 transition"
+                >
+                  View Details
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setDismissed()}
+                  className="rounded-lg border border-indigo-200 bg-white px-2.5 py-1.5 text-xs font-medium text-indigo-800 hover:bg-indigo-100 transition"
+                  title="Dismiss this notice"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
           )}
+
+          <Outlet />
         </main>
       </div>
     </div>
