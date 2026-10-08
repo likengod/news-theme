@@ -3,7 +3,7 @@ import {
   Undo, Redo, Heading2, Heading3, Heading4, Bold, Italic, Underline,
   Strikethrough, Subscript, Superscript, RemoveFormatting, Code2, Highlighter,
   ChevronDown, Pipette, AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  List, ListOrdered, Quote, Minus, Link2, Table as TableIcon, Image as ImageIcon,
+  List, ListOrdered, Quote, Minus, Link2, Unlink, Table as TableIcon, Image as ImageIcon,
   Upload, Youtube, Facebook, Video, Maximize2, Minimize2, FileText,
 } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
@@ -28,6 +28,8 @@ interface ToolbarProps {
   insertFacebook: () => void;
   insertVideoUrl: () => void;
   insertLink: () => void;
+  unlink: () => void;
+  clearFormatting: () => void;
   insertDivider: () => void;
   insertQuote: () => void;
   insertTable: () => void;
@@ -59,7 +61,7 @@ export function Toolbar({
   mode, setMode, exec, formatBlock, setFontFamily, setFontSize,
   fontOptions, currentSize, sizes, applyTextColor, applyHighlightColor,
   insertHTML, insertImage, imgRef, uploadImage, insertYouTube, insertFacebook,
-  insertVideoUrl, insertLink, insertDivider, insertQuote, insertTable,
+  insertVideoUrl, insertLink, unlink, clearFormatting, insertDivider, insertQuote, insertTable,
   isFullscreen, setIsFullscreen, words, saveSelection, emit,
   textColorOpen, setTextColorOpen, highlightOpen, setHighlightOpen,
   activeTextColor, activeHighlightColor, textColorRef, highlightRef,
@@ -173,27 +175,8 @@ export function Toolbar({
                 <Superscript className="h-4 w-4" />
               </Btn>
               <Btn
-                onClick={() => {
-                  restoreSelection();
-                  exec("removeFormat");
-                  if (ref.current) {
-                    const sel = window.getSelection();
-                    if (sel && sel.rangeCount > 0) {
-                      ref.current.querySelectorAll<HTMLElement>("*").forEach((s) => {
-                        if (sel.containsNode(s, true)) {
-                          s.style.fontSize = "";
-                          s.style.fontFamily = "";
-                          s.style.backgroundColor = "";
-                          s.style.color = "";
-                          s.style.lineHeight = "";
-                        }
-                      });
-                    }
-                  }
-                  setCurrentSize("14");
-                  emit();
-                }}
-                title="Clear formatting / Plain text"
+                onClick={clearFormatting}
+                title="Clear formatting & remove links / Reset to default text (14px)"
                 disabled={mode === "plain"}
               >
                 <RemoveFormatting className="h-4 w-4 text-rose-600" />
@@ -405,6 +388,9 @@ export function Toolbar({
               </Btn>
               <Btn onClick={insertLink} title="Insert / edit link" disabled={mode === "plain"}>
                 <Link2 className="h-4 w-4" />
+              </Btn>
+              <Btn onClick={unlink} title="Remove link / Unlink" disabled={mode === "plain"}>
+                <Unlink className="h-4 w-4 text-slate-600" />
               </Btn>
               <Btn onClick={insertTable} title="Insert Table" disabled={mode === "plain"}>
                 <TableIcon className="h-4 w-4" />

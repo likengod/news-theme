@@ -39,6 +39,8 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
     setFontSize,
     updateSelectionState,
     handlePaste,
+    clearFormatting,
+    unlink,
   } = useRichEditorSelection({
     ref,
     lastHtml,
@@ -228,6 +230,8 @@ function RichEditor({ value, onChange }: { value: string; onChange: (v: string) 
         insertFacebook={insertFacebook}
         insertVideoUrl={insertVideoUrl}
         insertLink={insertLink}
+        unlink={unlink}
+        clearFormatting={clearFormatting}
         insertDivider={insertDivider}
         insertQuote={insertQuote}
         insertTable={insertTable}

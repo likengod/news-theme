@@ -323,6 +323,172 @@ export function useRichEditorSelection({
     }
   };
 
+  // Remove links from selected text or cursor position
+  const unlink = () => {
+    restoreSelection();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || !ref.current) return;
+
+    try {
+      document.execCommand("unlink", false);
+    } catch {}
+
+    const range = sel.getRangeAt(0);
+    const editorText = (ref.current.innerText || "").trim();
+    const selText = range.toString().trim();
+    const isAllSelected =
+      range.commonAncestorContainer === ref.current ||
+      range.commonAncestorContainer.contains(ref.current) ||
+      (editorText.length > 0 && selText.length > 0 && selText === editorText);
+
+    const unwrap = (node: Element) => {
+      const parent = node.parentNode;
+      if (!parent) return;
+      while (node.firstChild) {
+        parent.insertBefore(node.firstChild, node);
+      }
+      parent.removeChild(node);
+    };
+
+    ref.current.querySelectorAll("a").forEach((a) => {
+      if (
+        isAllSelected ||
+        sel.containsNode(a, true) ||
+        a.contains(range.startContainer) ||
+        a.contains(range.endContainer)
+      ) {
+        unwrap(a);
+      }
+    });
+
+    emit();
+    saveSelection();
+  };
+
+  // Complete clean formatting: removes all links, styles, bold/italic, resets to clean 14px text
+  const clearFormatting = () => {
+    restoreSelection();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || !ref.current) return;
+
+    // 1. Browser native commands
+    try {
+      document.execCommand("unlink", false);
+    } catch {}
+    try {
+      document.execCommand("removeFormat", false);
+    } catch {}
+
+    const range = sel.getRangeAt(0);
+    const editorText = (ref.current.innerText || "").trim();
+    const selText = range.toString().trim();
+    const isAllSelected =
+      range.commonAncestorContainer === ref.current ||
+      range.commonAncestorContainer.contains(ref.current) ||
+      (editorText.length > 0 && selText.length > 0 && selText === editorText);
+
+    const unwrap = (node: Element) => {
+      const parent = node.parentNode;
+      if (!parent) return;
+      while (node.firstChild) {
+        parent.insertBefore(node.firstChild, node);
+      }
+      parent.removeChild(node);
+    };
+
+    // 2. Remove all <a> hyperlinks within the selection or cursor
+    ref.current.querySelectorAll("a").forEach((a) => {
+      if (
+        isAllSelected ||
+        sel.containsNode(a, true) ||
+        a.contains(range.startContainer) ||
+        a.contains(range.endContainer)
+      ) {
+        unwrap(a);
+      }
+    });
+
+    // 3. Remove inline formatting tags (b, strong, i, em, u, s, strike, del, mark, font, small, sub, sup, code)
+    const inlineFormatting = "b, strong, i, em, u, s, strike, del, mark, font, small, sub, sup, code";
+    ref.current.querySelectorAll(inlineFormatting).forEach((el) => {
+      if (
+        isAllSelected ||
+        sel.containsNode(el, true) ||
+        el.contains(range.startContainer) ||
+        el.contains(range.endContainer)
+      ) {
+        unwrap(el);
+      }
+    });
+
+    // 4. Strip all inline styles, classes, and obsolete attributes
+    ref.current.querySelectorAll<HTMLElement>("*").forEach((el) => {
+      const tag = el.tagName.toLowerCase();
+      if (["img", "iframe", "video"].includes(tag)) return;
+
+      if (
+        isAllSelected ||
+        sel.containsNode(el, true) ||
+        el.contains(range.startContainer) ||
+        el.contains(range.endContainer)
+      ) {
+        el.removeAttribute("style");
+        el.removeAttribute("class");
+        el.removeAttribute("color");
+        el.removeAttribute("face");
+        el.removeAttribute("size");
+        el.removeAttribute("dir");
+        el.removeAttribute("lang");
+      }
+    });
+
+    // 5. Unwrap useless or empty spans
+    ref.current.querySelectorAll("span").forEach((span) => {
+      if (!span.getAttribute("style") && !span.getAttribute("class") && !span.getAttribute("id")) {
+        unwrap(span);
+      }
+    });
+
+    // 6. Reset headings (h1-h6) and div text blocks to clean standard <p>
+    ref.current.querySelectorAll<HTMLElement>("h1, h2, h3, h4, h5, h6, blockquote, div").forEach((block) => {
+      if (
+        isAllSelected ||
+        sel.containsNode(block, true) ||
+        block.contains(range.startContainer) ||
+        block.contains(range.endContainer)
+      ) {
+        if (!block.querySelector("p, ul, ol, table, blockquote")) {
+          const p = document.createElement("p");
+          p.style.fontSize = "14px";
+          p.style.lineHeight = "1.75";
+          p.style.margin = "0.5rem 0";
+          while (block.firstChild) {
+            p.appendChild(block.firstChild);
+          }
+          block.parentNode?.replaceChild(p, block);
+        }
+      }
+    });
+
+    // 7. Ensure all selected paragraphs have default 14px size and clean line height
+    ref.current.querySelectorAll<HTMLElement>("p").forEach((p) => {
+      if (
+        isAllSelected ||
+        sel.containsNode(p, true) ||
+        p.contains(range.startContainer) ||
+        p.contains(range.endContainer)
+      ) {
+        p.style.fontSize = "14px";
+        p.style.lineHeight = "1.75";
+        p.style.margin = "0.5rem 0";
+      }
+    });
+
+    setCurrentSize("14");
+    emit();
+    saveSelection();
+  };
+
   // Clean pasted content from Word, Google Docs, external websites
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -352,7 +518,7 @@ export function useRichEditorSelection({
         font.parentNode?.replaceChild(span, font);
       });
 
-      // 3. Clean all elements: strip hardcoded font sizes, font families, and Word junk
+      // 3. Clean all elements: strip hardcoded font sizes, font families, colors, and Word junk
       doc.body.querySelectorAll("*").forEach((el) => {
         const tag = el.tagName.toLowerCase();
         const htmlEl = el as HTMLElement;
@@ -366,6 +532,9 @@ export function useRichEditorSelection({
           // Remove restrictive inline typography that blocks editor toolbar
           htmlEl.style.fontSize = "";
           htmlEl.style.fontFamily = "";
+          htmlEl.style.color = "";
+          htmlEl.style.backgroundColor = "";
+          htmlEl.style.textDecoration = "";
           htmlEl.style.lineHeight = "";
           htmlEl.style.margin = "";
           htmlEl.style.padding = "";
@@ -426,5 +595,7 @@ export function useRichEditorSelection({
     setFontSize,
     updateSelectionState,
     handlePaste,
+    clearFormatting,
+    unlink,
   };
 }
