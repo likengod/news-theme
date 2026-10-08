@@ -259,6 +259,7 @@ function SettingsPage() {
             update={update}
             isPremium={isPremium}
             onNavigateActivate={() => navigate({ to: ".", search: { tab: "activate" } })}
+            onSave={onSave}
           />
         )}
       </Suspense>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Lock, RefreshCw } from "lucide-react";
+import { Lock, RefreshCw, Save } from "lucide-react";
 import { toast } from "sonner";
 import { clearAllCachesServer, type SiteSettings } from "@/lib/site-content";
 import { Card, Toggle } from "./SettingsHelpers";
@@ -9,6 +9,7 @@ interface SpeedOptimizationTabProps {
   update: <K extends keyof SiteSettings>(k: K, v: SiteSettings[K]) => void;
   isPremium: boolean;
   onNavigateActivate: () => void;
+  onSave?: () => void;
 }
 
 export function SpeedOptimizationTab({
@@ -16,6 +17,7 @@ export function SpeedOptimizationTab({
   update,
   isPremium,
   onNavigateActivate,
+  onSave,
 }: SpeedOptimizationTabProps) {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
@@ -23,6 +25,13 @@ export function SpeedOptimizationTab({
         title="Website Speed Up Options"
         subtitle="Enable advanced optimization options to boost your website loading time and improve Google PageSpeed scores."
       >
+        <Toggle
+          label="Non-Blocking Web Fonts (Eliminate Render Blocking)"
+          checked={s.asyncFontsEnabled ?? true}
+          onChange={(v) => update("asyncFontsEnabled", v)}
+          hint="Load Google Fonts asynchronously with preconnect and font-display: swap. Eliminates the ~750ms render-blocking delay on initial page load."
+        />
+
         <Toggle
           label="Clean Unused CSS (PurgeCSS)"
           checked={!!s.cleanUnusedCss}
@@ -50,6 +59,18 @@ export function SpeedOptimizationTab({
           onChange={(v) => update("preRenderEnabled", v)}
           hint="Pre-generate static HTML files for top articles and category pages. Delivers instant load times under high traffic spikes."
         />
+
+        {onSave && (
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={onSave}
+              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 transition active:scale-95"
+            >
+              <Save className="h-3.5 w-3.5" /> Save Speed Settings
+            </button>
+          </div>
+        )}
       </Card>
 
       <Card

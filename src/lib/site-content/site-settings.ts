@@ -174,6 +174,7 @@ export type SiteSettings = {
   minifyJs: boolean;
   serverCacheEnabled: boolean;
   preRenderEnabled: boolean;
+  asyncFontsEnabled?: boolean;
   optimizationScheduleEnabled: boolean;
   optimizationScheduleTime: string;
   // Top Bar Customizations
@@ -419,6 +420,7 @@ export const defaultSettings: SiteSettings = {
   minifyJs: true,
   serverCacheEnabled: true,
   preRenderEnabled: false,
+  asyncFontsEnabled: true,
   optimizationScheduleEnabled: false,
   optimizationScheduleTime: "02:00",
   // Top Bar Customizations

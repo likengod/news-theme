@@ -129,16 +129,26 @@ export function generateRootHead(loaderData: any) {
     },
   ];
 
+  const asyncFonts = s?.asyncFontsEnabled ?? true;
+
   if (googleFontsUrl && typeof googleFontsUrl === "string" && googleFontsUrl.trim()) {
-    // Non-render-blocking font loading: preload the stylesheet and dynamically append it
-    links.push({
-      rel: "preload",
-      as: "style",
-      href: googleFontsUrl,
-    });
-    scripts.push({
-      children: `(function(){var l=document.createElement('link');l.rel='stylesheet';l.href=${JSON.stringify(googleFontsUrl)};document.head.appendChild(l);})();`,
-    });
+    if (asyncFonts) {
+      // Non-render-blocking font loading: preload the stylesheet and dynamically append it
+      links.push({
+        rel: "preload",
+        as: "style",
+        href: googleFontsUrl,
+      });
+      scripts.push({
+        children: `(function(){var l=document.createElement('link');l.rel='stylesheet';l.href=${JSON.stringify(googleFontsUrl)};document.head.appendChild(l);})();`,
+      });
+    } else {
+      // Standard render-blocking stylesheet
+      links.push({
+        rel: "stylesheet",
+        href: googleFontsUrl,
+      });
+    }
   }
 
   return {
