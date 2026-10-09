@@ -6,6 +6,19 @@
     "search": "Search news…",
     "navigation": "Navigation"
   },
+  "sideNav": {
+    "live": "Live",
+    "reels": "Shorts / Reels",
+    "results": "Results",
+    "videos": "Videos",
+    "photos": "Photo Gallery",
+    "factCheck": "Fact Check",
+    "opinion": "Opinion",
+    "archive": "Archive",
+    "urgent": "Utilities",
+    "emiCalculator": "EMI Calculator",
+    "ageCalculator": "Age Calculator"
+  },
   "footer": {
     "quickLinks": "Quick Links",
     "connectWithUs": "Connect With Us",

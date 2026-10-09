@@ -13,12 +13,14 @@ import {
   Newspaper,
 } from "lucide-react";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { useTranslation } from "@/lib/i18n";
 import { EmiCalculatorModal } from "./EmiCalculatorModal";
 import { AgeCalculatorModal } from "./AgeCalculatorModal";
 
 export function ArticleLeftNav() {
   const [showEmiModal, setShowEmiModal] = useState(false);
   const [showAgeModal, setShowAgeModal] = useState(false);
+  const { t, i18n } = useTranslation();
   const settings = useSiteSettings();
   const items = settings?.articleLeftNavItems || {};
 
@@ -72,7 +74,7 @@ export function ArticleLeftNav() {
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-red-600"></span>
                   </span>
                 </div>
-                <span className="truncate">লাইভ</span>
+                <span className="truncate">{t("sideNav.live", "Live")}</span>
               </Link>
             )}
 
@@ -83,7 +85,7 @@ export function ArticleLeftNav() {
                 className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
               >
                 <Clapperboard className="h-4 w-4 shrink-0 text-slate-600 group-hover:text-red-600 dark:text-slate-400" />
-                <span className="truncate font-semibold text-slate-900 dark:text-white">শর্টস / Reels</span>
+                <span className="truncate font-semibold text-slate-900 dark:text-white">{t("sideNav.reels", "Shorts / Reels")}</span>
               </Link>
             )}
 
@@ -94,7 +96,7 @@ export function ArticleLeftNav() {
                 className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
               >
                 <GraduationCap className="h-4 w-4 shrink-0 text-slate-600 group-hover:text-red-600 dark:text-slate-400" />
-                <span className="truncate">Result</span>
+                <span className="truncate">{t("sideNav.results", "Results")}</span>
               </Link>
             )}
 
@@ -105,7 +107,7 @@ export function ArticleLeftNav() {
                 className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
               >
                 <Video className="h-4 w-4 shrink-0 text-slate-600 group-hover:text-red-600 dark:text-slate-400" />
-                <span className="truncate">ভিডিও</span>
+                <span className="truncate">{t("sideNav.videos", "Videos")}</span>
               </Link>
             )}
 
@@ -117,7 +119,7 @@ export function ArticleLeftNav() {
                 className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
               >
                 <ImageIcon className="h-4 w-4 shrink-0 text-slate-600 group-hover:text-red-600 dark:text-slate-400" />
-                <span className="truncate">ফটো গ্যালারি</span>
+                <span className="truncate">{t("sideNav.photos", "Photo Gallery")}</span>
               </Link>
             )}
 
@@ -128,7 +130,7 @@ export function ArticleLeftNav() {
                 className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
               >
                 <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                <span className="truncate">ফ্যাক্ট চেক</span>
+                <span className="truncate">{t("sideNav.factCheck", "Fact Check")}</span>
               </Link>
             )}
 
@@ -140,7 +142,7 @@ export function ArticleLeftNav() {
                 className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
               >
                 <MessageSquareQuote className="h-4 w-4 shrink-0 text-slate-600 group-hover:text-red-600 dark:text-slate-400" />
-                <span className="truncate">ওপিনিয়ন</span>
+                <span className="truncate">{t("sideNav.opinion", "Opinion")}</span>
               </Link>
             )}
 
@@ -151,7 +153,7 @@ export function ArticleLeftNav() {
                 className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
               >
                 <Newspaper className="h-4 w-4 shrink-0 text-slate-600 group-hover:text-red-600 dark:text-slate-400" />
-                <span className="truncate">আর্কাইভ</span>
+                <span className="truncate">{t("sideNav.archive", "Archive")}</span>
               </Link>
             )}
           </nav>
@@ -162,7 +164,7 @@ export function ArticleLeftNav() {
           <div className="border-t border-slate-200 dark:border-slate-800 pt-3">
             <div className="px-2 pb-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
               <span className="h-1.5 w-1.5 rounded-full bg-red-600" />
-              <span>জরুরি</span>
+              <span>{t("sideNav.urgent", "Utilities")}</span>
             </div>
 
             <div className="flex flex-col space-y-0.5 text-[11px] font-medium text-slate-600 dark:text-slate-400">
@@ -174,7 +176,7 @@ export function ArticleLeftNav() {
                   className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer"
                 >
                   <Calculator className="h-3.5 w-3.5 shrink-0 text-slate-500 group-hover:text-red-600" />
-                  <span className="truncate">EMI ক্যালকুলেটর</span>
+                  <span className="truncate">{t("sideNav.emiCalculator", "EMI Calculator")}</span>
                 </button>
               )}
 
@@ -186,7 +188,7 @@ export function ArticleLeftNav() {
                   className="group flex items-start gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer"
                 >
                   <CalendarDays className="h-3.5 w-3.5 mt-0.5 shrink-0 text-slate-500 group-hover:text-blue-600" />
-                  <span className="leading-tight">বয়সের ক্যালকুলেটর</span>
+                  <span className="leading-tight">{t("sideNav.ageCalculator", "Age Calculator")}</span>
                 </button>
               )}
             </div>

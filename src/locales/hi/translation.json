@@ -6,6 +6,19 @@
     "search": "समाचार खोजें…",
     "navigation": "नेविगेशन"
   },
+  "sideNav": {
+    "live": "लाइव",
+    "reels": "शॉर्ट्स / रील्स",
+    "results": "परिणाम",
+    "videos": "वीडियो",
+    "photos": "फोटो गैलरी",
+    "factCheck": "फैक्ट चेक",
+    "opinion": "विचार / ओपिनियन",
+    "archive": "आर्काइव",
+    "urgent": "ज़रूरी",
+    "emiCalculator": "ईएमआई कैलकुलेटर",
+    "ageCalculator": "आयु कैलकुलेटर"
+  },
   "footer": {
     "quickLinks": "त्वरित लिंक",
     "connectWithUs": "हमसे जुड़ें",

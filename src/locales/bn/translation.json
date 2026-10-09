@@ -6,6 +6,19 @@
     "search": "খবর খুঁজুন…",
     "navigation": "নেভিগেশন"
   },
+  "sideNav": {
+    "live": "লাইভ",
+    "reels": "শর্টস / Reels",
+    "results": "Result",
+    "videos": "ভিডিও",
+    "photos": "ফটো গ্যালারি",
+    "factCheck": "ফ্যাক্ট চেক",
+    "opinion": "ওপিনিয়ন",
+    "archive": "আর্কাইভ",
+    "urgent": "জরুরি",
+    "emiCalculator": "EMI ক্যালকুলেটর",
+    "ageCalculator": "বয়সের ক্যালকুলেটর"
+  },
   "footer": {
     "quickLinks": "দ্রুত লিঙ্ক",
     "connectWithUs": "আমাদের সাথে যুক্ত হন",
