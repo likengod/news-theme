@@ -9,14 +9,16 @@ export function LiveVideo() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
 
-  // If live stream is toggled off in admin settings, do not render
-  if (liveVideo?.enabled === false) {
-    return null;
-  }
-
   const src = useMemo(() => {
     if (liveVideo.provider === "youtube") {
+      const vid = (liveVideo.youtubeVideoId || "").trim();
       const raw = (liveVideo.youtubeChannelId || "").trim();
+
+      // Explicit videoId takes highest priority
+      if (vid && vid.length === 11) {
+        return `https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=${muted ? 1 : 0}&controls=1&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`;
+      }
+
       let videoId = "";
       let channelId = raw;
 
@@ -25,9 +27,12 @@ export function LiveVideo() {
       } else if (raw.includes("youtu.be/")) {
         videoId = raw.split("youtu.be/")[1]?.split("?")[0] || "";
       } else if (raw.includes("youtube.com/live/")) {
-        videoId = raw.split("youtube.com/live/")[1]?.split("?")[0] || "";
+        const after = raw.split("youtube.com/live/")[1]?.split("?")[0]?.split("/")[0] || "";
+        if (after && !after.startsWith("@")) {
+          videoId = after;
+        }
       } else if (raw.includes("channel/")) {
-        channelId = raw.split("channel/")[1]?.split("/")[0]?.split("?")[0] || raw;
+        channelId = raw.split("channel/")[1]?.split("/")[0]?.split("?")[0] || channelId;
       } else if (raw.length === 11 && !raw.startsWith("UC")) {
         videoId = raw;
       }
@@ -35,11 +40,19 @@ export function LiveVideo() {
       if (videoId) {
         return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=${muted ? 1 : 0}&controls=1&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`;
       }
-      return `https://www.youtube-nocookie.com/embed/live_stream?channel=${channelId}&autoplay=1&mute=${muted ? 1 : 0}&controls=1&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`;
+      if (channelId && channelId.startsWith("UC")) {
+        return `https://www.youtube-nocookie.com/embed/live_stream?channel=${channelId}&autoplay=1&mute=${muted ? 1 : 0}&controls=1&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`;
+      }
+      return "";
     }
-    const href = encodeURIComponent(liveVideo.facebookPageUrl);
-    return `https://www.facebook.com/plugins/video.php?href=${href}&show_text=false&autoplay=1&mute=${muted ? 1 : 0}`;
+    const href = encodeURIComponent(liveVideo.facebookPageUrl || "");
+    return href ? `https://www.facebook.com/plugins/video.php?href=${href}&show_text=false&autoplay=1&mute=${muted ? 1 : 0}` : "";
   }, [liveVideo, muted]);
+
+  // If live stream is toggled off or no valid stream source is configured, do not render
+  if (liveVideo?.enabled === false || !src) {
+    return null;
+  }
 
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();

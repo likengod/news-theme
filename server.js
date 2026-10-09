@@ -400,6 +400,8 @@ const server = createServer(async (req, res) => {
       const chunks = [];
       for await (const chunk of req) chunks.push(chunk);
       init.body = Buffer.concat(chunks);
+      // Auto-purge SSR micro-cache on mutations so edits are immediately visible
+      SSR_CACHE.clear();
     }
 
     const request = new Request(url, init);

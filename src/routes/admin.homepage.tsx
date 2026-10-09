@@ -59,6 +59,7 @@ function HomepageEditorPage() {
   const [cfg, setCfg] = useState<HomepageConfig>(defaultHomepageConfig);
   const [dirty, setDirty] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     // Load local cache immediately, then fetch MySQL server config
@@ -85,10 +86,18 @@ function HomepageEditorPage() {
     setDirty(true);
   };
 
-  const onSave = () => {
-    saveHomepageConfig(cfg);
-    setDirty(false);
-    toast.success("Saved successfully");
+  const onSave = async () => {
+    setSaving(true);
+    try {
+      await saveHomepageConfig(cfg);
+      setDirty(false);
+      toast.success("Homepage configuration saved successfully");
+    } catch (err: any) {
+      console.error("Save failed:", err);
+      toast.error(err?.message || "Failed to save homepage settings");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const onReset = () => {
@@ -118,11 +127,11 @@ function HomepageEditorPage() {
           </button>
           <button
             onClick={onSave}
-            disabled={!dirty}
+            disabled={!dirty || saving}
             className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
-            {dirty ? "Save" : "Saved"}
+            {saving ? "Saving..." : dirty ? "Save" : "Saved"}
           </button>
         </div>
       </div>
@@ -212,9 +221,14 @@ function HomepageEditorPage() {
       <Group
         title="Live video stream"
         description="Embed live YouTube or Facebook stream on homepage hero."
-        defaultOpen={false}
+        defaultOpen={true}
       >
-        <LiveVideoEditor value={cfg.liveVideo} onChange={(v) => update("liveVideo", v)} />
+        <LiveVideoEditor
+          value={cfg.liveVideo}
+          onChange={(v) => update("liveVideo", v)}
+          onSave={onSave}
+          saving={saving}
+        />
       </Group>
 
       {/* News grid */}
@@ -251,11 +265,11 @@ function HomepageEditorPage() {
       <div className="sticky bottom-4 flex justify-end">
         <button
           onClick={onSave}
-          disabled={!dirty}
+          disabled={!dirty || saving}
           className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-lg hover:bg-slate-800 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
-          {dirty ? "Save" : "Saved"}
+          {saving ? "Saving..." : dirty ? "Save" : "Saved"}
         </button>
       </div>
     </div>

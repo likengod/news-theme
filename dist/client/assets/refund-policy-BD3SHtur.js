@@ -1,0 +1,2 @@
+import{t as e}from"./vendor-react-DlFibgBI.js";import{C as t}from"./index-Bu7B1Z5B.js";import{t as n}from"./PolicyLayout-h13CZmCg.js";var r=e();function i(){let e=t.useLoaderData();return(0,r.jsx)(n,{title:e?.title||``,intro:e?.intro||``,sections:e?.sections&&e.sections.length>0?e.sections.map(e=>({heading:e.heading,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e.body}})})):[{heading:e?.title||``,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e?.body||``}})}]})}export{i as component};
+//# sourceMappingURL=refund-policy-BD3SHtur.js.map
