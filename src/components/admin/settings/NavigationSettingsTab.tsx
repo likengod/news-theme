@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Compass, Sparkles, ChevronDown, Layers } from "lucide-react";
-import type { SiteSettings } from "@/lib/site-content";
+import { Compass, Sparkles, ChevronDown, Layers, Layout } from "lucide-react";
+import { type SiteSettings, isEnterpriseLicense } from "@/lib/site-content";
 import { LeftNavConfigSection } from "./navigation/LeftNavConfigSection";
 import { RightSidebarConfigSection } from "./navigation/RightSidebarConfigSection";
 import { NavigationWireframePreview } from "./navigation/NavigationWireframePreview";
@@ -13,7 +13,11 @@ interface NavigationSettingsTabProps {
 type NavigationTarget = "left" | "right";
 
 export function NavigationSettingsTab({ s, update }: NavigationSettingsTabProps) {
-  const [selectedTarget, setSelectedTarget] = useState<NavigationTarget>("left");
+  const isEnterprise = isEnterpriseLicense(s);
+  // Non-enterprise users default to the unlocked Right Sidebar section
+  const [selectedTarget, setSelectedTarget] = useState<NavigationTarget>(
+    isEnterprise ? "left" : "right"
+  );
 
   return (
     <div className="space-y-6">
@@ -29,20 +33,27 @@ export function NavigationSettingsTab({ s, update }: NavigationSettingsTabProps)
                 <h2 className="text-base font-bold text-slate-900">
                   Article Navigation &amp; Post View Layout
                 </h2>
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-amber-800">
-                  Enterprise
+                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-slate-700 border border-slate-200">
+                  Layout Rails
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                Configure desktop article rails: select left or right navigation to customize rail visibility and individual components.
+                Configure desktop article rails: Standard Right-Side Sidebar (All Plans) &amp; Left-Side Navigation Bar (Enterprise Exclusive).
               </p>
             </div>
           </div>
 
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 border border-slate-200">
-            <Sparkles className="h-3 w-3 text-amber-600" />
-            Enterprise Feature
-          </span>
+          {isEnterprise ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
+              <Sparkles className="h-3 w-3 text-emerald-600" />
+              Enterprise Rails Unlocked
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 border border-slate-200">
+              <Layout className="h-3 w-3 text-slate-500" />
+              Standard Plan (Right Sidebar Active)
+            </span>
+          )}
         </div>
 
         {/* Dropdown Selector */}
@@ -57,19 +68,23 @@ export function NavigationSettingsTab({ s, update }: NavigationSettingsTabProps)
                 Select Navigation Rail to Configure
               </label>
               <p className="text-xs text-slate-600 mt-0.5">
-                Choose which side of the article layout you want to edit (Left Navigation Bar or Right Sidebar).
+                Choose which side of the article layout you want to edit.
               </p>
             </div>
 
-            <div className="relative min-w-[280px]">
+            <div className="relative min-w-[300px]">
               <select
                 id="navigation-target-select"
                 value={selectedTarget}
                 onChange={(e) => setSelectedTarget(e.target.value as NavigationTarget)}
                 className="w-full appearance-none rounded-xl border-2 border-indigo-200 bg-white px-4 py-2.5 pr-10 text-xs sm:text-sm font-bold text-slate-900 shadow-xs transition hover:border-indigo-400 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-100 cursor-pointer"
               >
-                <option value="left">Left-Side Navigation Bar (Quick Nav)</option>
-                <option value="right">Right-Side Sidebar (Trending, Archive &amp; Community)</option>
+                <option value="right">
+                  Right-Side Sidebar (Trending, Archive, Community) — Standard (All Plans)
+                </option>
+                <option value="left">
+                  Left-Side Navigation Bar (Quick Nav) — Enterprise Exclusive {isEnterprise ? "✓" : "🔒"}
+                </option>
               </select>
               <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
             </div>

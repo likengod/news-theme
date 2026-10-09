@@ -16,7 +16,7 @@ import { ContentProtectionGuard } from "@/components/article/ContentProtectionGu
 import { articleQueryOptions, type ArticlePageData } from "@/lib/article-data";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
-import { getSiteSettingsServer } from "@/lib/site-content/site-settings";
+import { getSiteSettingsServer, isEnterpriseLicense } from "@/lib/site-content/site-settings";
 import { Lock, LogIn, AlertCircle, Sparkles } from "lucide-react";
 import { getCurrentUserRole } from "@/lib/auth.functions";
 import { getHomepageArticles } from "@/lib/articles.functions";
@@ -208,7 +208,14 @@ function ArticlePage() {
   const isAuthorized = useMemo(() => {
     if (!data || data.access_level !== "Premium") return true;
     if (checkingAuth) return false;
-    return userRole === "admin" || userRole === "editor" || userRole === "author";
+    return (
+      userRole === "admin" ||
+      userRole === "editor" ||
+      userRole === "author" ||
+      userRole === "journalist" ||
+      userRole === "premium" ||
+      userRole === "subscriber"
+    );
   }, [data, checkingAuth, userRole]);
 
   if (!data) {
@@ -218,7 +225,8 @@ function ArticlePage() {
   const heroCaption = data.imageCaption?.trim() || "";
   const heroCredit = data.imageCredit?.trim() || siteName;
 
-  const isLeftNavVisible = Boolean(settings?.showArticleLeftNav);
+  const isEnterprise = isEnterpriseLicense(settings);
+  const isLeftNavVisible = Boolean(settings?.showArticleLeftNav && isEnterprise);
   const isRightSidebarVisible = settings?.showArticleRightSidebar !== false;
 
   const gridLayoutClass = useMemo(() => {

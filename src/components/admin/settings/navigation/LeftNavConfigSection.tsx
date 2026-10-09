@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "@tanstack/react-router";
 import {
   PanelLeft,
   CheckCircle2,
@@ -13,8 +14,10 @@ import {
   Newspaper,
   Calculator,
   CalendarDays,
+  Lock,
+  Sparkles,
 } from "lucide-react";
-import type { SiteSettings } from "@/lib/site-content";
+import { type SiteSettings, isEnterpriseLicense } from "@/lib/site-content";
 
 interface LeftNavConfigSectionProps {
   s: SiteSettings;
@@ -103,10 +106,12 @@ const LEFT_NAV_ITEMS: ItemDef[] = [
 ];
 
 export function LeftNavConfigSection({ s, update }: LeftNavConfigSectionProps) {
-  const isLeftNavEnabled = Boolean(s.showArticleLeftNav);
+  const isEnterprise = isEnterpriseLicense(s);
+  const isLeftNavEnabled = Boolean(s.showArticleLeftNav && isEnterprise);
   const leftItems = s.articleLeftNavItems || {};
 
   const toggleLeftItem = (key: string) => {
+    if (!isEnterprise) return;
     const current = (leftItems as Record<string, boolean | undefined>)[key];
     const nextVal = current === false ? true : false;
     update("articleLeftNavItems", {
@@ -117,23 +122,65 @@ export function LeftNavConfigSection({ s, update }: LeftNavConfigSectionProps) {
 
   return (
     <div className="space-y-4 animate-fadeIn">
+      {/* Enterprise Restriction Notice for Non-Enterprise Users */}
+      {!isEnterprise && (
+        <div className="rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-white shrink-0 shadow-xs">
+                <Lock className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-bold text-amber-950">
+                    Enterprise Exclusive Feature
+                  </h4>
+                  <span className="rounded-full bg-amber-200/80 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-amber-900">
+                    Enterprise / Enterprise+
+                  </span>
+                </div>
+                <p className="text-xs text-amber-900/80 mt-1">
+                  The Left-Side Navigation Bar is exclusively available for <strong>Enterprise</strong> and <strong>Enterprise Plus</strong> licenses. Standard and Premium users can configure the Right-Side Sidebar. To unlock the Left-Side Navigation Bar on article post views, upgrade your license.
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/admin/settings"
+              search={{ tab: "activate" }}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-amber-700 transition shrink-0 shadow-xs"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Upgrade License
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Master Switch */}
-      <div className="rounded-xl border border-indigo-200 bg-indigo-50/40 p-4 transition-all">
+      <div className={`rounded-xl border p-4 transition-all ${
+        !isEnterprise
+          ? "border-slate-200 bg-slate-50/70 opacity-75"
+          : "border-indigo-200 bg-indigo-50/40"
+      }`}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1 max-w-xl">
-            <div className="flex items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white shrink-0">
                 <PanelLeft className="h-4 w-4" />
               </div>
               <label
                 htmlFor="toggle-left-nav"
-                className="text-sm font-bold text-slate-900 cursor-pointer"
+                className={`text-sm font-bold ${!isEnterprise ? "text-slate-600 cursor-not-allowed" : "text-slate-900 cursor-pointer"}`}
               >
                 Show Left-Side Navigation Bar on Article Pages
               </label>
-              {isLeftNavEnabled ? (
+              {!isEnterprise ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                  <Lock className="h-3 w-3" /> Enterprise Locked
+                </span>
+              ) : isLeftNavEnabled ? (
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
-                  <CheckCircle2 className="h-3 w-3" /> Enabled
+                  <CheckCircle2 className="h-3 w-3" /> Enabled (Enterprise)
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-700">
@@ -142,7 +189,9 @@ export function LeftNavConfigSection({ s, update }: LeftNavConfigSectionProps) {
               )}
             </div>
             <p className="text-xs text-slate-600 leading-relaxed pl-9.5">
-              When enabled, the vertical rail appears on desktop displays (1280px+). When disabled, the rail is hidden entirely and the article canvas expands.
+              {!isEnterprise
+                ? "This rail requires an Enterprise or Enterprise Plus license. When unlocked, it displays quick navigation links on desktop screens (1280px+)."
+                : "When enabled, the vertical rail appears on desktop displays (1280px+). When disabled, the rail is hidden entirely and the article canvas expands."}
             </p>
           </div>
 
@@ -151,10 +200,18 @@ export function LeftNavConfigSection({ s, update }: LeftNavConfigSectionProps) {
               id="toggle-left-nav"
               type="button"
               role="switch"
+              disabled={!isEnterprise}
               aria-checked={isLeftNavEnabled}
-              onClick={() => update("showArticleLeftNav", !isLeftNavEnabled)}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 ${
-                isLeftNavEnabled ? "bg-emerald-600" : "bg-slate-300"
+              onClick={() => {
+                if (!isEnterprise) return;
+                update("showArticleLeftNav", !isLeftNavEnabled);
+              }}
+              className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 ${
+                !isEnterprise
+                  ? "bg-slate-300 cursor-not-allowed opacity-50"
+                  : isLeftNavEnabled
+                    ? "bg-emerald-600 cursor-pointer"
+                    : "bg-slate-300 cursor-pointer"
               }`}
             >
               <span
@@ -227,10 +284,15 @@ export function LeftNavConfigSection({ s, update }: LeftNavConfigSectionProps) {
                 <button
                   type="button"
                   role="switch"
+                  disabled={!isEnterprise}
                   aria-checked={isVisible}
                   onClick={() => toggleLeftItem(item.key)}
-                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-                    isVisible ? "bg-emerald-600" : "bg-slate-300"
+                  className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                    !isEnterprise
+                      ? "bg-slate-300 cursor-not-allowed opacity-50"
+                      : isVisible
+                        ? "bg-emerald-600 cursor-pointer"
+                        : "bg-slate-300 cursor-pointer"
                   }`}
                 >
                   <span
