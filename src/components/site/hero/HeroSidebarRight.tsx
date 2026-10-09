@@ -171,3 +171,5 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
     </aside>
   );
 }
+
+export default HeroSidebarRight;

@@ -160,3 +160,5 @@ export function LiveVideo() {
     </article>
   );
 }
+
+export default LiveVideo;

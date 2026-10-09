@@ -11,13 +11,8 @@ import {
   type AdSlideItem,
 } from "@/lib/site-content";
 
-const LiveVideo = React.lazy(() =>
-  import("../LiveVideo").then((m) => ({ default: m.LiveVideo })),
-);
-
-const HeroFeaturedSlider = React.lazy(() =>
-  import("./HeroFeaturedSlider").then((m) => ({ default: m.default })),
-);
+import { LiveVideo } from "../LiveVideo";
+import HeroFeaturedSlider from "./HeroFeaturedSlider";
 
 const isRealAd = (ad: AdSlideItem) => {
   const img = ad?.imageLandscape || ad?.image || ad?.imagePortrait || "";
@@ -160,26 +155,22 @@ export function HeroMain({ activeLeads, cfg }: any) {
     <div className="flex flex-col gap-8 lg:col-span-8 lg:border-l lg:border-border lg:pl-8 w-full max-w-full min-w-0 overflow-hidden">
       <article className="w-full max-w-full min-w-0 overflow-hidden">
         {hasMultipleItems ? (
-          <React.Suspense fallback={renderSingleLead()}>
-            <HeroFeaturedSlider
-              leads={leads}
-              featuredAds={featuredAds}
-              featuredAdMode={featuredAdMode}
-              featuredAdScript={featuredAdScript}
-              showMultiple={showMultiple}
-              autoSlide={autoSlide}
-              slideInterval={slideInterval}
-              isEnterprisePlus={isEnterprisePlus}
-            />
-          </React.Suspense>
+          <HeroFeaturedSlider
+            leads={leads}
+            featuredAds={featuredAds}
+            featuredAdMode={featuredAdMode}
+            featuredAdScript={featuredAdScript}
+            showMultiple={showMultiple}
+            autoSlide={autoSlide}
+            slideInterval={slideInterval}
+            isEnterprisePlus={isEnterprisePlus}
+          />
         ) : (
           renderSingleLead()
         )}
       </article>
       <div>
-        <React.Suspense fallback={null}>
-          <LiveVideo />
-        </React.Suspense>
+        <LiveVideo />
       </div>
     </div>
   );
