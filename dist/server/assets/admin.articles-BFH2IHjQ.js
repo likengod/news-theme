@@ -1,0 +1,850 @@
+import { t as useServerFn } from "./useServerFn-BqzygRuj.js";
+import { _ as saveAdminArticle, a as getAdminArticleById, g as restoreAdminArticlesBulk, h as restoreAdminArticle, i as emptyTrashAdminArticles, l as getAllAdminArticles, m as importAdminArticles, n as deletePermanentlyAdminArticle, o as getAdminArticles, r as deletePermanentlyAdminArticlesBulk, s as getAdminAuthorProfiles, v as trashAdminArticle, y as trashAdminArticlesBulk } from "./articles.functions-DM-yK0EC.js";
+import { r as useCategories } from "./AdSettingsContext-uiV1_Xri.js";
+import { a as sections, o as slugify } from "./news-data-CiXcY3JG.js";
+import { t as authClient } from "./auth-client-BLNp-oeh.js";
+import { t as CsvImportExport } from "./CsvImportExport-cj5FA8rJ.js";
+import React, { Suspense, lazy, useCallback, useEffect, useState } from "react";
+import { useRouter } from "@tanstack/react-router";
+import { Fragment, jsx, jsxs } from "react/jsx-runtime";
+import { AlertTriangle, CalendarClock, CheckCircle2, ChevronLeft, ChevronRight, Clock, Eye, FileText, Files, Image, Loader2, Pencil, Plus, RotateCcw, Search, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+//#region src/lib/articles-store.ts
+var blankRow = (defaultAuthor, defaultCategory = "Uncategorized") => ({
+	id: 0,
+	title: "",
+	slug: "",
+	category: defaultCategory || "Uncategorized",
+	city: "",
+	state: "",
+	country: "",
+	author: defaultAuthor || "Admin User",
+	views: 0,
+	status: "Draft",
+	date: (/* @__PURE__ */ new Date()).toISOString(),
+	excerpt: "",
+	content: "",
+	featuredImage: "",
+	ogImage: "",
+	imageCaption: "",
+	imageCredit: "",
+	metaTitle: "",
+	metaDescription: "",
+	tags: "",
+	featured: false,
+	newsType: "Standard",
+	journalistId: "",
+	journalistName: "",
+	access_level: "Free"
+});
+//#endregion
+//#region src/hooks/useDebounce.ts
+/**
+* Delays updating the returned value until `delay` ms have elapsed
+* since the last change. Use this to debounce search inputs so we
+* don't fire a server request on every keystroke.
+*/
+function useDebounce(value, delay = 300) {
+	const [debounced, setDebounced] = useState(value);
+	useEffect(() => {
+		const timer = setTimeout(() => setDebounced(value), delay);
+		return () => clearTimeout(timer);
+	}, [value, delay]);
+	return debounced;
+}
+//#endregion
+//#region src/components/admin/ConfirmModal.tsx
+/**
+* Replaces browser-native confirm() dialogs with a clean, accessible modal.
+* Use this for any destructive action (delete, bulk delete, etc.)
+*/
+function ConfirmModal({ title, message, confirmLabel = "Confirm", cancelLabel = "Cancel", danger = true, onConfirm, onCancel }) {
+	return /* @__PURE__ */ jsx("div", {
+		className: "fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm",
+		onClick: (e) => {
+			if (e.target === e.currentTarget) onCancel();
+		},
+		children: /* @__PURE__ */ jsxs("div", {
+			className: "w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-slate-200",
+			children: [
+				/* @__PURE__ */ jsx("div", {
+					className: `mb-4 flex h-11 w-11 items-center justify-center rounded-full ${danger ? "bg-red-100" : "bg-slate-100"}`,
+					children: danger ? /* @__PURE__ */ jsx(AlertTriangle, { className: "h-5 w-5 text-red-600" }) : /* @__PURE__ */ jsx(Trash2, { className: "h-5 w-5 text-slate-600" })
+				}),
+				/* @__PURE__ */ jsx("h2", {
+					className: "text-base font-bold text-slate-800",
+					children: title
+				}),
+				/* @__PURE__ */ jsx("p", {
+					className: "mt-1.5 text-sm text-slate-500",
+					children: message
+				}),
+				/* @__PURE__ */ jsxs("div", {
+					className: "mt-5 flex gap-3",
+					children: [/* @__PURE__ */ jsx("button", {
+						onClick: onConfirm,
+						className: `flex-1 rounded-lg py-2.5 text-sm font-semibold text-white transition ${danger ? "bg-red-600 hover:bg-red-700" : "bg-slate-900 hover:bg-slate-800"}`,
+						children: confirmLabel
+					}), /* @__PURE__ */ jsx("button", {
+						onClick: onCancel,
+						className: "flex-1 rounded-lg border border-slate-200 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50",
+						children: cancelLabel
+					})]
+				})
+			]
+		})
+	});
+}
+//#endregion
+//#region src/components/admin/articles/ArticlesStatusTabs.tsx
+var STATUS_TABS = [
+	{
+		key: "All",
+		label: "All",
+		icon: Files
+	},
+	{
+		key: "Published",
+		label: "Published",
+		icon: CheckCircle2
+	},
+	{
+		key: "Scheduled",
+		label: "Scheduled",
+		icon: CalendarClock
+	},
+	{
+		key: "Draft",
+		label: "Drafts",
+		icon: FileText
+	},
+	{
+		key: "Review",
+		label: "In Review",
+		icon: Clock
+	},
+	{
+		key: "Trash",
+		label: "Trash",
+		icon: Trash2
+	}
+];
+function ArticlesStatusTabs({ status, setStatus, total, trashCount = 0, scheduledCount = 0 }) {
+	return /* @__PURE__ */ jsxs("div", {
+		className: "flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white p-2",
+		children: [STATUS_TABS.map((t) => {
+			const active = status === t.key;
+			const Icon = t.icon;
+			const isTrash = t.key === "Trash";
+			const isScheduled = t.key === "Scheduled";
+			return /* @__PURE__ */ jsxs("button", {
+				onClick: () => setStatus(t.key),
+				className: `inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${active ? isTrash ? "bg-rose-700 text-white" : isScheduled ? "bg-blue-600 text-white" : "bg-slate-900 text-white" : isTrash ? "text-rose-600 hover:bg-rose-50" : isScheduled ? "text-blue-600 hover:bg-blue-50" : "text-slate-600 hover:bg-slate-100"}`,
+				children: [
+					/* @__PURE__ */ jsx(Icon, { className: "h-3.5 w-3.5" }),
+					/* @__PURE__ */ jsx("span", { children: t.label }),
+					isScheduled && scheduledCount > 0 && /* @__PURE__ */ jsx("span", {
+						className: `ml-1 rounded-full px-1.5 py-0.2 text-[11px] font-semibold ${active ? "bg-white text-blue-700" : "bg-blue-100 text-blue-700"}`,
+						children: scheduledCount
+					}),
+					isTrash && trashCount > 0 && /* @__PURE__ */ jsx("span", {
+						className: `ml-1 rounded-full px-1.5 py-0.2 text-[11px] font-semibold ${active ? "bg-white text-rose-700" : "bg-rose-100 text-rose-700"}`,
+						children: trashCount
+					})
+				]
+			}, t.key);
+		}), /* @__PURE__ */ jsxs("span", {
+			className: "ml-auto rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600",
+			children: [
+				total,
+				" ",
+				status === "Trash" ? "in trash" : status === "Scheduled" ? "scheduled" : "total"
+			]
+		})]
+	});
+}
+//#endregion
+//#region src/components/admin/articles/ArticlesFilterBar.tsx
+function ArticlesFilterBar({ query, setQuery, debouncedQuery, category, setCategory, selectedCount, currentStatus, trashCount, onRequestBulkDelete, onRequestBulkRestore, onRequestEmptyTrash }) {
+	const dbCats = useCategories();
+	const allCategoryOptions = React.useMemo(() => {
+		if (dbCats && dbCats.length > 0) {
+			const names = dbCats.map((c) => c?.name?.trim()).filter(Boolean);
+			return Array.from(new Set(names));
+		}
+		return sections;
+	}, [dbCats]);
+	return /* @__PURE__ */ jsxs("div", {
+		className: "flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-white p-3",
+		children: [
+			/* @__PURE__ */ jsxs("div", {
+				className: "relative flex-1 min-w-[200px]",
+				children: [
+					/* @__PURE__ */ jsx(Search, { className: "pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" }),
+					/* @__PURE__ */ jsx("input", {
+						value: query,
+						onChange: (e) => setQuery(e.target.value),
+						"aria-label": "Search articles",
+						placeholder: "Search articles...",
+						className: "w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm focus:border-slate-900 focus:outline-none"
+					}),
+					query && debouncedQuery !== query && /* @__PURE__ */ jsx(Loader2, { className: "absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-slate-400" })
+				]
+			}),
+			/* @__PURE__ */ jsxs("select", {
+				value: category,
+				onChange: (e) => setCategory(e.target.value),
+				"aria-label": "Filter articles by category",
+				className: "rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none",
+				children: [/* @__PURE__ */ jsx("option", { children: "All" }), allCategoryOptions.map((s) => /* @__PURE__ */ jsx("option", { children: s }, s))]
+			}),
+			currentStatus === "Trash" ? /* @__PURE__ */ jsxs("div", {
+				className: "flex flex-wrap items-center gap-2",
+				children: [selectedCount > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [/* @__PURE__ */ jsxs("button", {
+					type: "button",
+					onClick: onRequestBulkRestore,
+					className: "inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors shadow-xs",
+					children: [
+						/* @__PURE__ */ jsx(RotateCcw, { className: "h-3.5 w-3.5" }),
+						" Restore (",
+						selectedCount,
+						")"
+					]
+				}), /* @__PURE__ */ jsxs("button", {
+					type: "button",
+					onClick: onRequestBulkDelete,
+					className: "inline-flex items-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100 transition-colors shadow-xs",
+					children: [
+						/* @__PURE__ */ jsx(Trash2, { className: "h-3.5 w-3.5" }),
+						" Delete Permanently (",
+						selectedCount,
+						")"
+					]
+				})] }), (trashCount ?? 0) > 0 && onRequestEmptyTrash && /* @__PURE__ */ jsxs("button", {
+					type: "button",
+					onClick: onRequestEmptyTrash,
+					className: "inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition-colors shadow-xs",
+					children: [/* @__PURE__ */ jsx(Trash2, { className: "h-3.5 w-3.5" }), " Empty Trash"]
+				})]
+			}) : selectedCount > 0 && /* @__PURE__ */ jsxs("button", {
+				type: "button",
+				onClick: onRequestBulkDelete,
+				className: "inline-flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100 transition-colors shadow-xs",
+				children: [
+					/* @__PURE__ */ jsx(Trash2, { className: "h-3.5 w-3.5" }),
+					" Move to Trash (",
+					selectedCount,
+					")"
+				]
+			})
+		]
+	});
+}
+//#endregion
+//#region src/components/admin/articles/ArticlesTable.tsx
+function ArticlesTable({ rows, loading, selected, allOnPageSelected, onTogglePage, onToggleOne, onEdit, onRequestDelete, onRestore, page, totalPages, total, pageSize, onPageChange }) {
+	const showStart = total > 0 ? (page - 1) * pageSize + 1 : 0;
+	const showEnd = Math.min(page * pageSize, total);
+	return /* @__PURE__ */ jsxs("div", {
+		className: "overflow-x-auto rounded-lg border border-slate-200 bg-white",
+		children: [/* @__PURE__ */ jsxs("table", {
+			className: "w-full min-w-[700px] text-sm",
+			children: [/* @__PURE__ */ jsx("thead", {
+				className: "bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500",
+				children: /* @__PURE__ */ jsxs("tr", { children: [
+					/* @__PURE__ */ jsx("th", {
+						className: "w-10 px-5 py-3",
+						children: /* @__PURE__ */ jsx("input", {
+							type: "checkbox",
+							checked: allOnPageSelected,
+							onChange: onTogglePage,
+							className: "h-4 w-4 cursor-pointer rounded border-slate-300",
+							"aria-label": "Select all on page"
+						})
+					}),
+					/* @__PURE__ */ jsx("th", {
+						className: "px-5 py-3",
+						children: "Title"
+					}),
+					/* @__PURE__ */ jsx("th", {
+						className: "px-5 py-3",
+						children: "Status"
+					}),
+					/* @__PURE__ */ jsx("th", {
+						className: "px-5 py-3",
+						children: "Category"
+					}),
+					/* @__PURE__ */ jsx("th", {
+						className: "px-5 py-3",
+						children: "Author"
+					}),
+					/* @__PURE__ */ jsx("th", {
+						className: "px-5 py-3",
+						children: "Views"
+					}),
+					/* @__PURE__ */ jsx("th", {
+						className: "px-5 py-3 text-right",
+						children: "Actions"
+					})
+				] })
+			}), /* @__PURE__ */ jsxs("tbody", {
+				className: "divide-y divide-slate-100",
+				children: [
+					loading && /* @__PURE__ */ jsx("tr", { children: /* @__PURE__ */ jsx("td", {
+						colSpan: 7,
+						className: "px-5 py-12 text-center text-slate-500",
+						children: /* @__PURE__ */ jsxs("div", {
+							className: "flex items-center justify-center gap-2",
+							children: [/* @__PURE__ */ jsx(Loader2, { className: "h-5 w-5 animate-spin" }), /* @__PURE__ */ jsx("span", { children: "Loading articles..." })]
+						})
+					}) }),
+					!loading && rows.map((r) => /* @__PURE__ */ jsxs("tr", {
+						className: `hover:bg-slate-50/60 ${selected.has(r.id) ? "bg-slate-50" : ""}`,
+						children: [
+							/* @__PURE__ */ jsx("td", {
+								className: "px-5 py-3",
+								children: /* @__PURE__ */ jsx("input", {
+									type: "checkbox",
+									checked: selected.has(r.id),
+									onChange: () => onToggleOne(r.id),
+									className: "h-4 w-4 cursor-pointer rounded border-slate-300",
+									"aria-label": `Select ${r.title}`
+								})
+							}),
+							/* @__PURE__ */ jsx("td", {
+								className: "max-w-[360px] px-5 py-3",
+								children: /* @__PURE__ */ jsxs("div", {
+									className: "flex items-center gap-3",
+									children: [/* @__PURE__ */ jsx("div", {
+										className: "h-10 w-16 shrink-0 overflow-hidden rounded bg-slate-100 border border-slate-200",
+										children: r.featuredImage ? /* @__PURE__ */ jsx("img", {
+											src: r.featuredImage,
+											alt: "",
+											width: 64,
+											height: 40,
+											loading: "lazy",
+											decoding: "async",
+											className: "h-full w-full object-cover"
+										}) : /* @__PURE__ */ jsx("div", {
+											className: "flex h-full w-full items-center justify-center text-slate-400",
+											children: /* @__PURE__ */ jsx(Image, { className: "h-4 w-4" })
+										})
+									}), /* @__PURE__ */ jsx("div", {
+										className: "min-w-0 flex-1",
+										children: /* @__PURE__ */ jsxs("div", {
+											className: "flex items-center gap-2",
+											children: [/* @__PURE__ */ jsx("p", {
+												className: "truncate font-medium",
+												title: r.title,
+												children: r.title
+											}), (r.status === "Scheduled" || r.status === "Published" && new Date(r.date) > /* @__PURE__ */ new Date()) && /* @__PURE__ */ jsxs("span", {
+												className: "inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 border border-blue-200 whitespace-nowrap",
+												title: `Scheduled for ${new Date(r.date).toLocaleString()}`,
+												children: [/* @__PURE__ */ jsx(CalendarClock, { className: "h-3 w-3 text-blue-600" }), /* @__PURE__ */ jsxs("span", { children: [
+													"Scheduled (",
+													new Date(r.date).toLocaleDateString(void 0, {
+														month: "short",
+														day: "numeric",
+														hour: "2-digit",
+														minute: "2-digit"
+													}),
+													")"
+												] })]
+											})]
+										})
+									})]
+								})
+							}),
+							/* @__PURE__ */ jsx("td", {
+								className: "px-5 py-3 whitespace-nowrap",
+								children: r.status === "Scheduled" || r.date && new Date(r.date).getTime() > Date.now() + 60 * 1e3 ? /* @__PURE__ */ jsxs("div", {
+									className: "space-y-0.5",
+									children: [/* @__PURE__ */ jsxs("span", {
+										className: "inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 border border-blue-200",
+										children: [/* @__PURE__ */ jsx(CalendarClock, { className: "h-3 w-3 text-blue-600" }), /* @__PURE__ */ jsx("span", { children: "Scheduled" })]
+									}), r.date && /* @__PURE__ */ jsx("p", {
+										className: "text-[10px] text-slate-500 font-medium",
+										children: new Date(r.date).toLocaleDateString(void 0, {
+											month: "short",
+											day: "numeric",
+											hour: "2-digit",
+											minute: "2-digit"
+										})
+									})]
+								}) : r.status === "Published" ? /* @__PURE__ */ jsxs("div", {
+									className: "space-y-0.5",
+									children: [/* @__PURE__ */ jsxs("span", {
+										className: "inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200",
+										children: [/* @__PURE__ */ jsx(CheckCircle2, { className: "h-3 w-3 text-emerald-600" }), /* @__PURE__ */ jsx("span", { children: "Published" })]
+									}), r.date && /* @__PURE__ */ jsx("p", {
+										className: "text-[10px] text-slate-400",
+										children: new Date(r.date).toLocaleDateString(void 0, {
+											month: "short",
+											day: "numeric",
+											year: "numeric"
+										})
+									})]
+								}) : r.status === "Trash" ? /* @__PURE__ */ jsxs("span", {
+									className: "inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-semibold text-rose-700 border border-rose-200",
+									children: [/* @__PURE__ */ jsx(Trash2, { className: "h-3 w-3 text-rose-600" }), /* @__PURE__ */ jsx("span", { children: "Trash" })]
+								}) : r.status === "Review" ? /* @__PURE__ */ jsxs("span", {
+									className: "inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200",
+									children: [/* @__PURE__ */ jsx(Clock, { className: "h-3 w-3 text-amber-600" }), /* @__PURE__ */ jsx("span", { children: "In Review" })]
+								}) : /* @__PURE__ */ jsxs("span", {
+									className: "inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700 border border-slate-200",
+									children: [/* @__PURE__ */ jsx(FileText, { className: "h-3 w-3 text-slate-500" }), /* @__PURE__ */ jsx("span", { children: "Draft" })]
+								})
+							}),
+							/* @__PURE__ */ jsx("td", {
+								className: "px-5 py-3 text-slate-600",
+								children: /* @__PURE__ */ jsx("div", {
+									className: "flex flex-wrap gap-1 max-w-[220px]",
+									children: (r.category || "Uncategorized").split(",").map((c, i) => /* @__PURE__ */ jsx("span", {
+										className: `inline-block rounded px-1.5 py-0.5 text-[11px] font-medium ${i === 0 ? "bg-slate-100 text-slate-800 border border-slate-200 font-semibold" : "bg-slate-50 text-slate-600 border border-slate-100"}`,
+										title: i === 0 ? `${c.trim()} (Primary Category)` : c.trim(),
+										children: c.trim()
+									}, i))
+								})
+							}),
+							/* @__PURE__ */ jsx("td", {
+								className: "px-5 py-3 text-slate-600",
+								children: r.author
+							}),
+							/* @__PURE__ */ jsx("td", {
+								className: "px-5 py-3 text-slate-600",
+								children: /* @__PURE__ */ jsxs("span", {
+									className: "inline-flex items-center gap-1",
+									children: [/* @__PURE__ */ jsx(Eye, { className: "h-3 w-3" }), (r.views ?? 0).toLocaleString()]
+								})
+							}),
+							/* @__PURE__ */ jsx("td", {
+								className: "px-5 py-3 text-right",
+								children: /* @__PURE__ */ jsx("div", {
+									className: "inline-flex items-center gap-1.5",
+									children: r.status === "Trash" ? /* @__PURE__ */ jsxs(Fragment, { children: [/* @__PURE__ */ jsxs("button", {
+										onClick: () => onRestore?.(r.id, r.title),
+										className: "inline-flex items-center gap-1 h-8 px-2.5 rounded-md border border-emerald-200 bg-emerald-50 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 transition-colors shadow-sm",
+										"aria-label": "Restore",
+										title: "Restore article to Draft",
+										children: [/* @__PURE__ */ jsx(RotateCcw, { className: "h-3.5 w-3.5" }), /* @__PURE__ */ jsx("span", { children: "Restore" })]
+									}), /* @__PURE__ */ jsxs("button", {
+										onClick: () => onRequestDelete(r.id, r.title),
+										className: "inline-flex items-center gap-1 h-8 px-2.5 rounded-md border border-rose-200 bg-rose-50 text-xs font-semibold text-rose-700 hover:bg-rose-100 hover:text-rose-800 transition-colors shadow-sm",
+										"aria-label": "Delete Permanently",
+										title: "Permanently Delete this article",
+										children: [/* @__PURE__ */ jsx(Trash2, { className: "h-3.5 w-3.5" }), /* @__PURE__ */ jsx("span", { children: "Delete Permanently" })]
+									})] }) : /* @__PURE__ */ jsxs(Fragment, { children: [/* @__PURE__ */ jsx("button", {
+										onClick: () => onEdit(r),
+										className: "grid h-8 w-8 place-items-center rounded-md border border-slate-200 hover:bg-slate-100 text-slate-700",
+										"aria-label": "Edit",
+										title: "Edit article",
+										children: /* @__PURE__ */ jsx(Pencil, { className: "h-3.5 w-3.5" })
+									}), /* @__PURE__ */ jsx("button", {
+										onClick: () => onRequestDelete(r.id, r.title),
+										className: "grid h-8 w-8 place-items-center rounded-md border border-slate-200 text-rose-600 hover:bg-rose-50 hover:border-rose-200",
+										"aria-label": "Move to Trash",
+										title: "Move to Trash",
+										children: /* @__PURE__ */ jsx(Trash2, { className: "h-3.5 w-3.5" })
+									})] })
+								})
+							})
+						]
+					}, r.id)),
+					!loading && rows.length === 0 && /* @__PURE__ */ jsx("tr", { children: /* @__PURE__ */ jsx("td", {
+						colSpan: 7,
+						className: "px-5 py-8 text-center text-slate-500",
+						children: "No articles found."
+					}) })
+				]
+			})]
+		}), totalPages > 1 && /* @__PURE__ */ jsxs("div", {
+			className: "flex items-center justify-between border-t border-slate-200 bg-slate-50 px-5 py-3 text-xs text-slate-600",
+			children: [/* @__PURE__ */ jsxs("span", { children: [
+				"Showing ",
+				showStart,
+				"-",
+				showEnd,
+				" of ",
+				total
+			] }), /* @__PURE__ */ jsxs("div", {
+				className: "flex items-center gap-1",
+				children: [
+					/* @__PURE__ */ jsx("button", {
+						disabled: page <= 1,
+						onClick: () => onPageChange(page - 1),
+						className: "grid h-7 w-7 place-items-center rounded border border-slate-200 bg-white disabled:opacity-40",
+						children: /* @__PURE__ */ jsx(ChevronLeft, { className: "h-3.5 w-3.5" })
+					}),
+					/* @__PURE__ */ jsxs("span", {
+						className: "px-2",
+						children: [
+							page,
+							" / ",
+							totalPages
+						]
+					}),
+					/* @__PURE__ */ jsx("button", {
+						disabled: page >= totalPages,
+						onClick: () => onPageChange(page + 1),
+						className: "grid h-7 w-7 place-items-center rounded border border-slate-200 bg-white disabled:opacity-40",
+						children: /* @__PURE__ */ jsx(ChevronRight, { className: "h-3.5 w-3.5" })
+					})
+				]
+			})]
+		})]
+	});
+}
+//#endregion
+//#region src/routes/admin.articles.tsx?tsr-split=component
+var ArticleEditor = lazy(() => import("./ArticleEditor-1OX8C8g_.js"));
+var PAGE_SIZE = 20;
+function ArticlesPage() {
+	const router = useRouter();
+	const fetchArticlesFn = useServerFn(getAdminArticles);
+	const fetchArticleByIdFn = useServerFn(getAdminArticleById);
+	const saveArticleFn = useServerFn(saveAdminArticle);
+	const trashArticleFn = useServerFn(trashAdminArticle);
+	const restoreArticleFn = useServerFn(restoreAdminArticle);
+	const deletePermanentlyArticleFn = useServerFn(deletePermanentlyAdminArticle);
+	const trashArticlesBulkFn = useServerFn(trashAdminArticlesBulk);
+	const restoreArticlesBulkFn = useServerFn(restoreAdminArticlesBulk);
+	const deletePermanentlyArticlesBulkFn = useServerFn(deletePermanentlyAdminArticlesBulk);
+	const emptyTrashFn = useServerFn(emptyTrashAdminArticles);
+	const getAllArticlesFn = useServerFn(getAllAdminArticles);
+	const importArticlesFn = useServerFn(importAdminArticles);
+	const [rows, setRows] = useState([]);
+	const [total, setTotal] = useState(0);
+	const [totalPages, setTotalPages] = useState(1);
+	const [trashCount, setTrashCount] = useState(0);
+	const [scheduledCount, setScheduledCount] = useState(0);
+	const [loading, setLoading] = useState(true);
+	const [q, setQ] = useState("");
+	const [cat, setCat] = useState("All");
+	const [status, setStatus] = useState("All");
+	const [page, setPage] = useState(1);
+	const debouncedQ = useDebounce(q, 300);
+	const [selected, setSelected] = useState(/* @__PURE__ */ new Set());
+	const [editing, setEditing] = useState(null);
+	const [creating, setCreating] = useState(false);
+	const [confirmAction, setConfirmAction] = useState(null);
+	const [currentUserAuthor, setCurrentUserAuthor] = useState("Admin User");
+	const [authorOptions, setAuthorOptions] = useState([]);
+	const fetchAuthorProfilesFn = useServerFn(getAdminAuthorProfiles);
+	const defaultCategory = useCategories()?.find((c) => c?.name?.toLowerCase() === "uncategorized")?.name || "Uncategorized";
+	useEffect(() => {
+		authClient.auth.getUser().then(({ data }) => {
+			const u = data.user;
+			if (u) setCurrentUserAuthor(u.displayName || u.user_metadata?.display_name || u.user_metadata?.full_name || u.username || u.email?.split("@")[0] || "Admin User");
+		});
+		fetchAuthorProfilesFn().then((res) => {
+			if (Array.isArray(res)) setAuthorOptions(res);
+		}).catch(() => {});
+	}, []);
+	const fetchArticles = useCallback(async () => {
+		try {
+			setLoading(true);
+			const res = await fetchArticlesFn({ data: {
+				q: debouncedQ,
+				category: cat,
+				status,
+				page,
+				limit: PAGE_SIZE
+			} });
+			setRows(res.rows ?? []);
+			setTotal(res.total ?? 0);
+			setTotalPages(res.totalPages ?? 1);
+			setTrashCount(res.trashCount ?? 0);
+			setScheduledCount(res.scheduledCount ?? 0);
+		} catch (err) {
+			toast.error(err.message || "Failed to load articles");
+		} finally {
+			setLoading(false);
+		}
+	}, [
+		debouncedQ,
+		cat,
+		status,
+		page
+	]);
+	const handleImport = async (data) => {
+		try {
+			setLoading(true);
+			await importArticlesFn({ data });
+			router.invalidate();
+			await fetchArticles();
+		} catch (err) {
+			toast.error(err.message || "Import failed");
+		} finally {
+			setLoading(false);
+		}
+	};
+	useEffect(() => {
+		fetchArticles();
+	}, [fetchArticles]);
+	useEffect(() => {
+		setPage(1);
+	}, [
+		debouncedQ,
+		cat,
+		status
+	]);
+	const pageIds = rows.map((r) => r.id);
+	const allOnPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
+	const togglePage = () => {
+		setSelected((prev) => {
+			const next = new Set(prev);
+			if (allOnPageSelected) pageIds.forEach((id) => next.delete(id));
+			else pageIds.forEach((id) => next.add(id));
+			return next;
+		});
+	};
+	const toggleOne = (id) => {
+		setSelected((prev) => {
+			const next = new Set(prev);
+			next.has(id) ? next.delete(id) : next.add(id);
+			return next;
+		});
+	};
+	const requestDelete = (id, title) => {
+		if (status === "Trash") setConfirmAction({
+			title: "Delete Permanently?",
+			message: `"${title}" will be permanently removed from the database. This cannot be undone.`,
+			confirmLabel: "Delete Permanently",
+			onConfirm: async () => {
+				setConfirmAction(null);
+				try {
+					await deletePermanentlyArticleFn({ data: id });
+					router.invalidate();
+					setSelected((prev) => {
+						const n = new Set(prev);
+						n.delete(id);
+						return n;
+					});
+					toast.success("Article permanently deleted");
+					fetchArticles();
+				} catch (err) {
+					toast.error(err.message || "Failed to delete article");
+				}
+			}
+		});
+		else setConfirmAction({
+			title: "Move to Trash?",
+			message: `"${title}" will be moved to the Trash. You can restore it anytime or delete it permanently.`,
+			confirmLabel: "Move to Trash",
+			onConfirm: async () => {
+				setConfirmAction(null);
+				try {
+					await trashArticleFn({ data: id });
+					router.invalidate();
+					setSelected((prev) => {
+						const n = new Set(prev);
+						n.delete(id);
+						return n;
+					});
+					toast.success("Article moved to Trash");
+					fetchArticles();
+				} catch (err) {
+					toast.error(err.message || "Failed to move article to Trash");
+				}
+			}
+		});
+	};
+	const requestRestore = async (id, title) => {
+		try {
+			await restoreArticleFn({ data: id });
+			router.invalidate();
+			setSelected((prev) => {
+				const n = new Set(prev);
+				n.delete(id);
+				return n;
+			});
+			toast.success(`"${title}" restored to Draft`);
+			fetchArticles();
+		} catch (err) {
+			toast.error(err.message || "Failed to restore article");
+		}
+	};
+	const requestBulkDelete = () => {
+		if (selected.size === 0) return;
+		if (status === "Trash") setConfirmAction({
+			title: `Delete ${selected.size} article(s) permanently?`,
+			message: "All selected articles will be permanently deleted from the database. This cannot be undone.",
+			confirmLabel: `Delete Permanently (${selected.size})`,
+			onConfirm: async () => {
+				setConfirmAction(null);
+				try {
+					await deletePermanentlyArticlesBulkFn({ data: Array.from(selected) });
+					router.invalidate();
+					toast.success(`${selected.size} article(s) permanently deleted`);
+					setSelected(/* @__PURE__ */ new Set());
+					fetchArticles();
+				} catch (err) {
+					toast.error(err.message || "Failed to delete articles");
+				}
+			}
+		});
+		else setConfirmAction({
+			title: `Move ${selected.size} article(s) to Trash?`,
+			message: "Selected articles will be moved to the Trash. You can restore them anytime.",
+			confirmLabel: `Move to Trash (${selected.size})`,
+			onConfirm: async () => {
+				setConfirmAction(null);
+				try {
+					await trashArticlesBulkFn({ data: Array.from(selected) });
+					router.invalidate();
+					toast.success(`${selected.size} article(s) moved to Trash`);
+					setSelected(/* @__PURE__ */ new Set());
+					fetchArticles();
+				} catch (err) {
+					toast.error(err.message || "Failed to move articles to Trash");
+				}
+			}
+		});
+	};
+	const requestBulkRestore = async () => {
+		if (selected.size === 0) return;
+		try {
+			await restoreArticlesBulkFn({ data: Array.from(selected) });
+			router.invalidate();
+			toast.success(`${selected.size} article(s) restored to Draft`);
+			setSelected(/* @__PURE__ */ new Set());
+			fetchArticles();
+		} catch (err) {
+			toast.error(err.message || "Failed to restore articles");
+		}
+	};
+	const requestEmptyTrash = () => {
+		setConfirmAction({
+			title: "Empty Trash?",
+			message: "All articles currently in the Trash will be permanently deleted. This cannot be undone.",
+			confirmLabel: "Empty Trash",
+			onConfirm: async () => {
+				setConfirmAction(null);
+				try {
+					await emptyTrashFn();
+					router.invalidate();
+					toast.success("Trash emptied");
+					setSelected(/* @__PURE__ */ new Set());
+					fetchArticles();
+				} catch (err) {
+					toast.error(err.message || "Failed to empty trash");
+				}
+			}
+		});
+	};
+	const save = async (r) => {
+		try {
+			await saveArticleFn({ data: {
+				...r,
+				slug: r.slug || slugify(r.title),
+				ogImage: r.ogImage || r.featuredImage
+			} });
+			router.invalidate();
+			toast.success("Saved successfully");
+			setEditing(null);
+			setCreating(false);
+			fetchArticles();
+		} catch (err) {
+			toast.error(err.message || "Failed to save article");
+		}
+	};
+	return /* @__PURE__ */ jsxs("div", {
+		className: "space-y-6",
+		children: [
+			/* @__PURE__ */ jsxs("div", {
+				className: "flex flex-col sm:flex-row sm:items-center justify-between gap-3",
+				children: [/* @__PURE__ */ jsxs("div", { children: [/* @__PURE__ */ jsx("h1", {
+					className: "text-xl sm:text-2xl font-bold tracking-tight",
+					children: "Articles"
+				}), /* @__PURE__ */ jsx("p", {
+					className: "text-xs sm:text-sm text-slate-500",
+					children: "Manage news posts, drafts, and reviews."
+				})] }), /* @__PURE__ */ jsxs("div", {
+					className: "flex flex-wrap items-center gap-1.5 sm:gap-2",
+					children: [/* @__PURE__ */ jsx(CsvImportExport, {
+						data: rows,
+						getData: getAllArticlesFn,
+						filename: "articles",
+						onImport: handleImport
+					}), /* @__PURE__ */ jsxs("button", {
+						onClick: () => setCreating(true),
+						className: "inline-flex items-center gap-1.5 sm:gap-2 rounded-md bg-slate-900 px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-medium text-white hover:bg-slate-800 transition whitespace-nowrap shadow-xs",
+						children: [/* @__PURE__ */ jsx(Plus, { className: "h-3.5 w-3.5 sm:h-4 sm:w-4" }), " New Article"]
+					})]
+				})]
+			}),
+			/* @__PURE__ */ jsx(ArticlesStatusTabs, {
+				status,
+				setStatus,
+				total,
+				trashCount,
+				scheduledCount
+			}),
+			/* @__PURE__ */ jsx(ArticlesFilterBar, {
+				query: q,
+				setQuery: setQ,
+				debouncedQuery: debouncedQ,
+				category: cat,
+				setCategory: setCat,
+				selectedCount: selected.size,
+				currentStatus: status,
+				trashCount,
+				onRequestBulkDelete: requestBulkDelete,
+				onRequestBulkRestore: requestBulkRestore,
+				onRequestEmptyTrash: requestEmptyTrash
+			}),
+			/* @__PURE__ */ jsx(ArticlesTable, {
+				rows,
+				loading,
+				selected,
+				allOnPageSelected,
+				onTogglePage: togglePage,
+				onToggleOne: toggleOne,
+				onEdit: async (row) => {
+					setEditing(row);
+					if (row.id) try {
+						const full = await fetchArticleByIdFn({ data: row.id });
+						if (full) setEditing(full);
+					} catch (err) {
+						console.warn("Could not fetch full article by ID:", err);
+					}
+				},
+				onRequestDelete: requestDelete,
+				onRestore: requestRestore,
+				page,
+				totalPages,
+				total,
+				pageSize: PAGE_SIZE,
+				onPageChange: (p) => setPage(p)
+			}),
+			(editing || creating) && /* @__PURE__ */ jsx(Suspense, {
+				fallback: /* @__PURE__ */ jsx("div", {
+					className: "fixed inset-0 z-50 grid place-items-center bg-slate-950/60 text-sm text-white",
+					children: "Loading editor..."
+				}),
+				children: /* @__PURE__ */ jsx(ArticleEditor, {
+					initial: editing ?? blankRow(currentUserAuthor, defaultCategory),
+					currentUserAuthor,
+					authorOptions,
+					onClose: () => {
+						setEditing(null);
+						setCreating(false);
+					},
+					onSave: save
+				}, editing ? `edit-${editing.id}` : "create-article")
+			}),
+			confirmAction && /* @__PURE__ */ jsx(ConfirmModal, {
+				title: confirmAction.title,
+				message: confirmAction.message,
+				confirmLabel: confirmAction.confirmLabel,
+				danger: true,
+				onConfirm: confirmAction.onConfirm,
+				onCancel: () => setConfirmAction(null)
+			})
+		]
+	});
+}
+//#endregion
+export { ArticlesPage as component };
+
+//# sourceMappingURL=admin.articles-BFH2IHjQ.js.map

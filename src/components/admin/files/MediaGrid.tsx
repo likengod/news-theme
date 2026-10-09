@@ -14,6 +14,9 @@ import {
   ArrowUpDown,
   SlidersHorizontal,
   FileArchive,
+  Search,
+  X,
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { EditMediaModal } from "./EditMediaModal";
@@ -157,6 +160,18 @@ export function MediaGrid({
 
   const duplicateCount = Array.from(duplicateInfo.keys()).length;
   const missingAltCount = items.filter((it) => !it.altText || it.altText.trim() === "").length;
+
+  const typeCounts = useMemo(() => {
+    let images = 0;
+    let videos = 0;
+    let docs = 0;
+    for (const it of items) {
+      if (it.type === "video") videos++;
+      else if (it.type === "document") docs++;
+      else images++;
+    }
+    return { all: items.length, images, videos, docs };
+  }, [items]);
 
   const copyUrl = (url: string) => {
     navigator.clipboard.writeText(url);
@@ -407,45 +422,173 @@ export function MediaGrid({
       )}
 
       {/* Filter Toolbar */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-xs">
-        <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
-          <input
-            type="text"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search media files by name or alt text..."
-            className="h-9 w-full sm:w-56 md:w-64 rounded-xl border border-slate-200 px-3 text-xs focus:border-slate-900 focus:outline-none"
-          />
-
-          {/* Filter Pills */}
-          <div className="flex flex-wrap items-center gap-1">
-            {(
-              [
-                { key: "all", label: "All" },
-                { key: "image", label: "Images" },
-                { key: "video", label: "Videos" },
-                { key: "document", label: "Documents" },
-              ] as const
-            ).map((t) => (
+      <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs space-y-3">
+        {/* Row 1: Search Bar & Right Tools */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
+          {/* Search Input */}
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search media files by name or alt text..."
+              className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-8 text-xs focus:bg-white focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 transition"
+            />
+            {q && (
               <button
-                key={t.key}
-                onClick={() => setFilter(t.key)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-semibold capitalize transition cursor-pointer ${
-                  filter === t.key
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
+                type="button"
+                onClick={() => setQ("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full hover:bg-slate-100 transition cursor-pointer"
+                title="Clear search"
               >
-                {t.label}
+                <X className="h-3.5 w-3.5" />
               </button>
-            ))}
+            )}
+          </div>
+
+          {/* Right Action Tools: Size Filter, Sort Dropdown, View Mode */}
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {/* Size Filter Dropdown */}
+            <label className="relative inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-100/80 px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-2xs">
+              <SlidersHorizontal className="h-3.5 w-3.5 text-slate-500 shrink-0 pointer-events-none" />
+              <select
+                value={sizeFilter}
+                onChange={(e) => setSizeFilter(e.target.value as any)}
+                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer pr-1"
+                title="Filter by file size"
+              >
+                <option value="all">All Sizes</option>
+                <option value="large">Large (&gt; 500 KB)</option>
+                <option value="medium">Medium (100–500 KB)</option>
+                <option value="small">Small (&lt; 100 KB)</option>
+              </select>
+            </label>
+
+            {/* Sort By Dropdown */}
+            <label className="relative inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-100/80 px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-2xs">
+              <ArrowUpDown className="h-3.5 w-3.5 text-slate-500 shrink-0 pointer-events-none" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer pr-1"
+                title="Sort items"
+              >
+                <option value="size-desc">Size: Largest (1 MB → 0)</option>
+                <option value="size-asc">Size: Smallest (0 → 1 MB)</option>
+                <option value="date-desc">Date: Newest</option>
+                <option value="date-asc">Date: Oldest</option>
+                <option value="name-asc">Name: A → Z</option>
+                <option value="name-desc">Name: Z → A</option>
+              </select>
+            </label>
+
+            {/* View Mode Toggle */}
+            <div className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-100/80 p-0.5 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                  viewMode === "grid"
+                    ? "bg-white text-slate-900 shadow-xs font-semibold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+                title="Grid View"
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                  viewMode === "list"
+                    ? "bg-white text-slate-900 shadow-xs font-semibold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+                title="List View"
+              >
+                <List className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">List</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2: Category Filter Tabs & Counter */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2.5 border-t border-slate-100">
+          {/* Filter Pills */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setFilter("all")}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
+                filter === "all"
+                  ? "bg-slate-900 text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              <span>All</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${filter === "all" ? "bg-slate-800 text-slate-200" : "bg-slate-200/70 text-slate-600"}`}>
+                {typeCounts.all}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFilter("image")}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
+                filter === "image"
+                  ? "bg-slate-900 text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              <ImageIcon className="h-3 w-3" />
+              <span>Images</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${filter === "image" ? "bg-slate-800 text-slate-200" : "bg-slate-200/70 text-slate-600"}`}>
+                {typeCounts.images}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFilter("video")}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
+                filter === "video"
+                  ? "bg-slate-900 text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              <Video className="h-3 w-3" />
+              <span>Videos</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${filter === "video" ? "bg-slate-800 text-slate-200" : "bg-slate-200/70 text-slate-600"}`}>
+                {typeCounts.videos}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFilter("document")}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
+                filter === "document"
+                  ? "bg-slate-900 text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              <FileText className="h-3 w-3" />
+              <span>Documents</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${filter === "document" ? "bg-slate-800 text-slate-200" : "bg-slate-200/70 text-slate-600"}`}>
+                {typeCounts.docs}
+              </span>
+            </button>
 
             {/* Duplicate Filter Tab */}
             <button
+              type="button"
               onClick={() => setFilter(filter === "duplicates" ? "all" : "duplicates")}
-              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
                 filter === "duplicates"
-                  ? "bg-amber-600 text-white"
+                  ? "bg-amber-600 text-white shadow-2xs"
                   : duplicateCount > 0
                     ? "bg-amber-100 text-amber-800 hover:bg-amber-200"
                     : "bg-slate-100 text-slate-400 opacity-60"
@@ -453,97 +596,52 @@ export function MediaGrid({
               title="Filter duplicate images"
             >
               <AlertTriangle className="h-3.5 w-3.5" />
-              Duplicates {duplicateCount > 0 && `(${duplicateCount})`}
+              <span>Duplicates</span>
+              {duplicateCount > 0 && (
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${filter === "duplicates" ? "bg-amber-700 text-amber-100" : "bg-amber-200 text-amber-900"}`}>
+                  {duplicateCount}
+                </span>
+              )}
             </button>
 
             {/* Missing Alt Text Filter Tab */}
             {missingAltCount > 0 && (
               <button
+                type="button"
                 onClick={() => setFilter(filter === "no-alt" ? "all" : "no-alt")}
-                className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
                   filter === "no-alt"
-                    ? "bg-rose-600 text-white"
+                    ? "bg-rose-600 text-white shadow-2xs"
                     : "bg-rose-50 text-rose-700 hover:bg-rose-100"
                 }`}
                 title="Filter files with no Alt Text"
               >
-                No Alt ({missingAltCount})
+                <span>No Alt Text</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${filter === "no-alt" ? "bg-rose-700 text-rose-100" : "bg-rose-200 text-rose-800"}`}>
+                  {missingAltCount}
+                </span>
               </button>
             )}
           </div>
-        </div>
 
-        {/* Right Action Tools: Size Filter, Sort Dropdown, Auto-fill, Grid/List */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Size Filter Dropdown */}
-          <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50/80 px-2 py-1">
-            <SlidersHorizontal className="h-3.5 w-3.5 text-slate-500" />
-            <select
-              value={sizeFilter}
-              onChange={(e) => setSizeFilter(e.target.value as any)}
-              className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
-              title="Filter by file size"
-            >
-              <option value="all">All Sizes</option>
-              <option value="large">Large (&gt; 500 KB)</option>
-              <option value="medium">Medium (100–500 KB)</option>
-              <option value="small">Small (&lt; 100 KB)</option>
-            </select>
-          </div>
+          {/* Right Side Actions / Count */}
+          <div className="flex items-center gap-2 ml-auto">
+            {onAutoFillAltTexts && missingAltCount > 0 && (
+              <button
+                type="button"
+                onClick={handleAutoFillAllAlt}
+                disabled={fillingAlt}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/90 px-2.5 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-2xs cursor-pointer disabled:opacity-50"
+                title="Automatically generate Alt Text for all items without alt text"
+              >
+                <Sparkles className={`h-3.5 w-3.5 text-indigo-600 ${fillingAlt ? "animate-spin" : ""}`} />
+                <span>Auto-fill Alt ({missingAltCount})</span>
+              </button>
+            )}
 
-          {/* Sort By Dropdown */}
-          <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50/80 px-2 py-1">
-            <ArrowUpDown className="h-3.5 w-3.5 text-slate-500" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
-              title="Sort items"
-            >
-              <option value="size-desc">Size: Largest (1 MB → 0)</option>
-              <option value="size-asc">Size: Smallest (0 → 1 MB)</option>
-              <option value="date-desc">Date: Newest</option>
-              <option value="date-asc">Date: Oldest</option>
-              <option value="name-asc">Name: A → Z</option>
-              <option value="name-desc">Name: Z → A</option>
-            </select>
-          </div>
-
-          {onAutoFillAltTexts && missingAltCount > 0 && (
-            <button
-              onClick={handleAutoFillAllAlt}
-              disabled={fillingAlt}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/80 px-2.5 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-2xs cursor-pointer disabled:opacity-50"
-              title="Automatically generate Alt Text for all items without alt text"
-            >
-              <Sparkles className={`h-3.5 w-3.5 text-indigo-600 ${fillingAlt ? "animate-spin" : ""}`} />
-              <span className="hidden sm:inline">Auto-fill Alt</span> ({missingAltCount})
-            </button>
-          )}
-
-          <div className="flex items-center gap-1 border-l border-slate-200 pl-2">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`rounded-lg p-1.5 transition cursor-pointer ${
-                viewMode === "grid"
-                  ? "bg-slate-900 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
-              title="Grid View"
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`rounded-lg p-1.5 transition cursor-pointer ${
-                viewMode === "list"
-                  ? "bg-slate-900 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
-              title="List View"
-            >
-              <List className="h-4 w-4" />
-            </button>
+            <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 whitespace-nowrap">
+              Showing {filteredAndSorted.length} of {items.length} files
+            </span>
           </div>
         </div>
       </div>
