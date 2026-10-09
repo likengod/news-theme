@@ -229,29 +229,20 @@ function ArticlePage() {
   const isLeftNavVisible = Boolean(settings?.showArticleLeftNav && isEnterprise);
   const isRightSidebarVisible = settings?.showArticleRightSidebar !== false;
 
-  const gridLayoutClass = useMemo(() => {
-    if (isLeftNavVisible && isRightSidebarVisible) {
-      return "grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_320px]";
-    }
-    if (isLeftNavVisible && !isRightSidebarVisible) {
-      return "grid-cols-1 xl:grid-cols-[140px_minmax(0,1fr)]";
-    }
-    if (!isLeftNavVisible && isRightSidebarVisible) {
-      return "grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px]";
-    }
-    return "grid-cols-1 max-w-4xl mx-auto";
-  }, [isLeftNavVisible, isRightSidebarVisible]);
-
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-clip w-full max-w-full">
       <ContentProtectionGuard />
       <ReadingProgress />
       <Header />
 
-      <main className="mx-auto max-w-7xl px-3 sm:px-4 pt-3 pb-12 w-full max-w-full min-w-0">
-        <div className={`grid gap-6 ${gridLayoutClass} w-full max-w-full min-w-0 items-start`}>
+      <main
+        className={`mx-auto px-3 sm:px-4 pt-3 pb-12 w-full max-w-full min-w-0 ${
+          isLeftNavVisible || isRightSidebarVisible ? "max-w-7xl" : "max-w-4xl"
+        }`}
+      >
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 w-full max-w-full min-w-0 items-start">
           {isLeftNavVisible && <ArticleLeftNav />}
-          <article className="relative w-full max-w-full min-w-0">
+          <article className="relative w-full min-w-0 flex-1">
             <ArticleHeader
               title={data.title}
               author={data.author}
@@ -352,7 +343,9 @@ function ArticlePage() {
           </article>
 
           {isRightSidebarVisible && (
-            <ArticleSidebar trending={trendingArticles} currentSlug={slug} />
+            <div className="w-full lg:w-[320px] xl:w-[340px] shrink-0">
+              <ArticleSidebar trending={trendingArticles} currentSlug={slug} />
+            </div>
           )}
         </div>
       </main>

@@ -64,12 +64,24 @@ export function ArticleSidebar({ trending = [], currentSlug }: Props) {
   const showAd3 = items.ad3 !== false;
   const showTrending = items.trendingNews !== false;
   const showArchive = items.archiveFinder !== false;
+  const showSocial = items.whatsappChannel !== false || items.telegramChannel !== false;
 
   const activeItems = (trending || [])
     .filter((item) => item && item.slug && item.slug !== currentSlug)
     .slice(0, 6);
 
-  if (!showAd3 && !showTrending && !showArchive) {
+  const displayItems =
+    activeItems.length > 0
+      ? activeItems
+      : FALLBACK_TRENDING.slice(0, 5).map((title) => ({
+          slug: slugify(title),
+          title,
+          category: "ট্রেন্ডিং",
+          hero: undefined,
+          featuredImage: undefined,
+        }));
+
+  if (!showAd3 && !showTrending && !showArchive && !showSocial) {
     return null;
   }
 
@@ -83,7 +95,7 @@ export function ArticleSidebar({ trending = [], currentSlug }: Props) {
       )}
 
       {/* সেরা শিরোনাম / Top Headlines Section - ABP Ananda style */}
-      {showTrending && activeItems.length > 0 && (
+      {showTrending && displayItems.length > 0 && (
         <div className="w-full">
           <div className="mb-4 border-b-2 border-red-600 pb-1.5 flex items-center justify-between">
             <h3 className="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-tight flex items-center gap-2">
@@ -96,7 +108,7 @@ export function ArticleSidebar({ trending = [], currentSlug }: Props) {
           </div>
 
           <div className="space-y-3.5">
-            {activeItems.map((item) => {
+            {displayItems.map((item) => {
               const rawImg = item.featuredImage || item.hero;
               const img = typeof rawImg === 'string' && rawImg.trim() !== '' ? rawImg.trim() : null;
               const firstCat = (item.category || "খবর").split(",")[0].trim();
