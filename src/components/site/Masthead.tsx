@@ -294,18 +294,21 @@ export function Masthead() {
 
       <nav className="sticky top-0 z-40 w-full border-t border-b border-border bg-background/95 backdrop-blur-md shadow-xs h-11 transition-all">
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-2 px-2 sm:px-4">
-          <div className="flex flex-1 items-center justify-start md:justify-center gap-1 text-xs sm:text-sm font-semibold uppercase tracking-wider overflow-x-auto no-scrollbar scroll-smooth py-1">
-            <Link
-              to="/"
-              aria-label="Home"
-              className="flex items-center shrink-0 whitespace-nowrap px-2.5 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
-            >
-              <Home className="h-4 w-4" />
-            </Link>
+          {/* Left: Home Icon */}
+          <Link
+            to="/"
+            aria-label="Home"
+            className="flex items-center shrink-0 whitespace-nowrap px-2 sm:px-2.5 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors pr-2.5 sm:pr-3.5 border-r border-border/60"
+          >
+            <Home className="h-4 w-4" />
+          </Link>
+
+          {/* Center/Full-Width: Category items spread across the width */}
+          <div className="flex flex-1 items-center justify-between gap-1 sm:gap-2 text-xs sm:text-sm font-semibold uppercase tracking-wider overflow-x-auto no-scrollbar scroll-smooth py-1 px-1 sm:px-3 min-w-0">
             {navItems.map((item) =>
               item.name === "Others" ? (
                 <div key={item.name} className="group relative shrink-0">
-                  <button className="flex items-center gap-1 whitespace-nowrap px-2.5 py-1 uppercase text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                  <button className="flex items-center gap-1 whitespace-nowrap px-2 sm:px-3 py-1 uppercase text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors">
                     {item.name}
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
@@ -340,7 +343,7 @@ export function Masthead() {
                   href={item.redirectUrl}
                   target={item.redirectUrl.startsWith("http") ? "_blank" : undefined}
                   rel={item.redirectUrl.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className="shrink-0 whitespace-nowrap px-2.5 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                  className="shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 text-center text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
                 >
                   {item.name}
                 </a>
@@ -349,9 +352,9 @@ export function Masthead() {
                   key={item.slug}
                   to="/$slug"
                   params={{ slug: item.slug }}
-                  className="shrink-0 whitespace-nowrap px-2.5 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                  className="shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 text-center text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
                   activeProps={{
-                    className: "shrink-0 whitespace-nowrap px-2.5 py-1 text-red-600 dark:text-red-500 font-bold",
+                    className: "shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 text-center text-red-600 dark:text-red-500 font-bold",
                   }}
                 >
                   {item.name}
@@ -359,7 +362,9 @@ export function Masthead() {
               ),
             )}
           </div>
-          <div className="hidden sm:flex shrink-0 items-center pl-2 border-l border-border/60">
+
+          {/* Right: Quick Search Button */}
+          <div className="flex shrink-0 items-center pl-2 sm:pl-3 border-l border-border/60">
             <SearchBox className="p-1.5 text-foreground/80 hover:text-foreground hover:bg-muted rounded-full transition-colors" />
           </div>
         </div>
