@@ -37,6 +37,12 @@ export function LiveVideo() {
         videoId = raw;
       }
 
+      // Automatically map NewsVanguardTripura24X7 handle to its verified channel & live stream
+      if (raw.toLowerCase().includes("newsvanguardtripura24x7")) {
+        channelId = "UC2EhA8EnLxOCbgn3nW2-OjA";
+        if (!videoId) videoId = "99tqX34EEVI";
+      }
+
       if (videoId) {
         return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=${muted ? 1 : 0}&controls=1&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`;
       }

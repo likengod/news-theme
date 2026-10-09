@@ -82,10 +82,10 @@ export const defaultHomepageConfig: HomepageConfig = {
     enabled: true,
     autoplay: true,
     provider: "youtube",
-    youtubeChannelId: "",
-    youtubeVideoId: "",
+    youtubeChannelId: "UC2EhA8EnLxOCbgn3nW2-OjA",
+    youtubeVideoId: "99tqX34EEVI",
     facebookPageUrl: "https://www.facebook.com/facebook",
-    title: "লাইভ সংবাদ কভারেজ",
+    title: "News Vanguard | ত্রিপুরা লাইভ ২৪*৭",
   },
   newsGridColumns: [
     { title: "World", fontSize: 12, color: "#1A1110", category: "Global" },
@@ -136,10 +136,113 @@ export const getHomepageConfigServer = createServerFn({ method: "GET" }).handler
   },
 );
 
+export async function resolveYouTubeInternal(rawInput: string) {
+  const raw = (rawInput || "").trim();
+  if (!raw) {
+    return { ok: false, error: "Please enter a YouTube Channel ID, Handle (@name), or Video Link." };
+  }
+
+  // 1. Direct watch / share / live / shorts / embed URLs
+  const videoMatch = raw.match(
+    /(?:watch\?v=|youtu\.be\/|youtube\.com\/(?:live|embed|shorts|v)\/|^)([a-zA-Z0-9_-]{11})(?:[?&/].*)?$/,
+  );
+  if (videoMatch && !raw.startsWith("UC") && !raw.includes("channel/") && !raw.includes("@")) {
+    const videoId = videoMatch[1];
+    return {
+      ok: true,
+      type: "video" as const,
+      videoId,
+      channelId: "",
+      embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&rel=0`,
+      thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+      title: "",
+    };
+  }
+
+  // 2. Direct Channel ID (UC...)
+  const channelMatch = raw.match(/(?:channel\/|^)(UC[a-zA-Z0-9_-]{22})(?:[/?].*)?$/);
+  if (channelMatch) {
+    const channelId = channelMatch[1];
+    return {
+      ok: true,
+      type: "channel" as const,
+      channelId,
+      videoId: "",
+      embedUrl: `https://www.youtube-nocookie.com/embed/live_stream?channel=${channelId}&autoplay=1&mute=1&controls=1&rel=0`,
+      thumbnailUrl: "",
+      title: "",
+    };
+  }
+
+  // 3. Handle or custom URL (@handle or youtube.com/@handle)
+  const handleMatch = raw.match(/@([a-zA-Z0-9_.-]+)/);
+  if (handleMatch) {
+    const handle = `@${handleMatch[1]}`;
+    try {
+      const res = await fetch(`https://www.youtube.com/${handle}/live`, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+          "Accept-Language": "en-US,en;q=0.9",
+        },
+        redirect: "follow",
+      });
+      const html = await res.text();
+      const mChannel =
+        html.match(/"channelId":"([a-zA-Z0-9_-]+)"/) ||
+        html.match(/channel_id=([a-zA-Z0-9_-]+)/);
+      const mVideo =
+        html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})"/) ||
+        html.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
+      const mTitle = html.match(/<title>([^<]+)<\/title>/);
+      const channelId = mChannel?.[1] || "";
+      const videoId = mVideo?.[1] || "";
+      const title = mTitle?.[1]?.replace(" - YouTube", "").trim() || "";
+
+      return {
+        ok: true,
+        type: videoId ? ("live_video" as const) : channelId ? ("channel" as const) : ("unknown" as const),
+        handle,
+        channelId,
+        videoId,
+        title,
+        thumbnailUrl: videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "",
+        embedUrl: videoId
+          ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&rel=0`
+          : channelId
+          ? `https://www.youtube-nocookie.com/embed/live_stream?channel=${channelId}&autoplay=1&mute=1&controls=1&rel=0`
+          : "",
+      };
+    } catch (e: any) {
+      return { ok: false, error: e?.message || "Failed to contact YouTube to detect channel" };
+    }
+  }
+
+  return {
+    ok: false,
+    error: "Unrecognized format. Please paste a channel handle (@name), full channel link, or video link.",
+  };
+}
+
 export const saveHomepageConfigServer = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .validator((cfg: HomepageConfig) => cfg)
   .handler(async ({ data }) => {
+    // Automatically resolve handle or URL to real Channel ID and live video ID if needed
+    if (data?.liveVideo?.provider === "youtube" && data.liveVideo.youtubeChannelId) {
+      const raw = data.liveVideo.youtubeChannelId.trim();
+      if (raw.includes("@") || raw.includes("youtube.com/") || raw.includes("youtu.be/")) {
+        try {
+          const res = await resolveYouTubeInternal(raw);
+          if (res.ok) {
+            if (res.channelId) data.liveVideo.youtubeChannelId = res.channelId;
+            if (res.videoId && !data.liveVideo.youtubeVideoId) data.liveVideo.youtubeVideoId = res.videoId;
+            if (res.title && !data.liveVideo.title) data.liveVideo.title = res.title;
+          }
+        } catch {}
+      }
+    }
+
     const json = JSON.stringify(data);
     await query(
       `INSERT INTO site_settings (setting_key, value) VALUES ('homepage_config', ?)
@@ -157,91 +260,7 @@ export const saveHomepageConfigServer = createServerFn({ method: "POST" })
 export const resolveYouTubeServer = createServerFn({ method: "POST" })
   .validator((input: { urlOrId: string }) => input)
   .handler(async ({ data }) => {
-    const raw = (data.urlOrId || "").trim();
-    if (!raw) {
-      return { ok: false, error: "Please enter a YouTube Channel ID, Handle (@name), or Video Link." };
-    }
-
-    // 1. Direct watch / share / live / shorts / embed URLs
-    const videoMatch = raw.match(
-      /(?:watch\?v=|youtu\.be\/|youtube\.com\/(?:live|embed|shorts|v)\/|^)([a-zA-Z0-9_-]{11})(?:[?&/].*)?$/,
-    );
-    if (videoMatch && !raw.startsWith("UC") && !raw.includes("channel/") && !raw.includes("@")) {
-      const videoId = videoMatch[1];
-      return {
-        ok: true,
-        type: "video" as const,
-        videoId,
-        channelId: "",
-        embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&rel=0`,
-        thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-        title: "",
-      };
-    }
-
-    // 2. Direct Channel ID (UC...)
-    const channelMatch = raw.match(/(?:channel\/|^)(UC[a-zA-Z0-9_-]{22})(?:[/?].*)?$/);
-    if (channelMatch) {
-      const channelId = channelMatch[1];
-      return {
-        ok: true,
-        type: "channel" as const,
-        channelId,
-        videoId: "",
-        embedUrl: `https://www.youtube-nocookie.com/embed/live_stream?channel=${channelId}&autoplay=1&mute=1&controls=1&rel=0`,
-        thumbnailUrl: "",
-        title: "",
-      };
-    }
-
-    // 3. Handle or custom URL (@handle or youtube.com/@handle)
-    const handleMatch = raw.match(/@([a-zA-Z0-9_.-]+)/);
-    if (handleMatch) {
-      const handle = `@${handleMatch[1]}`;
-      try {
-        const res = await fetch(`https://www.youtube.com/${handle}/live`, {
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-            "Accept-Language": "en-US,en;q=0.9",
-          },
-          redirect: "follow",
-        });
-        const html = await res.text();
-        const mChannel =
-          html.match(/"channelId":"([a-zA-Z0-9_-]+)"/) ||
-          html.match(/channel_id=([a-zA-Z0-9_-]+)/);
-        const mVideo =
-          html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})"/) ||
-          html.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
-        const mTitle = html.match(/<title>([^<]+)<\/title>/);
-        const channelId = mChannel?.[1] || "";
-        const videoId = mVideo?.[1] || "";
-        const title = mTitle?.[1]?.replace(" - YouTube", "").trim() || "";
-
-        return {
-          ok: true,
-          type: videoId ? ("live_video" as const) : channelId ? ("channel" as const) : ("unknown" as const),
-          handle,
-          channelId,
-          videoId,
-          title,
-          thumbnailUrl: videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "",
-          embedUrl: videoId
-            ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&rel=0`
-            : channelId
-            ? `https://www.youtube-nocookie.com/embed/live_stream?channel=${channelId}&autoplay=1&mute=1&controls=1&rel=0`
-            : "",
-        };
-      } catch (e: any) {
-        return { ok: false, error: e?.message || "Failed to contact YouTube to detect channel" };
-      }
-    }
-
-    return {
-      ok: false,
-      error: "Unrecognized format. Please paste a channel handle (@name), full channel link, or video link.",
-    };
+    return await resolveYouTubeInternal(data.urlOrId);
   });
 
 export function loadHomepageConfig(): HomepageConfig {

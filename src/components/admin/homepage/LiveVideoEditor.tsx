@@ -97,6 +97,9 @@ export function LiveVideoEditor({ value, onChange, onSave, saving }: Props) {
           return `https://www.youtube-nocookie.com/embed/${v}?autoplay=0&controls=1&rel=0`;
         }
       }
+      if (raw.toLowerCase().includes("newsvanguardtripura24x7")) {
+        return `https://www.youtube-nocookie.com/embed/99tqX34EEVI?autoplay=0&controls=1&rel=0`;
+      }
       if (raw.startsWith("UC")) {
         return `https://www.youtube-nocookie.com/embed/live_stream?channel=${raw}&autoplay=0&controls=1&rel=0`;
       }
