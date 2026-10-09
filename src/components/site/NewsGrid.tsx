@@ -244,3 +244,5 @@ export const NewsGrid = React.memo(function NewsGrid({
     </section>
   );
 });
+
+export default NewsGrid;

@@ -1,0 +1,2 @@
+import{t as e}from"./vendor-react-BzNVdmgG.js";import{f as t}from"./index-S2a1sb8N.js";import{t as n}from"./PolicyLayout-C3i6OAhY.js";var r=e();function i(){let e=t.useLoaderData();return(0,r.jsx)(n,{title:e?.title||``,intro:e?.intro||``,sections:e?.sections&&e.sections.length>0?e.sections.map(e=>({heading:e.heading,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e.body}})})):[{heading:e?.title||``,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e?.body||``}})}]})}export{i as component};
+//# sourceMappingURL=disclaimer-e8WTLThU.js.map

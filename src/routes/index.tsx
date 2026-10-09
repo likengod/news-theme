@@ -1,4 +1,3 @@
-import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import heroMarkets from "@/assets/hero-markets.webp";
 import { Header } from "@/components/site/Header";
@@ -10,19 +9,10 @@ import { getSiteSettingsServer } from "@/lib/site-content";
 import { getArticleImage } from "@/lib/news-data";
 import Footer from "@/components/site/Footer";
 
-// Below-the-fold / non-critical sections: code-split so they aren't in the initial JS bundle.
-const Columnists = lazy(() =>
-  import("@/components/site/Columnists").then((m) => ({ default: m?.default || m?.Columnists || (() => null) })),
-);
-const NewsGrid = lazy(() =>
-  import("@/components/site/NewsGrid").then((m) => ({ default: m?.default || m?.NewsGrid || (() => null) })),
-);
-const ReelsSection = lazy(() =>
-  import("@/components/site/ReelsSection").then((m) => ({ default: m?.default || m?.ReelsSection || (() => null) })),
-);
-const MarketsMagazine = lazy(() =>
-  import("@/components/site/MarketsMagazine").then((m) => ({ default: m?.default || m?.MarketsMagazine || (() => null) })),
-);
+import { Columnists } from "@/components/site/Columnists";
+import { NewsGrid } from "@/components/site/NewsGrid";
+import { ReelsSection } from "@/components/site/ReelsSection";
+import { MarketsMagazine } from "@/components/site/MarketsMagazine";
 
 const HOME_IMG = heroMarkets;
 const HOME_TITLE = "News Theme – Breaking News | Finance | Business | Market";
@@ -115,9 +105,7 @@ function Home() {
       <main className="mx-auto max-w-7xl px-4 py-4 md:py-10 w-full max-w-full min-w-0 overflow-x-clip">
         {/* On Mobile Devices (< md): Render Watch section directly below Header */}
         <div className="block md:hidden border-b border-border mb-2 pb-2 overflow-hidden">
-          <Suspense fallback={null}>
-            <Columnists hideTitle />
-          </Suspense>
+          <Columnists hideTitle />
         </div>
 
         <HeroBoard articles={dbArticles} tags={dbTags} />

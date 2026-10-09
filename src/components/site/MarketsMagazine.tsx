@@ -67,67 +67,8 @@ function getArticleSnippet(art?: { content?: string; excerpt?: string } | null):
   return text;
 }
 
-interface AdaptiveLineOptions {
-  singleLine: number;
-  twoLines: number;
-  threeLines?: number;
-}
-
-function useAdaptiveSnippetLines(
-  initialTitle: string,
-  options: AdaptiveLineOptions = { singleLine: 4, twoLines: 3, threeLines: 2 },
-) {
-  const titleRef = useRef<HTMLParagraphElement | HTMLHeadingElement | null>(null);
-  const [descLines, setDescLines] = useState<number>(() => {
-    if (!initialTitle) return options.singleLine;
-    return initialTitle.length > 52 ? options.twoLines : options.singleLine;
-  });
-
-  useEffect(() => {
-    const el = titleRef.current;
-    if (!el) return;
-
-    const updateLines = () => {
-      const h = el.clientHeight;
-      const computed = window.getComputedStyle(el);
-      const lineHeight = parseFloat(computed.lineHeight) || 24;
-      const ratio = h / lineHeight;
-
-      if (ratio <= 1.35) {
-        setDescLines(options.singleLine);
-      } else if (ratio <= 2.35) {
-        setDescLines(options.twoLines);
-      } else {
-        setDescLines(options.threeLines ?? options.twoLines);
-      }
-    };
-
-    updateLines();
-
-    if (typeof ResizeObserver !== "undefined") {
-      const ro = new ResizeObserver(updateLines);
-      ro.observe(el);
-      return () => ro.disconnect();
-    } else {
-      window.addEventListener("resize", updateLines);
-      return () => window.removeEventListener("resize", updateLines);
-    }
-  }, [initialTitle, options.singleLine, options.twoLines, options.threeLines]);
-
-  return { titleRef, descLines };
-}
-
 function MagazineLeadHeadline({ leadArt }: { leadArt: any }) {
-  const { titleRef, descLines } = useAdaptiveSnippetLines(leadArt.title, {
-    singleLine: 6,
-    twoLines: 5,
-    threeLines: 4,
-  });
-
   const snippet = getArticleSnippet(leadArt);
-  const match = snippet.trim().match(/^(\S+)\s*([\s\S]*)$/);
-  const firstWord = match ? match[1] : snippet;
-  const restText = match ? match[2] : "";
 
   return (
     <Link
@@ -137,31 +78,11 @@ function MagazineLeadHeadline({ leadArt }: { leadArt: any }) {
       }}
       className="group flex flex-col justify-center pt-0.5 min-w-0 w-full"
     >
-      <h2
-        ref={titleRef as any}
-        className="headline text-[24px] sm:text-[28px] lg:text-[32px] xl:text-[36px] font-extrabold leading-[1.25] tracking-tight text-foreground group-hover:text-red-600 transition-colors line-clamp-3"
-      >
+      <h2 className="headline text-[24px] sm:text-[28px] lg:text-[32px] xl:text-[36px] font-extrabold leading-[1.25] tracking-tight text-foreground group-hover:text-red-600 transition-colors line-clamp-3">
         {leadArt.title}
       </h2>
-      <p
-        className="mt-3 text-[14px] sm:text-[15px] lg:text-[16px] leading-relaxed text-muted-foreground select-text"
-        style={{
-          display: "-webkit-box",
-          WebkitBoxOrient: "vertical",
-          WebkitLineClamp: descLines,
-          overflow: "hidden",
-        }}
-      >
-        {firstWord ? (
-          <>
-            <span className="float-left text-[24px] sm:text-[28px] lg:text-[30px] font-black leading-[1.05] mr-2.5 mt-0.5 text-foreground select-text">
-              {firstWord}
-            </span>{" "}
-            {restText}
-          </>
-        ) : (
-          snippet
-        )}
+      <p className="mt-3 text-[14px] sm:text-[15px] lg:text-[16px] leading-relaxed text-muted-foreground line-clamp-4 select-text">
+        {snippet}
       </p>
       <div className="mt-3 flex items-center gap-2 font-sans text-[13px] sm:text-[14px] font-semibold text-foreground">
         <span className="text-red-600 uppercase text-xs font-bold tracking-wider">
@@ -175,11 +96,6 @@ function MagazineLeadHeadline({ leadArt }: { leadArt: any }) {
 }
 
 function MagazineCard1({ p1 }: { p1: any }) {
-  const { titleRef, descLines } = useAdaptiveSnippetLines(p1.title, {
-    singleLine: 4,
-    twoLines: 3,
-  });
-
   return (
     <Link
       to="/news/$slug"
@@ -200,21 +116,10 @@ function MagazineCard1({ p1 }: { p1: any }) {
           className="h-[130px] md:h-[135px] w-full object-cover md:w-[194px] rounded-xs shrink-0"
         />
         <div className="min-w-0">
-          <p
-            ref={titleRef as any}
-            className="headline text-[20px] font-bold leading-[1.3] tracking-normal text-foreground group-hover:underline md:text-[22px] line-clamp-2"
-          >
+          <p className="headline text-[20px] font-bold leading-[1.3] tracking-normal text-foreground group-hover:underline md:text-[22px] line-clamp-2">
             {p1.title}
           </p>
-          <p
-            className="mt-2 text-[14px] leading-relaxed text-muted-foreground"
-            style={{
-              display: "-webkit-box",
-              WebkitBoxOrient: "vertical",
-              WebkitLineClamp: descLines,
-              overflow: "hidden",
-            }}
-          >
+          <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground line-clamp-3 overflow-hidden">
             {getArticleSnippet(p1)}
           </p>
         </div>
@@ -224,32 +129,16 @@ function MagazineCard1({ p1 }: { p1: any }) {
 }
 
 function MagazineSmallCard({ article }: { article: any }) {
-  const { titleRef, descLines } = useAdaptiveSnippetLines(article.title, {
-    singleLine: 4,
-    twoLines: 3,
-  });
-
   return (
     <Link
       to="/news/$slug"
       params={{ slug: article.slug }}
       className="group block min-w-0"
     >
-      <p
-        ref={titleRef as any}
-        className="headline text-[17px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline line-clamp-2"
-      >
+      <p className="headline text-[17px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline line-clamp-2">
         {article.title}
       </p>
-      <p
-        className="mt-2 text-[14px] leading-relaxed text-muted-foreground"
-        style={{
-          display: "-webkit-box",
-          WebkitBoxOrient: "vertical",
-          WebkitLineClamp: descLines,
-          overflow: "hidden",
-        }}
-      >
+      <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground line-clamp-3 overflow-hidden">
         {getArticleSnippet(article)}
       </p>
     </Link>
@@ -507,3 +396,5 @@ export function MarketsMagazine({
     </section>
   );
 }
+
+export default MarketsMagazine;

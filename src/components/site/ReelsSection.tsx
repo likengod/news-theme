@@ -125,3 +125,5 @@ export function ReelsSection() {
     </section>
   );
 }
+
+export default ReelsSection;

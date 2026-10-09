@@ -45,10 +45,10 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                   />
                 </div>
               )}
-              <h3 className="headline mt-4 text-xl text-foreground group-hover:underline [-webkit-line-clamp:3] [max-height:none]">
+              <h3 className="headline mt-4 text-xl text-foreground group-hover:underline line-clamp-3">
                 {activeBottomItems[0].title}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-4 overflow-hidden">
                 {activeBottomItems[0].excerpt}
               </p>
               <MinRead
@@ -58,12 +58,6 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                 views={activeBottomItems[0].views}
               />
             </Link>
-          )}
-
-          {activeBottomItems[5] && (
-            <div className="hidden lg:block 2xl:hidden mt-auto border-t border-border pt-6 pb-2">
-              <HeadlineArticle item={activeBottomItems[5]} dense />
-            </div>
           )}
         </div>
 
@@ -94,10 +88,10 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                   />
                 </div>
               )}
-              <h3 className="headline mt-0 md:mt-4 text-xl text-foreground group-hover:underline line-clamp-2 [-webkit-line-clamp:2] [max-height:none]">
+              <h3 className="headline mt-0 md:mt-4 text-xl text-foreground group-hover:underline line-clamp-3">
                 {activeBottomItems[1].title}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-4 overflow-hidden">
                 {activeBottomItems[1].excerpt}
               </p>
               <MinRead
@@ -107,12 +101,6 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                 views={activeBottomItems[1].views}
               />
             </Link>
-          )}
-
-          {activeBottomItems[6] && (
-            <div className="hidden lg:block 2xl:hidden mt-auto border-t border-border pt-6 pb-2">
-              <HeadlineArticle item={activeBottomItems[6]} dense />
-            </div>
           )}
         </div>
 
@@ -137,3 +125,4 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
   );
 }
 
+export default HeroBottomGrid;

@@ -247,3 +247,5 @@ export function Columnists({ hideTitle }: { hideTitle?: boolean } = {}) {
     </section>
   );
 }
+
+export default Columnists;

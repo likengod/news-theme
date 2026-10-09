@@ -104,7 +104,7 @@ export const HeroBoard = React.memo(function HeroBoard({
       views: Number(a.views) || 0,
     }));
 
-    const bottomArticles = getUnique(articles, 7);
+    const bottomArticles = getUnique(articles, 5);
     const bottom = bottomArticles.map((a, i) => ({
       kicker: a.category,
       title: a.title,
@@ -198,3 +198,5 @@ export const HeroBoard = React.memo(function HeroBoard({
     </AnimatedContainer>
   );
 });
+
+export default HeroBoard;

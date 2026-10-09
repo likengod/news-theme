@@ -61,3 +61,5 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
     </div>
   );
 }
+
+export default HeroCultureRow;
