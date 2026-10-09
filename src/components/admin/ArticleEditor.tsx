@@ -124,11 +124,20 @@ export default function ArticleEditor({
     });
   };
 
-  const handlePublishNow = () => {
+  const handlePublish = () => {
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, "0");
     const localNow = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    handleSave("Published", localNow);
+    const isExistingPastDate =
+      r.status === "Published" &&
+      r.date &&
+      !isNaN(new Date(r.date).getTime()) &&
+      new Date(r.date).getTime() <= Date.now();
+    handleSave("Published", isExistingPastDate ? undefined : localNow);
+  };
+
+  const handlePublishNow = () => {
+    handlePublish();
   };
 
   const url = fullUrl(r);
@@ -230,7 +239,7 @@ export default function ArticleEditor({
               ) : (
                 <button
                   type="button"
-                  onClick={() => handleSave("Published")}
+                  onClick={handlePublish}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition shadow-sm cursor-pointer"
                 >
                   <Send className="h-3.5 w-3.5" />
@@ -380,7 +389,7 @@ export default function ArticleEditor({
                 ) : (
                   <button
                     type="button"
-                    onClick={() => handleSave("Published")}
+                    onClick={handlePublish}
                     className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 cursor-pointer shadow-sm"
                   >
                     Publish

@@ -97,8 +97,8 @@ export const getAdminArticles = createServerFn({ method: "GET" })
         filterSql += " AND (status IS NULL OR status != 'Trash')";
       }
 
-      // Run count, data, trash, and scheduled queries in parallel for speed
-      const [countRes, rows, trashRes, scheduledRes] = await Promise.all([
+      // Run count, data, and comprehensive status breakdown queries in parallel for speed
+      const [countRes, rows, statusCounts] = await Promise.all([
         query(`SELECT COUNT(*) AS total FROM articles${filterSql}`, params),
         query(
           `SELECT id, title, slug, category, city, state, country, author, views, status, date,
@@ -107,20 +107,36 @@ export const getAdminArticles = createServerFn({ method: "GET" })
            FROM articles${filterSql} ORDER BY date DESC, id DESC LIMIT ? OFFSET ?`,
           [...params, safeLimit, offset],
         ),
-        query("SELECT COUNT(*) AS total FROM articles WHERE status = 'Trash'"),
-        query(
-          "SELECT COUNT(*) AS total FROM articles WHERE status = 'Scheduled' OR (status = 'Published' AND date > NOW())",
-        ),
+        query(`
+          SELECT 
+            SUM(CASE WHEN status IS NULL OR status != 'Trash' THEN 1 ELSE 0 END) AS allCount,
+            SUM(CASE WHEN status = 'Published' AND date <= NOW() THEN 1 ELSE 0 END) AS publishedCount,
+            SUM(CASE WHEN status = 'Scheduled' OR (status = 'Published' AND date > NOW()) THEN 1 ELSE 0 END) AS scheduledCount,
+            SUM(CASE WHEN status = 'Draft' THEN 1 ELSE 0 END) AS draftCount,
+            SUM(CASE WHEN status = 'Review' THEN 1 ELSE 0 END) AS reviewCount,
+            SUM(CASE WHEN status = 'Trash' THEN 1 ELSE 0 END) AS trashCount
+          FROM articles
+        `),
       ]);
 
+      const sc = (statusCounts && statusCounts[0]) || {};
       const total = Number(countRes[0]?.total ?? 0);
-      const trashCount = Number(trashRes[0]?.total ?? 0);
-      const scheduledCount = Number(scheduledRes[0]?.total ?? 0);
+      const trashCount = Number(sc.trashCount ?? 0);
+      const scheduledCount = Number(sc.scheduledCount ?? 0);
+      const allCount = Number(sc.allCount ?? 0);
+      const publishedCount = Number(sc.publishedCount ?? 0);
+      const draftCount = Number(sc.draftCount ?? 0);
+      const reviewCount = Number(sc.reviewCount ?? 0);
+
       return {
         rows: rows.map((r: any) => ({ ...r, featured: Boolean(r.featured) })),
         total,
-        trashCount,
+        allCount,
+        publishedCount,
         scheduledCount,
+        draftCount,
+        reviewCount,
+        trashCount,
         totalPages: Math.max(1, Math.ceil(total / safeLimit)),
       };
     },
@@ -241,14 +257,10 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
     const isFuture = !isNaN(parsedArticleTime) && parsedArticleTime > nowTime + 60 * 1000;
 
     if (finalStatus === "Published") {
-      if (!isFuture) {
-        // Current or past time: if clock skew made it slightly ahead, cap to current timestamp so MySQL date <= NOW() matches immediately
-        if (parsedArticleTime > nowTime) {
-          formattedDate = getNowSql();
-        }
-      } else {
-        // Genuinely set more than 1 minute in the future
-        finalStatus = "Scheduled";
+      // If admin explicitly published it, NEVER demote to Scheduled!
+      // If the date is set in the future (or clock skew), clamp to NOW() so it satisfies date <= NOW() immediately
+      if (parsedArticleTime > nowTime) {
+        formattedDate = getNowSql();
       }
     } else if (finalStatus === "Scheduled") {
       if (!isFuture) {
@@ -291,7 +303,7 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
       const setClause = fields.map((f) => `${f} = ?`).join(", ");
       await query(`UPDATE articles SET ${setClause} WHERE id = ?`, [...values, r.id]);
       Object.keys(HOMEPAGE_CACHE).forEach((k) => delete HOMEPAGE_CACHE[k as any]);
-      return { ...r, slug, id: r.id };
+      return { ...r, status: finalStatus, date: formattedDate, slug, id: r.id };
     } else {
       // Insert
       const colNames = fields.join(", ");
@@ -301,7 +313,7 @@ export const saveAdminArticle = createServerFn({ method: "POST" })
         values,
       );
       Object.keys(HOMEPAGE_CACHE).forEach((k) => delete HOMEPAGE_CACHE[k as any]);
-      return { ...r, slug, id: result.insertId };
+      return { ...r, status: finalStatus, date: formattedDate, slug, id: result.insertId };
     }
   });
 

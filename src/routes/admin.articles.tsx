@@ -64,6 +64,10 @@ function ArticlesPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [allCount, setAllCount] = useState(0);
+  const [publishedCount, setPublishedCount] = useState(0);
+  const [draftCount, setDraftCount] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
   const [trashCount, setTrashCount] = useState(0);
   const [scheduledCount, setScheduledCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -133,6 +137,10 @@ function ArticlesPage() {
       setRows((res.rows ?? []) as Row[]);
       setTotal(res.total ?? 0);
       setTotalPages(res.totalPages ?? 1);
+      setAllCount((res as any).allCount ?? 0);
+      setPublishedCount((res as any).publishedCount ?? 0);
+      setDraftCount((res as any).draftCount ?? 0);
+      setReviewCount((res as any).reviewCount ?? 0);
       setTrashCount(res.trashCount ?? 0);
       setScheduledCount(res.scheduledCount ?? 0);
     } catch (err: any) {
@@ -337,12 +345,32 @@ function ArticlesPage() {
         slug: r.slug || slugify(r.title),
         ogImage: r.ogImage || r.featuredImage,
       };
-      await saveArticleFn({ data: final });
+      const savedResult = await saveArticleFn({ data: final });
       router.invalidate();
-      toast.success("Saved successfully");
+
+      const targetStatus: "All" | ArticleStatus = (savedResult as any)?.status || final.status || "Published";
+
+      // If user was viewing a different status tab (e.g. Drafts) and the article is now Published (or Scheduled),
+      // auto-switch to that tab so the article is immediately visible to the admin!
+      if (status !== targetStatus && status !== "All") {
+        setStatus(targetStatus);
+        setPage(1);
+      } else {
+        fetchArticles();
+      }
+
+      if (targetStatus === "Published") {
+        toast.success("Article published successfully! Switched to Published tab.");
+      } else if (targetStatus === "Scheduled") {
+        toast.success("Article scheduled successfully! Switched to Scheduled tab.");
+      } else if (targetStatus === "Draft") {
+        toast.success("Article saved as draft.");
+      } else {
+        toast.success("Saved successfully");
+      }
+
       setEditing(null);
       setCreating(false);
-      fetchArticles();
     } catch (err: any) {
       toast.error(err.message || "Failed to save article");
     }
@@ -370,10 +398,17 @@ function ArticlesPage() {
       {/* Status tabs */}
       <ArticlesStatusTabs
         status={status}
-        setStatus={setStatus}
+        setStatus={(s) => {
+          setStatus(s);
+          setPage(1);
+        }}
         total={total}
-        trashCount={trashCount}
+        allCount={allCount}
+        publishedCount={publishedCount}
         scheduledCount={scheduledCount}
+        draftCount={draftCount}
+        reviewCount={reviewCount}
+        trashCount={trashCount}
       />
 
       {/* Search + category filter bar */}
