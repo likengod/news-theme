@@ -45,6 +45,7 @@ export const getMediaListServer = createServerFn({ method: "GET" }).handler(asyn
     type: r.type,
     size: r.size,
     dataUrl: r.url, // we map the url to dataUrl for backward compatibility with frontend
+    url: r.url,
     usage: r.usage_type,
     altText: r.alt_text,
     description: r.description,

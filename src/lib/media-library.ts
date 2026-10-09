@@ -14,7 +14,8 @@ export interface MediaItem {
   name: string;
   type: string; // mime
   size: number; // bytes
-  dataUrl: string; // base64 data URL
+  dataUrl: string; // base64 data URL or public URL
+  url?: string;
   usage: MediaUsage;
   altText?: string;
   description?: string;
@@ -61,55 +62,126 @@ export function deriveAltText(filename: string): string {
     .join(" ");
 }
 
-let memoryCache: MediaItem[] = [];
+const BROADCAST_KEY = "nt_media_library_sync";
+let syncChannel: BroadcastChannel | null = null;
+if (typeof window !== "undefined" && typeof BroadcastChannel !== "undefined") {
+  try {
+    syncChannel = new BroadcastChannel(BROADCAST_KEY);
+    syncChannel.onmessage = (e) => {
+      if (e?.data?.type === "MEDIA_CHANGE") {
+        mediaLibrary.refresh(true);
+      }
+    };
+  } catch {}
+}
+
+const LOCAL_STORAGE_KEY = "nt_media_library_v1";
+
+function loadLocalStorageMedia(): MediaItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  return [];
+}
+
+function saveLocalStorageMedia(items: MediaItem[]) {
+  if (typeof window === "undefined") return;
+  try {
+    const slice = items.slice(0, 100).map((it) => ({
+      ...it,
+      dataUrl: it.dataUrl?.startsWith("data:") && it.url ? it.url : it.dataUrl,
+    }));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(slice));
+  } catch (e) {
+    console.warn("[MediaLibrary] localStorage quota warning:", e);
+  }
+}
+
+let memoryCache: MediaItem[] = loadLocalStorageMedia();
+
+function notifyChange(skipBroadcast = false) {
+  if (typeof window !== "undefined") {
+    saveLocalStorageMedia(memoryCache);
+    window.dispatchEvent(new Event("media-library-change"));
+    if (!skipBroadcast && syncChannel) {
+      try {
+        syncChannel.postMessage({ type: "MEDIA_CHANGE", ts: Date.now() });
+      } catch {}
+    }
+  }
+}
 
 // Load from Server on init
 if (typeof window !== "undefined") {
-  getMediaListServer()
-    .then((data) => {
-      if (data) {
-        memoryCache = data;
-        window.dispatchEvent(new Event("media-library-change"));
-      }
-    })
-    .catch((err) => console.error("Failed to load media library from server:", err));
-}
-
-function notifyChange() {
-  window.dispatchEvent(new Event("media-library-change"));
+  setTimeout(() => {
+    mediaLibrary.refresh(true).catch(() => {});
+  }, 0);
 }
 
 export const mediaLibrary = {
   list(): MediaItem[] {
-    return memoryCache.sort((a, b) => b.createdAt - a.createdAt);
+    return [...memoryCache].sort((a, b) => b.createdAt - a.createdAt);
+  },
+  async refresh(fromBroadcast = false): Promise<MediaItem[]> {
+    try {
+      const serverItems = await getMediaListServer();
+      if (serverItems && Array.isArray(serverItems)) {
+        const serverIdMap = new Set(serverItems.map((s: any) => s.id));
+        const unsynced = memoryCache.filter((m) => !serverIdMap.has(m.id));
+        const combined = [...serverItems, ...unsynced];
+        memoryCache = combined.map((m: any) => ({
+          ...m,
+          url: m.url || m.dataUrl,
+          dataUrl: m.dataUrl || m.url,
+        }));
+        notifyChange(fromBroadcast);
+      }
+    } catch (err) {
+      console.warn("Failed to load media library from server:", err);
+    }
+    return this.list();
   },
   async add(item: Omit<MediaItem, "id" | "createdAt">): Promise<MediaItem> {
     const id = `m_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const effectiveAltText = item.altText || deriveAltText(item.name);
 
-    // Call server to persist and get public URL
-    const res = await uploadMediaServer({
-      data: {
-        id,
-        name: item.name,
-        type: item.type,
-        size: item.size,
-        dataUrl: item.dataUrl,
-        usage: item.usage,
-        altText: effectiveAltText,
-        description: item.description,
-      },
-    });
+    let publicUrl = item.dataUrl;
+    try {
+      // Call server to persist and get public URL
+      const res = await uploadMediaServer({
+        data: {
+          id,
+          name: item.name,
+          type: item.type,
+          size: item.size,
+          dataUrl: item.dataUrl,
+          usage: item.usage,
+          altText: effectiveAltText,
+          description: item.description,
+        },
+      });
+      if (res?.url) {
+        publicUrl = res.url;
+      }
+    } catch (err) {
+      console.warn("uploadMediaServer warning (saved to local cache):", err);
+    }
 
     const full: MediaItem = {
       ...item,
       id,
       altText: effectiveAltText,
-      dataUrl: res.url, // replace base64 with public URL
+      dataUrl: publicUrl,
+      url: publicUrl,
       createdAt: Date.now(),
     };
 
-    memoryCache = [full, ...memoryCache];
+    memoryCache = [full, ...memoryCache.filter((m) => m.id !== id)];
     notifyChange();
     return full;
   },
