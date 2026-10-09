@@ -110,20 +110,25 @@ export const NewsGrid = React.memo(function NewsGrid({
       const cat = colCfg?.category;
 
       if (hasDbArticles && cat) {
-        const normalizedCat = (cat === "Auto (Latest)" ? "northeast" : cat).toLowerCase().trim();
-        const allCatArticles = articlesByCategoryName.get(normalizedCat) || [];
+        let matches: any[] = [];
+        if (cat === "Auto (Latest)") {
+          matches = articles.filter((a) => !localUsed.has(a.id));
+        } else {
+          const normalizedCat = cat.toLowerCase().trim();
+          const allCatArticles = articlesByCategoryName.get(normalizedCat) || [];
 
-        // 1. Unused category articles
-        let matches = allCatArticles.filter((a) => !localUsed.has(a.id));
+          // 1. Unused category articles
+          matches = allCatArticles.filter((a) => !localUsed.has(a.id));
 
-        // 2. If fewer than 7, include previously used category articles
-        if (matches.length < 7) {
-          const usedCatArticles = allCatArticles.filter((a) => localUsed.has(a.id));
-          for (const u of usedCatArticles) {
-            if (!matches.some((m) => m.id === u.id)) {
-              matches.push(u);
+          // 2. If fewer than 7, include previously used category articles
+          if (matches.length < 7) {
+            const usedCatArticles = allCatArticles.filter((a) => localUsed.has(a.id));
+            for (const u of usedCatArticles) {
+              if (!matches.some((m) => m.id === u.id)) {
+                matches.push(u);
+              }
+              if (matches.length >= 7) break;
             }
-            if (matches.length >= 7) break;
           }
         }
 

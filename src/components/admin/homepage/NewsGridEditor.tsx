@@ -4,9 +4,10 @@ import type { HomepageConfig, SectionStyle } from "@/lib/homepage-config";
 type Props = {
   columns: SectionStyle[];
   onUpdateColumn: (index: number, val: SectionStyle) => void;
+  categoryOptions?: string[];
 };
 
-export function NewsGridEditor({ columns, onUpdateColumn }: Props) {
+export function NewsGridEditor({ columns, onUpdateColumn, categoryOptions }: Props) {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {columns.map((col, idx) => (
@@ -16,6 +17,7 @@ export function NewsGridEditor({ columns, onUpdateColumn }: Props) {
           hint={`News column ${idx + 1} on homepage`}
           value={col}
           showCategory
+          categoryOptions={categoryOptions}
           onChange={(v: SectionStyle) => onUpdateColumn(idx, v)}
         />
       ))}

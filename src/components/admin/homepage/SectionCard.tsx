@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Settings2, ChevronDown } from "lucide-react";
-import { ALL_CATEGORY_OPTIONS, type SectionStyle } from "@/lib/homepage-config";
+import type { SectionStyle } from "@/lib/homepage-config";
+import { useCategories } from "@/components/site/AdSettingsContext";
 
 type Props = {
   label: string;
@@ -9,6 +10,7 @@ type Props = {
   showCategory?: boolean;
   showToggle?: boolean;
   showImageFit?: boolean;
+  categoryOptions?: string[];
   onChange: (v: SectionStyle) => void;
   children?: React.ReactNode;
 };
@@ -20,14 +22,42 @@ export function SectionCard({
   showCategory,
   showToggle,
   showImageFit,
+  categoryOptions,
   onChange,
   children,
 }: Props) {
+  const dbCats = useCategories();
   const [showStyle, setShowStyle] = useState(false);
   const [localTitle, setLocalTitle] = useState(value.title);
   const [localColor, setLocalColor] = useState(value.color);
   const [localFontSize, setLocalFontSize] = useState(value.fontSize);
   const isEnabled = value.enabled !== false;
+
+  const options = useMemo(() => {
+    let list: string[] = [];
+    if (categoryOptions && categoryOptions.length > 0) {
+      list = [...categoryOptions];
+    } else if (Array.isArray(dbCats) && dbCats.length > 0) {
+      list = dbCats
+        .map((c: any) => (typeof c === "string" ? c : c.name || c.slug))
+        .filter(Boolean);
+    }
+
+    const unique = new Set<string>();
+    unique.add("Auto (Latest)");
+
+    for (const name of list) {
+      if (name && name !== "Auto (Latest)") {
+        unique.add(name);
+      }
+    }
+
+    if (value.category && value.category !== "Auto (Latest)") {
+      unique.add(value.category);
+    }
+
+    return Array.from(unique);
+  }, [categoryOptions, dbCats, value.category]);
 
   useEffect(() => {
     setLocalTitle(value.title);
@@ -122,7 +152,7 @@ export function SectionCard({
                 onChange={(e) => onChange({ ...value, category: e.target.value })}
                 className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-sm focus:border-slate-900 focus:outline-none"
               >
-                {ALL_CATEGORY_OPTIONS.map((c) => (
+                {options.map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>

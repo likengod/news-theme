@@ -6,15 +6,12 @@
 // which pulls in image assets and adds ~1.2s to the critical path.
 const ALL_CATEGORIES = [
   "Northeast",
-  "Breaking",
   "Global",
-  "Politics",
-  "Business",
   "Crime",
-  "Tech",
   "Sports",
-  "Opinion",
-  "Others",
+  "Tripura",
+  "Entertainment",
+  "Education",
 ];
 
 export type SectionStyle = {
@@ -89,10 +86,10 @@ export const defaultHomepageConfig: HomepageConfig = {
   },
   newsGridColumns: [
     { title: "World", fontSize: 12, color: "#1A1110", category: "Global" },
-    { title: "Politics", fontSize: 12, color: "#1A1110", category: "Politics" },
-    { title: "Opinion", fontSize: 12, color: "#1A1110", category: "Opinion" },
-    { title: "Culture", fontSize: 12, color: "#1A1110", category: "Auto (Latest)" },
-    { title: "Arts", fontSize: 12, color: "#1A1110", category: "Auto (Latest)" },
+    { title: "Northeast", fontSize: 12, color: "#1A1110", category: "Northeast" },
+    { title: "Crime", fontSize: 12, color: "#1A1110", category: "Crime" },
+    { title: "Sports", fontSize: 12, color: "#1A1110", category: "Sports" },
+    { title: "Latest", fontSize: 12, color: "#1A1110", category: "Auto (Latest)" },
   ],
 };
 

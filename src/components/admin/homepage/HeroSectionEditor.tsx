@@ -1,4 +1,4 @@
-﻿import { SectionCard } from "./SectionCard";
+import { SectionCard } from "./SectionCard";
 import type { HomepageConfig, SectionStyle } from "@/lib/homepage-config";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 type Props = {
   config: HomepageConfig;
   onUpdate: <K extends keyof HomepageConfig>(key: K, val: HomepageConfig[K]) => void;
+  categoryOptions?: string[];
 };
 
-export function HeroSectionEditor({ config, onUpdate }: Props) {
+export function HeroSectionEditor({ config, onUpdate, categoryOptions }: Props) {
   return (
     <div className="space-y-3">
       <SectionCard
@@ -16,6 +17,7 @@ export function HeroSectionEditor({ config, onUpdate }: Props) {
         hint="Which category feeds the big hero lead story"
         value={config.heroFeatured}
         showCategory
+        categoryOptions={categoryOptions}
         onChange={(v: SectionStyle) => onUpdate("heroFeatured", v)}
       >
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
@@ -105,6 +107,7 @@ export function HeroSectionEditor({ config, onUpdate }: Props) {
         hint="Header title and category for top stories column"
         value={config.heroTopStories}
         showCategory
+        categoryOptions={categoryOptions}
         onChange={(v: SectionStyle) => onUpdate("heroTopStories", v)}
       />
       <SectionCard
@@ -112,6 +115,7 @@ export function HeroSectionEditor({ config, onUpdate }: Props) {
         hint="Culture section under the main hero grid"
         value={config.heroCultureMusic}
         showCategory
+        categoryOptions={categoryOptions}
         onChange={(v: SectionStyle) => onUpdate("heroCultureMusic", v)}
       />
       <SectionCard
@@ -119,6 +123,7 @@ export function HeroSectionEditor({ config, onUpdate }: Props) {
         hint="Top section on the right sidebar"
         value={config.heroOpinion}
         showCategory
+        categoryOptions={categoryOptions}
         onChange={(v: SectionStyle) => onUpdate("heroOpinion", v)}
       />
       <SectionCard
@@ -126,6 +131,7 @@ export function HeroSectionEditor({ config, onUpdate }: Props) {
         hint="Bottom section on the right sidebar"
         value={config.heroPopular}
         showCategory
+        categoryOptions={categoryOptions}
         onChange={(v: SectionStyle) => onUpdate("heroPopular", v)}
       />
     </div>

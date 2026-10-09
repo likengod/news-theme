@@ -14,7 +14,8 @@ import { SectionCard } from "@/components/admin/homepage/SectionCard";
 import { HeroSectionEditor } from "@/components/admin/homepage/HeroSectionEditor";
 import { NewsGridEditor } from "@/components/admin/homepage/NewsGridEditor";
 import { LiveVideoEditor } from "@/components/admin/homepage/LiveVideoEditor";
-import { useSiteSettings } from "@/components/site/AdSettingsContext";
+import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
+import { getCategories } from "@/lib/taxonomy.functions";
 
 export const Route = createFileRoute("/admin/homepage")({
   ssr: false,
@@ -60,6 +61,22 @@ function HomepageEditorPage() {
   const [dirty, setDirty] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const contextCats = useCategories();
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (Array.isArray(contextCats) && contextCats.length > 0) {
+      setCategories(contextCats.map((c: any) => (typeof c === "string" ? c : c.name || c.slug)).filter(Boolean));
+    }
+    getCategories()
+      .then((res) => {
+        if (Array.isArray(res) && res.length > 0) {
+          setCategories(res.map((c: any) => (typeof c === "string" ? c : c.name || c.slug)).filter(Boolean));
+        }
+      })
+      .catch(() => {});
+  }, [contextCats]);
 
   useEffect(() => {
     // Load local cache immediately, then fetch MySQL server config
@@ -196,7 +213,7 @@ function HomepageEditorPage() {
         title="Hero area"
         description="The main top section featuring lead stories, top news, and culture."
       >
-        <HeroSectionEditor config={cfg} onUpdate={update} />
+        <HeroSectionEditor config={cfg} onUpdate={update} categoryOptions={categories} />
       </Group>
 
       {/* Sidebar */}
@@ -206,12 +223,14 @@ function HomepageEditorPage() {
             label="Opinion"
             value={cfg.heroOpinion}
             showCategory
+            categoryOptions={categories}
             onChange={(v) => update("heroOpinion", v)}
           />
           <SectionCard
             label="Popular"
             value={cfg.heroPopular}
             showCategory
+            categoryOptions={categories}
             onChange={(v) => update("heroPopular", v)}
           />
         </div>
@@ -236,7 +255,7 @@ function HomepageEditorPage() {
         title="News grid (5 columns)"
         description="Each column feeds news from your chosen category."
       >
-        <NewsGridEditor columns={cfg.newsGridColumns} onUpdateColumn={updateCol} />
+        <NewsGridEditor columns={cfg.newsGridColumns} onUpdateColumn={updateCol} categoryOptions={categories} />
       </Group>
 
       {/* Other sections */}
@@ -247,6 +266,7 @@ function HomepageEditorPage() {
             value={cfg.watch}
             showCategory
             showToggle
+            categoryOptions={categories}
             onChange={(v) => update("watch", v)}
           />
           <SectionCard
@@ -256,6 +276,7 @@ function HomepageEditorPage() {
             showCategory
             showToggle
             showImageFit
+            categoryOptions={categories}
             onChange={(v) => update("marketsMagazine", v)}
           />
         </div>
