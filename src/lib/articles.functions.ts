@@ -491,6 +491,38 @@ export const importAdminArticles = createServerFn({ method: "POST" })
         formattedDate = String(r.date).replace("T", " ").replace("Z", "").substring(0, 19);
       }
 
+      let cleanFeaturedImage = (r.featuredImage || "").trim();
+      let cleanOgImage = (r.ogImage || cleanFeaturedImage || "").trim();
+
+      // Normalize full domain URLs pointing to /uploads/
+      if (/^https?:\/\/[^/]+\/uploads\/(.*)$/i.test(cleanFeaturedImage)) {
+        cleanFeaturedImage = cleanFeaturedImage.replace(/^https?:\/\/[^/]+\/uploads\//i, "/uploads/");
+      }
+      if (/^https?:\/\/[^/]+\/uploads\/(.*)$/i.test(cleanOgImage)) {
+        cleanOgImage = cleanOgImage.replace(/^https?:\/\/[^/]+\/uploads\//i, "/uploads/");
+      }
+
+      // If cleanFeaturedImage is provided, check if filename matches an uploaded media_library file
+      if (cleanFeaturedImage) {
+        const baseName = cleanFeaturedImage.split("/").pop()?.split("?")[0] || "";
+        if (baseName) {
+          try {
+            const mediaMatch = await query(
+              "SELECT url FROM media_library WHERE name = ? OR url LIKE ? ORDER BY id DESC LIMIT 1",
+              [baseName, `%${baseName}%`]
+            );
+            if (mediaMatch && mediaMatch.length > 0 && mediaMatch[0].url) {
+              cleanFeaturedImage = mediaMatch[0].url;
+              if (!cleanOgImage || cleanOgImage === r.featuredImage) {
+                cleanOgImage = mediaMatch[0].url;
+              }
+            }
+          } catch (e) {
+            // Ignore error if media_library table is not yet initialized
+          }
+        }
+      }
+
       const values = [
         r.title || "Untitled",
         finalSlug,
@@ -504,8 +536,8 @@ export const importAdminArticles = createServerFn({ method: "POST" })
         formattedDate,
         r.excerpt || "",
         r.content || "",
-        r.featuredImage || "",
-        r.ogImage || r.featuredImage || "",
+        cleanFeaturedImage,
+        cleanOgImage,
         r.metaTitle || "",
         r.metaDescription || "",
         r.tags || "",

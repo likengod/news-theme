@@ -161,12 +161,20 @@ export function slugify(input: any): string {
   return slug || "sample";
 }
 
-const LOCAL_IMAGES = [heroImg, fedImg, techImg, oilImg, cryptoImg, wsImg, tradeImg];
+export const LOCAL_IMAGES = [heroImg, fedImg, techImg, oilImg, cryptoImg, wsImg, tradeImg];
 
 export function getArticleImage(img?: string, index?: number): string {
-  if (!img || img.trim() === "" || img === "/placeholder.svg" || img.includes("placeholder")) {
-    const idx = (index ?? 0) % LOCAL_IMAGES.length;
+  if (!img || typeof img !== "string" || img.trim() === "" || img === "/placeholder.svg" || img.includes("placeholder")) {
+    const idx = Math.abs(index ?? 0) % LOCAL_IMAGES.length;
     return LOCAL_IMAGES[idx];
   }
-  return img;
+
+  const clean = img.trim();
+
+  // Normalize full domain URLs pointing to /uploads/ to relative /uploads/ paths
+  if (/^https?:\/\/[^/]+\/uploads\/(.*)$/i.test(clean)) {
+    return clean.replace(/^https?:\/\/[^/]+\/uploads\//i, "/uploads/");
+  }
+
+  return clean;
 }

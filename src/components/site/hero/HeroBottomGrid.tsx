@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
 import { HeadlineArticle, MinRead } from "../HeadlineArticle";
+import { getArticleImage } from "@/lib/news-data";
 
 export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
   if (!activeBottomItems || !Array.isArray(activeBottomItems) || activeBottomItems.length === 0) {
@@ -35,6 +36,11 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                     decoding="async"
                     width={400}
                     height={225}
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      el.onerror = null;
+                      el.src = getArticleImage(undefined, 0);
+                    }}
                     className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
@@ -79,6 +85,11 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                     decoding="async"
                     width={400}
                     height={225}
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      el.onerror = null;
+                      el.src = getArticleImage(undefined, 1);
+                    }}
                     className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>

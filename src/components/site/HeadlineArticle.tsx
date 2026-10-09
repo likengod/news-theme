@@ -1,6 +1,7 @@
 import { Views } from "./Views";
 import type { Item } from "@/lib/mock-news-data";
 import { Link } from "@tanstack/react-router";
+import { getArticleImage } from "@/lib/news-data";
 
 export function MinRead({
   seed,
@@ -55,6 +56,11 @@ export function HeadlineArticle({
             decoding="async"
             width={400}
             height={250}
+            onError={(e) => {
+              const el = e.currentTarget;
+              el.onerror = null;
+              el.src = getArticleImage(undefined, 1);
+            }}
             className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         </div>

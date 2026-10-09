@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
 import { MinRead } from "../HeadlineArticle";
-import { formatViews } from "@/lib/news-data";
+import { formatViews, getArticleImage } from "@/lib/news-data";
 import { useAdSettings, useSiteSettings } from "@/components/site/AdSettingsContext";
 import {
   loadAds,
@@ -104,6 +104,11 @@ export function HeroMain({ activeLeads, cfg }: any) {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
             width={800}
             height={500}
+            onError={(e) => {
+              const el = e.currentTarget;
+              el.onerror = null;
+              el.src = getArticleImage(undefined, 0);
+            }}
             className="w-full h-auto max-h-[480px] object-contain object-center transition-transform duration-500 group-hover:scale-[1.02]"
           />
         </div>
