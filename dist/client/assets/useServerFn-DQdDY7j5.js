@@ -1,0 +1,2 @@
+import{r as e}from"./rolldown-runtime-BHe-jwch.js";import{i as t}from"./vendor-react-BzNVdmgG.js";import{C as n,p as r}from"./vendor-tanstack-router-DmXgTnZS.js";var i=e(t(),1);function a(e){let t=r();return i.useCallback(async(...r)=>{try{let t=await e(...r);if(n(t))throw t;return t}catch(e){if(n(e))return e.options._fromLocation=t.stores.location.get(),t.navigate(t.resolveRedirect(e).options);throw e}},[t,e])}export{a as t};
+//# sourceMappingURL=useServerFn-DQdDY7j5.js.map

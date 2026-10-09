@@ -8,21 +8,21 @@ import { getHomepageArticles } from "@/lib/articles.functions";
 import { getTags } from "@/lib/taxonomy.functions";
 import { getSiteSettingsServer } from "@/lib/site-content";
 import { getArticleImage } from "@/lib/news-data";
+import Footer from "@/components/site/Footer";
 
 // Below-the-fold / non-critical sections: code-split so they aren't in the initial JS bundle.
 const Columnists = lazy(() =>
-  import("@/components/site/Columnists").then((m) => ({ default: m.Columnists })),
+  import("@/components/site/Columnists").then((m) => ({ default: m?.default || m?.Columnists || (() => null) })),
 );
 const NewsGrid = lazy(() =>
-  import("@/components/site/NewsGrid").then((m) => ({ default: m.NewsGrid })),
+  import("@/components/site/NewsGrid").then((m) => ({ default: m?.default || m?.NewsGrid || (() => null) })),
 );
 const ReelsSection = lazy(() =>
-  import("@/components/site/ReelsSection").then((m) => ({ default: m.ReelsSection })),
+  import("@/components/site/ReelsSection").then((m) => ({ default: m?.default || m?.ReelsSection || (() => null) })),
 );
 const MarketsMagazine = lazy(() =>
-  import("@/components/site/MarketsMagazine").then((m) => ({ default: m.MarketsMagazine })),
+  import("@/components/site/MarketsMagazine").then((m) => ({ default: m?.default || m?.MarketsMagazine || (() => null) })),
 );
-const Footer = lazy(() => import("@/components/site/Footer").then((m) => ({ default: m.Footer })));
 
 const HOME_IMG = heroMarkets;
 const HOME_TITLE = "News Theme – Breaking News | Finance | Business | Market";

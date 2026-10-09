@@ -1,12 +1,6 @@
-import { lazy, Suspense } from "react";
 import { Link } from "@tanstack/react-router";
-
-const RelatedNews = lazy(() =>
-  import("@/components/site/RelatedNews").then((m) => ({ default: m.RelatedNews })),
-);
-const CommentsSection = lazy(() =>
-  import("@/components/site/CommentsSection").then((m) => ({ default: m.CommentsSection })),
-);
+import { RelatedNews } from "@/components/site/RelatedNews";
+import CommentsSection from "@/components/site/CommentsSection";
 
 type Props = {
   slug: string;
@@ -45,13 +39,8 @@ export function ArticleFooter({
         </div>
       )}
 
-      <Suspense fallback={<div className="mt-8 h-24 animate-pulse rounded bg-muted" />}>
-        <RelatedNews currentSlug={slug} category={category} />
-      </Suspense>
-
-      <Suspense fallback={<div className="mt-8 h-32 animate-pulse rounded bg-muted" />}>
-        <CommentsSection articleSlug={slug} articleTitle={articleTitle} />
-      </Suspense>
+      <RelatedNews currentSlug={slug} category={category} />
+      <CommentsSection articleSlug={slug} articleTitle={articleTitle} />
     </footer>
   );
 }

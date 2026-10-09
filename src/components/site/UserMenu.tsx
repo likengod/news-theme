@@ -283,3 +283,5 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
     </DropdownMenu>
   );
 }
+
+export default UserMenu;

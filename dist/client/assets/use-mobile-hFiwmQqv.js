@@ -1,0 +1,2 @@
+import{r as e}from"./rolldown-runtime-BHe-jwch.js";import{i as t}from"./vendor-react-BzNVdmgG.js";var n=e(t()),r=768;function i(){let[e,t]=n.useState(!1);return n.useEffect(()=>{let e=window.matchMedia(`(max-width: ${r-1}px)`),n=e=>{t(e.matches)};return e.addEventListener(`change`,n),t(e.matches),()=>{e.removeEventListener(`change`,n)}},[]),!!e}export{i as t};
+//# sourceMappingURL=use-mobile-hFiwmQqv.js.map

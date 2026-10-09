@@ -1,0 +1,2 @@
+import{r as e}from"./rolldown-runtime-BHe-jwch.js";import{i as t}from"./vendor-react-BzNVdmgG.js";var n=e(t(),1);function r(e){let t=n.useRef({value:e,previous:e});return n.useMemo(()=>(t.current.value!==e&&(t.current.previous=t.current.value,t.current.value=e),t.current.previous),[e])}export{r as t};
+//# sourceMappingURL=dist-gIpyLwLs.js.map

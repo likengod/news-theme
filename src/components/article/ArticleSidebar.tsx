@@ -4,8 +4,7 @@ import { ArchiveFinder } from "@/components/site/ArchiveFinder";
 import { ArticleSocialChannels } from "./ArticleSocialChannels";
 import { slugify } from "@/lib/news-data";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
-
-const Advertisement = lazy(() => import("@/components/site/Advertisement"));
+import Advertisement from "@/components/site/Advertisement";
 
 const FALLBACK_TRENDING = [
   "Fed Signals Pause on Cuts as Inflation Reignites in Core Services",
@@ -89,9 +88,7 @@ export function ArticleSidebar({ trending = [], currentSlug }: Props) {
     <aside className="space-y-6 w-full min-w-0">
       {/* Top Banner Advertisement (ABP Ananda top right ad) */}
       {showAd3 && (
-        <Suspense fallback={<div className="aspect-[300/250] w-full animate-pulse bg-muted rounded" />}>
-          <Advertisement slot="ad3" aspectRatio="1/1" />
-        </Suspense>
+        <Advertisement slot="ad3" aspectRatio="1/1" />
       )}
 
       {/* সেরা শিরোনাম / Top Headlines Section - ABP Ananda style */}

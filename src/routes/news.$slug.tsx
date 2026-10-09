@@ -22,10 +22,7 @@ import { getCurrentUserRole } from "@/lib/auth.functions";
 import { getHomepageArticles } from "@/lib/articles.functions";
 import { authClient as supabase } from "@/lib/auth-client";
 import { trackRead } from "@/lib/user-actions-tracker";
-
-const PopupAd = lazy(() =>
-  import("@/components/site/PopupAd").then((m) => ({ default: m.PopupAd })),
-);
+import { PopupAd } from "@/components/site/PopupAd";
 
 function ArticleError({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
@@ -397,9 +394,7 @@ function ArticlePage() {
       </main>
 
       <Footer />
-      <Suspense fallback={null}>
-        <PopupAd />
-      </Suspense>
+      <PopupAd />
     </div>
   );
 }

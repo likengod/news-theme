@@ -4,7 +4,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { lazy, Suspense } from "react";
 import { ThemeToggle } from "./ThemeToggle";
-const UserMenu = lazy(() => import("./UserMenu").then((m) => ({ default: m.UserMenu })));
+import { UserMenu } from "./UserMenu";
 import { SearchBox } from "./SearchModal";
 import { sections, slugify } from "@/lib/news-data";
 import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
