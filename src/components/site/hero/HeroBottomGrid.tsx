@@ -45,7 +45,12 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
                 {activeBottomItems[0].excerpt}
               </p>
-              <MinRead seed={activeBottomItems[0].title} kicker={activeBottomItems[0].kicker} />
+              <MinRead
+                seed={activeBottomItems[0].title}
+                kicker={activeBottomItems[0].kicker}
+                author={activeBottomItems[0].author}
+                views={activeBottomItems[0].views}
+              />
             </Link>
           )}
 
@@ -84,7 +89,12 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground [-webkit-line-clamp:6] [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden">
                 {activeBottomItems[1].excerpt}
               </p>
-              <MinRead seed={activeBottomItems[1].title} kicker={activeBottomItems[1].kicker} />
+              <MinRead
+                seed={activeBottomItems[1].title}
+                kicker={activeBottomItems[1].kicker}
+                author={activeBottomItems[1].author}
+                views={activeBottomItems[1].views}
+              />
             </Link>
           )}
 

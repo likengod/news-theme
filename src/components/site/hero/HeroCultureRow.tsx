@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { formatViews, viewsFor } from "@/lib/news-data";
+import { formatViews } from "@/lib/news-data";
 
 export function HeroCultureRow({ cfg, activeCultureItems }: any) {
   return (
@@ -41,7 +41,7 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
                 </span>
               )}
               <span className="absolute bottom-2 left-2 bg-black px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-white">
-                {formatViews(c.views || viewsFor(c.title))} views
+                {formatViews(Number(c.views) || 0)} views
               </span>
             </div>
             <h3 className="headline mt-3 line-clamp-2 text-lg leading-tight text-foreground group-hover:underline break-words">

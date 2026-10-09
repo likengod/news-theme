@@ -123,17 +123,16 @@ export const mostRead: { title: string; views: number }[] = [
 ];
 
 export function formatViews(n: number): string {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
-  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
-  return String(n);
+  const count = Number(n) || 0;
+  if (count <= 0) return "0";
+  if (count >= 1_000_000) return (count / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  if (count >= 1_000) return (count / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+  return String(count);
 }
 
-// Deterministic pseudo view count from a string seed (e.g. title)
-export function viewsFor(seed: string): number {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
-  const n = Math.abs(h) % 480_000;
-  return 1_200 + n;
+// Neutralized to return 0 to prevent fake random views from appearing on articles
+export function viewsFor(_seed?: string): number {
+  return 0;
 }
 
 /** Canonical article shape used across components. */

@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Play, Eye, Film, ChevronLeft, ChevronRight, Sparkles, ExternalLink } from "lucide-react";
-import { viewsFor, formatViews } from "@/lib/news-data";
+import { formatViews } from "@/lib/news-data";
 import { getAllReels } from "@/lib/reels-data";
 import { ReelViewerModal } from "@/components/site/ReelViewerModal";
 import { useAdSettings } from "@/components/site/AdSettingsContext";
@@ -139,7 +139,7 @@ function ReelsPage() {
 
             const reel = entry.item;
             const globalIndex = startIndex + entry.originalIndex;
-            const count = reel.views || viewsFor(reel.title);
+            const count = Number(reel.views) || 0;
 
             return (
               <div

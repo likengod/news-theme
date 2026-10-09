@@ -4,7 +4,6 @@ import { Views } from "../Views";
 import Advertisement from "../Advertisement";
 import { ArchiveFinder } from "../ArchiveFinder";
 import { SocialIcons } from "../SocialIcons";
-import { viewsFor } from "@/lib/news-data";
 
 export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, tags }: any) {
   return (
@@ -37,7 +36,7 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
                   {o.title}
                 </p>
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  by {o.by} · <Views count={o.views || viewsFor(o.title)} />
+                  by {o.by} · <Views count={Number(o.views) || 0} />
                 </p>
               </div>
             </Link>
@@ -78,7 +77,7 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
                     {p.title}
                   </p>
                   <p className="mt-1 text-[11px] text-muted-foreground">
-                    by {p.by} · <Views count={p.views || viewsFor(p.title)} />
+                    by {p.by} · <Views count={Number(p.views) || 0} />
                   </p>
                 </div>
               </Link>

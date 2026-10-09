@@ -9,7 +9,7 @@ import {
   Eye,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebookF, FaTwitter } from "react-icons/fa6";
-import { viewsFor, formatViews } from "@/lib/news-data";
+import { formatViews } from "@/lib/news-data";
 
 export type WatchItem = {
   title: string;
@@ -17,6 +17,7 @@ export type WatchItem = {
   img: string;
   kicker: string | null;
   embedSrc: string;
+  views?: number | string;
 };
 
 export function ReelViewerModal({
@@ -185,7 +186,7 @@ export function ReelViewerModal({
               <Eye className="h-5 w-5 text-white/90" />
             </div>
             <span className="text-[10px] font-bold tracking-wide text-white/90">
-              {formatViews(viewsFor(currentItem.title))}
+              {formatViews(Number(currentItem.views) || 0)}
             </span>
           </div>
 
@@ -304,7 +305,7 @@ export function ReelViewerModal({
         </p>
         <p className="text-[11px] text-white/75 mt-1 flex items-center justify-center gap-1.5 font-medium">
           <Eye className="h-3.5 w-3.5 text-white/90" />
-          <span>{formatViews(viewsFor(currentItem.title))} views</span>
+          <span>{formatViews(Number(currentItem.views) || 0)} views</span>
           <span>•</span>
           <span>Swipe left/right for next</span>
         </p>

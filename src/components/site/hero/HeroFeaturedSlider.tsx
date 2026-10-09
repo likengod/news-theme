@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
 import { MinRead } from "../HeadlineArticle";
+import { formatViews } from "@/lib/news-data";
 import {
   Carousel,
   CarouselContent,
@@ -106,15 +107,14 @@ export default function HeroFeaturedSlider({
                 <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                 <circle cx="12" cy="12" r="3" />
               </svg>
-              {featured.views > 999 ? (featured.views / 1000).toFixed(1) + "K" : featured.views}{" "}
-              views
+              {formatViews(Number(featured.views) || 0)} views
             </span>
             <span>&bull;</span>
             <span className="font-bold text-foreground">{featured.kicker || "Featured"}</span>
           </div>
 
           <div className="hidden md:block">
-            <MinRead seed={featured.title} kicker={featured.kicker || "Featured"} />
+            <MinRead seed={featured.title} kicker={featured.kicker || "Featured"} author={featured.author} views={featured.views} />
           </div>
         </Link>
       </CarouselItem>,

@@ -1,5 +1,5 @@
 import React from "react";
-import { top, grid, lead, viewsFor, formatViews, getArticleImage } from "@/lib/news-data";
+import { top, grid, lead, formatViews, getArticleImage } from "@/lib/news-data";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
 import { articlesByCategory } from "@/lib/homepage-config";
 import {
@@ -103,6 +103,8 @@ export const HeroBoard = React.memo(function HeroBoard({
       excerpt: a.excerpt || a.content?.replace(/<[^>]*>/g, "").slice(0, 100) + "...",
       img: i === 2 ? getArticleImage(a.featuredImage, i + 7) : undefined,
       slug: a.slug,
+      author: a.author || "Admin User",
+      views: Number(a.views) || 0,
     }));
 
     const bottomArticles = getUnique(articles, 7);
@@ -112,6 +114,8 @@ export const HeroBoard = React.memo(function HeroBoard({
       excerpt: a.excerpt || a.content?.replace(/<[^>]*>/g, "").slice(0, 150) + "...",
       img: i < 2 ? getArticleImage(a.featuredImage, i + 12) : undefined,
       slug: a.slug,
+      author: a.author || "Admin User",
+      views: Number(a.views) || 0,
     }));
 
     // 3. Popular
@@ -119,9 +123,9 @@ export const HeroBoard = React.memo(function HeroBoard({
     const popularArticles = getUnique(articles, 4, (a) => matchesCat(a.category, popularCategory));
     const popular = popularArticles.map((a, i) => ({
       title: a.title,
-      by: a.author || "Newsroom",
+      by: a.author || "Admin User",
       img: getArticleImage(a.featuredImage, i + 18),
-      views: a.views || 0,
+      views: Number(a.views) || 0,
       slug: a.slug,
     }));
 
@@ -130,10 +134,10 @@ export const HeroBoard = React.memo(function HeroBoard({
     const opinionArticles = getUnique(articles, 6, (a) => matchesCat(a.category, opinionCategory));
     const opinion = opinionArticles.map((a, i) => ({
       title: a.title,
-      by: a.author || "Newsroom",
+      by: a.author || "Admin User",
       img: getArticleImage(a.featuredImage, i + 22),
       slug: a.slug,
-      views: a.views || 0,
+      views: Number(a.views) || 0,
     }));
 
     // 5. Culture & Music row
@@ -146,6 +150,8 @@ export const HeroBoard = React.memo(function HeroBoard({
       date: formatUtcDate(a.date),
       img: getArticleImage(a.featuredImage, i + 28),
       slug: a.slug,
+      author: a.author || "Admin User",
+      views: Number(a.views) || 0,
     }));
 
     return {

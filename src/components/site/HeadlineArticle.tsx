@@ -1,28 +1,27 @@
-import { viewsFor } from "@/lib/news-data";
 import { Views } from "./Views";
 import type { Item } from "@/lib/mock-news-data";
 import { Link } from "@tanstack/react-router";
 
-const AUTHORS = [
-  "Claire Bennett",
-  "Lucas Hayes",
-  "Maya Chen",
-  "Daniel Cole",
-  "Priya Raman",
-  "Noah Whitfield",
-];
-function authorFor(seed?: string) {
-  if (!seed) return AUTHORS[0];
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  return AUTHORS[h % AUTHORS.length];
-}
+export function MinRead({
+  seed,
+  kicker,
+  author,
+  views,
+}: {
+  seed?: string;
+  kicker?: string;
+  author?: string;
+  views?: number;
+}) {
+  const displayAuthor = author
+    ? (author.startsWith("By ") ? author.replace(/^By\s+/i, "") : author)
+    : "Admin User";
+  const displayViews = typeof views === "number" ? views : (views ? Number(views) : 0);
 
-export function MinRead({ seed, kicker }: { seed?: string; kicker?: string }) {
   return (
     <span className="mt-3 inline-flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-      <span className="font-medium text-foreground">By {authorFor(seed)}</span>
-      {seed && <Views count={viewsFor(seed)} />}
+      <span className="font-medium text-foreground">By {displayAuthor}</span>
+      <Views count={displayViews} />
       {kicker && <span className="kicker whitespace-nowrap text-[10px]">{kicker}</span>}
     </span>
   );
@@ -33,7 +32,7 @@ export function HeadlineArticle({
   dense = false,
   priority = false,
 }: {
-  item: Item & { slug?: string };
+  item: any;
   dense?: boolean;
   priority?: boolean;
 }) {
@@ -71,7 +70,7 @@ export function HeadlineArticle({
           {item.excerpt}
         </p>
       )}
-      <MinRead seed={item.title} kicker={item.kicker} />
+      <MinRead seed={item.title} kicker={item.kicker} author={item.author} views={item.views} />
     </Link>
   );
 }

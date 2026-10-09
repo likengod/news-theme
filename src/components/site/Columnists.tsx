@@ -6,7 +6,6 @@ import {
   ExternalLink,
   Sparkles,
 } from "lucide-react";
-import { viewsFor } from "@/lib/news-data";
 import { Views } from "./Views";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
 import { useReelsConfig } from "@/hooks/use-reels-config";
@@ -201,7 +200,7 @@ export function Columnists({ hideTitle }: { hideTitle?: boolean } = {}) {
                 </div>
               </div>
               <Views
-                count={viewsFor(v.title)}
+                count={Number((v as any).views) || 0}
                 className="mt-1.5 text-[11px] text-muted-foreground"
               />
             </div>
