@@ -1,4 +1,5 @@
 import appCss from "@/styles.css?url";
+import { APP_VERSION } from "@/lib/version";
 import {
   defaultFontConfig,
   buildGoogleFontsUrl,
@@ -92,7 +93,7 @@ export function generateRootHead(loaderData: any) {
   const links: Array<Record<string, any>> = [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
     { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-    { rel: "stylesheet", href: appCss },
+    { rel: "stylesheet", href: `${appCss}${appCss.includes("?") ? "&" : "?"}v=${APP_VERSION}` },
     {
       rel: "alternate",
       type: "application/rss+xml",

@@ -119,7 +119,9 @@ function sendStaticFile(filePath, req, res, host, parsedPath) {
   if (MIME_TYPES[ext]) {
     res.setHeader("Content-Type", MIME_TYPES[ext]);
   }
-  if (
+  if (ext === ".css") {
+    res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+  } else if (
     parsedPath.startsWith("/assets/") ||
     parsedPath.startsWith("/fonts/") ||
     [".woff2", ".woff", ".ttf", ".otf"].includes(ext)

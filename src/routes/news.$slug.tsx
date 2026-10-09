@@ -240,9 +240,55 @@ function ArticlePage() {
           isLeftNavVisible || isRightSidebarVisible ? "max-w-7xl" : "max-w-4xl"
         }`}
       >
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 w-full max-w-full min-w-0 items-start">
-          {isLeftNavVisible && <ArticleLeftNav />}
-          <article className="relative w-full min-w-0 flex-1">
+        <style>{`
+          .article-post-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 100%;
+            min-width: 0;
+            align-items: flex-start;
+          }
+          @media (min-width: 1024px) {
+            .article-post-container {
+              flex-direction: row !important;
+              gap: 2rem !important;
+            }
+            .article-post-main {
+              flex: 1 1 0% !important;
+              min-width: 0 !important;
+              max-width: 100% !important;
+              width: auto !important;
+            }
+            .article-post-sidebar {
+              flex: 0 0 320px !important;
+              width: 320px !important;
+              max-width: 320px !important;
+              min-width: 320px !important;
+            }
+          }
+          @media (min-width: 1280px) {
+            .article-post-sidebar {
+              flex: 0 0 340px !important;
+              width: 340px !important;
+              max-width: 340px !important;
+              min-width: 340px !important;
+            }
+            .article-post-leftnav {
+              flex: 0 0 140px !important;
+              width: 140px !important;
+              max-width: 140px !important;
+              min-width: 140px !important;
+            }
+          }
+        `}</style>
+        <div className="article-post-container flex flex-col lg:flex-row gap-6 lg:gap-8 w-full max-w-full min-w-0 items-start">
+          {isLeftNavVisible && (
+            <div className="article-post-leftnav shrink-0">
+              <ArticleLeftNav />
+            </div>
+          )}
+          <article className="article-post-main relative w-full min-w-0 flex-1">
             <ArticleHeader
               title={data.title}
               author={data.author}
@@ -343,7 +389,7 @@ function ArticlePage() {
           </article>
 
           {isRightSidebarVisible && (
-            <div className="w-full lg:w-[320px] xl:w-[340px] shrink-0">
+            <div className="article-post-sidebar w-full lg:w-[320px] xl:w-[340px] shrink-0">
               <ArticleSidebar trending={trendingArticles} currentSlug={slug} />
             </div>
           )}
