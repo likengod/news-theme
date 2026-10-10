@@ -387,7 +387,7 @@ export function MarketsMagazine({
       </div>
 
       {(p1 || p2 || p3) && (
-        <div className="mt-3 grid gap-8 border-t border-border pt-4 lg:grid-cols-[minmax(0,1.62fr)_minmax(0,0.7fr)_minmax(0,0.86fr)] w-full max-w-full min-w-0">
+        <div className="mt-3 grid gap-6 md:gap-8 border-t border-border pt-4 md:grid-cols-3 lg:grid-cols-[minmax(0,1.62fr)_minmax(0,0.7fr)_minmax(0,0.86fr)] w-full max-w-full min-w-0">
           {p1 && <MagazineCard1 p1={p1} />}
           {p2 && <MagazineSmallCard article={p2} />}
           {p3 && <MagazineSmallCard article={p3} />}

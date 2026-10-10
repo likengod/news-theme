@@ -16,7 +16,7 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
       >
         {cfg.heroTopStories.title}
       </h2>
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 w-full max-w-full min-w-0">
+      <div className="grid gap-6 md:grid-cols-3 w-full max-w-full min-w-0">
         
         {/* Column 1 */}
         <div className="flex flex-col h-full w-full min-w-0">
@@ -106,7 +106,7 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
 
         {/* Column 3 */}
         {activeBottomItems.length > 2 && (
-          <div className="divide-y divide-border border-t border-border pt-6 md:border-t-0 md:pt-0 md:col-span-2 lg:col-span-1">
+          <div className="divide-y divide-border border-t border-border pt-6 md:border-t-0 md:pt-0 w-full min-w-0">
             {activeBottomItems.slice(2, 5).map((item: any, idx: number) => {
               if (!item) return null;
               return (

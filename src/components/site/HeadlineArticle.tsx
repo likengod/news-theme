@@ -66,7 +66,7 @@ export function HeadlineArticle({
         </div>
       )}
       <h3
-        className={`headline text-foreground group-hover:underline ${dense ? "text-lg" : "text-xl"}`}
+        className={`headline text-foreground group-hover:underline line-clamp-2 ${dense ? "text-lg" : "text-xl"}`}
         suppressHydrationWarning
       >
         {item.title}
