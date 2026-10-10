@@ -174,9 +174,13 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
     if (!remote || !remote.includes(PERMANENT_GIT_PAT)) {
       git(`remote set-url origin ${authRemote}`);
     }
+    git('config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"');
     git("fetch origin main --tags");
     const activeBranch = branch.includes("fatal") ? "main" : branch;
-    const behindStr = git(`rev-list --count HEAD..origin/${activeBranch}`);
+    let behindStr = git(`rev-list --count HEAD..origin/${activeBranch}`);
+    if (behindStr.includes("fatal")) {
+      behindStr = git(`rev-list --count HEAD..FETCH_HEAD`);
+    }
     const aheadStr = git(`rev-list --count origin/${activeBranch}..HEAD`);
     behind = parseInt(behindStr) || 0;
     ahead = parseInt(aheadStr) || 0;
@@ -242,11 +246,15 @@ export async function executeGitPullCore() {
   const beforeHash = git("rev-parse --short HEAD");
 
   // 2. Fetch origin main with tags and reset cleanly
+  git('config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"');
   git("fetch origin main --tags");
   git("branch -M main");
-  let pullResult = git("checkout -f -B main origin/main");
+  let pullResult = git("reset --hard origin/main");
+  if (!pullResult || pullResult.includes("fatal") || pullResult.includes("unknown revision")) {
+    pullResult = git("reset --hard FETCH_HEAD");
+  }
   if (!pullResult || pullResult.includes("fatal")) {
-    pullResult = git("reset --hard origin/main");
+    pullResult = git("checkout -f -B main FETCH_HEAD");
   }
 
   // 3. Fast deployment: use verified pre-compiled dist directly from Git if present
@@ -456,9 +464,14 @@ export async function executeInitializeGitRepoCore() {
     git("remote remove origin");
 
     log += git(`remote add origin ${authUrl}`) + "\n";
-    log += git("fetch --all") + "\n";
+    git('config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"');
+    log += git("fetch --all --tags") + "\n";
     log += git(`branch -M ${branch}`) + "\n";
-    log += git(`reset --hard origin/${branch}`) + "\n";
+    let initReset = git(`reset --hard origin/${branch}`);
+    if (initReset.includes("fatal") || initReset.includes("unknown revision")) {
+      initReset = git("reset --hard FETCH_HEAD");
+    }
+    log += initReset + "\n";
 
     return { success: true, log };
   } catch (err: any) {
