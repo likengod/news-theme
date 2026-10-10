@@ -44,7 +44,7 @@ export function LicensePricingModal({ isOpen, onClose }: { isOpen: boolean; onCl
                     ₹499 <span className="ml-1 text-base font-medium text-slate-500">/mo</span>
                   </div>
                   <p className="text-xs font-semibold text-emerald-600 mt-1">
-                    Drops to ₹189/mo after 7 months
+                    Drops to ₹125/mo after 12 months
                   </p>
                 </div>
               ) : (
@@ -53,7 +53,7 @@ export function LicensePricingModal({ isOpen, onClose }: { isOpen: boolean; onCl
                     $10 <span className="ml-1 text-base font-medium text-slate-500">/mo</span>
                   </div>
                   <p className="text-xs font-semibold text-emerald-600 mt-1">
-                    Drops to $5/mo after 6 months
+                    Drops to $3/mo after 12 months
                   </p>
                 </div>
               )}
