@@ -98,7 +98,8 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
     "prettier": "^3.7.3",
-    "seroval": "^1.6.3",
+    "seroval": "^1.6.9",
+    "seroval-plugins": "^1.6.9",
     "sharp": "^0.35.5",
     "source-map-js": "^1.2.2",
     "typescript-eslint": "^8.56.1"
@@ -108,6 +109,10 @@
     "h3": "^1.15.11",
     "esbuild": "^0.28.2",
     "serialize-javascript": "^7.1.2",
-    "dompurify": "^3.4.16"
+    "dompurify": "^3.4.16",
+    "seroval": "^1.6.9",
+    "seroval-plugins": "^1.6.9",
+    "sharp": "^0.35.5",
+    "source-map-js": "^1.2.2"
   }
 }
