@@ -11,6 +11,8 @@ import {
   loadAdSlotMode,
   loadAdSlotScript,
   loadSettings,
+  isEnterpriseLicense,
+  isEnterprisePlusLicense,
   type AdSlideItem,
   type AdSlotMode,
 } from "@/lib/site-content";
@@ -154,8 +156,14 @@ export function MarketsMagazine({
 }) {
   const cfg = useHomepageConfig();
   const ctx = useAdSettings();
+  const settings = useSiteSettings();
+  const isEnterprise = isEnterpriseLicense(settings) || isEnterprisePlusLicense(settings);
 
-  const initialSlides = ctx?.adConfig ? ctx.adConfig.slots["home2"] || [] : loadAds("home2");
+  const initialSlides = isEnterprise
+    ? ctx?.adConfig
+      ? ctx.adConfig.slots["home2"] || []
+      : loadAds("home2")
+    : [];
   const initialMode = ctx?.adConfig
     ? ctx.adConfig.modes["home2"] || "image"
     : loadAdSlotMode("home2");
@@ -163,15 +171,12 @@ export function MarketsMagazine({
     ? ctx.adConfig.scripts["home2"] || ""
     : loadAdSlotScript("home2");
 
-  const [slides, setSlides] = useState<AdSlideItem[]>(() => {
-    return initialSlides.length > 0 ? initialSlides : FALLBACK_SLIDES;
-  });
+  const [slides, setSlides] = useState<AdSlideItem[]>(initialSlides);
   const [slotMode, setSlotMode] = useState<AdSlotMode>(initialMode);
   const [slotScript, setSlotScript] = useState(initialScript);
-  const settings = useSiteSettings();
   const [showCustomText, setShowCustomText] = useState(false);
 
-  const hasAd = slotMode === "script" ? Boolean(slotScript) : slides.length > 0;
+  const hasAd = isEnterprise && (slotMode === "script" ? Boolean(slotScript) : slides.length > 0);
 
   const hasCustomAlert =
     settings.festiveThemeEnabled !== false &&
@@ -191,23 +196,31 @@ export function MarketsMagazine({
 
   useEffect(() => {
     if (ctx?.adConfig) {
+      if (!isEnterprise) {
+        setSlides([]);
+        return;
+      }
       const ads = ctx.adConfig.slots["home2"] || [];
-      setSlides(ads.length > 0 ? ads : FALLBACK_SLIDES);
+      setSlides(ads);
       setSlotMode(ctx.adConfig.modes["home2"] || "image");
       setSlotScript(ctx.adConfig.scripts["home2"] || "");
     }
-  }, [ctx?.adConfig]);
+  }, [ctx?.adConfig, isEnterprise]);
 
   useEffect(() => {
     const sync = () => {
+      if (!isEnterprise) {
+        setSlides([]);
+        return;
+      }
       const ads = loadAds("home2");
-      setSlides(ads.length > 0 ? ads : FALLBACK_SLIDES);
+      setSlides(ads);
       setSlotMode(loadAdSlotMode("home2"));
       setSlotScript(loadAdSlotScript("home2"));
     };
     window.addEventListener("nt:ads-updated", sync);
     return () => window.removeEventListener("nt:ads-updated", sync);
-  }, []);
+  }, [isEnterprise]);
 
   const [slideIdx, setSlideIdx] = useState(0);
   useEffect(() => {

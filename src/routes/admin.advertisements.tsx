@@ -103,7 +103,7 @@ function AdvertisementsPage() {
 
   const isLocked =
     ((tab === "hero_showcase" || tab === "reel_ads") && !isEnterprisePlus) ||
-    (tab === "post_ads" && !isEnterprise && !isEnterprisePlus);
+    ((tab === "post_ads" || tab === "home2") && !isEnterprise && !isEnterprisePlus);
 
   return (
     <div className="space-y-3.5 sm:space-y-5 pb-12">

@@ -39,7 +39,7 @@ export function AdLicenseGuard({
     );
   }
 
-  if (tab === "post_ads" && !isEnterprise && !isEnterprisePlus) {
+  if ((tab === "post_ads" || tab === "home2") && !isEnterprise && !isEnterprisePlus) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50">
@@ -47,7 +47,7 @@ export function AdLicenseGuard({
         </div>
         <h3 className="mt-4 text-base font-semibold text-slate-800">Enterprise Feature Locked</h3>
         <p className="mt-1 max-w-sm text-sm text-slate-500">
-          The Post Ads advertisement slot is exclusively available for Enterprise and Enterprise Plus licenses. Please upgrade your license to unlock this slot.
+          The {activeSlot?.label || "Home 2"} advertisement slot is exclusively available for Enterprise and Enterprise Plus licenses. Please upgrade your license to unlock this slot.
         </p>
         <button
           onClick={() => navigate({ to: "/admin/settings", search: { tab: "activate" } })}

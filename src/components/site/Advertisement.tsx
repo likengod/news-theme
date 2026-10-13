@@ -72,6 +72,10 @@ export default function Advertisement({
   const planType = (s?.licenseType || "").toLowerCase();
   const isEnterprise = planType.includes("enterprise");
 
+  if ((slot === "post_ads" || slot === "home2") && !isEnterprise) {
+    return null;
+  }
+
   let initialMode =
     slot && ctx?.adConfig
       ? ctx.adConfig.modes[slot] || "image"

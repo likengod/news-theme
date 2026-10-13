@@ -38,7 +38,7 @@ export function AdSlotsNavBar({
           if ((s.key === "hero_showcase" || s.key === "reel_ads") && !isEnterprisePlus) {
             return null;
           }
-          if (s.key === "post_ads" && !isEnterprise && !isEnterprisePlus) {
+          if ((s.key === "post_ads" || s.key === "home2") && !isEnterprise && !isEnterprisePlus) {
             return null;
           }
           const isActive = tab === s.key;
