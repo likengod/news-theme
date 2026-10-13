@@ -6,9 +6,9 @@ import { Play, Eye, Film, ChevronLeft, ChevronRight, Sparkles, ExternalLink } fr
 import { formatViews } from "@/lib/news-data";
 import { getAllReels } from "@/lib/reels-data";
 import { ReelViewerModal } from "@/components/site/ReelViewerModal";
-import { useAdSettings } from "@/components/site/AdSettingsContext";
+import { useAdSettings, useSiteSettings } from "@/components/site/AdSettingsContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { loadAds, injectReelAds } from "@/lib/site-content";
+import { loadAds, injectReelAds, isEnterprisePlusLicense } from "@/lib/site-content";
 
 type ReelsSearchParams = {
   page?: number;
@@ -41,9 +41,12 @@ function ReelsPage() {
   const currentReels = allReels.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const adCtx = useAdSettings();
+  const settings = useSiteSettings();
+  const isEnterprisePlus = isEnterprisePlusLicense(settings);
   const reelAds = useMemo(() => {
+    if (!isEnterprisePlus) return [];
     return adCtx?.adConfig?.slots?.["reel_ads"] || loadAds("reel_ads");
-  }, [adCtx?.adConfig?.slots]);
+  }, [adCtx?.adConfig?.slots, isEnterprisePlus]);
 
   const isMobile = useIsMobile();
   const displayReels = useMemo(() => {

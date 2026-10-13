@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { X, ArrowRight } from "lucide-react";
-import { useAdSettings } from "@/components/site/AdSettingsContext";
+import { useAdSettings, useSiteSettings } from "@/components/site/AdSettingsContext";
 import { ScriptAdRenderer } from "@/components/site/ScriptAdRenderer";
 import {
   loadAds,
@@ -8,14 +8,21 @@ import {
   loadAdSlotScript,
   loadAdRotation,
   defaultAdSlidesPostAds,
+  isEnterpriseLicense,
+  isEnterprisePlusLicense,
   type AdSlideItem,
   type AdSlotMode,
 } from "@/lib/site-content";
 
 export function PostFeaturedImageAd() {
   const ctx = useAdSettings();
+  const settings = useSiteSettings();
   const [dismissed, setDismissed] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Post Ads is exclusively an Enterprise & Enterprise Plus feature
+  const isEnterprise = isEnterpriseLicense(settings) || isEnterprisePlusLicense(settings);
+  if (!isEnterprise) return null;
 
   // Load slot mode & script
   const slotMode: AdSlotMode =
