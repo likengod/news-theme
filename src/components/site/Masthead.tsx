@@ -3,7 +3,13 @@ import { createPortal } from "react-dom";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { sections, slugify } from "@/lib/news-data";
 import { getTopTags } from "@/lib/taxonomy.functions";
-import { ChevronDown, Home, Search, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Home, Search, X } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
 import { useTheme } from "@/lib/theme";
@@ -76,6 +82,58 @@ export function Masthead() {
   }
 
   const [logoFailed, setLogoFailed] = useState(false);
+
+  const navScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = () => {
+    const el = navScrollRef.current;
+    if (!el) return;
+    const hasOverflow = el.scrollWidth > el.clientWidth + 2;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(hasOverflow && el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  };
+
+  useEffect(() => {
+    checkScroll();
+    const el = navScrollRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      if (el.scrollWidth > el.clientWidth) {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          const atStart = el.scrollLeft <= 0;
+          const atEnd = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1;
+          if ((e.deltaY > 0 && !atEnd) || (e.deltaY < 0 && !atStart)) {
+            e.preventDefault();
+            el.scrollLeft += e.deltaY;
+            checkScroll();
+          }
+        }
+      }
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    const observer = new ResizeObserver(() => checkScroll());
+    observer.observe(el);
+    window.addEventListener("resize", checkScroll);
+
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      observer.disconnect();
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [navItems]);
+
+  const scrollNav = (direction: "left" | "right") => {
+    if (!navScrollRef.current) return;
+    const scrollAmount = 220;
+    navScrollRef.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
 
   const hasLogo = !logoFailed && !!(s.logoLight || s.logoDark);
   const mode = s.logoDisplayMode || (hasLogo ? "both" : "text_only");
@@ -293,75 +351,118 @@ export function Masthead() {
       </header>
 
       <nav className="sticky top-0 z-40 w-full border-t border-b border-border bg-background/95 backdrop-blur-md shadow-xs h-11 transition-all">
-        <div className="mx-auto flex h-full max-w-7xl items-center justify-center px-2 sm:px-4">
-          <div className="flex items-center justify-center gap-2 sm:gap-4 md:gap-5 lg:gap-6 text-xs sm:text-sm font-semibold uppercase tracking-wider overflow-x-auto no-scrollbar scroll-smooth py-1 max-w-full">
-            {/* Home Icon */}
-            <Link
-              to="/"
-              aria-label="Home"
-              className="flex items-center shrink-0 whitespace-nowrap px-1.5 sm:px-2 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
-            >
-              <Home className="h-4 w-4" />
-            </Link>
+        <div className="relative mx-auto flex h-full max-w-7xl items-center px-1 sm:px-2">
+          {/* Left scroll chevron */}
+          {canScrollLeft && (
+            <div className="absolute left-0 top-0 bottom-0 z-10 flex items-center pr-3 pl-1 bg-gradient-to-r from-background via-background/90 to-transparent">
+              <button
+                type="button"
+                onClick={() => scrollNav("left")}
+                className="flex items-center justify-center h-7 w-7 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted/80 transition-colors shadow-xs cursor-pointer"
+                aria-label="Scroll menu left"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+            </div>
+          )}
 
-            {/* Category Items */}
-            {navItems.map((item) =>
-              item.name === "Others" ? (
-                <div key={item.name} className="group relative shrink-0">
-                  <button className="flex items-center gap-1 whitespace-nowrap px-1.5 sm:px-2 py-1 uppercase text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors">
+          {/* Scrollable menu items track */}
+          <div
+            ref={navScrollRef}
+            onScroll={checkScroll}
+            className="w-full h-full flex items-center overflow-x-auto overflow-y-hidden no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden scroll-smooth py-1"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            <div className="flex items-center min-w-full w-max justify-center gap-1.5 sm:gap-3 md:gap-4 lg:gap-5 text-xs sm:text-sm font-semibold uppercase tracking-wider px-2 sm:px-4">
+              {/* Home Icon */}
+              <Link
+                to="/"
+                aria-label="Home"
+                className="flex items-center shrink-0 whitespace-nowrap px-1.5 sm:px-2 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                activeProps={{
+                  className: "flex items-center shrink-0 whitespace-nowrap px-1.5 sm:px-2 py-1 text-red-600 dark:text-red-500 font-bold",
+                }}
+              >
+                <Home className="h-4 w-4" />
+              </Link>
+
+              {/* Category Items */}
+              {navItems.map((item) =>
+                item.name === "Others" ? (
+                  <DropdownMenu key={item.name}>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center gap-1 shrink-0 whitespace-nowrap px-1.5 sm:px-2 py-1 uppercase text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer outline-hidden">
+                        {item.name}
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="w-48 max-h-72 overflow-y-auto">
+                      {dropdownItems.map((c) =>
+                        c.redirectUrl ? (
+                          <DropdownMenuItem key={c.slug} asChild>
+                            <a
+                              href={c.redirectUrl}
+                              target={c.redirectUrl.startsWith("http") ? "_blank" : undefined}
+                              rel={c.redirectUrl.startsWith("http") ? "noopener noreferrer" : undefined}
+                              className="w-full cursor-pointer px-3 py-2 text-xs font-semibold uppercase tracking-wider text-foreground hover:text-red-600"
+                            >
+                              {c.name}
+                            </a>
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem key={c.slug} asChild>
+                            <Link
+                              to="/$slug"
+                              params={{ slug: c.slug }}
+                              className="w-full cursor-pointer px-3 py-2 text-xs font-semibold uppercase tracking-wider text-foreground hover:text-red-600"
+                            >
+                              {c.name}
+                            </Link>
+                          </DropdownMenuItem>
+                        ),
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : item.redirectUrl ? (
+                  <a
+                    key={item.slug}
+                    href={item.redirectUrl}
+                    target={item.redirectUrl.startsWith("http") ? "_blank" : undefined}
+                    rel={item.redirectUrl.startsWith("http") ? "noopener noreferrer" : undefined}
+                    className="shrink-0 whitespace-nowrap px-1.5 sm:px-2 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                  >
                     {item.name}
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </button>
-                  <div className="invisible absolute left-1/2 z-50 mt-0 w-48 -translate-x-1/2 border border-border bg-background py-2 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100">
-                    {dropdownItems.map((c) =>
-                      c.redirectUrl ? (
-                        <a
-                          key={c.slug}
-                          href={c.redirectUrl}
-                          target={c.redirectUrl.startsWith("http") ? "_blank" : undefined}
-                          rel={c.redirectUrl.startsWith("http") ? "noopener noreferrer" : undefined}
-                          className="block px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-muted hover:text-red-600 transition-colors"
-                        >
-                          {c.name}
-                        </a>
-                      ) : (
-                        <Link
-                          key={c.slug}
-                          to="/$slug"
-                          params={{ slug: c.slug }}
-                          className="block px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-muted hover:text-red-600 transition-colors"
-                        >
-                          {c.name}
-                        </Link>
-                      ),
-                    )}
-                  </div>
-                </div>
-              ) : item.redirectUrl ? (
-                <a
-                  key={item.slug}
-                  href={item.redirectUrl}
-                  target={item.redirectUrl.startsWith("http") ? "_blank" : undefined}
-                  rel={item.redirectUrl.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className="shrink-0 whitespace-nowrap px-1.5 sm:px-2 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                >
-                  {item.name}
-                </a>
-              ) : (
-                <Link
-                  key={item.slug}
-                  to="/$slug"
-                  params={{ slug: item.slug }}
-                  className="shrink-0 whitespace-nowrap px-1.5 sm:px-2 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                  activeProps={{
-                    className: "shrink-0 whitespace-nowrap px-1.5 sm:px-2 py-1 text-red-600 dark:text-red-500 font-bold",
-                  }}
-                >
-                  {item.name}
-                </Link>
-              ),
-            )}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.slug}
+                    to="/$slug"
+                    params={{ slug: item.slug }}
+                    className="shrink-0 whitespace-nowrap px-1.5 sm:px-2 py-1 text-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    activeProps={{
+                      className: "shrink-0 whitespace-nowrap px-1.5 sm:px-2 py-1 text-red-600 dark:text-red-500 font-bold",
+                    }}
+                  >
+                    {item.name}
+                  </Link>
+                ),
+              )}
+            </div>
           </div>
+
+          {/* Right scroll chevron */}
+          {canScrollRight && (
+            <div className="absolute right-0 top-0 bottom-0 z-10 flex items-center pl-3 pr-1 bg-gradient-to-l from-background via-background/90 to-transparent">
+              <button
+                type="button"
+                onClick={() => scrollNav("right")}
+                className="flex items-center justify-center h-7 w-7 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted/80 transition-colors shadow-xs cursor-pointer"
+                aria-label="Scroll menu right"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
       </nav>
     </>
