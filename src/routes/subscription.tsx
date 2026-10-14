@@ -135,43 +135,43 @@ function SubscriptionPage() {
           </div>
         </header>
 
-        <section className="mx-auto mt-10 max-w-md rounded-2xl border border-border bg-card/40 p-8 shadow-sm">
-          <div className="flex items-center gap-2">
-            <Crown className="h-5 w-5" />
-            <h2 className="text-xl font-bold">{settings.subscriptionTitle || "Premium"}</h2>
+        <section className="mx-auto mt-10 max-w-md rounded-2xl border border-[#2db84f] bg-[#34C759] p-8 text-white shadow-xl">
+          <div className="flex items-center gap-2 text-white">
+            <Crown className="h-5 w-5 text-white" />
+            <h2 className="text-xl font-bold text-white">{settings.subscriptionTitle || "Premium"}</h2>
           </div>
-          <p className="mt-4 text-5xl font-black tracking-tight">
+          <p className="mt-4 text-5xl font-black tracking-tight text-white">
             {currencySymbol}
             {price}
-            <span className="text-base font-medium text-muted-foreground">{suffix}</span>
+            <span className="text-base font-medium text-white/85">{suffix}</span>
           </p>
-          <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-white/90">
             {saving}
           </p>
 
-          <ul className="mt-6 space-y-2.5">
+          <ul className="mt-6 space-y-2.5 text-white">
             {featuresList.map((p) => (
-              <li key={p} className="flex items-start gap-2 text-sm">
-                <Check className="mt-0.5 h-4 w-4 shrink-0" /> {p}
+              <li key={p} className="flex items-start gap-2 text-sm text-white">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-white" /> {p}
               </li>
             ))}
           </ul>
 
           {["admin", "editor", "journalist", "author", "premium"].includes(getCurrentRoleId()) ? (
-            <div className="mt-8 rounded-md bg-[#34C759] px-4 py-4 text-center text-sm font-semibold text-white shadow-xs">
+            <div className="mt-8 rounded-xl bg-white/20 border border-white/30 backdrop-blur-xs px-4 py-4 text-center text-sm font-bold text-white shadow-xs">
               You already have Premium access included with your role.
             </div>
           ) : (
             <>
               <button
                 onClick={() => upgrade(cycle)}
-                className="mt-8 w-full rounded-md bg-foreground py-3 text-sm font-semibold text-background hover:opacity-90"
+                className="mt-8 w-full rounded-xl bg-white py-3.5 text-sm font-bold text-[#1d8a3e] hover:bg-white/95 shadow-md transition cursor-pointer"
               >
                 Upgrade to Premium — {currencySymbol}
                 {price}
                 {suffix}
               </button>
-              <p className="mt-3 text-center text-[11px] text-muted-foreground">
+              <p className="mt-3 text-center text-[11px] text-white/85">
                 Demo checkout. Your viewer role switches to Premium user immediately.
               </p>
             </>
