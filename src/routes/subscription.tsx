@@ -158,7 +158,7 @@ function SubscriptionPage() {
           </ul>
 
           {["admin", "editor", "journalist", "author", "premium"].includes(getCurrentRoleId()) ? (
-            <div className="mt-8 rounded-md bg-green-900/20 py-4 text-center text-sm font-semibold text-green-400">
+            <div className="mt-8 rounded-md bg-[#34C759] px-4 py-4 text-center text-sm font-semibold text-white shadow-xs">
               You already have Premium access included with your role.
             </div>
           ) : (
