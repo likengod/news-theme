@@ -1,4 +1,4 @@
-export const APP_VERSION = "v1.2.12";
+export const APP_VERSION = "v1.2.13";
 
 export function parseSemver(v?: string) {
   if (!v) return 0;
