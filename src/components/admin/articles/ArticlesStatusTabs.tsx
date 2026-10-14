@@ -54,7 +54,7 @@ export function ArticlesStatusTabs({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white p-2">
+    <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1.5 sm:p-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       {STATUS_TABS.map((t) => {
         const active = status === t.key;
         const Icon = t.icon;
@@ -65,13 +65,13 @@ export function ArticlesStatusTabs({
           <button
             key={t.key}
             onClick={() => setStatus(t.key)}
-            className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer shrink-0 whitespace-nowrap ${
               active
                 ? isTrash
-                  ? "bg-rose-700 text-white"
+                  ? "bg-rose-700 text-white shadow-xs"
                   : isScheduled
-                    ? "bg-blue-600 text-white"
-                    : "bg-slate-900 text-white"
+                    ? "bg-blue-600 text-white shadow-xs"
+                    : "bg-slate-900 text-white shadow-xs"
                 : isTrash
                   ? "text-rose-600 hover:bg-rose-50"
                   : isScheduled
@@ -79,10 +79,10 @@ export function ArticlesStatusTabs({
                     : "text-slate-600 hover:bg-slate-100"
             }`}
           >
-            <Icon className="h-3.5 w-3.5" />
+            <Icon className="h-3.5 w-3.5 shrink-0" />
             <span>{t.label}</span>
             <span
-              className={`ml-1 rounded-full px-1.5 py-0.2 text-[11px] font-semibold ${
+              className={`rounded-full px-1.5 py-0.2 text-[10px] sm:text-[11px] font-bold ${
                 active
                   ? "bg-white/20 text-white"
                   : isTrash
@@ -97,7 +97,7 @@ export function ArticlesStatusTabs({
           </button>
         );
       })}
-      <span className="ml-auto rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+      <span className="ml-auto shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] sm:text-xs font-semibold text-slate-600 whitespace-nowrap">
         {total} {status === "Trash" ? "in trash" : status === "Scheduled" ? "scheduled" : status === "Draft" ? "drafts" : status === "Review" ? "in review" : status === "Published" ? "published" : "total"}
       </span>
     </div>

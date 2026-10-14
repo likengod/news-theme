@@ -271,110 +271,110 @@ function FileManagerPage() {
             Upload, manage, and reuse images, videos, and news assets across your site (Max 1 MB per file).
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
-          {/* Verify Scanner - Standalone */}
-          <Link
-            to="/verify-image"
-            target="_blank"
-            title="Scan any image for Layer 1 EXIF signature and Layer 2 pixel steganography DNA"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/80 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition whitespace-nowrap shadow-2xs"
-          >
-            <ShieldCheck className="h-3.5 w-3.5 text-indigo-600" />
-            Verify Scanner
-          </Link>
-
-          {/* Import / Export Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                title="Import / Export CSV or ZIP backups"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition whitespace-nowrap shadow-2xs cursor-pointer"
-              >
-                <ArrowUpDown className="h-3.5 w-3.5 text-slate-600" />
-                <span className="hidden sm:inline">Import / Export</span>
-                <ChevronDown className="h-3 w-3 text-slate-400" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 p-1">
-              <DropdownMenuLabel className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-2 py-1">
-                CSV Data
-              </DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => csvFileRef.current?.click()}
-                className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
-              >
-                <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
-                Import CSV
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={handleExportCsv}
-                className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
-              >
-                <Download className="h-4 w-4 text-emerald-600" />
-                Export CSV
-              </DropdownMenuItem>
-
-              <DropdownMenuSeparator className="my-1" />
-
-              <DropdownMenuLabel className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-2 py-1">
-                ZIP Images & Backup
-              </DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => zipFileRef.current?.click()}
-                className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
-              >
-                <FolderArchive className="h-4 w-4 text-indigo-600" />
-                Import ZIP Archive
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={handleExportZip}
-                className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
-              >
-                <FileArchive className="h-4 w-4 text-amber-600" />
-                Export ZIP Backup
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Hidden Inputs for CSV and ZIP */}
-          <input
-            ref={csvFileRef}
-            type="file"
-            accept=".csv,text/csv"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleImportCsv(file);
-              if (csvFileRef.current) csvFileRef.current.value = "";
-            }}
-            className="hidden"
-          />
-          <input
-            ref={zipFileRef}
-            type="file"
-            accept=".zip,application/zip,application/x-zip-compressed"
-            onChange={(e) => onUpload(e.target.files)}
-            className="hidden"
-          />
-
-          <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 whitespace-nowrap">
-            {items.length} files ({formatBytes(totalSize)})
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5">
+          {/* Primary Upload CTA on Mobile (full width) or Desktop */}
           <button
             onClick={() => fileRef.current?.click()}
             title="Upload Files or ZIP Archive (Max 1 MB per file)"
-            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg bg-slate-900 px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 transition whitespace-nowrap shadow-xs cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 sm:py-2 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 transition whitespace-nowrap shadow-xs cursor-pointer w-full sm:w-auto sm:order-last"
           >
-            <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Upload Files / ZIP (&lt; 1 MB)
+            <Upload className="h-4 w-4 shrink-0" />
+            <span>Upload Files / ZIP (&lt; 1 MB)</span>
           </button>
-          <input
-            ref={fileRef}
-            type="file"
-            multiple
-            accept="image/*,video/*,.pdf,.zip,application/zip,application/x-zip-compressed"
-            onChange={(e) => onUpload(e.target.files)}
-            className="hidden"
-          />
+
+          {/* Secondary actions row on mobile */}
+          <div className="flex items-center justify-between sm:justify-start gap-1.5 sm:gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-1.5">
+              {/* Verify Scanner - Standalone */}
+              <Link
+                to="/verify-image"
+                target="_blank"
+                title="Scan any image for Layer 1 EXIF signature and Layer 2 pixel steganography DNA"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/80 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition whitespace-nowrap shadow-2xs"
+              >
+                <ShieldCheck className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
+                <span>Scanner</span>
+              </Link>
+
+              {/* Import / Export Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    title="Import / Export CSV or ZIP backups"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition whitespace-nowrap shadow-2xs cursor-pointer"
+                  >
+                    <ArrowUpDown className="h-3.5 w-3.5 text-slate-600 shrink-0" />
+                    <span>Import / Export</span>
+                    <ChevronDown className="h-3 w-3 text-slate-400 shrink-0" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 p-1">
+                  <DropdownMenuLabel className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-2 py-1">
+                    CSV Data
+                  </DropdownMenuLabel>
+                  <DropdownMenuItem
+                    onClick={() => csvFileRef.current?.click()}
+                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
+                  >
+                    <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+                    Import CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleExportCsv}
+                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
+                  >
+                    <Download className="h-4 w-4 text-emerald-600" />
+                    Export CSV
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator className="my-1" />
+
+                  <DropdownMenuLabel className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-2 py-1">
+                    ZIP Images & Backup
+                  </DropdownMenuLabel>
+                  <DropdownMenuItem
+                    onClick={() => zipFileRef.current?.click()}
+                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
+                  >
+                    <FolderArchive className="h-4 w-4 text-indigo-600" />
+                    Import ZIP Archive
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleExportZip}
+                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
+                  >
+                    <FileArchive className="h-4 w-4 text-amber-600" />
+                    Export ZIP Backup
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Hidden Inputs for CSV and ZIP */}
+            <input
+              ref={csvFileRef}
+              type="file"
+              accept=".csv,text/csv"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleImportCsv(file);
+                if (csvFileRef.current) csvFileRef.current.value = "";
+              }}
+              className="hidden"
+            />
+            <input
+              ref={zipFileRef}
+              type="file"
+              accept=".zip,application/zip,application/x-zip-compressed"
+              onChange={(e) => onUpload(e.target.files)}
+              className="hidden"
+            />
+
+            <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 whitespace-nowrap shrink-0">
+              {items.length} files <span className="hidden xs:inline">({formatBytes(totalSize)})</span>
+            </span>
+          </div>
         </div>
       </div>
 

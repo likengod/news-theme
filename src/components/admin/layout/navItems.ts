@@ -43,3 +43,28 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
   { to: "/admin/files", label: "File Manager", icon: FolderOpen },
   { to: "/admin/updates", label: "Website Update", icon: Rocket },
 ];
+
+/**
+ * Panels accessible by the 'editor' role.
+ * Editors can only access and view:
+ * /admin/articles, /admin/inbox, /admin/comments, /admin/advertisements,
+ * /admin/files, /admin/journalists, /admin/categories, /admin/tags
+ */
+export const EDITOR_ALLOWED_ROUTES = [
+  "/admin/articles",
+  "/admin/inbox",
+  "/admin/comments",
+  "/admin/advertisements",
+  "/admin/files",
+  "/admin/journalists",
+  "/admin/categories",
+  "/admin/tags",
+] as const;
+
+export function isEditorAllowedRoute(pathname: string): boolean {
+  const clean = pathname.split("?")[0].replace(/\/+$/, "") || "/";
+  return EDITOR_ALLOWED_ROUTES.some((route) => {
+    const cleanRoute = route.replace(/\/+$/, "");
+    return clean === cleanRoute || clean.startsWith(cleanRoute + "/");
+  });
+}

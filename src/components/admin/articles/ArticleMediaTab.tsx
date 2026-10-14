@@ -9,6 +9,7 @@ import {
   Building2,
   Info,
   Check,
+  RotateCcw,
 } from "lucide-react";
 import type { Row } from "./types";
 
@@ -21,6 +22,19 @@ export default function ArticleMediaTab({ row, onChange }: ArticleMediaTabProps)
   const settings = useSiteSettings();
   const defaultSiteName = settings?.siteName || "Today Tripura";
   const activeCredit = row.imageCredit?.trim() || defaultSiteName;
+
+  // Auto-sync Featured Image to Open Graph image if OG image was empty or matching previous featured image
+  const handleFeaturedImageChange = (newUrl: string) => {
+    const prevFeatured = row.featuredImage || "";
+    onChange("featuredImage", newUrl);
+
+    // If ogImage was empty, or was previously synced with the old featured image, auto-sync it!
+    if (!row.ogImage || row.ogImage === prevFeatured) {
+      onChange("ogImage", newUrl);
+    }
+  };
+
+  const isCustomOg = Boolean(row.ogImage && row.featuredImage && row.ogImage !== row.featuredImage);
 
   // Auto-detect Bengali from title, content, or excerpt
   const isAutoBengali = /[\u0980-\u09FF]/.test(
@@ -71,7 +85,7 @@ export default function ArticleMediaTab({ row, onChange }: ArticleMediaTabProps)
         <Field label="Featured Image">
           <ImageInput
             value={row.featuredImage}
-            onChange={(v) => onChange("featuredImage", v)}
+            onChange={handleFeaturedImageChange}
             hint="Used as the hero image at the top of the post and default Open Graph image."
           />
         </Field>
@@ -240,14 +254,58 @@ export default function ArticleMediaTab({ row, onChange }: ArticleMediaTabProps)
       </div>
 
       {/* Open Graph Image Section */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <Share2 className="h-4 w-4 text-indigo-600" />
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                Open Graph Image (Social Media Sharing)
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Image shown when shared on Facebook, WhatsApp, Telegram, or Twitter/X. Recommended: 1200×630 px.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {isCustomOg ? (
+              <button
+                type="button"
+                onClick={() => onChange("ogImage", row.featuredImage || "")}
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer shadow-2xs"
+                title="Reset Open Graph image to match Featured Image"
+              >
+                <RotateCcw className="h-3 w-3 text-slate-500" />
+                <span>Reset to Featured Image</span>
+              </button>
+            ) : row.featuredImage ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                <Check className="h-3 w-3 stroke-[3]" />
+                Auto-Synced with Featured Image
+              </span>
+            ) : (
+              <span className="text-[11px] text-slate-400 italic">
+                (Add a Featured Image above to auto-populate)
+              </span>
+            )}
+          </div>
+        </div>
+
         <Field
-          label={`Open Graph Image ${row.ogImage ? "" : "(defaults to Featured Image)"}`}
+          label={
+            isCustomOg
+              ? "Custom Open Graph Image (Active Override)"
+              : "Open Graph Image (Defaults to Featured Image)"
+          }
         >
           <ImageInput
             value={row.ogImage}
             onChange={(v) => onChange("ogImage", v)}
-            hint="Override only if you want a different image when shared on social media. Recommended 1200×630."
+            fallbackValue={row.featuredImage}
+            fallbackLabel="Auto: Featured Image"
+            onResetToFallback={() => onChange("ogImage", row.featuredImage || "")}
+            hint="Override only if you want a different custom banner when shared on social media. Recommended 1200×630."
           />
         </Field>
       </div>

@@ -448,14 +448,14 @@ export function MediaGrid({
           </div>
 
           {/* Right Action Tools: Size Filter, Sort Dropdown, View Mode */}
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="grid grid-cols-[1fr_1fr_auto] sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto">
             {/* Size Filter Dropdown */}
-            <label className="relative inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-100/80 px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-2xs">
+            <label className="relative inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-100/80 px-2 sm:px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-2xs min-w-0">
               <SlidersHorizontal className="h-3.5 w-3.5 text-slate-500 shrink-0 pointer-events-none" />
               <select
                 value={sizeFilter}
                 onChange={(e) => setSizeFilter(e.target.value as any)}
-                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer pr-1"
+                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer pr-1 w-full truncate"
                 title="Filter by file size"
               >
                 <option value="all">All Sizes</option>
@@ -466,29 +466,29 @@ export function MediaGrid({
             </label>
 
             {/* Sort By Dropdown */}
-            <label className="relative inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-100/80 px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-2xs">
+            <label className="relative inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-100/80 px-2 sm:px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-2xs min-w-0">
               <ArrowUpDown className="h-3.5 w-3.5 text-slate-500 shrink-0 pointer-events-none" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer pr-1"
+                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer pr-1 w-full truncate"
                 title="Sort items"
               >
-                <option value="size-desc">Size: Largest (1 MB → 0)</option>
-                <option value="size-asc">Size: Smallest (0 → 1 MB)</option>
-                <option value="date-desc">Date: Newest</option>
-                <option value="date-asc">Date: Oldest</option>
+                <option value="size-desc">Largest</option>
+                <option value="size-asc">Smallest</option>
+                <option value="date-desc">Newest</option>
+                <option value="date-asc">Oldest</option>
                 <option value="name-asc">Name: A → Z</option>
                 <option value="name-desc">Name: Z → A</option>
               </select>
             </label>
 
             {/* View Mode Toggle */}
-            <div className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-100/80 p-0.5 shadow-2xs">
+            <div className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-100/80 p-0.5 shadow-2xs shrink-0">
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
-                className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                className={`inline-flex items-center gap-1 rounded-lg px-2 sm:px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
                   viewMode === "grid"
                     ? "bg-white text-slate-900 shadow-xs font-semibold"
                     : "text-slate-600 hover:text-slate-900"
@@ -501,7 +501,7 @@ export function MediaGrid({
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
-                className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                className={`inline-flex items-center gap-1 rounded-lg px-2 sm:px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
                   viewMode === "list"
                     ? "bg-white text-slate-900 shadow-xs font-semibold"
                     : "text-slate-600 hover:text-slate-900"
@@ -516,13 +516,13 @@ export function MediaGrid({
         </div>
 
         {/* Row 2: Category Filter Tabs & Counter */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2.5 border-t border-slate-100">
-          {/* Filter Pills */}
-          <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2.5 border-t border-slate-100">
+          {/* Filter Pills with horizontal scroll on small screens */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-w-full">
             <button
               type="button"
               onClick={() => setFilter("all")}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer shrink-0 ${
                 filter === "all"
                   ? "bg-slate-900 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -537,7 +537,7 @@ export function MediaGrid({
             <button
               type="button"
               onClick={() => setFilter("image")}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer shrink-0 ${
                 filter === "image"
                   ? "bg-slate-900 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -553,7 +553,7 @@ export function MediaGrid({
             <button
               type="button"
               onClick={() => setFilter("video")}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer shrink-0 ${
                 filter === "video"
                   ? "bg-slate-900 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -569,7 +569,7 @@ export function MediaGrid({
             <button
               type="button"
               onClick={() => setFilter("document")}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer shrink-0 ${
                 filter === "document"
                   ? "bg-slate-900 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -586,7 +586,7 @@ export function MediaGrid({
             <button
               type="button"
               onClick={() => setFilter(filter === "duplicates" ? "all" : "duplicates")}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer shrink-0 ${
                 filter === "duplicates"
                   ? "bg-amber-600 text-white shadow-2xs"
                   : duplicateCount > 0
@@ -609,7 +609,7 @@ export function MediaGrid({
               <button
                 type="button"
                 onClick={() => setFilter(filter === "no-alt" ? "all" : "no-alt")}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer shrink-0 ${
                   filter === "no-alt"
                     ? "bg-rose-600 text-white shadow-2xs"
                     : "bg-rose-50 text-rose-700 hover:bg-rose-100"
@@ -625,7 +625,7 @@ export function MediaGrid({
           </div>
 
           {/* Right Side Actions / Count */}
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto sm:ml-auto">
             {onAutoFillAltTexts && missingAltCount > 0 && (
               <button
                 type="button"
@@ -639,7 +639,7 @@ export function MediaGrid({
               </button>
             )}
 
-            <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 whitespace-nowrap">
+            <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 whitespace-nowrap ml-auto sm:ml-0">
               Showing {filteredAndSorted.length} of {items.length} files
             </span>
           </div>

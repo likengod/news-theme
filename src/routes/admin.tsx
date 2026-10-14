@@ -17,54 +17,68 @@ import { AdminTopBar } from "@/components/admin/layout/AdminTopBar";
 import { getAdminUserDisplayInfo } from "@/components/admin/layout/adminUserUtils";
 import { useAdminTheme } from "@/components/admin/hooks/useAdminTheme";
 import { useAdminUpdateChecker } from "@/components/admin/hooks/useAdminUpdateChecker";
+import { isEditorAllowedRoute } from "@/components/admin/layout/navItems";
 
 // In-memory cache of verified admin tokens (never trusted from forgeable sessionStorage)
-const verifiedAdminTokens = new Map<string, number>();
+const verifiedAdminTokens = new Map<string, { expiry: number; role: string }>();
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
   pendingComponent: AdminPendingFallback,
   errorComponent: AdminErrorFallback,
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
     const { data } = await supabase.auth.getSession();
     if (!data.session?.user || !data.session?.access_token) throw redirect({ to: "/auth" });
 
     const token = data.session.access_token;
     const now = Date.now();
-    const cachedExpiry = verifiedAdminTokens.get(token);
-    if (cachedExpiry && cachedExpiry > now) {
-      return { user: data.session.user };
-    }
+    let userRole: string | null = null;
+    const cached = verifiedAdminTokens.get(token);
+    if (cached && cached.expiry > now) {
+      userRole = cached.role;
+    } else {
+      // Validate session token and check role permissions — run both DB queries in parallel
+      try {
+        const [res, roleRes] = await Promise.all([
+          getUserServer({ data: token }),
+          getCurrentUserRole({ data: token }),
+        ]);
 
-    // Validate session token and check role permissions — run both DB queries in parallel
-    try {
-      const [res, roleRes] = await Promise.all([
-        getUserServer({ data: token }),
-        getCurrentUserRole({ data: token }),
-      ]);
+        if (!res.user) {
+          verifiedAdminTokens.delete(token);
+          await supabase.auth.signOut();
+          throw redirect({ to: "/auth" });
+        }
 
-      if (!res.user) {
+        const allowedRoles = ["admin", "editor"];
+        if (!roleRes.role || !allowedRoles.includes(roleRes.role)) {
+          verifiedAdminTokens.delete(token);
+          throw redirect({ to: "/" });
+        }
+
+        userRole = roleRes.role;
+        // Cache verified permission in memory for 2 minutes for snappy admin navigation
+        verifiedAdminTokens.set(token, { expiry: now + 2 * 60 * 1000, role: userRole });
+      } catch (e: any) {
         verifiedAdminTokens.delete(token);
+        if (e?.headers || e?.to) throw e;
         await supabase.auth.signOut();
         throw redirect({ to: "/auth" });
       }
-
-      const allowedRoles = ["admin", "editor"];
-      if (!roleRes.role || !allowedRoles.includes(roleRes.role)) {
-        verifiedAdminTokens.delete(token);
-        throw redirect({ to: "/" });
-      }
-
-      // Cache verified permission in memory for 2 minutes for snappy admin navigation
-      verifiedAdminTokens.set(token, now + 2 * 60 * 1000);
-    } catch (e: any) {
-      verifiedAdminTokens.delete(token);
-      if (e?.headers || e?.to) throw e;
-      await supabase.auth.signOut();
-      throw redirect({ to: "/auth" });
     }
 
-    return { user: data.session.user };
+    // Role-based access control for editors:
+    // Editors can only access:
+    // /admin/articles, /admin/inbox, /admin/comments, /admin/advertisements,
+    // /admin/files, /admin/journalists, /admin/categories, /admin/tags
+    if (userRole === "editor") {
+      const currentPath = location.pathname;
+      if (!isEditorAllowedRoute(currentPath)) {
+        throw redirect({ to: "/admin/articles" });
+      }
+    }
+
+    return { user: data.session.user, role: userRole };
   },
   head: () => ({
     meta: [
@@ -77,7 +91,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  const { user } = Route.useRouteContext();
+  const { user, role } = Route.useRouteContext();
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
@@ -106,6 +120,7 @@ function AdminLayout() {
         hasUpdate={updateStatus.hasUpdate}
         siteSettings={s}
         onLogout={handleLogout}
+        role={role}
       />
 
       {/* Main Container */}
@@ -118,10 +133,11 @@ function AdminLayout() {
           pathname={pathname}
           initials={initials}
           email={email}
+          role={role}
         />
 
         <main className="p-4 sm:p-6 lg:p-8">
-          {updateStatus.hasUpdate && !dismissed && pathname !== "/admin/updates" && (
+          {role !== "editor" && updateStatus.hasUpdate && !dismissed && pathname !== "/admin/updates" && (
             <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 rounded-xl border border-indigo-200 bg-indigo-50/80 p-3.5 sm:p-4 text-indigo-950 shadow-xs">
               <div className="flex items-center gap-2.5 sm:gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white">

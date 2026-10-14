@@ -176,12 +176,14 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
         )}
         {isStaff && (
           <>
-            <Link to="/admin" className="hover:text-foreground">
-              Admin panel
+            <Link to={role === "editor" ? "/admin/articles" : "/admin"} className="hover:text-foreground">
+              {role === "editor" ? "Editor panel" : "Admin panel"}
             </Link>
-            <Link to="/admin/settings" className="hover:text-foreground">
-              Settings
-            </Link>
+            {role !== "editor" && (
+              <Link to="/admin/settings" className="hover:text-foreground">
+                Settings
+              </Link>
+            )}
           </>
         )}
         <button type="button" onClick={handleSignOut} className="text-left hover:text-foreground">
@@ -250,14 +252,14 @@ export function UserMenu({ variant = "topbar" }: { variant?: "topbar" | "mobile"
           </>
         )}
 
-        {/* Admins & Staff Only: Admin Panel */}
+        {/* Admins & Staff Only: Admin/Editor Panel */}
         {isStaff && (
           <DropdownMenuItem
-            onSelect={() => navigate({ to: "/admin" })}
+            onSelect={() => navigate({ to: role === "editor" ? "/admin/articles" : "/admin" })}
             className="cursor-pointer font-semibold"
           >
             <LayoutDashboard className="mr-2 h-4 w-4 text-slate-700" />
-            Admin Panel
+            {role === "editor" ? "Editor Panel" : "Admin Panel"}
           </DropdownMenuItem>
         )}
 

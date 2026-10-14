@@ -18,6 +18,7 @@ import { InboxFilterBar } from "@/components/admin/inbox/InboxFilterBar";
 import { InboxRequestItem } from "@/components/admin/inbox/InboxRequestItem";
 import { ConfirmDeleteModal } from "@/components/admin/inbox/ConfirmDeleteModal";
 
+// Admin Inbox Route
 export const Route = createFileRoute("/admin/inbox")({
   head: () => ({
     meta: [
@@ -172,28 +173,28 @@ function AdminInboxPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-800">
-            <Inbox className="h-6 w-6 text-slate-600" />
+          <h1 className="flex items-center gap-2 text-xl sm:text-2xl font-bold text-slate-800">
+            <Inbox className="h-5 w-5 sm:h-6 sm:w-6 text-slate-600" />
             Admin Inbox
             {pendingTotal > 0 && (
-              <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+              <span className="rounded-full bg-rose-500 px-2 py-0.5 text-xs font-bold text-white shadow-xs">
                 {pendingTotal} pending
               </span>
             )}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Review contact messages, work applications, withdrawals and account deletion requests.
+          <p className="mt-0.5 text-xs sm:text-sm text-slate-500">
+            Review contact messages, work applications, journalist applications and account deletion requests.
           </p>
         </div>
         <button
           onClick={load}
           disabled={loading}
-          className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-2xs disabled:opacity-60 cursor-pointer w-fit"
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          Refresh
+          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+          <span>Refresh</span>
         </button>
       </div>
 

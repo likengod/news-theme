@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { Home as HomeIcon, X, LogOut, ExternalLink } from "lucide-react";
-import { ADMIN_NAV_ITEMS } from "./navItems";
+import { X, LogOut, ExternalLink } from "lucide-react";
+import { ADMIN_NAV_ITEMS, isEditorAllowedRoute } from "./navItems";
 import { getAccessibleLogoColor } from "@/lib/color-utils";
 
 interface AdminSidebarProps {
@@ -12,6 +12,7 @@ interface AdminSidebarProps {
   hasUpdate: boolean;
   siteSettings: any;
   onLogout: () => void;
+  role?: string | null;
 }
 
 export function AdminSidebar({
@@ -22,8 +23,16 @@ export function AdminSidebar({
   hasUpdate,
   siteSettings: s,
   onLogout,
+  role,
 }: AdminSidebarProps) {
   const safeSecondaryColor = getAccessibleLogoColor(s?.logoColorSecondary || "#dc2626", false, 4.5);
+  const isEditor = role === "editor";
+  const homeTarget = isEditor ? "/admin/articles" : "/admin";
+
+  const visibleNavItems = isEditor
+    ? ADMIN_NAV_ITEMS.filter((item) => isEditorAllowedRoute(item.to))
+    : ADMIN_NAV_ITEMS;
+
   return (
     <>
       <aside
@@ -35,13 +44,13 @@ export function AdminSidebar({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
               <Link
-                to="/admin"
+                to={homeTarget}
                 className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-slate-900 text-sm font-bold text-white hover:opacity-90 transition"
               >
                 {(s.logoTextPrimary || s.siteName || "N").charAt(0).toUpperCase()}
               </Link>
               <div className="leading-tight min-w-0">
-                <Link to="/admin" className="text-sm font-bold block truncate hover:opacity-80 transition">
+                <Link to={homeTarget} className="text-sm font-bold block truncate hover:opacity-80 transition">
                   <span style={{ color: s.logoColorPrimary || "#000000" }}>
                     {s.logoTextPrimary || "News"}
                   </span>{" "}
@@ -70,10 +79,10 @@ export function AdminSidebar({
 
         <nav className="p-3">
           <p className="px-3 pb-2 pt-3 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
-            Main
+            {isEditor ? "Editor Panel" : "Main"}
           </p>
           <ul className="space-y-1">
-            {ADMIN_NAV_ITEMS.map((item) => {
+            {visibleNavItems.map((item) => {
               // Reward feature is visible for Enterprise Plus licenses only
               if (item.to === "/admin/rewards" && !isEnterprisePlus) {
                 return null;
@@ -90,18 +99,18 @@ export function AdminSidebar({
                     className={`flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition ${
                       active
                         ? "bg-slate-900 text-white"
-                        : item.to === "/admin/updates" && hasUpdate
+                        : item.to === "/admin/updates" && hasUpdate && !isEditor
                           ? "bg-red-50 text-red-700 hover:bg-red-100 font-semibold border border-red-200"
                           : "text-slate-700 hover:bg-slate-100"
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <Icon
-                        className={`h-4 w-4 ${item.to === "/admin/updates" && hasUpdate ? "text-red-600 animate-pulse" : ""}`}
+                        className={`h-4 w-4 ${item.to === "/admin/updates" && hasUpdate && !isEditor ? "text-red-600 animate-pulse" : ""}`}
                       />
                       {item.label}
                     </div>
-                    {item.to === "/admin/updates" && hasUpdate && (
+                    {item.to === "/admin/updates" && hasUpdate && !isEditor && (
                       <span className="flex items-center gap-1 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-extrabold uppercase text-white shadow-sm animate-pulse">
                         Update
                       </span>
@@ -119,7 +128,7 @@ export function AdminSidebar({
             <li>
               <button
                 onClick={onLogout}
-                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 cursor-pointer"
               >
                 <LogOut className="h-4 w-4" />
                 Sign out

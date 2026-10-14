@@ -1,7 +1,21 @@
 import Papa from "papaparse";
 import { toast } from "sonner";
-import { Download, Upload, ChevronDown } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import {
+  Download,
+  ChevronDown,
+  ArrowUpDown,
+  FileSpreadsheet,
+  FileUp,
+} from "lucide-react";
+import { useRef } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 type Props<T> = {
   data?: T[];
@@ -11,23 +25,16 @@ type Props<T> = {
   iconOnly?: boolean;
 };
 
-export function CsvImportExport<T>({ data, getData, filename, onImport, iconOnly }: Props<T>) {
+export function CsvImportExport<T>({
+  data,
+  getData,
+  filename,
+  onImport,
+  iconOnly,
+}: Props<T>) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [showExportMenu, setShowExportMenu] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowExportMenu(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const handleExport = async (mode: "all" | "page") => {
-    setShowExportMenu(false);
     try {
       let exportData = data;
       if (mode === "all" && getData) {
@@ -45,13 +52,16 @@ export function CsvImportExport<T>({ data, getData, filename, onImport, iconOnly
       const url = URL.createObjectURL(blob);
 
       link.setAttribute("href", url);
-      link.setAttribute("download", `${filename}-${mode}-${new Date().toISOString().split("T")[0]}.csv`);
+      link.setAttribute(
+        "download",
+        `${filename}-${mode}-${new Date().toISOString().split("T")[0]}.csv`,
+      );
       link.style.visibility = "hidden";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      toast.success("Export successful!");
+      toast.success(`Export successful (${exportData.length} ${filename})`);
     } catch (e) {
       console.error(e);
       toast.error("Failed to export data");
@@ -91,74 +101,76 @@ export function CsvImportExport<T>({ data, getData, filename, onImport, iconOnly
   };
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2">
-      <input type="file" accept=".csv" ref={fileRef} onChange={handleImport} className="hidden" />
-      <button
-        onClick={() => fileRef.current?.click()}
-        title="Import CSV"
-        aria-label="Import CSV"
-        className={
-          iconOnly
-            ? "h-9 w-9 inline-flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-xs shrink-0"
-            : "inline-flex items-center gap-1.5 sm:gap-2 rounded-md bg-white border border-slate-200 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 transition whitespace-nowrap shadow-xs"
-        }
-      >
-        <Upload className={iconOnly ? "h-4 w-4" : "h-3.5 w-3.5 sm:h-4 sm:w-4"} />
-        {!iconOnly && " Import CSV"}
-      </button>
-      
-      {getData ? (
-        <div className="relative" ref={menuRef}>
+    <div className="inline-flex items-center">
+      <input
+        type="file"
+        accept=".csv"
+        ref={fileRef}
+        onChange={handleImport}
+        className="hidden"
+      />
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <button
-            onClick={() => setShowExportMenu(!showExportMenu)}
-            title="Export CSV"
-            aria-label="Export CSV"
+            type="button"
+            title="Import or Export CSV Data"
+            aria-label="Import or Export CSV Data"
             className={
               iconOnly
-                ? "h-9 w-9 inline-flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-xs shrink-0"
-                : "inline-flex items-center gap-1.5 sm:gap-2 rounded-md bg-white border border-slate-200 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 transition whitespace-nowrap shadow-xs"
+                ? "h-9 w-9 inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-2xs shrink-0 cursor-pointer"
+                : "inline-flex items-center gap-1.5 sm:gap-2 rounded-md sm:rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition whitespace-nowrap shadow-2xs cursor-pointer"
             }
           >
-            <Download className={iconOnly ? "h-4 w-4" : "h-3.5 w-3.5 sm:h-4 sm:w-4"} />
-            {!iconOnly && (
-              <>
-                {" "}Export CSV <ChevronDown className="h-3 w-3 opacity-50" />
-              </>
-            )}
+            <ArrowUpDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-600 dark:text-slate-400 shrink-0" />
+            {!iconOnly && <span>Import / Export</span>}
+            <ChevronDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-slate-400 shrink-0" />
           </button>
-          
-          {showExportMenu && (
-            <div className="absolute right-0 mt-1 w-44 sm:w-48 rounded-md bg-white shadow-lg border border-slate-100 py-1 z-50">
-              <button
-                onClick={() => handleExport("page")}
-                className="w-full text-left px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-50 transition"
-              >
-                Export Current Page
-              </button>
-              <button
-                onClick={() => handleExport("all")}
-                className="w-full text-left px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-50 transition"
-              >
-                Export All Data
-              </button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align="end" className="w-56 p-1.5 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg rounded-lg">
+          <DropdownMenuLabel className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider px-2 py-1">
+            CSV Actions
+          </DropdownMenuLabel>
+
+          <DropdownMenuItem
+            onClick={() => fileRef.current?.click()}
+            className="flex items-center gap-2.5 px-2.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-md transition"
+          >
+            <FileUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-semibold text-slate-800 dark:text-slate-100">Import CSV</span>
+              <span className="text-[10px] text-slate-400">Upload & merge data</span>
             </div>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator className="my-1 bg-slate-100 dark:bg-slate-800" />
+
+          <DropdownMenuItem
+            onClick={() => handleExport("page")}
+            className="flex items-center gap-2.5 px-2.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-md transition"
+          >
+            <Download className="h-4 w-4 text-slate-600 dark:text-slate-400 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-semibold text-slate-800 dark:text-slate-100">Export Current Page</span>
+              <span className="text-[10px] text-slate-400">Export visible table rows</span>
+            </div>
+          </DropdownMenuItem>
+
+          {getData && (
+            <DropdownMenuItem
+              onClick={() => handleExport("all")}
+              className="flex items-center gap-2.5 px-2.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-md transition"
+            >
+              <FileSpreadsheet className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <div className="flex flex-col">
+                <span className="font-semibold text-slate-800 dark:text-slate-100">Export All Data</span>
+                <span className="text-[10px] text-slate-400">Download all database records</span>
+              </div>
+            </DropdownMenuItem>
           )}
-        </div>
-      ) : (
-        <button
-          onClick={() => handleExport("page")}
-          title="Export CSV"
-          aria-label="Export CSV"
-          className={
-            iconOnly
-              ? "h-9 w-9 inline-flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-xs shrink-0"
-              : "inline-flex items-center gap-1.5 sm:gap-2 rounded-md bg-white border border-slate-200 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 transition whitespace-nowrap shadow-xs"
-          }
-        >
-          <Download className={iconOnly ? "h-4 w-4" : "h-3.5 w-3.5 sm:h-4 sm:w-4"} />
-          {!iconOnly && " Export CSV"}
-        </button>
-      )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

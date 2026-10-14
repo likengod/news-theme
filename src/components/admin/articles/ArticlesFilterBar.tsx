@@ -41,15 +41,15 @@ export function ArticlesFilterBar({
   }, [dbCats]);
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-white p-3">
-      <div className="relative flex-1 min-w-[200px]">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 rounded-xl border border-slate-200 bg-white p-2.5 sm:p-3 shadow-xs">
+      <div className="relative flex-1 min-w-0">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           aria-label="Search articles"
           placeholder="Search articles..."
-          className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm focus:border-slate-900 focus:outline-none"
+          className="w-full rounded-lg border border-slate-200 py-1.5 sm:py-2 pl-9 pr-3 text-xs sm:text-sm focus:border-slate-900 focus:outline-none"
         />
         {query && debouncedQuery !== query && (
           <Loader2 className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-slate-400" />
@@ -60,7 +60,7 @@ export function ArticlesFilterBar({
         value={category}
         onChange={(e) => setCategory(e.target.value)}
         aria-label="Filter articles by category"
-        className="rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
+        className="rounded-lg border border-slate-200 px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:border-slate-900 focus:outline-none shrink-0"
       >
         <option>All</option>
         {allCategoryOptions.map((s) => (

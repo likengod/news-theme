@@ -13,16 +13,32 @@ function ImageInput({
   value,
   onChange,
   hint,
+  fallbackValue,
+  fallbackLabel,
+  onResetToFallback,
 }: {
   value: string;
   onChange: (v: string) => void;
   hint?: string;
+  fallbackValue?: string;
+  fallbackLabel?: string;
+  onResetToFallback?: () => void;
 }) {
+  const displayImage = value || fallbackValue || "";
+  const isUsingFallback = !value && Boolean(fallbackValue);
+
   return (
-    <div className="flex gap-3">
-      <div className="grid h-32 w-48 shrink-0 place-items-center overflow-hidden rounded-md border-2 border-dashed border-slate-200 bg-slate-50">
-        {value ? (
-          <img src={value} alt="preview" className="h-full w-full object-cover" />
+    <div className="flex flex-col sm:flex-row gap-3">
+      <div className="relative grid h-32 w-48 shrink-0 place-items-center overflow-hidden rounded-md border-2 border-dashed border-slate-200 bg-slate-50">
+        {displayImage ? (
+          <>
+            <img src={displayImage} alt="preview" className="h-full w-full object-cover" />
+            {isUsingFallback && (
+              <div className="absolute inset-x-0 bottom-0 bg-slate-900/85 backdrop-blur-xs px-2 py-0.5 text-center text-[10px] font-semibold text-white tracking-wide">
+                {fallbackLabel || "From Featured Image"}
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center text-slate-400">
             <ImageIcon className="mx-auto h-6 w-6" />
@@ -31,12 +47,28 @@ function ImageInput({
         )}
       </div>
       <div className="flex-1 space-y-2">
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Paste image URL..."
-          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
-        />
+        <div className="relative">
+          <input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={
+              fallbackValue
+                ? `Default: ${fallbackLabel || "Using Featured Image"} (or paste custom URL)...`
+                : "Paste image URL..."
+            }
+            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none pr-16"
+          />
+          {value && onResetToFallback && (
+            <button
+              type="button"
+              onClick={onResetToFallback}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded transition cursor-pointer"
+              title="Reset to Featured Image"
+            >
+              Reset
+            </button>
+          )}
+        </div>
         <MediaField
           value={value}
           onChange={onChange}

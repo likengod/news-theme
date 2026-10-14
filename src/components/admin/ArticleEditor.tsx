@@ -9,6 +9,7 @@ import {
   CalendarClock,
   Send,
   X,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
@@ -60,7 +61,7 @@ export default function ArticleEditor({
     excerpt: raw.excerpt || "",
     content: raw.content || "",
     featuredImage: raw.featuredImage || "",
-    ogImage: raw.ogImage || "",
+    ogImage: raw.ogImage || raw.featuredImage || "",
     imageCaption: raw.imageCaption || "",
     imageCredit: raw.imageCredit || "",
     metaTitle: raw.metaTitle || "",
@@ -167,10 +168,10 @@ export default function ArticleEditor({
   const nextTab = order[idx + 1];
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4 backdrop-blur-sm">
-      <div className="flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200">
+    <div className="fixed inset-0 z-50 flex sm:grid sm:place-items-center bg-slate-950/60 p-0 sm:p-4 backdrop-blur-sm overflow-hidden">
+      <div className="flex h-full sm:h-auto max-h-full sm:max-h-[94vh] w-full max-w-6xl flex-col rounded-none sm:rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200 overflow-hidden">
         {/* Modal Header */}
-        <div className="relative border-b border-slate-200 bg-gradient-to-br from-slate-50 to-white px-6 py-4">
+        <div className="shrink-0 relative border-b border-slate-200 bg-gradient-to-br from-slate-50 to-white px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
@@ -198,7 +199,7 @@ export default function ArticleEditor({
                 </a>
                 <button
                   onClick={copyUrl}
-                  className="rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-slate-600 hover:bg-slate-50"
+                  className="rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-slate-600 hover:bg-slate-50 cursor-pointer"
                 >
                   Copy
                 </button>
@@ -267,7 +268,7 @@ export default function ArticleEditor({
           </div>
 
           {/* Tab Navigation */}
-          <div className="mt-4 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex overflow-x-auto gap-1.5 pb-1 sm:pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {tabs.map((t) => {
               const Icon = t.icon;
               const active = tab === t.id;
@@ -275,13 +276,13 @@ export default function ArticleEditor({
                 <button
                   key={t.id}
                   onClick={() => setTab(t.id)}
-                  className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
+                  className={`inline-flex items-center gap-1.5 sm:gap-2 rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                     active
                       ? "bg-slate-900 text-white shadow-sm"
                       : "border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
                   }`}
                 >
-                  <Icon className="h-3.5 w-3.5" /> {t.label}
+                  <Icon className="h-3.5 w-3.5 shrink-0" /> {t.label}
                 </button>
               );
             })}
@@ -289,7 +290,7 @@ export default function ArticleEditor({
         </div>
 
         {/* Tab Body */}
-        <div className="flex-1 overflow-y-auto bg-slate-50/50 px-6 py-6">
+        <div className="flex-1 min-h-0 overflow-y-auto bg-slate-50/50 px-3.5 sm:px-6 py-4 sm:py-6">
           {tab === "content" && (
             <ArticleContentTab
               row={r}
@@ -325,78 +326,90 @@ export default function ArticleEditor({
         </div>
 
         {/* Step Progression Footer */}
-        <div className="flex items-center justify-between gap-2 border-t border-slate-200 bg-white px-6 py-3">
-          <p className="text-xs text-slate-500">
-            Step {idx + 1} of {order.length} ·{" "}
-            {isLast ? "Review & publish" : "Complete this step, then continue"}
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={onClose}
-              className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-100"
-            >
-              Cancel
-            </button>
-            {!isFirst && (
+        <div className="shrink-0 border-t border-slate-200 bg-white px-3 sm:px-6 py-2.5 sm:py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] z-20 pb-[calc(0.625rem+env(safe-area-inset-bottom,0px))]">
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               <button
-                onClick={() => setTab(prevTab)}
-                className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-100"
+                type="button"
+                onClick={onClose}
+                className="rounded-md border border-slate-200 bg-white px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 transition whitespace-nowrap cursor-pointer shrink-0"
               >
-                Back
+                Cancel
               </button>
-            )}
-            {!isLast && (
-              <button
-                onClick={() => setTab(nextTab)}
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-              >
-                Next:{" "}
-                {nextTab === "media"
-                  ? "Media"
-                  : nextTab === "seo"
-                    ? "SEO & Social"
-                    : "Settings"}
-              </button>
-            )}
-            {isLast && (
-              <>
+              {!isFirst && (
                 <button
                   type="button"
-                  onClick={() => handleSave("Draft")}
-                  className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer"
+                  onClick={() => setTab(prevTab)}
+                  className="rounded-md border border-slate-200 bg-white px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 transition whitespace-nowrap cursor-pointer shrink-0"
                 >
-                  Save as Draft
+                  Back
                 </button>
-                {isScheduled ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handlePublishNow}
-                      className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-100 cursor-pointer shadow-xs"
-                      title="Override schedule and publish immediately"
-                    >
-                      Publish Now
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleSave("Scheduled")}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition shadow-sm cursor-pointer"
-                    >
-                      <CalendarClock className="h-4 w-4" />
-                      <span>Schedule Post</span>
-                    </button>
-                  </>
-                ) : (
+              )}
+              <p className="text-[11px] sm:text-xs text-slate-500 truncate ml-1 sm:ml-2">
+                <span className="font-bold text-slate-800">{idx + 1}/{order.length}</span>
+                <span className="hidden md:inline"> · {isLast ? "Review & publish" : "Complete step & continue"}</span>
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {!isLast ? (
+                <button
+                  type="button"
+                  onClick={() => setTab(nextTab)}
+                  className="inline-flex items-center gap-1 rounded-md bg-slate-900 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 transition whitespace-nowrap shadow-xs cursor-pointer shrink-0"
+                >
+                  <span className="sm:hidden">Next</span>
+                  <span className="hidden sm:inline">
+                    Next:{" "}
+                    {nextTab === "media"
+                      ? "Media"
+                      : nextTab === "seo"
+                        ? "SEO & Social"
+                        : "Settings"}
+                  </span>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              ) : (
+                <>
                   <button
                     type="button"
-                    onClick={handlePublish}
-                    className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 cursor-pointer shadow-sm"
+                    onClick={() => handleSave("Draft")}
+                    className="rounded-md border border-slate-200 bg-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 transition whitespace-nowrap cursor-pointer shrink-0"
                   >
-                    Publish
+                    Draft
                   </button>
-                )}
-              </>
-            )}
+                  {isScheduled ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handlePublishNow}
+                        className="hidden xs:inline-flex rounded-md border border-slate-300 bg-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-slate-800 hover:bg-slate-100 transition shadow-2xs whitespace-nowrap cursor-pointer shrink-0"
+                        title="Override schedule and publish immediately"
+                      >
+                        Publish Now
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSave("Scheduled")}
+                        className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white hover:bg-blue-700 transition shadow-xs whitespace-nowrap cursor-pointer shrink-0"
+                      >
+                        <CalendarClock className="h-3.5 w-3.5" />
+                        <span>Schedule</span>
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handlePublish}
+                      className="inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-3.5 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 transition shadow-xs whitespace-nowrap cursor-pointer shrink-0"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                      <span>Publish</span>
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

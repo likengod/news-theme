@@ -9,6 +9,7 @@ interface AdminTopBarProps {
   pathname: string;
   initials: string;
   email: string;
+  role?: string | null;
 }
 
 export function AdminTopBar({
@@ -18,7 +19,11 @@ export function AdminTopBar({
   pathname,
   initials,
   email,
+  role,
 }: AdminTopBarProps) {
+  const isEditor = role === "editor";
+  const roleLabel = isEditor ? "Editor" : "Administrator";
+
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
       <div className="flex items-center gap-3">
@@ -31,14 +36,14 @@ export function AdminTopBar({
             id="adminTopSearch"
             name="adminSearch"
             aria-label="Search admin dashboard"
-            placeholder="Search..."
+            placeholder={isEditor ? "Search articles, files..." : "Search..."}
             className="w-72 rounded-md border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none"
           />
         </div>
       </div>
 
       <div className="flex items-center gap-3">
-        {hasUpdate && !pathname?.startsWith("/admin/updates") && (
+        {!isEditor && hasUpdate && !pathname?.startsWith("/admin/updates") && (
           <Link
             to="/admin/updates"
             className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-red-600 px-2 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold text-white hover:bg-red-700 transition shrink-0 whitespace-nowrap"
@@ -55,7 +60,7 @@ export function AdminTopBar({
           </div>
           <div className="hidden text-left leading-tight sm:block">
             <div className="text-xs font-semibold">{email.split("@")[0]}</div>
-            <div className="text-[10px] text-slate-500">Administrator</div>
+            <div className="text-[10px] text-slate-500 capitalize">{roleLabel}</div>
           </div>
         </div>
       </div>

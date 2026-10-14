@@ -11,7 +11,6 @@ import Footer from "@/components/site/Footer";
 
 import { Columnists } from "@/components/site/Columnists";
 import { NewsGrid } from "@/components/site/NewsGrid";
-import { ReelsSection } from "@/components/site/ReelsSection";
 import { MarketsMagazine } from "@/components/site/MarketsMagazine";
 
 const HOME_IMG = heroMarkets;
@@ -120,10 +119,6 @@ function Home() {
         {/* Below-the-fold sections: defer loading until user scrolls near them */}
         <LazySection minHeight={600} rootMargin="400px">
           <NewsGrid articles={dbArticles} usedIds={usedIds} />
-        </LazySection>
-
-        <LazySection minHeight={400} rootMargin="300px">
-          <ReelsSection />
         </LazySection>
 
         <LazySection minHeight={500} rootMargin="300px">
