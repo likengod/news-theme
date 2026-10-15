@@ -1,12 +1,17 @@
-﻿import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
 import {
   executeGetGitStatusCore,
   executeGitPullCore,
   executeBuildProjectCore,
+  executePatchDependenciesCore,
   executeGetDeployHistoryCore,
   executeGetDeployLogCore,
   executeInitializeGitRepoCore,
 } from "./deploy.server";
+
+export const patchDependencies = createServerFn({ method: "POST" }).handler(async () => {
+  return await executePatchDependenciesCore();
+});
 
 export const getGitStatus = createServerFn({ method: "GET" })
   .validator((d?: { forceRefresh?: boolean }) => d)

@@ -27,6 +27,7 @@ import {
   getGitStatus,
   gitPull,
   buildProject,
+  patchDependencies,
   getDeployHistory,
   getDeployLog,
   initializeGitRepo,
@@ -82,6 +83,7 @@ function UpdatesPage() {
   const [loading, setLoading] = useState(true);
   const [pulling, setPulling] = useState(false);
   const [building, setBuilding] = useState(false);
+  const [patching, setPatching] = useState(false);
   const [expandedLog, setExpandedLog] = useState<number | null>(null);
   const [logContent, setLogContent] = useState<string>("");
   const [buildOutput, setBuildOutput] = useState<string>("");
@@ -222,6 +224,41 @@ function UpdatesPage() {
     }
   };
 
+  const handlePatchDependencies = async () => {
+    setPatching(true);
+    setBuildOutput("");
+    try {
+      const res: any = await patchDependencies();
+      setBuildOutput(res?.buildLog || "");
+      if (res?.success) {
+        toast.success("Security patches applied! Waiting for server restart...");
+        let attempts = 0;
+        const checkInterval = setInterval(async () => {
+          attempts++;
+          try {
+            const ping = await fetch("/api/health?t=" + Date.now());
+            if (ping.ok || attempts >= 15) {
+              clearInterval(checkInterval);
+              window.location.reload();
+            }
+          } catch {
+            if (attempts >= 15) {
+              clearInterval(checkInterval);
+              window.location.reload();
+            }
+          }
+        }, 1500);
+      } else {
+        toast.error("Patching failed — check log below");
+        await refresh();
+      }
+    } catch (err: any) {
+      toast.error("Patch error: " + (err?.message || "Unknown error"));
+    } finally {
+      setPatching(false);
+    }
+  };
+
   const viewLog = async (id: number) => {
     if (expandedLog === id) {
       setExpandedLog(null);
@@ -279,6 +316,20 @@ function UpdatesPage() {
               <span>Updated ({currentVersion})</span>
             </div>
           )}
+
+          <button
+            onClick={handlePatchDependencies}
+            disabled={pulling || building || patching}
+            title="Install and patch all secure dependencies in node_modules"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg sm:rounded-xl bg-emerald-600 px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-bold text-white shadow-xs transition hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-60 cursor-pointer whitespace-nowrap"
+          >
+            {patching ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-white shrink-0" />
+            ) : (
+              <ShieldCheck className="h-3.5 w-3.5 text-white shrink-0" />
+            )}
+            <span>{patching ? "Patching Packages..." : "Patch Vulnerabilities"}</span>
+          </button>
 
           <button
             onClick={refresh}

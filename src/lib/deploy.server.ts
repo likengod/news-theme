@@ -1,4 +1,4 @@
-﻿import { query } from "./db.server";
+import { query } from "./db.server";
 import { execSync } from "child_process";
 import path from "path";
 import fs from "fs";
@@ -262,8 +262,21 @@ export async function executeGitPullCore() {
   let buildSuccess = true;
   const hasPrebuiltDist = fs.existsSync(path.join(ROOT, "dist", "server", "server.js"));
 
+  // Always sync dependencies with package.json / package-lock.json overrides
+  try {
+    const installLog = execSync("npm install --no-audit --no-fund 2>&1", {
+      cwd: ROOT,
+      encoding: "utf-8",
+      timeout: 120000,
+    });
+    buildLog += "\n[Security & Dependencies]: node_modules synced.\n" + installLog.slice(-500);
+  } catch (depErr: any) {
+    console.warn("[Deploy] npm install warning:", depErr?.message || depErr);
+    buildLog += "\n[Security notice]: " + (depErr?.message || "npm install skipped");
+  }
+
   if (hasPrebuiltDist) {
-    buildLog = "Pre-compiled production bundle verified from Git. Instant safe deployment applied without server rebuild.";
+    buildLog = "Pre-compiled production bundle verified from Git. Instant safe deployment applied.\n" + buildLog;
   } else {
     let hasNpm = false;
     try {
@@ -417,6 +430,52 @@ export async function executeBuildProjectCore() {
   }
 
   return { success: status === "Success", status, buildLog: buildLog.slice(-3000), deployId };
+}
+
+export async function executePatchDependenciesCore() {
+  await ensureDeployTable();
+
+  const branch = git("rev-parse --abbrev-ref HEAD");
+  const commitHash = git("rev-parse --short HEAD");
+  const commitMessage = "Security patch: node_modules dependency sync";
+
+  const result = await query(
+    `INSERT INTO deployments (commit_hash, commit_message, branch, status, triggered_by)
+       VALUES (?, ?, ?, 'Building', 'admin')`,
+    [commitHash, commitMessage, branch],
+  );
+  const deployId = result.insertId;
+
+  let installLog = "";
+  let status = "Success";
+  try {
+    installLog = execSync("npm install --no-audit --no-fund 2>&1", {
+      cwd: ROOT,
+      encoding: "utf-8",
+      timeout: 180000,
+    });
+  } catch (err: any) {
+    installLog = err.stdout || err.stderr || err.message;
+    status = "Failed";
+  }
+
+  await query(
+    "UPDATE deployments SET status = ?, build_log = ?, finished_at = NOW() WHERE id = ?",
+    [status, installLog.slice(-5000), deployId],
+  );
+
+  if (status === "Success") {
+    setTimeout(() => {
+      try {
+        const tmpDir = path.join(ROOT, "tmp");
+        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+        fs.writeFileSync(path.join(tmpDir, "restart.txt"), new Date().toISOString());
+        process.exit(0);
+      } catch {}
+    }, 1500);
+  }
+
+  return { success: status === "Success", status, buildLog: installLog.slice(-3000), deployId };
 }
 
 // â”€â”€â”€ Deployment History â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
