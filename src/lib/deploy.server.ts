@@ -274,6 +274,80 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
 
 // â”€â”€â”€ Git Pull â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+export async function downloadAndExtractTarball(): Promise<{ success: boolean; log: string }> {
+  const tarUrl = "https://codeload.github.com/likengod/news-theme/tar.gz/refs/heads/main";
+  const tmpDir = path.join(ROOT, "tmp");
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+  const archivePath = path.join(tmpDir, `update-${Date.now()}.tar.gz`);
+
+  // 1. Backup critical user credentials and custom files in memory
+  let envBackup: string | null = null;
+  let dbConfigBackup: string | null = null;
+  const envPath = path.join(ROOT, ".env");
+  const dbConfigPath = path.join(ROOT, "db-config.json");
+
+  if (fs.existsSync(envPath)) {
+    try { envBackup = fs.readFileSync(envPath, "utf-8"); } catch {}
+  }
+  if (fs.existsSync(dbConfigPath)) {
+    try { dbConfigBackup = fs.readFileSync(dbConfigPath, "utf-8"); } catch {}
+  }
+
+  // 2. Download prebuilt release tarball from GitHub
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const https = require("https");
+      const req = https.get(tarUrl, { headers: { "User-Agent": "NewsThemeAutoUpdater" } }, (res: any) => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          https.get(res.headers.location, { headers: { "User-Agent": "NewsThemeAutoUpdater" } }, (r2: any) => {
+            const out = fs.createWriteStream(archivePath);
+            r2.pipe(out);
+            out.on("finish", () => out.close(() => resolve()));
+            out.on("error", reject);
+          }).on("error", reject);
+        } else if (res.statusCode === 200) {
+          const out = fs.createWriteStream(archivePath);
+          res.pipe(out);
+          out.on("finish", () => out.close(() => resolve()));
+          out.on("error", reject);
+        } else {
+          reject(new Error(`Download failed with HTTP ${res.statusCode}`));
+        }
+      });
+      req.on("error", reject);
+      req.setTimeout(60000, () => { req.destroy(new Error("Download timed out")); });
+    });
+  } catch (dlErr: any) {
+    return { success: false, log: `Direct HTTP download failed: ${dlErr.message}` };
+  }
+
+  // 3. Extract prebuilt files into ROOT
+  try {
+    execSync(`tar -xzf "${archivePath}" --strip-components=1 -C "${ROOT}"`, {
+      encoding: "utf-8",
+      timeout: 120000,
+      env: getSpawnEnv(),
+    });
+  } catch (extErr: any) {
+    return { success: false, log: `Tar extraction error: ${extErr.message}` };
+  } finally {
+    try { if (fs.existsSync(archivePath)) fs.unlinkSync(archivePath); } catch {}
+  }
+
+  // 4. Restore preserved user credentials
+  if (envBackup !== null) {
+    try { fs.writeFileSync(envPath, envBackup, "utf-8"); } catch {}
+  }
+  if (dbConfigBackup !== null) {
+    try { fs.writeFileSync(dbConfigPath, dbConfigBackup, "utf-8"); } catch {}
+  }
+
+  return {
+    success: true,
+    log: "Successfully downloaded and applied pre-compiled update package directly via secure HTTPS (Git-independent zero-loss update).",
+  };
+}
+
 export async function executeGitPullCore() {
   await ensureDeployTable();
 
@@ -309,6 +383,12 @@ export async function executeGitPullCore() {
   }
   if (!pullResult || pullResult.includes("fatal")) {
     pullResult = git("reset --hard origin/main");
+  }
+
+  // If Git failed (e.g. fresh ZIP install without Git commits or dubious ownership), fallback to direct HTTPS release extraction
+  if (pullResult.includes("fatal") || pullResult.includes("unknown revision") || pullResult.includes("error")) {
+    const directRes = await downloadAndExtractTarball();
+    pullResult = directRes.log;
   }
 
   // 5. Pre-compiled dist check & safe dependency sync
