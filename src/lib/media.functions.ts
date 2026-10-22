@@ -123,21 +123,48 @@ export const batchUpdateAltTextServer = createServerFn({ method: "POST" })
   });
 
 
-function removeFileFromDisk(fileUrl?: string) {
+async function removeFileFromDisk(fileUrl?: string) {
   if (!fileUrl || typeof fileUrl !== "string") return;
-  if (fileUrl.startsWith("/uploads/")) {
-    const cwd = process.cwd();
-    const candidatePaths = [
-      path.join(cwd, "public", fileUrl),
-      path.join(cwd, fileUrl),
-      path.join(cwd, "dist", "client", fileUrl),
-    ];
-    for (const p of candidatePaths) {
-      try {
-        if (fs.existsSync(p)) fs.unlinkSync(p);
-      } catch {}
+  const cleanUrl = fileUrl.split("?")[0].replace(/^https?:\/\/[^/]+/i, "");
+  if (!cleanUrl.includes("/uploads/")) return;
+
+  const filename = path.basename(cleanUrl);
+  if (!filename || filename === ".gitkeep" || filename.includes("..")) return;
+
+  const cwd = process.cwd();
+  const searchDirs = [
+    path.join(cwd, "public", "uploads"),
+    path.join(cwd, "public", "uploads", "media"),
+    path.join(cwd, "public", "uploads", "promos"),
+    path.join(cwd, "public", "uploads", "ads"),
+    path.join(cwd, "public", "uploads", "documents"),
+    path.join(cwd, "dist", "client", "uploads"),
+    path.join(cwd, "dist", "client", "uploads", "media"),
+    path.join(cwd, "dist", "client", "uploads", "promos"),
+    path.join(cwd, "dist", "client", "uploads", "ads"),
+    path.join(cwd, "dist", "client", "uploads", "documents"),
+    path.join(cwd, "uploads"),
+    path.join(cwd, "uploads", "media"),
+    path.join(cwd, "uploads", "promos"),
+    path.join(cwd, "uploads", "ads"),
+    path.join(cwd, "uploads", "documents"),
+  ];
+
+  for (const dir of searchDirs) {
+    const targetFile = path.join(dir, filename);
+    try {
+      if (fs.existsSync(targetFile)) {
+        fs.unlinkSync(targetFile);
+      }
+    } catch (e) {
+      console.error(`[MediaDelete] Failed to unlink file ${targetFile}:`, e);
     }
   }
+
+  // Clear article featured_image reference if it was linked to this file
+  try {
+    await query("UPDATE articles SET featured_image = NULL WHERE featured_image LIKE ?", [`%${filename}%`]);
+  } catch {}
 }
 
 export const deleteMediaServer = createServerFn({ method: "POST" })
@@ -146,7 +173,7 @@ export const deleteMediaServer = createServerFn({ method: "POST" })
     try {
       const rows: any = await query("SELECT url FROM media_library WHERE id = ?", [data.id]);
       if (Array.isArray(rows) && rows[0]?.url) {
-        removeFileFromDisk(rows[0].url);
+        await removeFileFromDisk(rows[0].url);
       }
     } catch {}
     await query("DELETE FROM media_library WHERE id = ?", [data.id]);
@@ -162,7 +189,7 @@ export const deleteMultipleMediaServer = createServerFn({ method: "POST" })
       const rows: any = await query(`SELECT url FROM media_library WHERE id IN (${placeholders})`, data.ids);
       if (Array.isArray(rows)) {
         for (const r of rows) {
-          if (r?.url) removeFileFromDisk(r.url);
+          if (r?.url) await removeFileFromDisk(r.url);
         }
       }
     } catch {}
