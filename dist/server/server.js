@@ -1,4 +1,4 @@
-//#region src/lib/error-capture.ts
+// src/lib/error-capture.ts
 var lastCapturedError;
 var TTL_MS = 5e3;
 function record(error) {
@@ -21,8 +21,7 @@ function consumeLastCapturedError() {
 	lastCapturedError = void 0;
 	return error;
 }
-//#endregion
-//#region src/lib/error-page.ts
+// src/lib/error-page.ts
 function renderErrorPage(detail) {
 	const safeDetail = detail ? detail.replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
 	return `<!doctype html>
@@ -85,11 +84,10 @@ function renderErrorPage(detail) {
   </body>
 </html>`;
 }
-//#endregion
-//#region src/server.ts
+// src/server.ts
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./assets/server-BLr4SZDx.js").then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./assets/server-ClBhY37e.js").then((n) => n.t).then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
 async function normalizeCatastrophicSsrResponse(request, response) {
@@ -138,7 +136,6 @@ var server_default = { async fetch(request, env, ctx) {
 		});
 	}
 } };
-//#endregion
 export { server_default as default, renderErrorPage as t };
 
 //# sourceMappingURL=server.js.map

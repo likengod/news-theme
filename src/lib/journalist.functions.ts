@@ -178,7 +178,7 @@ const JOURNALIST_ROLES = new Set(["author", "editor", "admin"]);
 const JOURNALIST_ROLES_ALL = new Set(["author", "editor", "admin", "journalist"]);
 
 export const lookupJournalist = createServerFn({ method: "POST" })
-  .inputValidator((data: { publicUserId: string }) => {
+  .validator((data: { publicUserId: string }) => {
     const id = String(data?.publicUserId ?? "").trim();
     if (id.length < 3) throw new Error("Enter a valid Journalist ID, User ID, or Phone Number");
     return { publicUserId: id };
@@ -266,7 +266,7 @@ export type JournalistPrivateStats =
     };
 
 export const getJournalistPrivateStats = createServerFn({ method: "POST" })
-  .inputValidator((data: { targetUserId: string; sessionToken?: string }) => {
+  .validator((data: { targetUserId: string; sessionToken?: string }) => {
     if (!data?.targetUserId) throw new Error("targetUserId is required");
     return {
       targetUserId: String(data.targetUserId).trim(),
@@ -381,7 +381,7 @@ export type JournalistSearchResult = {
 
 export const searchJournalists = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { query: string }) => {
+  .validator((data: { query: string }) => {
     const query = String(data?.query ?? "").trim();
     if (query.length < 2) throw new Error("Enter at least 2 characters");
     return { query };
@@ -451,7 +451,7 @@ export type AwardResult = {
 
 export const awardJournalistPoints = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { publicUserId: string; points: number; reason?: string }) => {
+  .validator((data: { publicUserId: string; points: number; reason?: string }) => {
     const publicUserId = String(data?.publicUserId ?? "").trim();
     const points = Math.floor(Number(data?.points));
     if (!/^\d{10}$/.test(publicUserId)) throw new Error("Invalid 10-digit User ID");
@@ -517,7 +517,7 @@ function cleanText(v: unknown, max = 200): string | null {
 
 export const upsertJournalist = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: JournalistUpsertInput) => {
+  .validator((data: JournalistUpsertInput) => {
     const email = String(data?.email ?? "")
       .trim()
       .toLowerCase();
@@ -701,7 +701,7 @@ export const upsertJournalist = createServerFn({ method: "POST" })
 
 export const setJournalistActive = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { userId: string; active: boolean }) => {
+  .validator((data: { userId: string; active: boolean }) => {
     if (!data?.userId) throw new Error("userId required");
     return { userId: String(data.userId), active: !!data.active };
   })
@@ -714,7 +714,7 @@ export const setJournalistActive = createServerFn({ method: "POST" })
 
 export const deleteJournalist = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { userId: string }) => {
+  .validator((data: { userId: string }) => {
     if (!data?.userId) throw new Error("userId required");
     return { userId: String(data.userId) };
   })

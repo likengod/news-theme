@@ -9,245 +9,70 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WorkWithUsRouteImport } from './routes/work-with-us'
-import { Route as WithdrawPointsRouteImport } from './routes/withdraw-points'
-import { Route as WatchRouteImport } from './routes/watch'
-import { Route as VerifyImageRouteImport } from './routes/verify-image'
-import { Route as VerifiedJournalistRouteImport } from './routes/verified-journalist'
-import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
-import { Route as SubscriptionRouteImport } from './routes/subscription'
-import { Route as SubmitNewsRouteImport } from './routes/submit-news'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SetupRouteImport } from './routes/setup'
-import { Route as SearchRouteImport } from './routes/search'
-import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
-import { Route as ResultsRouteImport } from './routes/results'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
-import { Route as ReelsRouteImport } from './routes/reels'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
-import { Route as NewsSitemapDotxmlRouteImport } from './routes/news-sitemap[.]xml'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as FactCheckingPolicyRouteImport } from './routes/fact-checking-policy'
-import { Route as FactCheckRouteImport } from './routes/fact-check'
-import { Route as EventRouteImport } from './routes/event'
-import { Route as EditorialPolicyRouteImport } from './routes/editorial-policy'
-import { Route as EarnPointsRouteImport } from './routes/earn-points'
-import { Route as DmcaRouteImport } from './routes/dmca'
-import { Route as DisclaimerRouteImport } from './routes/disclaimer'
-import { Route as DataDeletionPolicyRouteImport } from './routes/data-deletion-policy'
-import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ArchiveRouteImport } from './routes/archive'
-import { Route as ApplyJournalistRouteImport } from './routes/apply-journalist'
-import { Route as ApplyRouteImport } from './routes/apply'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SlugRouteImport } from './routes/$slug'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ApplyRouteImport } from './routes/apply'
+import { Route as ApplyJournalistRouteImport } from './routes/apply-journalist'
+import { Route as ArchiveRouteImport } from './routes/archive'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
+import { Route as DataDeletionPolicyRouteImport } from './routes/data-deletion-policy'
+import { Route as DisclaimerRouteImport } from './routes/disclaimer'
+import { Route as DmcaRouteImport } from './routes/dmca'
+import { Route as EarnPointsRouteImport } from './routes/earn-points'
+import { Route as EditorialPolicyRouteImport } from './routes/editorial-policy'
+import { Route as EventRouteImport } from './routes/event'
+import { Route as FactCheckRouteImport } from './routes/fact-check'
+import { Route as FactCheckingPolicyRouteImport } from './routes/fact-checking-policy'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as NewsSitemapDotxmlRouteImport } from './routes/news-sitemap[.]xml'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ReelsRouteImport } from './routes/reels'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ResultsRouteImport } from './routes/results'
+import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as SetupRouteImport } from './routes/setup'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SubmitNewsRouteImport } from './routes/submit-news'
+import { Route as SubscriptionRouteImport } from './routes/subscription'
+import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
+import { Route as VerifiedJournalistRouteImport } from './routes/verified-journalist'
+import { Route as VerifyImageRouteImport } from './routes/verify-image'
+import { Route as WatchRouteImport } from './routes/watch'
+import { Route as WithdrawPointsRouteImport } from './routes/withdraw-points'
+import { Route as WorkWithUsRouteImport } from './routes/work-with-us'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as NewsSlugRouteImport } from './routes/news.$slug'
-import { Route as ApiUpdatesRouteImport } from './routes/api/updates'
-import { Route as ApiUpdateRouteImport } from './routes/api/update'
-import { Route as ApiRssRouteImport } from './routes/api/rss'
-import { Route as AdminUsersRouteImport } from './routes/admin.users'
-import { Route as AdminUpdatesRouteImport } from './routes/admin.updates'
-import { Route as AdminTagsRouteImport } from './routes/admin.tags'
-import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
-import { Route as AdminRolesRouteImport } from './routes/admin.roles'
-import { Route as AdminRewardsRouteImport } from './routes/admin.rewards'
-import { Route as AdminReelsRouteImport } from './routes/admin.reels'
-import { Route as AdminPagesRouteImport } from './routes/admin.pages'
-import { Route as AdminJournalistsRouteImport } from './routes/admin.journalists'
-import { Route as AdminInboxRouteImport } from './routes/admin.inbox'
-import { Route as AdminHomepageRouteImport } from './routes/admin.homepage'
-import { Route as AdminFilesRouteImport } from './routes/admin.files'
-import { Route as AdminCommentsRouteImport } from './routes/admin.comments'
-import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
-import { Route as AdminArticlesRouteImport } from './routes/admin.articles'
 import { Route as AdminAdvertisementsRouteImport } from './routes/admin.advertisements'
+import { Route as AdminArticlesRouteImport } from './routes/admin.articles'
+import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminCommentsRouteImport } from './routes/admin.comments'
+import { Route as AdminFilesRouteImport } from './routes/admin.files'
+import { Route as AdminHomepageRouteImport } from './routes/admin.homepage'
+import { Route as AdminInboxRouteImport } from './routes/admin.inbox'
+import { Route as AdminJournalistsRouteImport } from './routes/admin.journalists'
+import { Route as AdminPagesRouteImport } from './routes/admin.pages'
+import { Route as AdminReelsRouteImport } from './routes/admin.reels'
+import { Route as AdminRewardsRouteImport } from './routes/admin.rewards'
+import { Route as AdminRolesRouteImport } from './routes/admin.roles'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminTagsRouteImport } from './routes/admin.tags'
+import { Route as AdminUpdatesRouteImport } from './routes/admin.updates'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as ApiRssRouteImport } from './routes/api/rss'
+import { Route as ApiUpdateRouteImport } from './routes/api/update'
+import { Route as ApiUpdatesRouteImport } from './routes/api/updates'
+import { Route as NewsSlugRouteImport } from './routes/news.$slug'
 import { Route as ApiPublicSeedDemoAdminRouteImport } from './routes/api/public/seed-demo-admin'
 
-const WorkWithUsRoute = WorkWithUsRouteImport.update({
-  id: '/work-with-us',
-  path: '/work-with-us',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WithdrawPointsRoute = WithdrawPointsRouteImport.update({
-  id: '/withdraw-points',
-  path: '/withdraw-points',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WatchRoute = WatchRouteImport.update({
-  id: '/watch',
-  path: '/watch',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VerifyImageRoute = VerifyImageRouteImport.update({
-  id: '/verify-image',
-  path: '/verify-image',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VerifiedJournalistRoute = VerifiedJournalistRouteImport.update({
-  id: '/verified-journalist',
-  path: '/verified-journalist',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
-  id: '/terms-and-conditions',
-  path: '/terms-and-conditions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SubscriptionRoute = SubscriptionRouteImport.update({
-  id: '/subscription',
-  path: '/subscription',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SubmitNewsRoute = SubmitNewsRouteImport.update({
-  id: '/submit-news',
-  path: '/submit-news',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SetupRoute = SetupRouteImport.update({
-  id: '/setup',
-  path: '/setup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchRoute = SearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RssDotxmlRoute = RssDotxmlRouteImport.update({
-  id: '/rss.xml',
-  path: '/rss.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResultsRoute = ResultsRouteImport.update({
-  id: '/results',
-  path: '/results',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RefundPolicyRoute = RefundPolicyRouteImport.update({
-  id: '/refund-policy',
-  path: '/refund-policy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReelsRoute = ReelsRouteImport.update({
-  id: '/reels',
-  path: '/reels',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
-  id: '/privacy-policy',
-  path: '/privacy-policy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewsSitemapDotxmlRoute = NewsSitemapDotxmlRouteImport.update({
-  id: '/news-sitemap.xml',
-  path: '/news-sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FactCheckingPolicyRoute = FactCheckingPolicyRouteImport.update({
-  id: '/fact-checking-policy',
-  path: '/fact-checking-policy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FactCheckRoute = FactCheckRouteImport.update({
-  id: '/fact-check',
-  path: '/fact-check',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventRoute = EventRouteImport.update({
-  id: '/event',
-  path: '/event',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EditorialPolicyRoute = EditorialPolicyRouteImport.update({
-  id: '/editorial-policy',
-  path: '/editorial-policy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EarnPointsRoute = EarnPointsRouteImport.update({
-  id: '/earn-points',
-  path: '/earn-points',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DmcaRoute = DmcaRouteImport.update({
-  id: '/dmca',
-  path: '/dmca',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DisclaimerRoute = DisclaimerRouteImport.update({
-  id: '/disclaimer',
-  path: '/disclaimer',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DataDeletionPolicyRoute = DataDeletionPolicyRouteImport.update({
-  id: '/data-deletion-policy',
-  path: '/data-deletion-policy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CookiePolicyRoute = CookiePolicyRouteImport.update({
-  id: '/cookie-policy',
-  path: '/cookie-policy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ArchiveRoute = ArchiveRouteImport.update({
-  id: '/archive',
-  path: '/archive',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApplyJournalistRoute = ApplyJournalistRouteImport.update({
-  id: '/apply-journalist',
-  path: '/apply-journalist',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApplyRoute = ApplyRouteImport.update({
-  id: '/apply',
-  path: '/apply',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugRoute = SlugRouteImport.update({
@@ -255,9 +80,184 @@ const SlugRoute = SlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApplyRoute = ApplyRouteImport.update({
+  id: '/apply',
+  path: '/apply',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApplyJournalistRoute = ApplyJournalistRouteImport.update({
+  id: '/apply-journalist',
+  path: '/apply-journalist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArchiveRoute = ArchiveRouteImport.update({
+  id: '/archive',
+  path: '/archive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiePolicyRoute = CookiePolicyRouteImport.update({
+  id: '/cookie-policy',
+  path: '/cookie-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataDeletionPolicyRoute = DataDeletionPolicyRouteImport.update({
+  id: '/data-deletion-policy',
+  path: '/data-deletion-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisclaimerRoute = DisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DmcaRoute = DmcaRouteImport.update({
+  id: '/dmca',
+  path: '/dmca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EarnPointsRoute = EarnPointsRouteImport.update({
+  id: '/earn-points',
+  path: '/earn-points',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditorialPolicyRoute = EditorialPolicyRouteImport.update({
+  id: '/editorial-policy',
+  path: '/editorial-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventRoute = EventRouteImport.update({
+  id: '/event',
+  path: '/event',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FactCheckRoute = FactCheckRouteImport.update({
+  id: '/fact-check',
+  path: '/fact-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FactCheckingPolicyRoute = FactCheckingPolicyRouteImport.update({
+  id: '/fact-checking-policy',
+  path: '/fact-checking-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsSitemapDotxmlRoute = NewsSitemapDotxmlRouteImport.update({
+  id: '/news-sitemap.xml',
+  path: '/news-sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReelsRoute = ReelsRouteImport.update({
+  id: '/reels',
+  path: '/reels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultsRoute = ResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RssDotxmlRoute = RssDotxmlRouteImport.update({
+  id: '/rss.xml',
+  path: '/rss.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetupRoute = SetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubmitNewsRoute = SubmitNewsRouteImport.update({
+  id: '/submit-news',
+  path: '/submit-news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionRoute = SubscriptionRouteImport.update({
+  id: '/subscription',
+  path: '/subscription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
+  id: '/terms-and-conditions',
+  path: '/terms-and-conditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifiedJournalistRoute = VerifiedJournalistRouteImport.update({
+  id: '/verified-journalist',
+  path: '/verified-journalist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyImageRoute = VerifyImageRouteImport.update({
+  id: '/verify-image',
+  path: '/verify-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WatchRoute = WatchRouteImport.update({
+  id: '/watch',
+  path: '/watch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WithdrawPointsRoute = WithdrawPointsRouteImport.update({
+  id: '/withdraw-points',
+  path: '/withdraw-points',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkWithUsRoute = WorkWithUsRouteImport.update({
+  id: '/work-with-us',
+  path: '/work-with-us',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -265,94 +265,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const NewsSlugRoute = NewsSlugRouteImport.update({
-  id: '/news/$slug',
-  path: '/news/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiUpdatesRoute = ApiUpdatesRouteImport.update({
-  id: '/api/updates',
-  path: '/api/updates',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiUpdateRoute = ApiUpdateRouteImport.update({
-  id: '/api/update',
-  path: '/api/update',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiRssRoute = ApiRssRouteImport.update({
-  id: '/api/rss',
-  path: '/api/rss',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminUsersRoute = AdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminUpdatesRoute = AdminUpdatesRouteImport.update({
-  id: '/updates',
-  path: '/updates',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminTagsRoute = AdminTagsRouteImport.update({
-  id: '/tags',
-  path: '/tags',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminRolesRoute = AdminRolesRouteImport.update({
-  id: '/roles',
-  path: '/roles',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminRewardsRoute = AdminRewardsRouteImport.update({
-  id: '/rewards',
-  path: '/rewards',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminReelsRoute = AdminReelsRouteImport.update({
-  id: '/reels',
-  path: '/reels',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminPagesRoute = AdminPagesRouteImport.update({
-  id: '/pages',
-  path: '/pages',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminJournalistsRoute = AdminJournalistsRouteImport.update({
-  id: '/journalists',
-  path: '/journalists',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminInboxRoute = AdminInboxRouteImport.update({
-  id: '/inbox',
-  path: '/inbox',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminHomepageRoute = AdminHomepageRouteImport.update({
-  id: '/homepage',
-  path: '/homepage',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminFilesRoute = AdminFilesRouteImport.update({
-  id: '/files',
-  path: '/files',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCommentsRoute = AdminCommentsRouteImport.update({
-  id: '/comments',
-  path: '/comments',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
-  id: '/categories',
-  path: '/categories',
+const AdminAdvertisementsRoute = AdminAdvertisementsRouteImport.update({
+  id: '/advertisements',
+  path: '/advertisements',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminArticlesRoute = AdminArticlesRouteImport.update({
@@ -360,10 +275,95 @@ const AdminArticlesRoute = AdminArticlesRouteImport.update({
   path: '/articles',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAdvertisementsRoute = AdminAdvertisementsRouteImport.update({
-  id: '/advertisements',
-  path: '/advertisements',
+const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminCommentsRoute = AdminCommentsRouteImport.update({
+  id: '/comments',
+  path: '/comments',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFilesRoute = AdminFilesRouteImport.update({
+  id: '/files',
+  path: '/files',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHomepageRoute = AdminHomepageRouteImport.update({
+  id: '/homepage',
+  path: '/homepage',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInboxRoute = AdminInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminJournalistsRoute = AdminJournalistsRouteImport.update({
+  id: '/journalists',
+  path: '/journalists',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPagesRoute = AdminPagesRouteImport.update({
+  id: '/pages',
+  path: '/pages',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReelsRoute = AdminReelsRouteImport.update({
+  id: '/reels',
+  path: '/reels',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRewardsRoute = AdminRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRolesRoute = AdminRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTagsRoute = AdminTagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUpdatesRoute = AdminUpdatesRouteImport.update({
+  id: '/updates',
+  path: '/updates',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const ApiRssRoute = ApiRssRouteImport.update({
+  id: '/api/rss',
+  path: '/api/rss',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUpdateRoute = ApiUpdateRouteImport.update({
+  id: '/api/update',
+  path: '/api/update',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUpdatesRoute = ApiUpdatesRouteImport.update({
+  id: '/api/updates',
+  path: '/api/updates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsSlugRoute = NewsSlugRouteImport.update({
+  id: '/news/$slug',
+  path: '/news/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicSeedDemoAdminRoute = ApiPublicSeedDemoAdminRouteImport.update({
   id: '/api/public/seed-demo-admin',
@@ -793,256 +793,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/work-with-us': {
-      id: '/work-with-us'
-      path: '/work-with-us'
-      fullPath: '/work-with-us'
-      preLoaderRoute: typeof WorkWithUsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/withdraw-points': {
-      id: '/withdraw-points'
-      path: '/withdraw-points'
-      fullPath: '/withdraw-points'
-      preLoaderRoute: typeof WithdrawPointsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/watch': {
-      id: '/watch'
-      path: '/watch'
-      fullPath: '/watch'
-      preLoaderRoute: typeof WatchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/verify-image': {
-      id: '/verify-image'
-      path: '/verify-image'
-      fullPath: '/verify-image'
-      preLoaderRoute: typeof VerifyImageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/verified-journalist': {
-      id: '/verified-journalist'
-      path: '/verified-journalist'
-      fullPath: '/verified-journalist'
-      preLoaderRoute: typeof VerifiedJournalistRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/terms-and-conditions': {
-      id: '/terms-and-conditions'
-      path: '/terms-and-conditions'
-      fullPath: '/terms-and-conditions'
-      preLoaderRoute: typeof TermsAndConditionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/subscription': {
-      id: '/subscription'
-      path: '/subscription'
-      fullPath: '/subscription'
-      preLoaderRoute: typeof SubscriptionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/submit-news': {
-      id: '/submit-news'
-      path: '/submit-news'
-      fullPath: '/submit-news'
-      preLoaderRoute: typeof SubmitNewsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/setup': {
-      id: '/setup'
-      path: '/setup'
-      fullPath: '/setup'
-      preLoaderRoute: typeof SetupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/search': {
-      id: '/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof SearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rss.xml': {
-      id: '/rss.xml'
-      path: '/rss.xml'
-      fullPath: '/rss.xml'
-      preLoaderRoute: typeof RssDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/results': {
-      id: '/results'
-      path: '/results'
-      fullPath: '/results'
-      preLoaderRoute: typeof ResultsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/refund-policy': {
-      id: '/refund-policy'
-      path: '/refund-policy'
-      fullPath: '/refund-policy'
-      preLoaderRoute: typeof RefundPolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reels': {
-      id: '/reels'
-      path: '/reels'
-      fullPath: '/reels'
-      preLoaderRoute: typeof ReelsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy-policy': {
-      id: '/privacy-policy'
-      path: '/privacy-policy'
-      fullPath: '/privacy-policy'
-      preLoaderRoute: typeof PrivacyPolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/news-sitemap.xml': {
-      id: '/news-sitemap.xml'
-      path: '/news-sitemap.xml'
-      fullPath: '/news-sitemap.xml'
-      preLoaderRoute: typeof NewsSitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fact-checking-policy': {
-      id: '/fact-checking-policy'
-      path: '/fact-checking-policy'
-      fullPath: '/fact-checking-policy'
-      preLoaderRoute: typeof FactCheckingPolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fact-check': {
-      id: '/fact-check'
-      path: '/fact-check'
-      fullPath: '/fact-check'
-      preLoaderRoute: typeof FactCheckRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/event': {
-      id: '/event'
-      path: '/event'
-      fullPath: '/event'
-      preLoaderRoute: typeof EventRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/editorial-policy': {
-      id: '/editorial-policy'
-      path: '/editorial-policy'
-      fullPath: '/editorial-policy'
-      preLoaderRoute: typeof EditorialPolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/earn-points': {
-      id: '/earn-points'
-      path: '/earn-points'
-      fullPath: '/earn-points'
-      preLoaderRoute: typeof EarnPointsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dmca': {
-      id: '/dmca'
-      path: '/dmca'
-      fullPath: '/dmca'
-      preLoaderRoute: typeof DmcaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/disclaimer': {
-      id: '/disclaimer'
-      path: '/disclaimer'
-      fullPath: '/disclaimer'
-      preLoaderRoute: typeof DisclaimerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/data-deletion-policy': {
-      id: '/data-deletion-policy'
-      path: '/data-deletion-policy'
-      fullPath: '/data-deletion-policy'
-      preLoaderRoute: typeof DataDeletionPolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cookie-policy': {
-      id: '/cookie-policy'
-      path: '/cookie-policy'
-      fullPath: '/cookie-policy'
-      preLoaderRoute: typeof CookiePolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/archive': {
-      id: '/archive'
-      path: '/archive'
-      fullPath: '/archive'
-      preLoaderRoute: typeof ArchiveRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/apply-journalist': {
-      id: '/apply-journalist'
-      path: '/apply-journalist'
-      fullPath: '/apply-journalist'
-      preLoaderRoute: typeof ApplyJournalistRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/apply': {
-      id: '/apply'
-      path: '/apply'
-      fullPath: '/apply'
-      preLoaderRoute: typeof ApplyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug': {
@@ -1052,11 +807,256 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apply': {
+      id: '/apply'
+      path: '/apply'
+      fullPath: '/apply'
+      preLoaderRoute: typeof ApplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apply-journalist': {
+      id: '/apply-journalist'
+      path: '/apply-journalist'
+      fullPath: '/apply-journalist'
+      preLoaderRoute: typeof ApplyJournalistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/archive': {
+      id: '/archive'
+      path: '/archive'
+      fullPath: '/archive'
+      preLoaderRoute: typeof ArchiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookie-policy': {
+      id: '/cookie-policy'
+      path: '/cookie-policy'
+      fullPath: '/cookie-policy'
+      preLoaderRoute: typeof CookiePolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data-deletion-policy': {
+      id: '/data-deletion-policy'
+      path: '/data-deletion-policy'
+      fullPath: '/data-deletion-policy'
+      preLoaderRoute: typeof DataDeletionPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/disclaimer': {
+      id: '/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/disclaimer'
+      preLoaderRoute: typeof DisclaimerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dmca': {
+      id: '/dmca'
+      path: '/dmca'
+      fullPath: '/dmca'
+      preLoaderRoute: typeof DmcaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/earn-points': {
+      id: '/earn-points'
+      path: '/earn-points'
+      fullPath: '/earn-points'
+      preLoaderRoute: typeof EarnPointsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/editorial-policy': {
+      id: '/editorial-policy'
+      path: '/editorial-policy'
+      fullPath: '/editorial-policy'
+      preLoaderRoute: typeof EditorialPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event': {
+      id: '/event'
+      path: '/event'
+      fullPath: '/event'
+      preLoaderRoute: typeof EventRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fact-check': {
+      id: '/fact-check'
+      path: '/fact-check'
+      fullPath: '/fact-check'
+      preLoaderRoute: typeof FactCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fact-checking-policy': {
+      id: '/fact-checking-policy'
+      path: '/fact-checking-policy'
+      fullPath: '/fact-checking-policy'
+      preLoaderRoute: typeof FactCheckingPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news-sitemap.xml': {
+      id: '/news-sitemap.xml'
+      path: '/news-sitemap.xml'
+      fullPath: '/news-sitemap.xml'
+      preLoaderRoute: typeof NewsSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reels': {
+      id: '/reels'
+      path: '/reels'
+      fullPath: '/reels'
+      preLoaderRoute: typeof ReelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/results': {
+      id: '/results'
+      path: '/results'
+      fullPath: '/results'
+      preLoaderRoute: typeof ResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rss.xml': {
+      id: '/rss.xml'
+      path: '/rss.xml'
+      fullPath: '/rss.xml'
+      preLoaderRoute: typeof RssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup': {
+      id: '/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/submit-news': {
+      id: '/submit-news'
+      path: '/submit-news'
+      fullPath: '/submit-news'
+      preLoaderRoute: typeof SubmitNewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscription': {
+      id: '/subscription'
+      path: '/subscription'
+      fullPath: '/subscription'
+      preLoaderRoute: typeof SubscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms-and-conditions': {
+      id: '/terms-and-conditions'
+      path: '/terms-and-conditions'
+      fullPath: '/terms-and-conditions'
+      preLoaderRoute: typeof TermsAndConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verified-journalist': {
+      id: '/verified-journalist'
+      path: '/verified-journalist'
+      fullPath: '/verified-journalist'
+      preLoaderRoute: typeof VerifiedJournalistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-image': {
+      id: '/verify-image'
+      path: '/verify-image'
+      fullPath: '/verify-image'
+      preLoaderRoute: typeof VerifyImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/watch': {
+      id: '/watch'
+      path: '/watch'
+      fullPath: '/watch'
+      preLoaderRoute: typeof WatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/withdraw-points': {
+      id: '/withdraw-points'
+      path: '/withdraw-points'
+      fullPath: '/withdraw-points'
+      preLoaderRoute: typeof WithdrawPointsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/work-with-us': {
+      id: '/work-with-us'
+      path: '/work-with-us'
+      fullPath: '/work-with-us'
+      preLoaderRoute: typeof WorkWithUsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -1066,130 +1066,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/news/$slug': {
-      id: '/news/$slug'
-      path: '/news/$slug'
-      fullPath: '/news/$slug'
-      preLoaderRoute: typeof NewsSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/updates': {
-      id: '/api/updates'
-      path: '/api/updates'
-      fullPath: '/api/updates'
-      preLoaderRoute: typeof ApiUpdatesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/update': {
-      id: '/api/update'
-      path: '/api/update'
-      fullPath: '/api/update'
-      preLoaderRoute: typeof ApiUpdateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/rss': {
-      id: '/api/rss'
-      path: '/api/rss'
-      fullPath: '/api/rss'
-      preLoaderRoute: typeof ApiRssRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/users': {
-      id: '/admin/users'
-      path: '/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AdminUsersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/updates': {
-      id: '/admin/updates'
-      path: '/updates'
-      fullPath: '/admin/updates'
-      preLoaderRoute: typeof AdminUpdatesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/tags': {
-      id: '/admin/tags'
-      path: '/tags'
-      fullPath: '/admin/tags'
-      preLoaderRoute: typeof AdminTagsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/roles': {
-      id: '/admin/roles'
-      path: '/roles'
-      fullPath: '/admin/roles'
-      preLoaderRoute: typeof AdminRolesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/rewards': {
-      id: '/admin/rewards'
-      path: '/rewards'
-      fullPath: '/admin/rewards'
-      preLoaderRoute: typeof AdminRewardsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/reels': {
-      id: '/admin/reels'
-      path: '/reels'
-      fullPath: '/admin/reels'
-      preLoaderRoute: typeof AdminReelsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/pages': {
-      id: '/admin/pages'
-      path: '/pages'
-      fullPath: '/admin/pages'
-      preLoaderRoute: typeof AdminPagesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/journalists': {
-      id: '/admin/journalists'
-      path: '/journalists'
-      fullPath: '/admin/journalists'
-      preLoaderRoute: typeof AdminJournalistsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/inbox': {
-      id: '/admin/inbox'
-      path: '/inbox'
-      fullPath: '/admin/inbox'
-      preLoaderRoute: typeof AdminInboxRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/homepage': {
-      id: '/admin/homepage'
-      path: '/homepage'
-      fullPath: '/admin/homepage'
-      preLoaderRoute: typeof AdminHomepageRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/files': {
-      id: '/admin/files'
-      path: '/files'
-      fullPath: '/admin/files'
-      preLoaderRoute: typeof AdminFilesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/comments': {
-      id: '/admin/comments'
-      path: '/comments'
-      fullPath: '/admin/comments'
-      preLoaderRoute: typeof AdminCommentsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/categories': {
-      id: '/admin/categories'
-      path: '/categories'
-      fullPath: '/admin/categories'
-      preLoaderRoute: typeof AdminCategoriesRouteImport
+    '/admin/advertisements': {
+      id: '/admin/advertisements'
+      path: '/advertisements'
+      fullPath: '/admin/advertisements'
+      preLoaderRoute: typeof AdminAdvertisementsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/articles': {
@@ -1199,12 +1080,131 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminArticlesRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/advertisements': {
-      id: '/admin/advertisements'
-      path: '/advertisements'
-      fullPath: '/admin/advertisements'
-      preLoaderRoute: typeof AdminAdvertisementsRouteImport
+    '/admin/categories': {
+      id: '/admin/categories'
+      path: '/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/admin/comments': {
+      id: '/admin/comments'
+      path: '/comments'
+      fullPath: '/admin/comments'
+      preLoaderRoute: typeof AdminCommentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/files': {
+      id: '/admin/files'
+      path: '/files'
+      fullPath: '/admin/files'
+      preLoaderRoute: typeof AdminFilesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/homepage': {
+      id: '/admin/homepage'
+      path: '/homepage'
+      fullPath: '/admin/homepage'
+      preLoaderRoute: typeof AdminHomepageRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/inbox': {
+      id: '/admin/inbox'
+      path: '/inbox'
+      fullPath: '/admin/inbox'
+      preLoaderRoute: typeof AdminInboxRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/journalists': {
+      id: '/admin/journalists'
+      path: '/journalists'
+      fullPath: '/admin/journalists'
+      preLoaderRoute: typeof AdminJournalistsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pages': {
+      id: '/admin/pages'
+      path: '/pages'
+      fullPath: '/admin/pages'
+      preLoaderRoute: typeof AdminPagesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reels': {
+      id: '/admin/reels'
+      path: '/reels'
+      fullPath: '/admin/reels'
+      preLoaderRoute: typeof AdminReelsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/rewards': {
+      id: '/admin/rewards'
+      path: '/rewards'
+      fullPath: '/admin/rewards'
+      preLoaderRoute: typeof AdminRewardsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/roles': {
+      id: '/admin/roles'
+      path: '/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AdminRolesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/tags': {
+      id: '/admin/tags'
+      path: '/tags'
+      fullPath: '/admin/tags'
+      preLoaderRoute: typeof AdminTagsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/updates': {
+      id: '/admin/updates'
+      path: '/updates'
+      fullPath: '/admin/updates'
+      preLoaderRoute: typeof AdminUpdatesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/api/rss': {
+      id: '/api/rss'
+      path: '/api/rss'
+      fullPath: '/api/rss'
+      preLoaderRoute: typeof ApiRssRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/update': {
+      id: '/api/update'
+      path: '/api/update'
+      fullPath: '/api/update'
+      preLoaderRoute: typeof ApiUpdateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/updates': {
+      id: '/api/updates'
+      path: '/api/updates'
+      fullPath: '/api/updates'
+      preLoaderRoute: typeof ApiUpdatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news/$slug': {
+      id: '/news/$slug'
+      path: '/news/$slug'
+      fullPath: '/news/$slug'
+      preLoaderRoute: typeof NewsSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/seed-demo-admin': {
       id: '/api/public/seed-demo-admin'

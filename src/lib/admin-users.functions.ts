@@ -308,7 +308,7 @@ export const importAdminUsers = createServerFn({ method: "POST" })
 
 export const createAdminUser = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator(
+  .validator(
     (data: { email: string; password: string; username?: string; displayName?: string; role?: AppRole }) => {
       if (!data.email || !data.email.includes("@")) throw new Error("Valid email required");
       if (!data.password || data.password.length < 8)
@@ -397,7 +397,7 @@ export const createAdminUser = createServerFn({ method: "POST" })
 
 export const setAdminUserRole = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { userId: string; role: AppRole }) => data)
+  .validator((data: { userId: string; role: AppRole }) => data)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
 
@@ -433,7 +433,7 @@ export const setAdminUserRole = createServerFn({ method: "POST" })
 
 export const deleteAdminUser = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { userId: string }) => data)
+  .validator((data: { userId: string }) => data)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     if (data.userId === context.userId) throw new Error("You cannot delete yourself");
@@ -444,7 +444,7 @@ export const deleteAdminUser = createServerFn({ method: "POST" })
 
 export const toggleAdminUserBan = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { userId: string; suspend: boolean }) => data)
+  .validator((data: { userId: string; suspend: boolean }) => data)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     if (data.userId === context.userId) throw new Error("You cannot suspend yourself");
@@ -455,7 +455,7 @@ export const toggleAdminUserBan = createServerFn({ method: "POST" })
 
 export const bulkDeleteAdminUsers = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { userIds: string[] }) => data)
+  .validator((data: { userIds: string[] }) => data)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const validIds = (data.userIds ?? []).filter((id) => id !== context.userId);
@@ -468,7 +468,7 @@ export const bulkDeleteAdminUsers = createServerFn({ method: "POST" })
 
 export const bulkToggleAdminUserBan = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { userIds: string[]; suspend: boolean }) => data)
+  .validator((data: { userIds: string[]; suspend: boolean }) => data)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const validIds = (data.userIds ?? []).filter((id) => id !== context.userId);
@@ -484,7 +484,7 @@ export const bulkToggleAdminUserBan = createServerFn({ method: "POST" })
 
 export const regeneratePublicUserId = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { userId: string }) => data)
+  .validator((data: { userId: string }) => data)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
 
@@ -510,7 +510,7 @@ export const regeneratePublicUserId = createServerFn({ method: "POST" })
 
 export const setUserPoints = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { userId: string; mode: "set" | "add"; amount: number }) => {
+  .validator((data: { userId: string; mode: "set" | "add"; amount: number }) => {
     if (!data.userId) throw new Error("userId required");
     if (typeof data.amount !== "number" || Number.isNaN(data.amount))
       throw new Error("amount must be a number");
@@ -532,7 +532,7 @@ export const setUserPoints = createServerFn({ method: "POST" })
 
 export const updateAdminUserPassword = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { userId: string; password: string }) => {
+  .validator((data: { userId: string; password: string }) => {
     if (!data.password || data.password.length < 8)
       throw new Error("Password must be at least 8 characters");
     return data;
@@ -560,7 +560,7 @@ export const updateAdminUserPassword = createServerFn({ method: "POST" })
 
 export const updateAdminUserDetails = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator(
+  .validator(
     (data: { userId: string; email?: string; username?: string; displayName?: string; avatarUrl?: string }) => data,
   )
   .handler(async ({ data, context }) => {
@@ -619,7 +619,7 @@ export const updateAdminUserDetails = createServerFn({ method: "POST" })
 
 export const deleteAdminUsersBulk = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: { userIds: string[] }) => data)
+  .validator((data: { userIds: string[] }) => data)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const ids = data.userIds.filter((id) => id !== context.userId);

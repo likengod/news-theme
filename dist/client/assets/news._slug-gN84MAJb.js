@@ -1,0 +1,1 @@
+export{t as notFoundComponent}from"./news._slug-DTtIk78x.js";
