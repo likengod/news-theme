@@ -97,6 +97,8 @@ export const clearAllCachesServer = createServerFn({ method: "POST" })
         path.join(cwd, "dist", "client", "uploads", "promos"),
         path.join(cwd, "uploads", "promos"),
         path.join(cwd, "uploads"),
+        path.join(cwd, "tmp"),
+        path.join(cwd, "temp"),
       ];
 
       const now = Date.now();

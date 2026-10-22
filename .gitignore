@@ -40,6 +40,13 @@ db-config.json.bak
 *.zip
 .gemini
 
+# Temp directories & files
+tmp/
+tmp/*
+temp/
+*.tmp
+restart.txt
+
 # Uploads
 uploads/
 public/uploads/

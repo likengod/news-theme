@@ -2,6 +2,7 @@ import { query } from "./db.server";
 import { execSync } from "child_process";
 import path from "path";
 import fs from "fs";
+import os from "os";
 import { APP_VERSION } from "./version";
 
 const ROOT = process.cwd();
@@ -276,8 +277,7 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
 
 export async function downloadAndExtractTarball(): Promise<{ success: boolean; log: string }> {
   const tarUrl = "https://codeload.github.com/likengod/news-theme/tar.gz/refs/heads/main";
-  const tmpDir = path.join(ROOT, "tmp");
-  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+  const tmpDir = os.tmpdir();
   const archivePath = path.join(tmpDir, `update-${Date.now()}.tar.gz`);
 
   // 1. Backup critical user credentials and custom files in memory
