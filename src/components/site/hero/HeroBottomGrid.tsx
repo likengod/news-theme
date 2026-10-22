@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "@tanstack/react-router";
 import { HeadlineArticle, MinRead } from "../HeadlineArticle";
 import { getArticleImage } from "@/lib/news-data";
+import { getNewsTitleStyle } from "@/lib/homepage-config";
 
 export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
   if (!activeBottomItems || !Array.isArray(activeBottomItems) || activeBottomItems.length === 0) {
@@ -45,7 +46,10 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                   />
                 </div>
               )}
-              <h3 className="headline mt-4 text-xl text-foreground group-hover:underline line-clamp-3">
+              <h3
+                className="headline mt-4 text-xl news-title-interactive group-hover:underline line-clamp-3"
+                style={getNewsTitleStyle(cfg?.heroTopStories)}
+              >
                 {activeBottomItems[0].title}
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-4 overflow-hidden">
@@ -88,7 +92,10 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                   />
                 </div>
               )}
-              <h3 className="headline mt-0 md:mt-4 text-xl text-foreground group-hover:underline line-clamp-3">
+              <h3
+                className="headline mt-0 md:mt-4 text-xl news-title-interactive group-hover:underline line-clamp-3"
+                style={getNewsTitleStyle(cfg?.heroTopStories)}
+              >
                 {activeBottomItems[1].title}
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-4 overflow-hidden">
@@ -114,7 +121,7 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
                   key={`${item.title || "item"}-${idx}`}
                   className={idx === 0 ? "pb-5" : idx === 1 ? "py-5" : "pt-5"}
                 >
-                  <HeadlineArticle item={item} dense />
+                  <HeadlineArticle item={item} dense sectionStyle={cfg?.heroTopStories} />
                 </div>
               );
             })}

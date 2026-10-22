@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
-import { Settings2, ChevronDown } from "lucide-react";
+import { Settings2, ChevronDown, Lock } from "lucide-react";
 import type { SectionStyle } from "@/lib/homepage-config";
-import { useCategories } from "@/components/site/AdSettingsContext";
+import { useCategories, useSiteSettings } from "@/components/site/AdSettingsContext";
+import { isEnterpriseLicense } from "@/lib/site-content";
 
 type Props = {
   label: string;
@@ -27,10 +28,15 @@ export function SectionCard({
   children,
 }: Props) {
   const dbCats = useCategories();
+  const siteSettings = useSiteSettings();
+  const isEnterprise = isEnterpriseLicense(siteSettings);
+
   const [showStyle, setShowStyle] = useState(false);
   const [localTitle, setLocalTitle] = useState(value.title);
   const [localColor, setLocalColor] = useState(value.color);
   const [localFontSize, setLocalFontSize] = useState(value.fontSize);
+  const [localTitleColor, setLocalTitleColor] = useState(value.titleColor || "#141414");
+  const [localTitleHoverColor, setLocalTitleHoverColor] = useState(value.titleHoverColor || "#dc2626");
   const isEnabled = value.enabled !== false;
 
   const options = useMemo(() => {
@@ -63,7 +69,9 @@ export function SectionCard({
     setLocalTitle(value.title);
     setLocalColor(value.color);
     setLocalFontSize(value.fontSize);
-  }, [value.title, value.color, value.fontSize]);
+    setLocalTitleColor(value.titleColor || "#141414");
+    setLocalTitleHoverColor(value.titleHoverColor || "#dc2626");
+  }, [value.title, value.color, value.fontSize, value.titleColor, value.titleHoverColor]);
 
   const handleTitleChange = (val: string) => {
     setLocalTitle(val);
@@ -78,6 +86,16 @@ export function SectionCard({
   const handleFontSizeChange = (val: number) => {
     setLocalFontSize(val);
     onChange({ ...value, fontSize: val });
+  };
+
+  const handleTitleColorChange = (val: string) => {
+    setLocalTitleColor(val);
+    onChange({ ...value, titleColor: val });
+  };
+
+  const handleTitleHoverColorChange = (val: string) => {
+    setLocalTitleHoverColor(val);
+    onChange({ ...value, titleHoverColor: val });
   };
 
   const handleToggle = () => {
@@ -193,49 +211,135 @@ export function SectionCard({
         </button>
 
         {showStyle && (
-          <div className="flex flex-wrap items-end gap-3 border-t border-slate-100 pt-3">
-            <label className="w-32">
-              <span className="mb-1 block text-[11px] font-medium text-slate-500">
-                Text size (px)
-              </span>
-              <input
-                type="number"
-                min={8}
-                max={64}
-                value={localFontSize}
-                onChange={(e) => handleFontSizeChange(Number(e.target.value) || 12)}
-                className="h-9 w-full rounded-md border border-slate-200 px-2 text-sm focus:border-slate-900 focus:outline-none"
-              />
-            </label>
-
-            <label className="flex items-end gap-2">
-              <div>
-                <span className="mb-1 block text-[11px] font-medium text-slate-500">Color</span>
+          <div className="border-t border-slate-100 pt-3 space-y-3">
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="w-32">
+                <span className="mb-1 block text-[11px] font-medium text-slate-500">
+                  Text size (px)
+                </span>
                 <input
-                  type="color"
+                  type="number"
+                  min={8}
+                  max={64}
+                  value={localFontSize}
+                  onChange={(e) => handleFontSizeChange(Number(e.target.value) || 12)}
+                  className="h-9 w-full rounded-md border border-slate-200 px-2 text-sm focus:border-slate-900 focus:outline-none"
+                />
+              </label>
+
+              <label className="flex items-end gap-2">
+                <div>
+                  <span className="mb-1 block text-[11px] font-medium text-slate-500">Color</span>
+                  <input
+                    type="color"
+                    value={localColor}
+                    onChange={(e) => handleColorChange(e.target.value)}
+                    className="h-9 w-14 cursor-pointer rounded-md border border-slate-200 p-0.5"
+                  />
+                </div>
+                <input
+                  type="text"
                   value={localColor}
                   onChange={(e) => handleColorChange(e.target.value)}
-                  className="h-9 w-14 cursor-pointer rounded-md border border-slate-200 p-0.5"
+                  className="h-9 w-28 rounded-md border border-slate-200 px-2 text-sm focus:border-slate-900 focus:outline-none font-mono"
                 />
-              </div>
-              <input
-                type="text"
-                value={localColor}
-                onChange={(e) => handleColorChange(e.target.value)}
-                className="h-9 w-28 rounded-md border border-slate-200 px-2 text-sm focus:border-slate-900 focus:outline-none font-mono"
-              />
-            </label>
+              </label>
 
-            <button
-              type="button"
-              onClick={() => {
-                handleFontSizeChange(12);
-                handleColorChange("#1A1110");
-              }}
-              className="h-9 rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 hover:bg-slate-50"
-            >
-              Reset style
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  handleFontSizeChange(12);
+                  handleColorChange("#1A1110");
+                  handleTitleColorChange("#141414");
+                  handleTitleHoverColorChange("#dc2626");
+                }}
+                className="h-9 rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 hover:bg-slate-50"
+              >
+                Reset style
+              </button>
+            </div>
+
+            <div className="border-t border-slate-100 pt-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-semibold text-slate-800">
+                  News Article Title &amp; Touch Interaction Colors
+                </span>
+                {!isEnterprise && (
+                  <span className="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 border border-amber-200">
+                    <Lock className="h-2.5 w-2.5" />
+                    Enterprise Feature
+                  </span>
+                )}
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <span className="mb-1 block text-[11px] font-medium text-slate-500">
+                    Article Title Color (Default: Chinese Black)
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      disabled={!isEnterprise}
+                      value={localTitleColor}
+                      onChange={(e) => handleTitleColorChange(e.target.value)}
+                      className={`h-9 w-14 rounded-md border border-slate-200 p-0.5 ${!isEnterprise ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                      title={!isEnterprise ? "Requires Enterprise or Enterprise Plus license" : "Choose article title color"}
+                    />
+                    <input
+                      type="text"
+                      disabled={!isEnterprise}
+                      value={localTitleColor}
+                      onChange={(e) => handleTitleColorChange(e.target.value)}
+                      placeholder="#141414"
+                      className={`h-9 w-28 rounded-md border border-slate-200 px-2 text-sm font-mono focus:border-slate-900 focus:outline-none ${!isEnterprise ? "opacity-50 cursor-not-allowed bg-slate-50" : ""}`}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <span className="mb-1 block text-[11px] font-medium text-slate-500">
+                    Hover / Touch Interaction Color
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      disabled={!isEnterprise}
+                      value={localTitleHoverColor}
+                      onChange={(e) => handleTitleHoverColorChange(e.target.value)}
+                      className={`h-9 w-14 rounded-md border border-slate-200 p-0.5 ${!isEnterprise ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                      title={!isEnterprise ? "Requires Enterprise or Enterprise Plus license" : "Choose hover/touch interaction color"}
+                    />
+                    <input
+                      type="text"
+                      disabled={!isEnterprise}
+                      value={localTitleHoverColor}
+                      onChange={(e) => handleTitleHoverColorChange(e.target.value)}
+                      placeholder="#dc2626"
+                      className={`h-9 w-28 rounded-md border border-slate-200 px-2 text-sm font-mono focus:border-slate-900 focus:outline-none ${!isEnterprise ? "opacity-50 cursor-not-allowed bg-slate-50" : ""}`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Live Interactive Preview */}
+              <div className="mt-2.5 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2">
+                <span className="text-[11px] text-slate-500">
+                  Live Preview (Hover or tap to test):
+                </span>
+                <div
+                  className="group cursor-pointer select-none"
+                  style={{
+                    "--title-color": localTitleColor,
+                    "--title-hover-color": localTitleHoverColor,
+                  } as React.CSSProperties}
+                >
+                  <span className="news-title-interactive text-xs font-bold transition-colors">
+                    {localTitle || label} — সংবাদ শিরোনাম নমুনা
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

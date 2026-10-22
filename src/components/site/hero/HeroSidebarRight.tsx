@@ -4,6 +4,7 @@ import { Views } from "../Views";
 import Advertisement from "../Advertisement";
 import { ArchiveFinder } from "../ArchiveFinder";
 import { SocialIcons } from "../SocialIcons";
+import { getNewsTitleStyle } from "@/lib/homepage-config";
 
 export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, tags }: any) {
   return (
@@ -32,7 +33,10 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
                 className="h-14 w-14 shrink-0 object-cover"
               />
               <div>
-                <p className="font-serif text-sm font-bold leading-snug text-foreground group-hover:underline line-clamp-2">
+                <p
+                  className="font-serif text-sm font-bold leading-snug news-title-interactive group-hover:underline line-clamp-2"
+                  style={getNewsTitleStyle(cfg?.heroOpinion)}
+                >
                   {o.title}
                 </p>
                 <p className="mt-1 text-[11px] text-muted-foreground">
@@ -73,7 +77,10 @@ export function HeroSidebarRight({ cfg, activeOpinionItems, activePopularItems, 
                   className="h-14 w-14 shrink-0 object-cover"
                 />
                 <div>
-                  <p className="font-serif text-sm font-bold leading-snug text-foreground group-hover:underline line-clamp-2">
+                  <p
+                    className="font-serif text-sm font-bold leading-snug news-title-interactive group-hover:underline line-clamp-2"
+                    style={getNewsTitleStyle(cfg?.heroPopular)}
+                  >
                     {p.title}
                   </p>
                   <p className="mt-1 text-[11px] text-muted-foreground">

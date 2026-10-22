@@ -27,6 +27,10 @@ export type SectionStyle = {
   enabled?: boolean;
   /** Image display mode: "cover" (crop to fill) or "contain" / "fit" (show entire full uncropped image) */
   imageFit?: "cover" | "contain" | "natural";
+  /** News article title text color (default: #141414 Chinese Black) */
+  titleColor?: string;
+  /** News article title hover / touch interaction color (default: #dc2626) */
+  titleHoverColor?: string;
 };
 
 export type LiveVideoConfig = {
@@ -302,6 +306,13 @@ export function onHomepageConfigChange(cb: () => void): () => void {
 
 export function styleFor(s: SectionStyle): React.CSSProperties {
   return { color: s.color, fontSize: `${s.fontSize}px` };
+}
+
+export function getNewsTitleStyle(s?: Partial<SectionStyle> | null): React.CSSProperties {
+  return {
+    "--title-color": s?.titleColor || "#141414",
+    "--title-hover-color": s?.titleHoverColor || "#dc2626",
+  } as React.CSSProperties;
 }
 
 /** Pick items matching a category (kicker substring match), latest first. */

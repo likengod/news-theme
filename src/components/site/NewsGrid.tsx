@@ -5,7 +5,7 @@ import fedImg from "@/assets/news-fed.webp";
 import wsImg from "@/assets/news-wallstreet.webp";
 import cryptoImg from "@/assets/news-crypto.webp";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
-import { articlesByCategory } from "@/lib/homepage-config";
+import { articlesByCategory, getNewsTitleStyle } from "@/lib/homepage-config";
 import { getArticleImage } from "@/lib/news-data";
 import { Link } from "@tanstack/react-router";
 
@@ -220,7 +220,10 @@ export const NewsGrid = React.memo(function NewsGrid({
                     </span>
                   )}
                 </div>
-                <h3 className="mt-3 line-clamp-2 overflow-hidden font-serif text-[17px] font-bold leading-snug text-primary group-hover:underline">
+                <h3
+                  className="mt-3 line-clamp-2 overflow-hidden font-serif text-[17px] font-bold leading-snug news-title-interactive group-hover:underline"
+                  style={getNewsTitleStyle(colCfg)}
+                >
                   {col.lead}
                 </h3>
               </Link>
@@ -230,9 +233,14 @@ export const NewsGrid = React.memo(function NewsGrid({
                     <Link
                       to="/news/$slug"
                       params={{ slug: item?.slug || "sample" }}
-                      className="block line-clamp-2 overflow-hidden font-serif text-[15px] font-semibold leading-snug text-primary hover:underline"
+                      className="group/item block line-clamp-2 overflow-hidden font-serif text-[15px] font-semibold leading-snug hover:underline"
                     >
-                      {item.title}
+                      <span
+                        className="news-title-interactive"
+                        style={getNewsTitleStyle(colCfg)}
+                      >
+                        {item.title}
+                      </span>
                     </Link>
                   </li>
                 ))}

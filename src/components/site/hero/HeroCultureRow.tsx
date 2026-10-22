@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
 import { formatViews } from "@/lib/news-data";
+import { getNewsTitleStyle } from "@/lib/homepage-config";
 
 export function HeroCultureRow({ cfg, activeCultureItems }: any) {
   return (
@@ -44,7 +45,10 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
                 {formatViews(Number(c.views) || 0)} views
               </span>
             </div>
-            <h3 className="headline mt-3 line-clamp-2 text-lg leading-tight text-foreground group-hover:underline break-words">
+            <h3
+              className="headline mt-3 line-clamp-2 text-lg leading-tight news-title-interactive group-hover:underline break-words"
+              style={getNewsTitleStyle(cfg?.heroCultureMusic)}
+            >
               {c.title}
             </h3>
             <p className="mt-2 line-clamp-2 text-sm leading-snug text-muted-foreground break-words">

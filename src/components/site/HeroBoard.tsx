@@ -182,7 +182,7 @@ export const HeroBoard = React.memo(function HeroBoard({
               articlesByCategory={articlesByCategory}
             />
             <div className="hidden lg:col-span-4 lg:block lg:order-first">
-              <HeroSidebarLeft activeLeftItems={activeLeftItems} />
+              <HeroSidebarLeft activeLeftItems={activeLeftItems} cfg={cfg} />
             </div>
           </div>
           <HeroBottomGrid cfg={cfg} activeBottomItems={activeBottomItems} />

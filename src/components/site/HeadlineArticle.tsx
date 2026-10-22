@@ -2,6 +2,7 @@ import { Views } from "./Views";
 import type { Item } from "@/lib/mock-news-data";
 import { Link } from "@tanstack/react-router";
 import { getArticleImage } from "@/lib/news-data";
+import { getNewsTitleStyle } from "@/lib/homepage-config";
 
 export function MinRead({
   seed,
@@ -32,10 +33,12 @@ export function HeadlineArticle({
   item,
   dense = false,
   priority = false,
+  sectionStyle,
 }: {
   item: any;
   dense?: boolean;
   priority?: boolean;
+  sectionStyle?: any;
 }) {
   if (!item) return null;
   return (
@@ -66,7 +69,8 @@ export function HeadlineArticle({
         </div>
       )}
       <h3
-        className={`headline text-foreground group-hover:underline line-clamp-2 ${dense ? "text-lg" : "text-xl"}`}
+        className={`headline news-title-interactive group-hover:underline line-clamp-2 ${dense ? "text-lg" : "text-xl"}`}
+        style={getNewsTitleStyle(sectionStyle)}
         suppressHydrationWarning
       >
         {item.title}

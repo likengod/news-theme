@@ -13,6 +13,7 @@ import {
 
 import { LiveVideo } from "../LiveVideo";
 import HeroFeaturedSlider from "./HeroFeaturedSlider";
+import { getNewsTitleStyle } from "@/lib/homepage-config";
 
 const isRealAd = (ad: AdSlideItem) => {
   const img = ad?.imageLandscape || ad?.image || ad?.imagePortrait || "";
@@ -107,7 +108,10 @@ export function HeroMain({ activeLeads, cfg }: any) {
             className="w-full h-auto max-h-[480px] object-contain object-center transition-transform duration-500 group-hover:scale-[1.02]"
           />
         </div>
-        <h2 className="headline mt-3 text-xl font-bold text-foreground group-hover:underline md:mt-4 md:text-3xl">
+        <h2
+          className="headline mt-3 text-xl font-bold news-title-interactive group-hover:underline md:mt-4 md:text-3xl"
+          style={getNewsTitleStyle(cfg?.heroFeatured)}
+        >
           {featured.title}
         </h2>
         <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
@@ -164,6 +168,7 @@ export function HeroMain({ activeLeads, cfg }: any) {
             autoSlide={autoSlide}
             slideInterval={slideInterval}
             isEnterprisePlus={isEnterprisePlus}
+            sectionCfg={cfg?.heroFeatured}
           />
         ) : (
           renderSingleLead()

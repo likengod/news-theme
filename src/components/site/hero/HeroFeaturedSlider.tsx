@@ -13,6 +13,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { ScriptAdRenderer } from "@/components/site/ScriptAdRenderer";
 import type { AdSlideItem } from "@/lib/site-content";
+import { getNewsTitleStyle } from "@/lib/homepage-config";
 
 interface HeroFeaturedSliderProps {
   leads: any[];
@@ -23,6 +24,7 @@ interface HeroFeaturedSliderProps {
   autoSlide: boolean;
   slideInterval: number;
   isEnterprisePlus: boolean;
+  sectionCfg?: any;
 }
 
 export default function HeroFeaturedSlider({
@@ -34,6 +36,7 @@ export default function HeroFeaturedSlider({
   autoSlide,
   slideInterval,
   isEnterprisePlus,
+  sectionCfg,
 }: HeroFeaturedSliderProps) {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
@@ -81,7 +84,10 @@ export default function HeroFeaturedSlider({
               className="w-full h-auto max-h-[480px] object-contain object-center transition-transform duration-500 group-hover:scale-[1.02]"
             />
           </div>
-          <h2 className="headline mt-3 text-xl font-bold text-foreground group-hover:underline md:mt-4 md:text-3xl">
+          <h2
+            className="headline mt-3 text-xl font-bold news-title-interactive group-hover:underline md:mt-4 md:text-3xl"
+            style={getNewsTitleStyle(sectionCfg)}
+          >
             {featured.title}
           </h2>
           <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">

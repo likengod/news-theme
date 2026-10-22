@@ -17,6 +17,7 @@ import {
   type AdSlotMode,
 } from "@/lib/site-content";
 import { useHomepageConfig } from "@/hooks/use-homepage-config";
+import { getNewsTitleStyle } from "@/lib/homepage-config";
 import { ScriptAdRenderer } from "./ScriptAdRenderer";
 
 import { getArticleImage } from "@/lib/news-data";
@@ -69,7 +70,7 @@ function getArticleSnippet(art?: { content?: string; excerpt?: string } | null):
   return text;
 }
 
-function MagazineLeadHeadline({ leadArt }: { leadArt: any }) {
+function MagazineLeadHeadline({ leadArt, sectionCfg }: { leadArt: any; sectionCfg?: any }) {
   const snippet = getArticleSnippet(leadArt);
 
   return (
@@ -80,7 +81,10 @@ function MagazineLeadHeadline({ leadArt }: { leadArt: any }) {
       }}
       className="group flex flex-col justify-center pt-0.5 min-w-0 w-full"
     >
-      <h2 className="headline text-[24px] sm:text-[28px] lg:text-[32px] xl:text-[36px] font-extrabold leading-[1.25] tracking-tight text-foreground group-hover:text-red-600 transition-colors line-clamp-3">
+      <h2
+        className="headline text-[24px] sm:text-[28px] lg:text-[32px] xl:text-[36px] font-extrabold leading-[1.25] tracking-tight news-title-interactive line-clamp-3"
+        style={getNewsTitleStyle(sectionCfg)}
+      >
         {leadArt.title}
       </h2>
       <p className="mt-3 text-[14px] sm:text-[15px] lg:text-[16px] leading-relaxed text-muted-foreground line-clamp-4 select-text">
@@ -97,7 +101,7 @@ function MagazineLeadHeadline({ leadArt }: { leadArt: any }) {
   );
 }
 
-function MagazineCard1({ p1 }: { p1: any }) {
+function MagazineCard1({ p1, sectionCfg }: { p1: any; sectionCfg?: any }) {
   return (
     <Link
       to="/news/$slug"
@@ -118,7 +122,10 @@ function MagazineCard1({ p1 }: { p1: any }) {
           className="h-[130px] md:h-[135px] w-full object-cover md:w-[194px] rounded-xs shrink-0"
         />
         <div className="min-w-0">
-          <p className="headline text-[20px] font-bold leading-[1.3] tracking-normal text-foreground group-hover:underline md:text-[22px] line-clamp-2">
+          <p
+            className="headline text-[20px] font-bold leading-[1.3] tracking-normal news-title-interactive group-hover:underline md:text-[22px] line-clamp-2"
+            style={getNewsTitleStyle(sectionCfg)}
+          >
             {p1.title}
           </p>
           <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground line-clamp-3 overflow-hidden">
@@ -130,14 +137,17 @@ function MagazineCard1({ p1 }: { p1: any }) {
   );
 }
 
-function MagazineSmallCard({ article }: { article: any }) {
+function MagazineSmallCard({ article, sectionCfg }: { article: any; sectionCfg?: any }) {
   return (
     <Link
       to="/news/$slug"
       params={{ slug: article.slug }}
       className="group block min-w-0"
     >
-      <p className="headline text-[17px] font-bold leading-[1.32] tracking-normal text-foreground group-hover:underline line-clamp-2">
+      <p
+        className="headline text-[17px] font-bold leading-[1.32] tracking-normal news-title-interactive group-hover:underline line-clamp-2"
+        style={getNewsTitleStyle(sectionCfg)}
+      >
         {article.title}
       </p>
       <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground line-clamp-3 overflow-hidden">
@@ -357,7 +367,7 @@ export function MarketsMagazine({
         </Link>
 
         {/* Headline & Story Deck Column */}
-        <MagazineLeadHeadline leadArt={leadArt} />
+        <MagazineLeadHeadline leadArt={leadArt} sectionCfg={cfg.marketsMagazine} />
 
         {/* Right Ad Slot (Only if ads are present) */}
         {hasAd && (
@@ -401,9 +411,9 @@ export function MarketsMagazine({
 
       {(p1 || p2 || p3) && (
         <div className="mt-3 grid gap-6 md:gap-8 border-t border-border pt-4 md:grid-cols-3 lg:grid-cols-[minmax(0,1.62fr)_minmax(0,0.7fr)_minmax(0,0.86fr)] w-full max-w-full min-w-0">
-          {p1 && <MagazineCard1 p1={p1} />}
-          {p2 && <MagazineSmallCard article={p2} />}
-          {p3 && <MagazineSmallCard article={p3} />}
+          {p1 && <MagazineCard1 p1={p1} sectionCfg={cfg.marketsMagazine} />}
+          {p2 && <MagazineSmallCard article={p2} sectionCfg={cfg.marketsMagazine} />}
+          {p3 && <MagazineSmallCard article={p3} sectionCfg={cfg.marketsMagazine} />}
         </div>
       )}
     </section>
