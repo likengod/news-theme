@@ -181,6 +181,17 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // Fast-path SSR cache purge endpoint (called on settings/article save or admin cleanup)
+    if (parsedPath === "/api/internal/clear-cache" || parsedPath === "/api/purge-ssr-cache") {
+      SSR_CACHE.clear();
+      cachedCssLink = "";
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.end(JSON.stringify({ success: true, message: "SSR micro-cache cleared" }));
+      return;
+    }
+
     // Fast-path emergency pull & self-heal endpoint (works even if SSR is down)
     if (parsedPath === "/api/emergency-pull" || parsedPath === "/api/self-heal") {
       try {
@@ -384,9 +395,11 @@ const server = createServer(async (req, res) => {
       !parsedPath.startsWith("/_serverFn") &&
       !parsedPath.startsWith("/admin") &&
       !parsedPath.startsWith("/setup") &&
+      !parsedPath.startsWith("/search") &&
       !(req.headers.cookie && (req.headers.cookie.includes("nt_session") || req.headers.cookie.includes("session_token")));
 
-    const cacheKey = parsedPath;
+    // Cache key includes full URL with query parameters so /page?q=... or ?page=2 are distinct
+    const cacheKey = rawUrl;
     const now = Date.now();
     if (isPublicGet && SSR_CACHE.has(cacheKey)) {
       const cached = SSR_CACHE.get(cacheKey);
@@ -464,20 +477,22 @@ const server = createServer(async (req, res) => {
       bodyBuffer = Buffer.concat(chunks);
     }
 
-    // Save to SSR Micro-Cache if eligible (120-second TTL)
+    // Save to SSR Micro-Cache if eligible (15-second TTL for traffic shielding + instant content freshness)
     if (isPublicGet && response.status === 200 && isHtml && bodyBuffer.length > 0) {
       try {
         const gzipped = zlib.gzipSync(bodyBuffer, { level: 6 });
         SSR_CACHE.set(cacheKey, {
           html: bodyBuffer,
           gzipped,
-          expiry: now + 120 * 1000,
+          expiry: now + 15 * 1000,
         });
         if (SSR_CACHE.size > 200) {
           // Prune oldest
           const firstKey = SSR_CACHE.keys().next().value;
           if (firstKey) SSR_CACHE.delete(firstKey);
         }
+      } catch {}
+    }
       } catch {}
     }
 

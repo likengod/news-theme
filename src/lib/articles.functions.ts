@@ -753,6 +753,10 @@ export const getPublicArchiveArticles = createServerFn({ method: "GET" })
 
 const HOMEPAGE_CACHE: Record<number, { data: any; lastFetched: number; TTL: number }> = {};
 
+export function clearHomepageArticlesCache(): void {
+  Object.keys(HOMEPAGE_CACHE).forEach((k) => delete HOMEPAGE_CACHE[k as any]);
+}
+
 // Public: get latest homepage articles (optimized lightweight payload)
 export const getHomepageArticles = createServerFn({ method: "GET" })
   .validator((limit: any) => limit)

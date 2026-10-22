@@ -30,14 +30,46 @@ export function clearCache(key: string) {
 export const clearAllCachesServer = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .handler(async () => {
-    // 1. Clear in-memory cache
+    // 1. Clear in-memory site settings & data caches
     for (const key in SERVER_CACHE) {
       delete SERVER_CACHE[key];
     }
 
+    // 2. Clear specialized subsystem caches
+    try {
+      const { clearHomepageArticlesCache } = await import("../articles.functions");
+      clearHomepageArticlesCache();
+    } catch {}
+
+    try {
+      const { clearCategoriesCache, clearTagsCache } = await import("../taxonomy.functions");
+      clearCategoriesCache();
+      clearTagsCache();
+    } catch {}
+
+    try {
+      const { clearFontCache } = await import("../font-config");
+      clearFontCache();
+    } catch {}
+
+    // 3. Purge server.js SSR micro-cache via fast-path endpoint
+    try {
+      const port = process.env.PORT || "3000";
+      const http = await import("node:http");
+      const req = http.request({
+        hostname: "127.0.0.1",
+        port: Number(port),
+        path: "/api/internal/clear-cache",
+        method: "GET",
+        timeout: 2000,
+      });
+      req.on("error", () => {});
+      req.end();
+    } catch {}
+
     let purgedCount = 0;
 
-    // 2. Scan and purge orphaned promotional & stray upload images from disk
+    // 4. Scan and purge orphaned promotional & stray upload images from disk
     try {
       const fs = await import("node:fs");
       const path = await import("node:path");

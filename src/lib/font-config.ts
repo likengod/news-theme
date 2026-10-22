@@ -306,6 +306,10 @@ function clearCache(key: string): void {
   cache.delete(key);
 }
 
+export function clearFontCache(): void {
+  cache.clear();
+}
+
 // Server functions
 export const getFontConfigServer = createServerFn({ method: "GET" }).handler(async () => {
   const cacheKey = "font_configuration_data";
