@@ -255,11 +255,10 @@ export function RedirectsAndLinksTab() {
                   </tr>
                 ) : brokenLinks.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={4}
-                      className="px-4 py-6 text-center text-emerald-600 font-semibold flex items-center justify-center gap-1.5"
-                    >
-                      <CheckCircle className="h-4 w-4" /> Perfect SEO Health! No broken links found.
+                    <td colSpan={4} className="px-4 py-6 text-center text-emerald-600 font-semibold">
+                      <div className="flex items-center justify-center gap-1.5">
+                        <CheckCircle className="h-4 w-4 text-emerald-600" /> Perfect SEO Health! No broken links found.
+                      </div>
                     </td>
                   </tr>
                 ) : (

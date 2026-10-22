@@ -195,13 +195,32 @@ export const scanBrokenLinksServer = createServerFn({ method: "GET" })
         let suggestion = "";
 
         if (url.startsWith("/")) {
-          const path = url.split("?")[0].split("#")[0];
+          let path = url.split("?")[0].split("#")[0];
+          // Normalize trailing slash (e.g. /about/ -> /about)
+          if (path.length > 1 && path.endsWith("/")) {
+            path = path.slice(0, -1);
+          }
+
+          // Skip static upload files, compiled assets, or APIs
+          if (
+            path.startsWith("/uploads/") ||
+            path.startsWith("/assets/") ||
+            path.startsWith("/fonts/") ||
+            path.startsWith("/api/")
+          ) {
+            continue;
+          }
 
           if (path.startsWith("/news/")) {
             const slug = path.substring(6);
             if (!articleSlugsMap.has(slug)) {
               isBroken = true;
               suggestion = findSuggestion(slug);
+            }
+          } else if (path.startsWith("/category/")) {
+            const catSlug = path.substring(10);
+            if (!categorySlugs.has(catSlug)) {
+              isBroken = true;
             }
           } else {
             const slug = path.substring(1);
@@ -232,7 +251,7 @@ export const fixBrokenLinkServer = createServerFn({ method: "POST" })
   .validator((data) =>
     z
       .object({
-        articleId: z.number(),
+        articleId: z.coerce.number(),
         brokenUrl: z.string().min(1),
         correctedUrl: z.string().min(1),
       })
