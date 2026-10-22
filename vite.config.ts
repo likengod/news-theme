@@ -7,6 +7,9 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  ssr: {
+    noExternal: ["@tanstack/router-core", "@tanstack/react-router"],
+  },
   server: {
     port: 3099,
     host: true,

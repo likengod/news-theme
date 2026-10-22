@@ -181,6 +181,25 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // Fast-path emergency pull & self-heal endpoint (works even if SSR is down)
+    if (parsedPath === "/api/emergency-pull" || parsedPath === "/api/self-heal") {
+      try {
+        const { execSync } = await import("node:child_process");
+        const gitCmd = "git fetch origin main --tags && git reset --hard origin/main";
+        const log = execSync(gitCmd, { cwd: __dirname, encoding: "utf-8", timeout: 60000 });
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ success: true, log }));
+        setTimeout(() => process.exit(0), 1000);
+        return;
+      } catch (err) {
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ success: false, error: err?.message || String(err) }));
+        return;
+      }
+    }
+
     // Special handling for favicon.ico so it never falls into SSR route matching
     if (parsedPath === "/favicon.ico") {
       const icoDirs = [
