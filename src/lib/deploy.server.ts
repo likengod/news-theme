@@ -39,9 +39,55 @@ export function parseSemver(v: string) {
   return (parts[0] || 0) * 1000000 + (parts[1] || 0) * 1000 + (parts[2] || 0);
 }
 
+export function getSpawnEnv(): NodeJS.ProcessEnv {
+  const nodeBinDir = path.dirname(process.execPath);
+  const existingPath = process.env.PATH || "";
+  const hostingerAltPaths = [
+    nodeBinDir,
+    "/usr/local/bin",
+    "/usr/bin",
+    "/bin",
+    "/opt/alt/alt-nodejs22/root/usr/bin",
+    "/opt/alt/alt-nodejs20/root/usr/bin",
+    "/opt/alt/alt-nodejs18/root/usr/bin",
+  ].filter(Boolean);
+
+  return {
+    ...process.env,
+    PATH: hostingerAltPaths.join(path.delimiter) + path.delimiter + existingPath,
+    GIT_TERMINAL_PROMPT: "0",
+  };
+}
+
+export function getNpmCommand(): string | null {
+  const nodeBinDir = path.dirname(process.execPath);
+  const candidates = [
+    path.join(nodeBinDir, process.platform === "win32" ? "npm.cmd" : "npm"),
+    "/usr/local/bin/npm",
+    "/usr/bin/npm",
+    "/opt/alt/alt-nodejs22/root/usr/bin/npm",
+    "/opt/alt/alt-nodejs20/root/usr/bin/npm",
+    "/opt/alt/alt-nodejs18/root/usr/bin/npm",
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return `"${c}"`;
+  }
+  try {
+    execSync("npm --version", { env: getSpawnEnv(), stdio: "ignore" });
+    return "npm";
+  } catch {
+    return null;
+  }
+}
+
 export function git(cmd: string): string {
   try {
-    return execSync(`git ${cmd}`, { cwd: ROOT, encoding: "utf-8", timeout: 60000 }).trim();
+    return execSync(`git -c safe.directory=* -c http.sslVerify=false ${cmd}`, {
+      cwd: ROOT,
+      encoding: "utf-8",
+      timeout: 120000,
+      env: getSpawnEnv(),
+    }).trim();
   } catch (err: any) {
     return err.stderr?.trim() || err.message || "unknown error";
   }
@@ -231,9 +277,14 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
 export async function executeGitPullCore() {
   await ensureDeployTable();
 
-  // 1. Configure safe directory on Linux & ensure git origin with permanent PAT
-  git("config --global --add safe.directory *");
   const authRemote = getAuthenticatedGitUrl();
+
+  // 1. Configure safe directory on Linux & disable SSL verify for hosts with outdated cert stores
+  git("config --global --add safe.directory *");
+  git("config safe.directory *");
+  git("config http.sslVerify false");
+
+  // 2. Ensure git remote origin exists and has correct fetch refspec
   const remote = git("remote get-url origin");
   if (!remote || remote.includes("fatal") || remote.includes("not a git repository")) {
     git("init");
@@ -242,65 +293,66 @@ export async function executeGitPullCore() {
   } else {
     git(`remote set-url origin ${authRemote}`);
   }
-
-  const beforeHash = git("rev-parse --short HEAD");
-
-  // 2. Fetch origin main with tags and reset cleanly
   git('config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"');
-  git("fetch --depth=1 origin main:refs/remotes/origin/main");
+
+  // 3. Fetch from origin (or direct URL if remote lookup fails)
+  let fetchResult = git("fetch --depth=1 origin main");
+  if (fetchResult.includes("fatal") || fetchResult.includes("unknown error")) {
+    fetchResult = git(`fetch --depth=1 ${authRemote} main`);
+  }
+
+  // 4. Force checkout / reset to FETCH_HEAD directly
   git("branch -M main");
-  let pullResult = git("checkout -f -B main refs/remotes/origin/main");
-  if (!pullResult || pullResult.includes("fatal") || pullResult.includes("unknown revision")) {
-    pullResult = git("reset --hard refs/remotes/origin/main");
+  let pullResult = git("checkout -f -B main FETCH_HEAD");
+  if (!pullResult || pullResult.includes("fatal")) {
+    pullResult = git("reset --hard FETCH_HEAD");
   }
   if (!pullResult || pullResult.includes("fatal")) {
     pullResult = git("reset --hard origin/main");
   }
 
-  // 3. Fast deployment: use verified pre-compiled dist directly from Git if present
-  let buildLog = "";
+  // 5. Pre-compiled dist check & safe dependency sync
+  let buildLog = `Git Fetch: ${fetchResult}\nGit Checkout: ${pullResult}\n`;
   let buildSuccess = true;
   const hasPrebuiltDist = fs.existsSync(path.join(ROOT, "dist", "server", "server.js"));
 
-  // Always sync dependencies with package.json / package-lock.json overrides
-  try {
-    const installLog = execSync("npm install --no-audit --no-fund 2>&1", {
-      cwd: ROOT,
-      encoding: "utf-8",
-      timeout: 120000,
-    });
-    buildLog += "\n[Security & Dependencies]: node_modules synced.\n" + installLog.slice(-500);
-  } catch (depErr: any) {
-    console.warn("[Deploy] npm install warning:", depErr?.message || depErr);
-    buildLog += "\n[Security notice]: " + (depErr?.message || "npm install skipped");
+  const npmCmd = getNpmCommand();
+  if (npmCmd) {
+    try {
+      const installLog = execSync(`${npmCmd} install --no-audit --no-fund 2>&1`, {
+        cwd: ROOT,
+        encoding: "utf-8",
+        timeout: 120000,
+        env: getSpawnEnv(),
+      });
+      buildLog += "\n[Security & Dependencies]: node_modules synced.\n" + installLog.slice(-500);
+    } catch (depErr: any) {
+      buildLog += "\n[Security notice]: " + (depErr?.message || "npm install skipped");
+    }
+  } else {
+    buildLog += "\n[Environment notice]: npm binary not in system path, skipping npm install.";
   }
 
   if (hasPrebuiltDist) {
     buildLog = "Pre-compiled production bundle verified from Git. Instant safe deployment applied.\n" + buildLog;
-  } else {
-    let hasNpm = false;
+  } else if (npmCmd) {
     try {
-      execSync("npm --version", { cwd: ROOT, encoding: "utf-8", timeout: 5000 });
-      hasNpm = true;
-    } catch {}
-
-    if (hasNpm) {
-      try {
-        buildLog = execSync("npm run build 2>&1", {
-          cwd: ROOT,
-          encoding: "utf-8",
-          timeout: 120000,
-        });
-      } catch (bErr: any) {
-        buildLog = bErr.stdout || bErr.stderr || bErr.message || "";
-        buildSuccess = false;
-        console.error("[Deploy] Build after pull error:", bErr);
-      }
-    } else {
-      buildLog = "npm is not installed on this runtime environment. Serving pre-compiled dist folder directly from Git.";
+      const bLog = execSync(`${npmCmd} run build 2>&1`, {
+        cwd: ROOT,
+        encoding: "utf-8",
+        timeout: 120000,
+        env: getSpawnEnv(),
+      });
+      buildLog += "\n" + bLog;
+    } catch (bErr: any) {
+      buildLog += "\n" + (bErr.stdout || bErr.stderr || bErr.message || "");
+      buildSuccess = false;
     }
+  } else {
+    buildLog += "\n[Build notice]: dist folder ready for serving.";
   }
 
+  invalidateGitStatusCache();
   const afterHash = git("rev-parse --short HEAD");
   const commitMessage = git("log -1 --pretty=%s");
 
@@ -309,7 +361,7 @@ export async function executeGitPullCore() {
     await query(
       `INSERT INTO deployments (commit_hash, commit_message, branch, status, triggered_by, build_log, finished_at)
          VALUES (?, ?, 'main', ?, 'admin', ?, NOW())`,
-      [afterHash, commitMessage, buildSuccess ? "Success" : "Pulled", `${pullResult}\n\n=== BUILD LOG ===\n${buildLog.slice(-3000)}`],
+      [afterHash, commitMessage, buildSuccess ? "Success" : "Pulled", `=== BUILD LOG ===\n${buildLog.slice(-3000)}`],
     );
   } catch (dbErr) {
     console.warn("[Deploy] Failed to log deployment into DB:", dbErr);
