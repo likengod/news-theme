@@ -118,6 +118,8 @@ export type SiteSettings = {
   seoRobotsIndex?: boolean;
   seoRobotsFollow?: boolean;
   seoGooglebotNews?: boolean;
+  seoAiBotsEnabled?: boolean;
+  seoAiTakeawaysEnabled?: boolean;
   seoCanonicalBaseUrl?: string;
   seoNewsPublicationName?: string;
   seoOrganizationType?: string;
@@ -268,6 +270,99 @@ export function isEnterprisePlusLicense(s?: SiteSettings | null): boolean {
   );
 }
 
+export function generateRobotsTxt(origin: string, aiBotsEnabled: boolean = false): string {
+  const cleanOrigin = (origin || "https://todaytripura.com").replace(/\/$/, "");
+  if (aiBotsEnabled) {
+    return `# Robots.txt - Generative Engine Optimization (GEO) & Answer Engine (AEO) Active
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/*
+Disallow: /setup
+
+# Permitted AI Search & Answer Engine Crawlers (GEO / AEO)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Block Aggressive Scrapers & Content Theft Bots
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+Sitemap: ${cleanOrigin}/sitemap.xml
+Sitemap: ${cleanOrigin}/news-sitemap.xml
+`;
+  }
+
+  // Default: Explicitly Block AI Scrapers
+  return `# Robots.txt - AI Crawlers Blocked (Default Inactive Mode)
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/*
+Disallow: /setup
+
+# Block AI Scrapers & Model Training Crawlers
+User-agent: GPTBot
+Disallow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+Sitemap: ${cleanOrigin}/sitemap.xml
+Sitemap: ${cleanOrigin}/news-sitemap.xml
+`;
+}
+
 export const defaultSettings: SiteSettings = {
   siteName: "Today Tripura",
   tagline: "Your daily window to the world — unfiltered, insightful, and always ahead.",
@@ -393,6 +488,8 @@ export const defaultSettings: SiteSettings = {
   seoRobotsIndex: true,
   seoRobotsFollow: true,
   seoGooglebotNews: true,
+  seoAiBotsEnabled: false,
+  seoAiTakeawaysEnabled: true,
   seoCanonicalBaseUrl: "",
   seoNewsPublicationName: "News Theme",
   seoOrganizationType: "NewsMediaOrganization",
@@ -595,5 +692,26 @@ export const saveSiteSettingsServer = createServerFn({ method: "POST" })
       [json, json],
     );
     clearCache("site_settings_data");
+
+    // Automatically synchronize physical robots.txt files for instant crawler response
+    try {
+      const fs = await import("fs");
+      const path = await import("path");
+      const robotsContent = generateRobotsTxt(
+        cleanedData.seoCanonicalBaseUrl || "https://todaytripura.com",
+        Boolean(cleanedData.seoAiBotsEnabled)
+      );
+      const root = process.cwd();
+      const paths = [
+        path.join(root, "public", "robots.txt"),
+        path.join(root, "dist", "client", "robots.txt"),
+      ];
+      for (const p of paths) {
+        try {
+          fs.writeFileSync(p, robotsContent, "utf-8");
+        } catch {}
+      }
+    } catch {}
+
     return { success: true };
   });

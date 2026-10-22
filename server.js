@@ -241,7 +241,7 @@ const server = createServer(async (req, res) => {
       res.statusCode = 200;
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.setHeader("Cache-Control", "public, max-age=86400");
-      res.end("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\nDisallow: /api/*\nDisallow: /setup\nSitemap: https://" + host + "/sitemap.xml\n");
+      res.end("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\nDisallow: /api/*\nDisallow: /setup\n\n# Explicitly Block AI Scrapers (Default Protection Mode)\nUser-agent: GPTBot\nDisallow: /\nUser-agent: OAI-SearchBot\nDisallow: /\nUser-agent: ClaudeBot\nDisallow: /\nUser-agent: PerplexityBot\nDisallow: /\nUser-agent: Google-Extended\nDisallow: /\nUser-agent: CCBot\nDisallow: /\n\nSitemap: https://" + host + "/sitemap.xml\nSitemap: https://" + host + "/news-sitemap.xml\n");
       return;
     }
 

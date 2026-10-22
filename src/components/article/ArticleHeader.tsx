@@ -155,13 +155,13 @@ export function ArticleHeader({
       </nav>
 
       {/* Main Headline - Bold, high impact, ABP Ananda style */}
-      <h1 className="text-2xl sm:text-3xl md:text-[34px] lg:text-[38px] font-bold text-slate-950 dark:text-white leading-[1.3] tracking-tight mb-3">
+      <h1 className="article-headline text-2xl sm:text-3xl md:text-[34px] lg:text-[38px] font-bold text-slate-950 dark:text-white leading-[1.3] tracking-tight mb-3">
         {title}
       </h1>
 
       {/* Excerpt / Dek / Sub-headline - ABP Ananda style */}
       {deck && (
-        <p className="text-base sm:text-lg text-slate-700 dark:text-slate-300 leading-relaxed font-normal mb-3">
+        <p className="article-deck text-base sm:text-lg text-slate-700 dark:text-slate-300 leading-relaxed font-normal mb-3">
           {deck}
         </p>
       )}

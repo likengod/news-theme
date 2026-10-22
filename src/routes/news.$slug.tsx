@@ -13,6 +13,7 @@ import { ArticleLeftNav } from "@/components/article/ArticleLeftNav";
 import { ShareRail } from "@/components/article/ShareRail";
 import { ArticleQrCard } from "@/components/article/ArticleQrCard";
 import { ContentProtectionGuard } from "@/components/article/ContentProtectionGuard";
+import { ArticleKeyTakeaways } from "@/components/article/ArticleKeyTakeaways";
 import { articleQueryOptions, type ArticlePageData } from "@/lib/article-data";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
@@ -149,6 +150,47 @@ export const Route = createFileRoute("/news/$slug")({
             },
             mainEntityOfPage: { "@type": "WebPage", "@id": url },
             description: data.excerpt,
+            articleSection: data.category,
+            inLanguage: "en",
+            keywords: data.category,
+            isAccessibleForFree: data.access_level !== "Premium",
+            publishingPrinciples: `${origin}/editorial-policy`,
+            speakable: {
+              "@type": "SpeakableSpecification",
+              cssSelector: [
+                ".article-headline",
+                ".article-deck",
+                ".article-takeaways",
+                ".article-paragraphs > p:first-of-type",
+              ],
+            },
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: origin,
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: data.category,
+                item: `${origin}/category/${encodeURIComponent(data.category)}`,
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: data.title,
+                item: url,
+              },
+            ],
           }),
         },
       ],
@@ -302,6 +344,10 @@ function ArticlePage() {
               caption={heroCaption}
               credit={heroCredit}
             />
+
+            {settings?.seoAiTakeawaysEnabled !== false && data.excerpt && (
+              <ArticleKeyTakeaways excerpt={data.excerpt} category={data.category} />
+            )}
 
             <div className="w-full pt-1">
               {checkingAuth ? (

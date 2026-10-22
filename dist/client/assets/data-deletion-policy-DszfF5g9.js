@@ -1,0 +1,2 @@
+import{t as e}from"./vendor-react-ll9v5vLK.js";import{g as t}from"./index-Dmxg7uV2.js";import{t as n}from"./PolicyLayout-B1_Ufzgm.js";var r=e();function i(){let e=t.useLoaderData();return(0,r.jsx)(n,{title:e?.title||``,intro:e?.intro||``,sections:e?.sections&&e.sections.length>0?e.sections.map(e=>({heading:e.heading,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e.body}})})):[{heading:e?.title||``,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e?.body||``}})}]})}export{i as component};
+//# sourceMappingURL=data-deletion-policy-DszfF5g9.js.map

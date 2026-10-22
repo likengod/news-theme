@@ -1,5 +1,5 @@
-# Robots.txt for News Vanguard 24x7
-# Copyright (c) 2026 Vanguard Tripura (vanguardtripura.com). All rights reserved.
+# Robots.txt - AI Crawlers Blocked (Default Inactive Mode)
+# Switch on "Allow AI Search Crawlers (GEO / AEO)" in Admin > SEO Settings to permit indexing.
 
 User-agent: *
 Allow: /
@@ -8,14 +8,26 @@ Disallow: /admin/*
 Disallow: /api/*
 Disallow: /setup
 
-# Block AI Scrapers & Code Theft Bots
+# Explicitly Block AI Scrapers & Model Training Crawlers by default
 User-agent: GPTBot
+Disallow: /
+
+User-agent: OAI-SearchBot
 Disallow: /
 
 User-agent: ChatGPT-User
 Disallow: /
 
 User-agent: ClaudeBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
 Disallow: /
 
 User-agent: CCBot
@@ -27,5 +39,5 @@ Disallow: /
 User-agent: Diffbot
 Disallow: /
 
-Sitemap: https://vanguardtripura.com/sitemap.xml
-Sitemap: https://vanguardtripura.com/news-sitemap.xml
+Sitemap: https://todaytripura.com/sitemap.xml
+Sitemap: https://todaytripura.com/news-sitemap.xml

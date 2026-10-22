@@ -282,9 +282,102 @@ export function SeoSettingsTab({ s, update }: SeoSettingsTabProps) {
         </div>
       </Card>
 
+      {/* 4. Generative Engine Optimization (GEO) & Answer Engine Optimization (AEO) */}
+      <Card
+        title="4. Generative Engine (GEO) & Answer Engine (AEO)"
+        subtitle="Optimize for ChatGPT Search, Google AI Overviews, Perplexity, and Claude. In default mode, AI bots are explicitly blocked in robots.txt."
+      >
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-slate-200 bg-white shadow-xs">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-slate-900">
+                  Allow AI Search Crawlers (GEO / AEO)
+                </span>
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                    s.seoAiBotsEnabled
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-amber-100 text-amber-800"
+                  }`}
+                >
+                  {s.seoAiBotsEnabled ? "Active (AI Allowed)" : "Inactive (AI Blocked by Default)"}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">
+                When <strong>Active</strong>: <code>robots.txt</code> allows <code>GPTBot</code>, <code>OAI-SearchBot</code>, <code>PerplexityBot</code>, <code>ClaudeBot</code>, and <code>Google-Extended</code> so your news articles can be discovered, summarized, and cited in AI answers.<br />
+                When <strong>Inactive (Default)</strong>: <code>robots.txt</code> explicitly disallows AI bots to block AI model scrapers from training on your content.
+              </p>
+            </div>
+
+            <label className="relative inline-flex items-center cursor-pointer shrink-0">
+              <input
+                type="checkbox"
+                checked={s.seoAiBotsEnabled ?? false}
+                onChange={(e) => update("seoAiBotsEnabled", e.target.checked)}
+                className="peer sr-only"
+                aria-label="Toggle AI Search Crawlers"
+              />
+              <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-emerald-600 peer-checked:after:translate-x-full peer-focus:outline-none" />
+            </label>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-slate-200 bg-white shadow-xs">
+            <div className="space-y-1">
+              <span className="text-sm font-bold text-slate-900 block">
+                Article "Key Takeaways" (TL;DR) & Speakable Schema
+              </span>
+              <p className="text-xs text-slate-500">
+                Displays a structured bulleted summary at the top of news articles and embeds Google's official <code>SpeakableSpecification</code>. Generative AI engines use this to extract direct quotes and cite Today Tripura as the primary answer source.
+              </p>
+            </div>
+
+            <label className="relative inline-flex items-center cursor-pointer shrink-0">
+              <input
+                type="checkbox"
+                checked={s.seoAiTakeawaysEnabled !== false}
+                onChange={(e) => update("seoAiTakeawaysEnabled", e.target.checked)}
+                className="peer sr-only"
+                aria-label="Toggle Key Takeaways Box"
+              />
+              <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-focus:outline-none" />
+            </label>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs">
+            <div className="flex items-center justify-between font-semibold text-slate-600 mb-2">
+              <span>Robots.txt AI Directives ({s.seoAiBotsEnabled ? "Permitted" : "Blocked"}):</span>
+              <div className="flex items-center gap-3">
+                <a
+                  href="/llms.txt"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-indigo-600 hover:underline"
+                >
+                  View /llms.txt <ExternalLink className="h-3 w-3" />
+                </a>
+                <a
+                  href="/robots.txt"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                >
+                  View /robots.txt <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            </div>
+            <pre className="font-mono text-[11px] bg-slate-900 text-slate-100 p-2.5 rounded overflow-x-auto leading-relaxed">
+              {s.seoAiBotsEnabled
+                ? `# GEO/AEO Permitted Mode:\nUser-agent: GPTBot\nAllow: /\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: ClaudeBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /`
+                : `# Default Inactive Mode (Explicitly Blocked):\nUser-agent: GPTBot\nDisallow: /\n\nUser-agent: OAI-SearchBot\nDisallow: /\n\nUser-agent: ClaudeBot\nDisallow: /\n\nUser-agent: PerplexityBot\nDisallow: /`}
+            </pre>
+          </div>
+        </div>
+      </Card>
+
       {/* 5. Google News & XML Sitemaps */}
       <Card
-        title="4. Google News & XML Sitemaps Hub"
+        title="5. Google News & XML Sitemaps Hub"
         subtitle="Submit these XML feeds to Google Publisher Center and Search Console for rapid discovery of breaking stories."
       >
         <div className="space-y-4">
@@ -372,7 +465,7 @@ export function SeoSettingsTab({ s, update }: SeoSettingsTabProps) {
 
       {/* 6. Schema.org NewsMediaOrganization Markup */}
       <Card
-        title="5. Schema.org NewsMediaOrganization Structured Data"
+        title="6. Schema.org NewsMediaOrganization Structured Data"
         subtitle="Trust signals and editorial accountability policies required by Google News algorithms."
       >
         <div className="space-y-4">
