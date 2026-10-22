@@ -16,6 +16,7 @@ import { NewsGridEditor } from "@/components/admin/homepage/NewsGridEditor";
 import { LiveVideoEditor } from "@/components/admin/homepage/LiveVideoEditor";
 import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
 import { getCategories } from "@/lib/taxonomy.functions";
+import { isEnterpriseLicense } from "@/lib/site-content/site-settings";
 
 export const Route = createFileRoute("/admin/homepage")({
   ssr: false,
@@ -54,8 +55,7 @@ function Group({
 
 function HomepageEditorPage() {
   const s = useSiteSettings();
-  const planType = (s.licenseType || "").toLowerCase();
-  const isEnterprise = planType.includes("enterprise");
+  const isEnterprise = isEnterpriseLicense(s);
 
   const [cfg, setCfg] = useState<HomepageConfig>(defaultHomepageConfig);
   const [dirty, setDirty] = useState(false);
@@ -155,37 +155,37 @@ function HomepageEditorPage() {
 
       {/* Top Header Bars & Market Ticker */}
       <Group
-        title="Top Header Bars & Market Ticker"
-        description="Show or hide the financial market ticker bar and breaking news bar."
+        title={isEnterprise ? "Top Header Bars & Market Ticker" : "Top Header Breaking News Bar"}
+        description={
+          isEnterprise
+            ? "Show or hide the financial market ticker bar and breaking news bar."
+            : "Show or hide the breaking news headlines scrolling ticker."
+        }
         defaultOpen={true}
       >
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className={`flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-xs ${!isEnterprise ? "opacity-60" : ""}`}>
-            <div>
-              <h3 className="text-sm font-semibold text-slate-800">
-                Stock Market Ticker Bar
-                {!isEnterprise && (
-                  <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-800">
-                    Enterprise
-                  </span>
-                )}
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Displays live indices (NIFTY 50, SENSEX, GOLD, SILVER, CRUDE OIL) under the header.
-              </p>
+        <div className={`grid gap-3 ${isEnterprise ? "sm:grid-cols-2" : "grid-cols-1"}`}>
+          {isEnterprise && (
+            <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800">
+                  Stock Market Ticker Bar
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Displays live indices (NIFTY 50, SENSEX, GOLD, SILVER, CRUDE OIL) under the header.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center ml-3 shrink-0 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={cfg.showTicker ?? false}
+                  onChange={(e) => update("showTicker", e.target.checked)}
+                  className="peer sr-only"
+                  aria-label="Toggle Stock Market Ticker Bar"
+                />
+                <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-focus:outline-none" />
+              </label>
             </div>
-            <label className={`relative inline-flex items-center ml-3 shrink-0 ${isEnterprise ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
-              <input
-                type="checkbox"
-                checked={isEnterprise ? (cfg.showTicker ?? false) : false}
-                onChange={(e) => isEnterprise && update("showTicker", e.target.checked)}
-                disabled={!isEnterprise}
-                className="peer sr-only"
-                aria-label="Toggle Stock Market Ticker Bar"
-              />
-              <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-focus:outline-none" />
-            </label>
-          </div>
+          )}
 
           <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
             <div>
