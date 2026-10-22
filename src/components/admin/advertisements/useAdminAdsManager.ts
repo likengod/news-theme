@@ -170,7 +170,7 @@ export function useAdminAdsManager(isEnterprise: boolean) {
     const item = trash.find((t) => t.id === id);
     if (item) {
       const urlsToDelete = [item.image, item.imagePortrait, item.imageLandscape].filter(
-        (url): url is string => !!url && typeof url === "string" && (url.startsWith("/uploads/ads/") || url.startsWith("/uploads/promos/")),
+        (url): url is string => !!url && typeof url === "string" && url.startsWith("/uploads/"),
       );
       if (urlsToDelete.length > 0) {
         try {
@@ -184,6 +184,32 @@ export function useAdminAdsManager(isEnterprise: boolean) {
     router.invalidate();
     setTrash(loadTrash());
     toast.success("Permanently deleted");
+  };
+
+  const onPurgeAll = async () => {
+    const urlsToDelete: string[] = [];
+    for (const item of trash) {
+      if (item.image && typeof item.image === "string" && item.image.startsWith("/uploads/")) {
+        urlsToDelete.push(item.image);
+      }
+      if (item.imagePortrait && typeof item.imagePortrait === "string" && item.imagePortrait.startsWith("/uploads/")) {
+        urlsToDelete.push(item.imagePortrait);
+      }
+      if (item.imageLandscape && typeof item.imageLandscape === "string" && item.imageLandscape.startsWith("/uploads/")) {
+        urlsToDelete.push(item.imageLandscape);
+      }
+    }
+    if (urlsToDelete.length > 0) {
+      try {
+        await deleteAdStaticFilesServer({ data: urlsToDelete });
+      } catch (err) {
+        console.error("Failed to delete static files:", err);
+      }
+    }
+    saveTrash([]);
+    router.invalidate();
+    setTrash([]);
+    toast.success("All trash emptied and image files deleted");
   };
 
   return {
@@ -212,5 +238,6 @@ export function useAdminAdsManager(isEnterprise: boolean) {
     onSave,
     onRestore,
     onPurge,
+    onPurgeAll,
   };
 }

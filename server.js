@@ -266,8 +266,10 @@ const server = createServer(async (req, res) => {
         path.join(__dirname, "uploads", fileNameOnly),
         path.join(__dirname, "public", "uploads", "promos", fileNameOnly),
         path.join(__dirname, "public", "uploads", "ads", fileNameOnly),
+        path.join(__dirname, "public", "uploads", "media", fileNameOnly),
         path.join(__dirname, "dist", "client", "uploads", "promos", fileNameOnly),
         path.join(__dirname, "dist", "client", "uploads", "ads", fileNameOnly),
+        path.join(__dirname, "dist", "client", "uploads", "media", fileNameOnly),
       ];
 
       for (const candidate of possibleUploadPaths) {

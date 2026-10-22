@@ -69,6 +69,7 @@ function AdvertisementsPage() {
     onSave,
     onRestore,
     onPurge,
+    onPurgeAll,
   } = useAdminAdsManager(isEnterprise);
 
   const [page, setPage] = useState(1);
@@ -161,6 +162,7 @@ function AdvertisementsPage() {
           slots={SLOTS}
           onRestore={onRestore}
           onPurge={onPurge}
+          onPurgeAll={onPurgeAll}
         />
       ) : slotMode === "script" ? (
         <ScriptAdEditor

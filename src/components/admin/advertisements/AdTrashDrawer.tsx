@@ -7,9 +7,10 @@ interface AdTrashDrawerProps {
   slots: Array<{ key: AdSlot; label: string }>;
   onRestore: (id: string) => void;
   onPurge: (id: string) => void;
+  onPurgeAll?: () => void;
 }
 
-export function AdTrashDrawer({ trash, slots, onRestore, onPurge }: AdTrashDrawerProps) {
+export function AdTrashDrawer({ trash, slots, onRestore, onPurge, onPurgeAll }: AdTrashDrawerProps) {
   if (trash.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
@@ -24,11 +25,24 @@ export function AdTrashDrawer({ trash, slots, onRestore, onPurge }: AdTrashDrawe
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between rounded-lg bg-amber-50 px-4 py-2 text-xs text-amber-800 border border-amber-200">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-amber-50 px-4 py-2.5 text-xs text-amber-800 border border-amber-200">
         <div className="flex items-center gap-2 font-medium">
           <Info className="h-4 w-4 shrink-0 text-amber-600" />
-          Items in trash are automatically purged 30 days after deletion.
+          Items in trash are automatically purged after 30 days.
         </div>
+        {onPurgeAll && trash.length > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm("Are you sure you want to permanently delete all items in trash and their image files?")) {
+                onPurgeAll();
+              }
+            }}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-red-700 transition"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Empty Trash ({trash.length})
+          </button>
+        )}
       </div>
       {trash.map((ad) => (
         <div

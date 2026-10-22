@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createServerFn } from "@tanstack/react-start";
 import { query } from "./db.server";
-import { persistBase64Image } from "./ad-storage.server";
+import { persistMediaImage } from "./ad-storage.server";
 
 export const uploadMediaServer = createServerFn({ method: "POST" })
   .validator(
@@ -18,8 +18,8 @@ export const uploadMediaServer = createServerFn({ method: "POST" })
     }) => data,
   )
   .handler(async ({ data }) => {
-    // 1. Save base64 to disk
-    const publicUrl = persistBase64Image(data.dataUrl, `media_${Date.now()}`);
+    // 1. Save base64 to disk under /uploads/media/
+    const publicUrl = persistMediaImage(data.dataUrl, `media_${Date.now()}`);
 
     // 2. Insert into database
     await query(
@@ -93,7 +93,7 @@ export const replaceMediaFileServer = createServerFn({ method: "POST" })
     }) => data,
   )
   .handler(async ({ data }) => {
-    const publicUrl = persistBase64Image(data.dataUrl, `media_${Date.now()}`);
+    const publicUrl = persistMediaImage(data.dataUrl, `media_${Date.now()}`);
     const updates = ["url = ?", "size = ?", "type = ?"];
     const params: any[] = [publicUrl, data.size, data.type];
     if (data.name !== undefined) {

@@ -702,11 +702,13 @@ export const deleteAdStaticFilesServer = createServerFn({ method: "POST" })
     const cwd = process.cwd();
     let deletedCount = 0;
 
-    for (const url of urls) {
-      if (!url || typeof url !== "string" || !(url.startsWith("/uploads/ads/") || url.startsWith("/uploads/promos/"))) continue;
+    for (const rawUrl of urls) {
+      if (!rawUrl || typeof rawUrl !== "string") continue;
+      const cleanUrl = rawUrl.split("?")[0].trim();
+      if (!cleanUrl.startsWith("/uploads/")) continue;
 
-      const filename = url.replace("/uploads/ads/", "").replace("/uploads/promos/", "");
-      if (filename.includes("/") || filename.includes("..")) continue;
+      const filename = path.basename(cleanUrl);
+      if (!filename || filename.includes("..") || filename === ".gitkeep") continue;
 
       const targetDirs = [
         path.join(cwd, "public", "uploads", "promos"),
@@ -715,6 +717,13 @@ export const deleteAdStaticFilesServer = createServerFn({ method: "POST" })
         path.join(cwd, "public", "uploads", "ads"),
         path.join(cwd, "dist", "client", "uploads", "ads"),
         path.join(cwd, "uploads", "ads"),
+        path.join(cwd, "public", "uploads", "media"),
+        path.join(cwd, "dist", "client", "uploads", "media"),
+        path.join(cwd, "public", "uploads", "documents"),
+        path.join(cwd, "dist", "client", "uploads", "documents"),
+        path.join(cwd, "public", "uploads"),
+        path.join(cwd, "dist", "client", "uploads"),
+        path.join(cwd, "uploads"),
       ];
 
       for (const dir of targetDirs) {
@@ -855,6 +864,78 @@ export const saveAdConfigurationServer = createServerFn({ method: "POST" })
       cleanData = cleanConfig;
     } catch (storageErr) {
       console.error("[AdStorage] Save persistence error:", storageErr);
+    }
+
+    // Auto-cleanup: remove physical image files for deleted/replaced ads
+    try {
+      const prevRows: any = await query(
+        "SELECT value FROM site_settings WHERE setting_key = 'ad_configuration_data'",
+      );
+      if (prevRows && prevRows[0]?.value) {
+        const prevConfig = JSON.parse(prevRows[0].value);
+        const extractUrls = (cfg: any): string[] => {
+          const list: string[] = [];
+          if (!cfg || !cfg.slots) return list;
+          for (const s of Object.keys(cfg.slots)) {
+            const arr = cfg.slots[s];
+            if (Array.isArray(arr)) {
+              for (const it of arr) {
+                if (it?.image) list.push(it.image);
+                if (it?.imagePortrait) list.push(it.imagePortrait);
+                if (it?.imageLandscape) list.push(it.imageLandscape);
+              }
+            }
+          }
+          return list;
+        };
+
+        const prevUrls = new Set(extractUrls(prevConfig));
+        const newUrls = new Set(extractUrls(cleanData));
+
+        const removedUrls: string[] = [];
+        for (const u of prevUrls) {
+          if (!newUrls.has(u) && u.startsWith("/uploads/")) {
+            removedUrls.push(u);
+          }
+        }
+
+        if (removedUrls.length > 0) {
+          // Check that they aren't also stored in media_library
+          const mediaRows: any = await query("SELECT url FROM media_library");
+          const mediaUrls = new Set((mediaRows || []).map((m: any) => m.url));
+          const safeToDelete = removedUrls.filter((u) => !mediaUrls.has(u));
+
+          if (safeToDelete.length > 0) {
+            const fs = await import("node:fs");
+            const path = await import("node:path");
+            const cwd = process.cwd();
+            for (const url of safeToDelete) {
+              const filename = path.basename(url.split("?")[0]);
+              if (!filename || filename === ".gitkeep") continue;
+
+              const candidateDirs = [
+                path.join(cwd, "public", "uploads", "promos"),
+                path.join(cwd, "dist", "client", "uploads", "promos"),
+                path.join(cwd, "uploads", "promos"),
+                path.join(cwd, "public", "uploads", "ads"),
+                path.join(cwd, "dist", "client", "uploads", "ads"),
+                path.join(cwd, "uploads", "ads"),
+                path.join(cwd, "public", "uploads"),
+                path.join(cwd, "dist", "client", "uploads"),
+                path.join(cwd, "uploads"),
+              ];
+              for (const dir of candidateDirs) {
+                const fp = path.join(dir, filename);
+                try {
+                  if (fs.existsSync(fp)) fs.unlinkSync(fp);
+                } catch {}
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("[AdStorage] Auto-cleanup error:", e);
     }
 
     const json = JSON.stringify(cleanData);
