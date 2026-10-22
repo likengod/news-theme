@@ -175,7 +175,7 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
       git(`remote set-url origin ${authRemote}`);
     }
     git('config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"');
-    git("fetch origin main --tags");
+    git("fetch --depth=1 origin main:refs/remotes/origin/main");
     const activeBranch = branch.includes("fatal") ? "main" : branch;
     let behindStr = git(`rev-list --count HEAD..origin/${activeBranch}`);
     if (behindStr.includes("fatal")) {
@@ -247,14 +247,14 @@ export async function executeGitPullCore() {
 
   // 2. Fetch origin main with tags and reset cleanly
   git('config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"');
-  git("fetch origin main --tags");
+  git("fetch --depth=1 origin main:refs/remotes/origin/main");
   git("branch -M main");
-  let pullResult = git("reset --hard origin/main");
+  let pullResult = git("checkout -f -B main refs/remotes/origin/main");
   if (!pullResult || pullResult.includes("fatal") || pullResult.includes("unknown revision")) {
-    pullResult = git("reset --hard FETCH_HEAD");
+    pullResult = git("reset --hard refs/remotes/origin/main");
   }
   if (!pullResult || pullResult.includes("fatal")) {
-    pullResult = git("checkout -f -B main FETCH_HEAD");
+    pullResult = git("reset --hard origin/main");
   }
 
   // 3. Fast deployment: use verified pre-compiled dist directly from Git if present
@@ -524,11 +524,11 @@ export async function executeInitializeGitRepoCore() {
 
     log += git(`remote add origin ${authUrl}`) + "\n";
     git('config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"');
-    log += git("fetch --all --tags") + "\n";
+    log += git(`fetch --depth=1 origin ${branch}:refs/remotes/origin/${branch}`) + "\n";
     log += git(`branch -M ${branch}`) + "\n";
-    let initReset = git(`reset --hard origin/${branch}`);
+    let initReset = git(`checkout -f -B ${branch} refs/remotes/origin/${branch}`);
     if (initReset.includes("fatal") || initReset.includes("unknown revision")) {
-      initReset = git("reset --hard FETCH_HEAD");
+      initReset = git(`reset --hard refs/remotes/origin/${branch}`);
     }
     log += initReset + "\n";
 
