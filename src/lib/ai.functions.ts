@@ -150,6 +150,22 @@ export const generateArticleContentServer = createServerFn({ method: "POST" })
 CRITICAL RULE: You must strictly follow the "5 Ws and H" rule. Ensure the lead paragraph clearly answers: Who, What, Where, When, Why, and How.
 Writing Style: ${effectiveStyle}
   ${effectiveStyle === `5 ws` ? `CRITICAL INSTRUCTION: You MUST structure the article body explicitly using headings for each of the Five Ws and H. Literally use <h2>Who is the story about?</h2>, <h2>What happened?</h2>, <h2>When did it happen?</h2>, <h2>Where did it take place?</h2>, <h2>Why did the story occur?</h2>, and <h2>How did the events come about?</h2> followed by paragraphs of deep information for each.` : ``}
+  ${effectiveStyle.toLowerCase().includes("nextgen") ? `CRITICAL NEXTGEN MULTI-ENGINE OPTIMIZATION RULES (5Ws + SEO + AEO + GEO + LLMO + AIO):
+You must craft this news story to dominate traditional search engines (Google, Bing) as well as AI answer engines and generative overviews (Google SGE / Gemini AI Overviews, Perplexity, ChatGPT, Claude):
+1. 5 Ws and H (Journalistic Inverted Pyramid):
+   - The opening lead paragraph MUST immediately establish Who, What, Where, When, Why, and How in an authoritative, factual journalistic tone.
+2. AEO (Answer Engine Optimization - Featured Snippets & Voice Search):
+   - Immediately following the lead, include a concise 40-50 word standalone summary paragraph that provides a direct, quotable answer to the core question of the event (targeted for Google Position Zero / voice search).
+3. GEO (Generative Engine Optimization - Google SGE & AI Overviews):
+   - Include high factual information gain: concrete verifiable entities (proper names, organizations, official designations, specific dates, numerical metrics, locations).
+   - Attribute facts clearly (e.g., "According to official reports...", "Speaking at the briefing...").
+4. LLMO (Large Language Model Optimization - ChatGPT, Claude, Perplexity Citable Format):
+   - Embed an <h2>Key Takeaways & Highlights</h2> section with 3-4 bullet points (<ul><li>...</li></ul>) synthesizing the essential facts for fast AI extraction.
+   - At the bottom of the article, embed an <h2>Frequently Asked Questions</h2> section containing 2 to 3 concise, high-value Q&As formatted using <p><strong>Q: [Question]?</strong><br/>A: [Direct 1-2 sentence answer]</p>.
+5. SEO & AIO (Search & Artificial Intelligence Semantic Optimization):
+   - Strict hierarchical semantic HTML (<h2> and <h3> tags, no non-semantic styling).
+   - High semantic entity density without keyword stuffing.
+   - Zero fluff, conversational filler, or boilerplate disclaimers.` : ``}
 
 Instructions/Details:
 ${data.instructions}

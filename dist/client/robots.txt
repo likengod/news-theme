@@ -1,4 +1,6 @@
 # Robots.txt - AI Crawlers Blocked (Default Inactive Mode)
+# Switch on "Allow AI Search Crawlers (GEO / AEO)" in Admin > SEO Settings to permit indexing.
+
 User-agent: *
 Allow: /
 Disallow: /admin
@@ -6,7 +8,7 @@ Disallow: /admin/*
 Disallow: /api/*
 Disallow: /setup
 
-# Block AI Scrapers & Model Training Crawlers
+# Explicitly Block AI Scrapers & Model Training Crawlers by default
 User-agent: GPTBot
 Disallow: /
 
@@ -37,5 +39,5 @@ Disallow: /
 User-agent: Diffbot
 Disallow: /
 
-Sitemap: http://localhost:3099/sitemap.xml
-Sitemap: http://localhost:3099/news-sitemap.xml
+Sitemap: https://todaytripura.com/sitemap.xml
+Sitemap: https://todaytripura.com/news-sitemap.xml

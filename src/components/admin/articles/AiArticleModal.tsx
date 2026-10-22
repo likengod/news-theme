@@ -31,7 +31,7 @@ export default function AiArticleModal({
   isEnterprise,
 }: AiArticleModalProps) {
   const [aiInstructions, setAiInstructions] = useState("");
-  const [aiStyle, setAiStyle] = useState("Normal");
+  const [aiStyle, setAiStyle] = useState(isEnterprise ? "NextGen" : "Normal");
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [generatedAiData, setGeneratedAiData] = useState<GeneratedAiContent | null>(null);
 
@@ -114,12 +114,28 @@ export default function AiArticleModal({
                   }`}
                   title={!isEnterprise ? "Enterprise or Enterprise+ license required to customize writing style" : undefined}
                 >
+                  <option value="NextGen">⚡ NextGen (5Ws + SEO, AEO, GEO, LLMO, AIO)</option>
                   <option value="Normal">Normal</option>
                   <option value="Corporate">Corporate</option>
                   <option value="Business">Business</option>
                   <option value="Friendly">Friendly</option>
                   <option value="5 ws">5 ws</option>
                 </select>
+                {isEnterprise && aiStyle === "NextGen" && (
+                  <div className="mt-1.5 p-2.5 rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200/80 text-[11px] text-slate-700 shadow-xs">
+                    <div className="font-semibold text-indigo-700 flex items-center gap-1.5 mb-1">
+                      <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+                      <span>NextGen Optimization Framework Active:</span>
+                    </div>
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-0.5 text-[10.5px] text-slate-600">
+                      <li>• <strong>5Ws & H</strong>: Inverted pyramid journalistic lead</li>
+                      <li>• <strong>AEO</strong>: Answer Engine summary for Featured Snippets</li>
+                      <li>• <strong>GEO</strong>: Entity citation graph for AI Overviews</li>
+                      <li>• <strong>LLMO</strong>: Key Takeaways & FAQ for ChatGPT/Perplexity</li>
+                      <li>• <strong>SEO & AIO</strong>: Clean semantic markup & rich meta tags</li>
+                    </ul>
+                  </div>
+                )}
                 {!isEnterprise && (
                   <p className="mt-1 text-[11px] text-amber-600">
                     Enterprise or Enterprise+ license required to customize writing styles.
