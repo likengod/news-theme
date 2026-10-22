@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { createServerFn } from "@tanstack/react-start";
 import { query } from "./db.server";
 import { persistBase64Image } from "./ad-storage.server";
@@ -120,9 +122,33 @@ export const batchUpdateAltTextServer = createServerFn({ method: "POST" })
     return { success: true, count: data.items.length };
   });
 
+
+function removeFileFromDisk(fileUrl?: string) {
+  if (!fileUrl || typeof fileUrl !== "string") return;
+  if (fileUrl.startsWith("/uploads/")) {
+    const cwd = process.cwd();
+    const candidatePaths = [
+      path.join(cwd, "public", fileUrl),
+      path.join(cwd, fileUrl),
+      path.join(cwd, "dist", "client", fileUrl),
+    ];
+    for (const p of candidatePaths) {
+      try {
+        if (fs.existsSync(p)) fs.unlinkSync(p);
+      } catch {}
+    }
+  }
+}
+
 export const deleteMediaServer = createServerFn({ method: "POST" })
   .validator((data: { id: string }) => data)
   .handler(async ({ data }) => {
+    try {
+      const rows: any = await query("SELECT url FROM media_library WHERE id = ?", [data.id]);
+      if (Array.isArray(rows) && rows[0]?.url) {
+        removeFileFromDisk(rows[0].url);
+      }
+    } catch {}
     await query("DELETE FROM media_library WHERE id = ?", [data.id]);
     return { success: true };
   });
@@ -131,6 +157,15 @@ export const deleteMultipleMediaServer = createServerFn({ method: "POST" })
   .validator((data: { ids: string[] }) => data)
   .handler(async ({ data }) => {
     if (!data.ids || data.ids.length === 0) return { success: true, count: 0 };
+    try {
+      const placeholders = data.ids.map(() => "?").join(",");
+      const rows: any = await query(`SELECT url FROM media_library WHERE id IN (${placeholders})`, data.ids);
+      if (Array.isArray(rows)) {
+        for (const r of rows) {
+          if (r?.url) removeFileFromDisk(r.url);
+        }
+      }
+    } catch {}
     const placeholders = data.ids.map(() => "?").join(",");
     await query(`DELETE FROM media_library WHERE id IN (${placeholders})`, data.ids);
     return { success: true, count: data.ids.length };
