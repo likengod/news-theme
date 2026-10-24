@@ -73,15 +73,21 @@ function SubscriptionPage() {
     const premium = roles.find((r) => r.id === "premium");
     if (!premium) return toast.error("Premium role not configured");
 
+    try {
+      await upgradeFn({ data: {} as any }); // Update server side
+    } catch (e: any) {
+      if (e?.message && e.message.includes("Too many")) {
+        return toast.error(e.message);
+      }
+      // If not logged in, inform user
+      if (e?.message && (e.message.includes("401") || e.message.includes("Unauthorized") || e.message.includes("Authentication required"))) {
+        return toast.error("Please sign in or create an account to subscribe.");
+      }
+    }
+
     const current = getCurrentRoleId();
     if (!["admin", "editor", "journalist", "author", "premium"].includes(current)) {
       setCurrentRoleId("premium"); // Update client side immediately only if they were a reader
-    }
-
-    try {
-      await upgradeFn({ data: {} as any }); // Update server side
-    } catch (e) {
-      // Ignore errors (e.g. not logged in) - the client side will still work for guest demo
     }
 
     toast.success(`Welcome to Premium (${plan})! Your account is upgraded.`);

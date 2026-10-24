@@ -79,6 +79,7 @@ export function CommentsSection({
   const [email, setEmail] = useState("");
   const [draft, setDraft] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [hpTrap, setHpTrap] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [userDisplayName, setUserDisplayName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -143,7 +144,7 @@ export function CommentsSection({
 
     try {
       isReply ? setReplySubmitting(true) : setSubmitting(true);
-      await postCommentFn({ data: { articleSlug, articleTitle, name: authorName, email: authorEmail, body, parentId: parentId ?? null } });
+      await postCommentFn({ data: { articleSlug, articleTitle, name: authorName, email: authorEmail, body, parentId: parentId ?? null, hp_trap: hpTrap } });
       if (userId) trackComment(userId, articleSlug);
       toast.success(isReply ? "Reply submitted! Pending approval." : "Comment submitted! It is pending administrator approval before appearing here.");
       if (isReply) { setReplyDraft(""); setReplyingTo(null); }
@@ -230,6 +231,9 @@ export function CommentsSection({
   ) : (
     /* ── Main comment form: compact card ── */
     <form onSubmit={onSubmit} className="mt-3 space-y-3 rounded-lg border border-border/70 bg-card/60 p-3.5">
+        <div style={{ display: 'none', position: 'absolute', left: '-9999px' }} aria-hidden="true">
+          <input type="text" name="hp_trap" tabIndex={-1} autoComplete="off" value={hpTrap} onChange={(e) => setHpTrap(e.target.value)} />
+        </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label htmlFor="comment-author-name" className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Your Name</label>

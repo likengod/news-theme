@@ -39,6 +39,7 @@ export function RegisterForm({ onSwitchToSignin }: { onSwitchToSignin: () => voi
   const [showConfirm, setShowConfirm] = useState(false);
   const [agree, setAgree] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [hpTrap, setHpTrap] = useState("");
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -61,6 +62,7 @@ export function RegisterForm({ onSwitchToSignin }: { onSwitchToSignin: () => voi
       password: parsed.data.password,
       phone: parsed.data.phone,
       turnstileToken,
+      hp_trap: hpTrap,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
         data: {
@@ -85,6 +87,18 @@ export function RegisterForm({ onSwitchToSignin }: { onSwitchToSignin: () => voi
       </div>
 
       <form onSubmit={handleSignUp} className="space-y-4">
+        {/* Anti-bot Honeypot Trap (invisible to humans, auto-filled by spam bots) */}
+        <div style={{ display: "none", position: "absolute", left: "-9999px" }} aria-hidden="true">
+          <input
+            type="text"
+            name="hp_trap"
+            tabIndex={-1}
+            autoComplete="off"
+            value={hpTrap}
+            onChange={(e) => setHpTrap(e.target.value)}
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="firstName" className="text-sm font-semibold">

@@ -5,6 +5,14 @@ import crypto from "crypto";
 import { query, hashPassword, verifyPassword, cleanupExpiredSessions } from "./db.server";
 import { z } from "zod";
 import disposableDomains from "disposable-email-domains";
+import {
+  getClientIp,
+  checkLoginRateLimit,
+  recordFailedLogin,
+  clearLoginRateLimit,
+  checkSignupRateLimit,
+  validateHoneypot,
+} from "./security.server";
 
 // Generator for public_user_id (10 digits)
 async function generatePublicUserId(): Promise<string> {
@@ -29,21 +37,26 @@ export const signUpServer = createServerFn({ method: "POST" })
         password: z.string().min(8, "Password must be at least 8 characters").optional(),
         displayName: z.string().max(50).optional(),
         turnstileToken: z.string().min(1, "Captcha verification is required"),
+        hp_trap: z.string().optional(),
       })
       .parse(data),
   )
   .handler(async ({ data }) => {
+    // Anti-bot honeypot check
+    validateHoneypot(data.hp_trap);
+
     const { email, password, displayName, turnstileToken } = data;
     if (!email || !password) throw new Error("Email and password are required");
+
+    const req = getRequest();
+    const ip = getClientIp(req);
+
+    // Fast memory rate limiter: max 3 attempts per 10 mins from IP
+    checkSignupRateLimit(ip);
 
     // 1. Verify Turnstile Token
     const turnstileSecret =
       process.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
-    const req = getRequest();
-    const ip =
-      req?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req?.headers?.get("cf-connecting-ip") ||
-      "unknown";
 
     if (turnstileToken) {
       const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
@@ -144,12 +157,22 @@ export const signInServer = createServerFn({ method: "POST" })
       .object({
         email: z.string().min(1, "Identifier is required"),
         password: z.string().min(1, "Password is required").optional(),
+        hp_trap: z.string().optional(),
       })
       .parse(data),
   )
   .handler(async ({ data }) => {
+    // Anti-bot honeypot check
+    validateHoneypot(data.hp_trap);
+
     const { email, password } = data;
     if (!email || !password) throw new Error("Email and password are required");
+
+    const req = getRequest();
+    const ip = getClientIp(req);
+
+    // Layer 2: Check for brute-force lockout
+    checkLoginRateLimit(ip);
 
     await ensureAuthSchema();
 
@@ -175,15 +198,22 @@ export const signInServer = createServerFn({ method: "POST" })
       }
     }
 
-    if (users.length === 0) throw new Error("Invalid email, username, phone or password");
+    if (users.length === 0) {
+      recordFailedLogin(ip);
+      throw new Error("Invalid email, username, phone or password");
+    }
 
     const user = users[0];
 
     // Constant-time, backward-compatible verification supporting auto-migration
     const verification = verifyPassword(password, user.password_hash, user.salt || undefined);
     if (!verification.valid) {
+      recordFailedLogin(ip);
       throw new Error("Invalid email, username, phone or password");
     }
+
+    // Login successful: reset failed attempt counter for this IP
+    clearLoginRateLimit(ip);
 
     // Retroactive secure migration for users missing a salt or using legacy weak hash
     if (!user.salt || verification.needsRehash) {

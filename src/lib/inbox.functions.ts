@@ -1,9 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { requireAuth, requireAdmin } from "@/lib/auth-middleware";
 import { query } from "./db.server";
 import { persistDocumentImage, persistMediaImage } from "./ad-storage.server";
 import { z } from "zod";
 import crypto from "crypto";
+import { getClientIp, checkPublicFormRateLimit, validateHoneypot } from "./security.server";
 
 async function generateJournalistId(): Promise<string> {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -46,10 +48,19 @@ export const submitContactMessage = createServerFn({ method: "POST" })
         email: z.string().email("Invalid email").max(100),
         subject: z.string().max(100).optional(),
         message: z.string().min(1, "Message is required").max(5000),
+        hp_trap: z.string().optional(),
       })
       .parse(data),
   )
   .handler(async ({ data }) => {
+    // Anti-bot honeypot check
+    validateHoneypot(data.hp_trap);
+
+    // Layer 4: Rate limit contact messages (max 3 per 5 minutes per IP)
+    const req = getRequest();
+    const ip = getClientIp(req);
+    checkPublicFormRateLimit("contact", ip);
+
     await query(
       `INSERT INTO inbox_requests (type, user_email, user_name, title, details, status)
        VALUES (?, ?, ?, ?, ?, 'Pending')`,
@@ -82,10 +93,19 @@ export const submitWorkWithUs = createServerFn({ method: "POST" })
         tier: z.string().max(50),
         portfolio: z.string().max(500).optional(),
         pitch: z.string().min(1, "Pitch is required").max(5000),
+        hp_trap: z.string().optional(),
       })
       .parse(data),
   )
   .handler(async ({ data }) => {
+    // Anti-bot honeypot check
+    validateHoneypot(data.hp_trap);
+
+    // Layer 4: Rate limit applications (max 3 per 10 minutes per IP)
+    const req = getRequest();
+    const ip = getClientIp(req);
+    checkPublicFormRateLimit("work_with_us", ip);
+
     const details = JSON.stringify({
       phone: data.phone || "",
       alternativePhone: data.alternativePhone || "",
@@ -208,10 +228,19 @@ export const submitEventRegistration = createServerFn({ method: "POST" })
         customField: z.string().max(255).optional(),
         customFieldLabel: z.string().optional(),
         eventName: z.string().default("শারদ সম্মান"),
+        hp_trap: z.string().optional(),
       })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
+    // Anti-bot honeypot check
+    validateHoneypot(data.hp_trap);
+
+    // Layer 4: Rate limit event registrations (max 3 per 5 minutes per IP)
+    const req = getRequest();
+    const ip = getClientIp(req);
+    checkPublicFormRateLimit("event", ip);
+
     const details = JSON.stringify({
       "Event Name": data.eventName,
       "Phone": data.phone.trim(),
@@ -336,10 +365,19 @@ export const submitJournalistApplication = createServerFn({ method: "POST" })
         country: z.string().max(80).optional(),
         pinCode: z.string().max(20).optional(),
         bio: z.string().max(2000).optional(),
+        hp_trap: z.string().optional(),
       })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
+    // Anti-bot honeypot check
+    validateHoneypot(data.hp_trap);
+
+    // Layer 4: Rate limit applications (max 2 per 15 minutes per IP)
+    const req = getRequest();
+    const ip = getClientIp(req);
+    checkPublicFormRateLimit("journalist_application", ip);
+
     const savedDocUrl = data.documentUrl
       ? persistDocumentImage(data.documentUrl, "doc")
       : "";

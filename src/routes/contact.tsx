@@ -31,7 +31,7 @@ function ContactPage() {
   const s = useSiteSettings();
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", subject: "News tip", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", subject: "News tip", message: "", hp_trap: "" });
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const phoneHref = (s.contactPhone || "+91 99999 99999").replace(/[^0-9+]/g, "");
@@ -89,6 +89,18 @@ function ContactPage() {
                   }
                 }}
               >
+                {/* Anti-bot Honeypot Trap (invisible to humans, auto-filled by bots) */}
+                <div style={{ display: "none", position: "absolute", left: "-9999px" }} aria-hidden="true">
+                  <input
+                    type="text"
+                    name="hp_trap"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={form.hp_trap}
+                    onChange={(e) => set("hp_trap", e.target.value)}
+                  />
+                </div>
+
                 <label className="block text-sm">
                   <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                     Full name

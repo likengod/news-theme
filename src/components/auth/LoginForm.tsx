@@ -19,6 +19,7 @@ export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () => void }
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const [hpTrap, setHpTrap] = useState("");
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,7 +32,7 @@ export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () => void }
 
     setLoading(true);
     const id = parsed.data.identifier;
-    const creds = { email: id, password: parsed.data.password };
+    const creds = { email: id, password: parsed.data.password, hp_trap: hpTrap };
     const { error } = await supabase.auth.signInWithPassword(creds);
     setLoading(false);
     if (error) return toast.error(error.message);
@@ -66,6 +67,18 @@ export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () => void }
       </div>
 
       <form onSubmit={handleSignIn} className="space-y-4">
+        {/* Anti-bot Honeypot Trap (invisible to humans, auto-filled by spam bots) */}
+        <div style={{ display: "none", position: "absolute", left: "-9999px" }} aria-hidden="true">
+          <input
+            type="text"
+            name="hp_trap"
+            tabIndex={-1}
+            autoComplete="off"
+            value={hpTrap}
+            onChange={(e) => setHpTrap(e.target.value)}
+          />
+        </div>
+
         <div className="space-y-1.5">
           <Label htmlFor="identifier" className="text-sm font-semibold">
             Email, Username, or Phone

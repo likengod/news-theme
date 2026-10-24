@@ -28,7 +28,7 @@ function notify(event: string, session: any) {
 
 export const authClient = {
   auth: {
-    async signInWithPassword(credentials: { email: string; password?: string }) {
+    async signInWithPassword(credentials: { email: string; password?: string; hp_trap?: string }) {
       try {
         const res = await signInServer({ data: credentials });
         if (typeof window !== "undefined") {
@@ -49,6 +49,7 @@ export const authClient = {
       email: string;
       password?: string;
       turnstileToken?: string;
+      hp_trap?: string;
       options?: { data?: { display_name?: string } };
     }) {
       try {
@@ -58,6 +59,7 @@ export const authClient = {
             password: credentials.password,
             displayName: credentials.options?.data?.display_name,
             turnstileToken: credentials.turnstileToken || "",
+            hp_trap: credentials.hp_trap || "",
           },
         });
         if (typeof window !== "undefined") {

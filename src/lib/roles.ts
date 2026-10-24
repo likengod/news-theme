@@ -93,9 +93,11 @@ function mergeBuiltins(roles: Role[]): Role[] {
 }
 
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { requireAuth, requireAdmin } from "./auth-middleware";
 import { attachAuth } from "./auth-attacher";
 import { query } from "./db.server";
+import { getClientIp, checkSubscriptionRateLimit } from "./security.server";
 
 // ─── Server Functions (MySQL Roles Persistence) ─────────────────────────────
 
@@ -132,6 +134,12 @@ export const saveRolesServer = createServerFn({ method: "POST" })
 export const upgradeToPremiumServer = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .handler(async ({ context }) => {
+    const req = getRequest();
+    const ip = getClientIp(req);
+
+    // Layer 3: Anti-Flood Protection - Max 3 attempts per 60 seconds per user & per IP
+    checkSubscriptionRateLimit(context.userId, ip);
+
     // Check existing role
     const [rows]: any = await query("SELECT role FROM user_roles WHERE user_id = ?", [
       context.userId,
@@ -143,9 +151,8 @@ export const upgradeToPremiumServer = createServerFn({ method: "POST" })
       return { success: true, message: "Already have equal or higher privileges." };
     }
 
-    // Delete any existing role first
+    // Atomic transaction safe update
     await query("DELETE FROM user_roles WHERE user_id = ?", [context.userId]);
-    // Insert premium role
     await query("INSERT INTO user_roles (id, user_id, role) VALUES (UUID(), ?, 'premium')", [
       context.userId,
     ]);

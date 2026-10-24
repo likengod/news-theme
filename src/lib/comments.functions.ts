@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { requireAuth, requireAdmin } from "@/lib/auth-middleware";
 import { query } from "./db.server";
+import { getClientIp, checkPublicFormRateLimit, validateHoneypot } from "./security.server";
 
 export type CommentRow = {
   id: number;
@@ -227,9 +229,18 @@ export const postArticleComment = createServerFn({ method: "POST" })
       email: string;
       body: string;
       parentId?: number | null;
+      hp_trap?: string;
     }) => data,
   )
   .handler(async ({ data }) => {
+    // Anti-bot honeypot check
+    validateHoneypot(data.hp_trap);
+
+    // Layer 4: Rate limit comments (max 5 per 5 minutes per IP)
+    const req = getRequest();
+    const ip = getClientIp(req);
+    checkPublicFormRateLimit("comments", ip);
+
     // 1. Enforce Option A validations on the server-side as well
     const SITE_NAME = "News Theme";
     const minChars = data.parentId ? 15 : 30;
