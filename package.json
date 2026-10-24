@@ -9,6 +9,7 @@
     "build": "vite build",
     "build:clean": "vite build",
     "build:dev": "vite build --mode development",
+    "package": "node scripts/package-deploy.cjs",
     "start": "node server.js",
     "preview": "vite preview",
     "lint": "eslint .",
