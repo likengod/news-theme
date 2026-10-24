@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getPool } from "./db.server";
 import { requireAdmin } from "./auth-middleware";
 import { attachAuth } from "./auth-attacher";
+import { APP_VERSION } from "./version";
 
 export const generateBackupServer = createServerFn({ method: "POST" })
   .middleware([attachAuth, requireAdmin])
@@ -65,7 +66,7 @@ export const generateBackupServer = createServerFn({ method: "POST" })
 
       return {
         timestamp: new Date().toISOString(),
-        version: "1.2.22",
+        version: APP_VERSION,
         data: backupData,
         files,
         stats: {

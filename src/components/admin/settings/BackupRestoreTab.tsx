@@ -25,6 +25,7 @@ import {
   restoreBackupServer,
   fetchCloudBackupServer,
 } from "@/lib/backup.functions";
+import { APP_VERSION } from "@/lib/version";
 import JSZip from "jszip";
 
 export function BackupRestoreTab() {
@@ -66,7 +67,7 @@ export function BackupRestoreTab() {
       // Add manifest metadata
       const manifest = {
         website: "Today Tripura",
-        version: backupResponse.version || "1.2.22",
+        version: backupResponse.version || APP_VERSION,
         exportedAt: backupResponse.timestamp || new Date().toISOString(),
         stats: backupResponse.stats,
       };
@@ -183,7 +184,7 @@ export function BackupRestoreTab() {
       const res = await restoreBackup({
         data: {
           backup: {
-            version: "1.2.22",
+            version: APP_VERSION,
             data: dbData,
           },
           files: extractedFiles,
