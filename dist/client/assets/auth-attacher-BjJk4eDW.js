@@ -1,0 +1,2 @@
+import{r as e}from"./auth-middleware-BwSK_RvR.js";var t=`nt:mysql_session:v1`,n=e({type:`function`}).client(async({next:e})=>{if(typeof window<`u`)try{let n=localStorage.getItem(t);if(n){let t=JSON.parse(n);if(t?.access_token)return e({headers:{Authorization:`Bearer ${t.access_token}`}})}}catch{}return e()});export{n as t};
+//# sourceMappingURL=auth-attacher-BjJk4eDW.js.map
