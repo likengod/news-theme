@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Views } from "@/components/site/Views";
-import { loadSettings } from "@/lib/site-content";
+import { loadSettings, isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
 import { slugify } from "@/lib/news-data";
 import { Share2, Check } from "lucide-react";
 import { toast } from "sonner";
@@ -44,9 +44,13 @@ export function ArticleHeader({
     return () => window.removeEventListener("nt:settings-updated", handleUpdate);
   }, []);
 
+  const isEnterprise = isEnterpriseLicense(settings);
+  const isEnterprisePlus = isEnterprisePlusLicense(settings);
+  const canUseImage = isEnterprisePlus && Boolean(settings.festiveAlertImage);
+  const canUseText = isEnterprise && Boolean(settings.topBarWeatherCustomText);
+
   const hasCustomAlert =
-    settings.festiveThemeEnabled !== false &&
-    (!!settings.topBarWeatherCustomText || !!settings.festiveAlertImage);
+    settings.festiveThemeEnabled !== false && (canUseImage || canUseText);
 
   useEffect(() => {
     if (!hasCustomAlert) {
@@ -141,7 +145,7 @@ export function ArticleHeader({
 
         {hasCustomAlert && showCustomText && (
           <span className="ml-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider animate-in fade-in duration-300">
-            {settings.festiveAlertImage ? (
+            {canUseImage ? (
               <img
                 src={settings.festiveAlertImage}
                 alt="Alert"

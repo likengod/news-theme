@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Save, Sparkles, Power } from "lucide-react";
 import { toast } from "sonner";
-import { loadSettings, saveSettings, type SiteSettings } from "@/lib/site-content";
+import {
+  loadSettings,
+  saveSettings,
+  type SiteSettings,
+  isEnterpriseLicense,
+  isEnterprisePlusLicense,
+} from "@/lib/site-content";
 import { useFontConfig } from "@/components/site/AdSettingsContext";
 import {
   FESTIVE_GRADIENT_MAP,
@@ -19,6 +25,8 @@ export function FestiveSettingsForm() {
   const fontConfig = useFontConfig();
 
   const isFestiveEnabled = settings.festiveThemeEnabled !== false;
+  const isEnterprise = isEnterpriseLicense(settings);
+  const isEnterprisePlus = isEnterprisePlusLicense(settings);
 
   useEffect(() => {
     setSettings(loadSettings());
@@ -197,7 +205,13 @@ export function FestiveSettingsForm() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-12">
-          <FestiveControls settings={settings} update={update} fontConfig={fontConfig} />
+          <FestiveControls
+            settings={settings}
+            update={update}
+            fontConfig={fontConfig}
+            isEnterprise={isEnterprise}
+            isEnterprisePlus={isEnterprisePlus}
+          />
           <FestivePreviewCard
             settings={settings}
             isFestiveEnabled={isFestiveEnabled}
@@ -210,6 +224,7 @@ export function FestiveSettingsForm() {
             customAlertFontFamilyCss={customAlertFontFamilyCss}
             rotationAnimStyle={rotationAnimStyle}
             triggerTestSwap={triggerTestSwap}
+            isEnterprisePlus={isEnterprisePlus}
           />
         </div>
       </section>

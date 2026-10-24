@@ -51,7 +51,17 @@ export function LiveVideo() {
       }
       return "";
     }
-    const href = encodeURIComponent(liveVideo.facebookPageUrl || "");
+    let fbUrl = (liveVideo.facebookPageUrl || "").trim();
+    if (
+      fbUrl &&
+      !fbUrl.includes("/videos/") &&
+      !fbUrl.includes("/live") &&
+      !fbUrl.includes("watch") &&
+      !fbUrl.includes("fb.watch")
+    ) {
+      fbUrl = fbUrl.replace(/\/+$/, "") + "/live/";
+    }
+    const href = encodeURIComponent(fbUrl);
     return href ? `https://www.facebook.com/plugins/video.php?href=${href}&show_text=false&autoplay=1&mute=${muted ? 1 : 0}` : "";
   }, [liveVideo, muted]);
 

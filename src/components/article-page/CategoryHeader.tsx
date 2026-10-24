@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
+import { isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
 
 const FESTIVE_GRADIENT_MAP: Record<string, string> = {
   "indian-flag": "linear-gradient(to right, #FF9933, #000080, #138808)",
@@ -46,6 +47,33 @@ interface CategoryHeaderProps {
 }
 
 export function CategoryHeader({ category, settings, showCustomText }: CategoryHeaderProps) {
+  const isEnterprise = isEnterpriseLicense(settings);
+  const isEnterprisePlus = isEnterprisePlusLicense(settings);
+
+  // If site does not have Enterprise license:
+  // Strictly display plain category name only, with NO festive animation and NO festive alert image/text
+  if (!isEnterprise) {
+    return (
+      <header className="border-b border-border pb-3 overflow-hidden">
+        {/* Breadcrumb */}
+        <nav className="mb-1 flex items-center gap-1 text-[11px] uppercase tracking-widest text-muted-foreground">
+          <Link to="/" className="hover:text-foreground transition-colors">
+            Home
+          </Link>
+          <span className="mx-1">/</span>
+          <span className="text-foreground font-semibold">{category.name}</span>
+        </nav>
+        <h1 className="font-serif text-5xl font-bold md:text-6xl flex items-center flex-wrap gap-3">
+          <span className="text-foreground">{category.name}</span>
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+          {category.description}
+        </p>
+      </header>
+    );
+  }
+
+  // Enterprise & Enterprise Plus handling
   const activeCategoryGradient =
     settings.festiveCategoryTitleGradient &&
     (FESTIVE_GRADIENT_MAP[settings.festiveCategoryTitleGradient] ||
@@ -84,9 +112,12 @@ export function CategoryHeader({ category, settings, showCustomText }: CategoryH
       ? { color: settings.topBarTextColor }
       : undefined;
 
+  // Enterprise Plus gets Image support; Enterprise (standard) gets Text message support only
+  const canUseImageAlert = Boolean(isEnterprisePlus && settings.festiveAlertImage);
+  const canUseTextAlert = Boolean(settings.topBarWeatherCustomText);
+
   const hasCustomAlert = Boolean(
-    settings.festiveThemeEnabled !== false &&
-      (settings.topBarWeatherCustomText || settings.festiveAlertImage),
+    settings.festiveThemeEnabled !== false && (canUseImageAlert || canUseTextAlert),
   );
 
   const isShowingCustomAlert = Boolean(hasCustomAlert && showCustomText);
@@ -103,50 +134,50 @@ export function CategoryHeader({ category, settings, showCustomText }: CategoryH
     <>
       <style dangerouslySetInnerHTML={{ __html: SLUG_ROTATION_KEYFRAMES }} />
       <header className="border-b border-border pb-3 overflow-hidden">
-      {/* Breadcrumb */}
-      <nav className="mb-1 flex items-center gap-1 text-[11px] uppercase tracking-widest text-muted-foreground">
-        <Link to="/" className="hover:text-foreground transition-colors">
-          Home
-        </Link>
-        <span className="mx-1">/</span>
-        <span className="text-foreground font-semibold">{category.name}</span>
-      </nav>
-      <h1
-        key={`${showCustomText ? "custom" : "default"}-${settings.customAlertAnimationStyle}`}
-        className="font-serif text-5xl font-bold md:text-6xl flex items-center flex-wrap gap-3"
-        style={rotationAnimStyle}
-      >
-        {isShowingCustomAlert ? (
-          settings.festiveAlertImage ? (
-            <img
-              src={settings.festiveAlertImage}
-              alt="Alert Badge"
-              className="h-12 md:h-16 w-auto max-w-[240px] object-contain shrink-0 align-middle"
-            />
+        {/* Breadcrumb */}
+        <nav className="mb-1 flex items-center gap-1 text-[11px] uppercase tracking-widest text-muted-foreground">
+          <Link to="/" className="hover:text-foreground transition-colors">
+            Home
+          </Link>
+          <span className="mx-1">/</span>
+          <span className="text-foreground font-semibold">{category.name}</span>
+        </nav>
+        <h1
+          key={`${showCustomText ? "custom" : "default"}-${settings.customAlertAnimationStyle}`}
+          className="font-serif text-5xl font-bold md:text-6xl flex items-center flex-wrap gap-3"
+          style={hasCustomAlert ? rotationAnimStyle : undefined}
+        >
+          {isShowingCustomAlert ? (
+            canUseImageAlert ? (
+              <img
+                src={settings.festiveAlertImage}
+                alt="Alert Badge"
+                className="h-12 md:h-16 w-auto max-w-[240px] object-contain shrink-0 align-middle"
+              />
+            ) : (
+              <span
+                className={alertTextStyle ? "" : "text-foreground"}
+                style={{
+                  ...alertTextStyle,
+                  ...(customAlertFontFamilyCss ? { fontFamily: customAlertFontFamilyCss } : {}),
+                }}
+              >
+                {settings.topBarWeatherCustomText}
+              </span>
+            )
           ) : (
             <span
-              className={alertTextStyle ? "" : "text-foreground"}
-              style={{
-                ...alertTextStyle,
-                ...(customAlertFontFamilyCss ? { fontFamily: customAlertFontFamilyCss } : {}),
-              }}
+              className={categoryTitleStyle ? "" : "text-foreground"}
+              style={categoryTitleStyle}
             >
-              {settings.topBarWeatherCustomText}
+              {category.name}
             </span>
-          )
-        ) : (
-          <span
-            className={categoryTitleStyle ? "" : "text-foreground"}
-            style={categoryTitleStyle}
-          >
-            {category.name}
-          </span>
-        )}
-      </h1>
-      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-        {category.description}
-      </p>
-    </header>
+          )}
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+          {category.description}
+        </p>
+      </header>
     </>
   );
 }

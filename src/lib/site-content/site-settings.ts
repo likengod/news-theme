@@ -7,6 +7,7 @@ import { getCached, setCached, clearCache } from "./server-cache";
 export type SiteSettings = {
   siteName: string;
   tagline: string;
+  taglineFontSize?: number;
   logoText: string;
   contactEmail: string;
   contactPhone: string;
@@ -366,6 +367,7 @@ Sitemap: ${cleanOrigin}/news-sitemap.xml
 export const defaultSettings: SiteSettings = {
   siteName: "Today Tripura",
   tagline: "Your daily window to the world — unfiltered, insightful, and always ahead.",
+  taglineFontSize: 11,
   logoText: "Today Tripura",
   contactEmail: "contact@todaytripura.com",
   contactPhone: "+1 (555) 234-5678",
@@ -525,11 +527,11 @@ export const defaultSettings: SiteSettings = {
   topBarWeatherCustomText: "",
   topBarSwapDelay: 5,
   topBarBgColor: "",
-  topBarTextColor: "",
+  topBarTextColor: "#000000",
   topBarTextGradient: "",
   // Festive & Category Customizations
   festiveThemeEnabled: true,
-  festiveCategoryTitleColor: "",
+  festiveCategoryTitleColor: "#000000",
   festiveCategoryTitleGradient: "",
   festiveCategoryBadgeBgColor: "",
   festiveCategoryBadgeTextColor: "",
@@ -616,6 +618,15 @@ export function loadSettings(): SiteSettings {
     if (res.licenseType) {
       res.licenseType = normalizeLicenseType(res.licenseType);
     }
+    if (res.taglineFontSize !== undefined) {
+      res.taglineFontSize = Number(res.taglineFontSize) || defaultSettings.taglineFontSize;
+    }
+    if (!res.topBarTextColor) {
+      res.topBarTextColor = "#000000";
+    }
+    if (!res.festiveCategoryTitleColor) {
+      res.festiveCategoryTitleColor = "#000000";
+    }
     return res;
   } catch {
     return defaultSettings;
@@ -667,6 +678,10 @@ export const getSiteSettingsServer = createServerFn({ method: "GET" }).handler(
           gitRemoteUrl: parsed.gitRemoteUrl || defaultSettings.gitRemoteUrl,
           gitAccessToken: parsed.gitAccessToken || defaultSettings.gitAccessToken,
           gitBranch: parsed.gitBranch || defaultSettings.gitBranch,
+          taglineFontSize:
+            parsed.taglineFontSize !== undefined
+              ? Number(parsed.taglineFontSize) || defaultSettings.taglineFontSize
+              : defaultSettings.taglineFontSize,
         };
         setCached(cacheKey, res);
         return res;

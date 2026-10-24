@@ -63,18 +63,38 @@ export function NewsroomPerformanceCard({ data }: NewsroomPerformanceCardProps) 
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Verified comments posted</p>
         </div>
 
-        {/* Registered Users */}
-        <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Registered Community</span>
-            <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
-              <Users className="h-4 w-4" />
+        {/* Total Registered Users */}
+        <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Registered Users</span>
+              <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
+                <Users className="h-4 w-4" />
+              </div>
             </div>
+            <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              {data.totalUsers.toLocaleString()}
+            </p>
           </div>
-          <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            {data.totalUsers.toLocaleString()}
-          </p>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Active platform members</p>
+          <div className="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+            <span className="inline-flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+              Male: {data.maleUsers ?? 0}
+            </span>
+            <span className="text-slate-300 dark:text-slate-600">•</span>
+            <span className="inline-flex items-center gap-1 font-semibold text-pink-600 dark:text-pink-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-pink-500" />
+              Female: {data.femaleUsers ?? 0}
+            </span>
+            {(data.otherUsers ?? 0) > 0 && (
+              <>
+                <span className="text-slate-300 dark:text-slate-600">•</span>
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 dark:text-slate-500" title="Other or not specified">
+                  Other: {data.otherUsers}
+                </span>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

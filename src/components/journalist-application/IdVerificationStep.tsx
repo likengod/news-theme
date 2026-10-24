@@ -47,7 +47,7 @@ export function IdVerificationStep({
 
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-            Upload Document Image <span className="text-slate-400 font-normal">(&lt; 1 MB)</span>
+            Upload Document Image <span className="text-slate-400 font-normal">(&lt; 5 MB)</span>
           </label>
           <div className="flex items-center gap-2">
             <button
@@ -69,7 +69,7 @@ export function IdVerificationStep({
             )}
           </div>
           <p className="mt-1 text-[11px] text-slate-500">
-            Upload image size less than 1 MB (JPG, PNG, WEBP).
+            Upload image or document under 5 MB (JPG, PNG, WEBP).
           </p>
           <input
             ref={docFileInputRef}
@@ -93,7 +93,7 @@ export function IdVerificationStep({
               <span className="rounded-full bg-blue-100 text-blue-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
                 {documentType || "ID Document"}
               </span>
-              <span className="text-[11px] font-semibold text-emerald-600">✓ Ready to submit (&lt; 1 MB)</span>
+              <span className="text-[11px] font-semibold text-emerald-600">✓ Ready to submit (&lt; 5 MB)</span>
             </div>
             <p className="mt-1 text-xs text-slate-600">
               {documentType ? `${documentType} image loaded.` : "Document image loaded."} Official accreditation proof.

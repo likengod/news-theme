@@ -7,6 +7,8 @@ interface PersonalInfoStepProps {
   setEmail: (val: string) => void;
   phone: string;
   setPhone: (val: string) => void;
+  dob?: string;
+  setDob?: (val: string) => void;
   fatherName: string;
   setFatherName: (val: string) => void;
   motherName: string;
@@ -28,6 +30,8 @@ export function PersonalInfoStep({
   setEmail,
   phone,
   setPhone,
+  dob = "",
+  setDob,
   fatherName,
   setFatherName,
   motherName,
@@ -192,6 +196,18 @@ export function PersonalInfoStep({
             <option value="O+">O+</option>
             <option value="O-">O-</option>
           </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            Date of Birth
+          </label>
+          <input
+            type="date"
+            value={dob}
+            onChange={(e) => setDob?.(e.target.value)}
+            className="h-10 w-full rounded-lg border border-slate-200 px-3.5 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 bg-white"
+          />
         </div>
       </div>
     </div>

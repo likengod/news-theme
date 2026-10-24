@@ -13,6 +13,7 @@ import {
   RevenueTab,
   type DashboardTab,
   type DashboardData,
+  type DatePreset,
 } from "@/components/admin/dashboard";
 
 export const Route = createFileRoute("/admin/")({
@@ -22,49 +23,124 @@ export const Route = createFileRoute("/admin/")({
   component: DashboardPage,
 });
 
+function parseDatePrefix(val: unknown): string {
+  if (!val) return "";
+  if (typeof val === "string") return val.slice(0, 10);
+  if (val instanceof Date) {
+    try {
+      return val.toISOString().slice(0, 10);
+    } catch {
+      return "";
+    }
+  }
+  if (typeof val === "number") {
+    try {
+      return new Date(val).toISOString().slice(0, 10);
+    } catch {
+      return "";
+    }
+  }
+  try {
+    const d = new Date(val as any);
+    if (!isNaN(d.getTime())) {
+      return d.toISOString().slice(0, 10);
+    }
+  } catch {}
+  return String(val).slice(0, 10);
+}
+
+function computePresetDates(preset: DatePreset): { startDate: string; endDate: string } {
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+
+  switch (preset) {
+    case "24h": {
+      const past = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      return { startDate: past.toISOString().slice(0, 10), endDate: todayStr };
+    }
+    case "7d": {
+      const past = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return { startDate: past.toISOString().slice(0, 10), endDate: todayStr };
+    }
+    case "30d": {
+      const past = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      return { startDate: past.toISOString().slice(0, 10), endDate: todayStr };
+    }
+    case "6m": {
+      const past = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+      return { startDate: past.toISOString().slice(0, 10), endDate: todayStr };
+    }
+    case "1y": {
+      const past = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+      return { startDate: past.toISOString().slice(0, 10), endDate: todayStr };
+    }
+    case "all":
+    default:
+      return { startDate: "", endDate: "" };
+  }
+}
+
 function DashboardPage() {
   const data = Route.useLoaderData();
 
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const startOfMonthStr = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10);
+  const [preset, setPreset] = useState<DatePreset>("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-  const [startDate, setStartDate] = useState(startOfMonthStr);
-  const [endDate, setEndDate] = useState(todayStr);
+  const handlePresetChange = (nextPreset: DatePreset) => {
+    setPreset(nextPreset);
+    if (nextPreset !== "custom") {
+      const { startDate: s, endDate: e } = computePresetDates(nextPreset);
+      setStartDate(s);
+      setEndDate(e);
+    }
+  };
 
-  const isDateFiltered = startDate !== startOfMonthStr || endDate !== todayStr;
+  const handleStartDateChange = (val: string) => {
+    setStartDate(val);
+    setPreset("custom");
+  };
+
+  const handleEndDateChange = (val: string) => {
+    setEndDate(val);
+    setPreset("custom");
+  };
+
+  const isDateFiltered = preset !== "all" && (Boolean(startDate) || Boolean(endDate));
 
   const filteredArticles = isDateFiltered
-    ? data.topArticles.filter((a) => {
-        if (!a.date) return true;
-        const d = a.date.slice(0, 10);
+    ? (data?.topArticles || []).filter((a) => {
+        const d = parseDatePrefix(a.date);
+        if (!d) return false;
         return (!startDate || d >= startDate) && (!endDate || d <= endDate);
       })
-    : data.topArticles;
+    : (data?.topArticles || []);
 
   const filteredFeatured = isDateFiltered
-    ? data.featuredArticles.filter((a) => {
-        if (!a.date) return true;
-        const d = a.date.slice(0, 10);
+    ? (data?.featuredArticles || []).filter((a) => {
+        const d = parseDatePrefix(a.date);
+        if (!d) return false;
         return (!startDate || d >= startDate) && (!endDate || d <= endDate);
       })
-    : data.featuredArticles;
+    : (data?.featuredArticles || []);
 
   const handleResetDates = () => {
-    setStartDate(startOfMonthStr);
-    setEndDate(todayStr);
-    toast.info("Date range reset to current month");
+    setPreset("all");
+    setStartDate("");
+    setEndDate("");
+    toast.info("Date range reset to All Time");
   };
 
   const handleExport = () => {
     // Generate CSV report of top articles and stats
     const csvContent = [
       ["Title", "Category", "Views", "Date", "Status"],
-      ...data.topArticles.map((a) => [
+      ...filteredArticles.map((a) => [
         `"${a.title.replace(/"/g, '""')}"`,
         `"${a.category || "General"}"`,
         a.views || 0,
-        a.date || "",
+        parseDatePrefix(a.date),
         a.status || "Published",
       ]),
     ]
@@ -75,7 +151,8 @@ function DashboardPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `analytics-report-${startDate}-to-${endDate}.csv`);
+    const rangeTag = preset === "all" ? "all-time" : `${startDate || "start"}-to-${endDate || "end"}`;
+    link.setAttribute("download", `analytics-report-${rangeTag}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -86,7 +163,7 @@ function DashboardPage() {
     const reportData = {
       title: "Today Tripura - Newsroom Performance Snapshot",
       generatedAt: new Date().toISOString(),
-      dateRange: { startDate, endDate },
+      dateRange: { preset, startDate, endDate },
       kpis: {
         totalPosts: data.totalArticles,
         totalJournalists: data.totalJournalists,
@@ -94,7 +171,7 @@ function DashboardPage() {
         totalRevenue: `${data.currencySymbol || "₹"}${data.totalRevenue}`,
         totalViews: data.totalViews,
       },
-      topArticles: data.topArticles.slice(0, 10).map((a) => ({
+      topArticles: filteredArticles.slice(0, 10).map((a) => ({
         title: a.title,
         category: a.category,
         views: a.views,
@@ -108,7 +185,8 @@ function DashboardPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `todaytripura-report-${startDate}-to-${endDate}.json`);
+    const rangeTag = preset === "all" ? "all-time" : `${startDate || "start"}-to-${endDate || "end"}`;
+    link.setAttribute("download", `todaytripura-report-${rangeTag}.json`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -123,10 +201,12 @@ function DashboardPage() {
     <div className="space-y-6 pb-12">
       {/* 1. Header (Greeting, Date Controls, Export) */}
       <DashboardHeader
+        preset={preset}
+        onPresetChange={handlePresetChange}
         startDate={startDate}
         endDate={endDate}
-        onStartDateChange={setStartDate}
-        onEndDateChange={setEndDate}
+        onStartDateChange={handleStartDateChange}
+        onEndDateChange={handleEndDateChange}
         onResetDates={handleResetDates}
         onExport={handleExport}
       />

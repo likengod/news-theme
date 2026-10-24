@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { loadSettings } from "@/lib/site-content";
+import { loadSettings, isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
 
 const FESTIVE_GRADIENT_MAP: Record<string, string> = {
   "indian-flag": "linear-gradient(to right, #FF9933, #000080, #138808)",
@@ -24,9 +24,13 @@ export function ArticleQrCard({ url }: Props) {
     return () => window.removeEventListener("nt:settings-updated", handleUpdate);
   }, []);
 
+  const isEnterprise = isEnterpriseLicense(settings);
+  const isEnterprisePlus = isEnterprisePlusLicense(settings);
+  const canUseImage = isEnterprisePlus && Boolean(settings.festiveAlertImage);
+  const canUseText = isEnterprise && Boolean(settings.topBarWeatherCustomText || settings.festiveScanMeCustomText);
+
   const hasCustomAlert =
-    settings.festiveThemeEnabled !== false &&
-    (!!settings.topBarWeatherCustomText || !!settings.festiveAlertImage);
+    settings.festiveThemeEnabled !== false && (canUseImage || canUseText);
 
   useEffect(() => {
     if (!hasCustomAlert) {
@@ -86,7 +90,7 @@ export function ArticleQrCard({ url }: Props) {
           key={showCustomText ? "custom" : "default"}
           className="text-xs font-extrabold uppercase leading-tight tracking-tight sm:text-sm animate-in fade-in duration-300 inline-flex items-center gap-1.5"
         >
-          {hasCustomAlert && showCustomText && settings.festiveAlertImage ? (
+          {hasCustomAlert && showCustomText && canUseImage ? (
             <img
               src={settings.festiveAlertImage}
               alt="Alert"

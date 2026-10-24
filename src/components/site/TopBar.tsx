@@ -8,7 +8,7 @@ import { UserMenu } from "./UserMenu";
 import { SearchBox } from "./SearchModal";
 import { sections, slugify } from "@/lib/news-data";
 import { useSiteSettings, useCategories } from "@/components/site/AdSettingsContext";
-import { loadSettings, defaultSettings } from "@/lib/site-content";
+import { loadSettings, defaultSettings, isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
 import { useTranslation } from "@/lib/i18n";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useTheme } from "@/lib/theme";
@@ -89,10 +89,15 @@ export function TopBar() {
     day: "numeric",
   });
 
+  const isEnterprise = mounted && isEnterpriseLicense(settings);
+  const isEnterprisePlus = mounted && isEnterprisePlusLicense(settings);
+  const canUseImage = isEnterprisePlus && Boolean(settings.festiveAlertImage);
+  const canUseText = isEnterprise && Boolean(settings.topBarWeatherCustomText);
+
   const hasCustomRight =
     mounted &&
     settings.festiveThemeEnabled !== false &&
-    (!!settings.topBarWeatherCustomText || !!settings.festiveAlertImage);
+    (canUseImage || canUseText);
   const delay = Number(settings.topBarSwapDelay) || 5;
 
   useEffect(() => {
@@ -127,11 +132,16 @@ export function TopBar() {
     >
       <div
         className={`mx-auto flex h-full max-w-7xl items-center justify-between gap-2 px-4 text-[11px] font-medium uppercase tracking-widest ${
-          mounted && settings.topBarTextColor
+          mounted && settings.topBarTextColor && (settings.topBarBgColor || !isDark)
             ? ""
             : "text-foreground"
         }`}
-        style={{ color: (mounted && settings.topBarTextColor) || undefined }}
+        style={{
+          color:
+            mounted && settings.topBarTextColor && (settings.topBarBgColor || !isDark)
+              ? settings.topBarTextColor
+              : undefined,
+        }}
       >
         <div className="flex-1 min-w-0">
           <span className="truncate">
@@ -160,14 +170,21 @@ export function TopBar() {
                   : undefined,
               }}
             >
-              {settings.festiveAlertImage ? (
+              {canUseImage ? (
                 <img
                   src={settings.festiveAlertImage}
                   alt="Alert"
                   className="h-4.5 w-auto max-w-[80px] object-contain shrink-0 align-middle"
                 />
               ) : (
-                <span style={gradientStyle}>
+                <span
+                  style={
+                    gradientStyle ||
+                    (mounted && settings.topBarTextColor && (settings.topBarBgColor || !isDark)
+                      ? { color: settings.topBarTextColor }
+                      : undefined)
+                  }
+                >
                   {settings.topBarWeatherCustomText}
                 </span>
               )}

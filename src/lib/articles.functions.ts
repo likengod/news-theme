@@ -833,7 +833,15 @@ export const getAdminDashboardStats = createServerFn({ method: "GET" })
     ] = await Promise.all([
       query("SELECT COUNT(*) as count FROM articles").catch(() => [{ count: 0 }]),
       query("SELECT COALESCE(SUM(views), 0) as count FROM articles").catch(() => [{ count: 0 }]),
-      query("SELECT COUNT(*) as count FROM users").catch(() => [{ count: 0 }]),
+      query(`
+        SELECT 
+          COUNT(*) as count,
+          SUM(CASE WHEN LOWER(TRIM(p.gender)) = 'male' THEN 1 ELSE 0 END) as maleCount,
+          SUM(CASE WHEN LOWER(TRIM(p.gender)) = 'female' THEN 1 ELSE 0 END) as femaleCount,
+          SUM(CASE WHEN p.gender IS NULL OR TRIM(p.gender) = '' OR LOWER(TRIM(p.gender)) NOT IN ('male', 'female') THEN 1 ELSE 0 END) as otherCount
+        FROM users u
+        LEFT JOIN profiles p ON (p.id = u.id OR p.email = u.email)
+      `).catch(() => [{ count: 0, maleCount: 0, femaleCount: 0, otherCount: 0 }]),
       query("SELECT COUNT(*) as count FROM comments").catch(() => [{ count: 0 }]),
       query(`
         SELECT COUNT(DISTINCT user_id) as count 
@@ -871,7 +879,11 @@ export const getAdminDashboardStats = createServerFn({ method: "GET" })
 
     const totalArticles = Number(articlesCountRes?.[0]?.count) || 0;
     const totalViews = Number(viewsCountRes?.[0]?.count) || 0;
-    const totalUsers = Number(usersCountRes?.[0]?.count) || 0;
+    const userRow = (usersCountRes as any)?.[0] || {};
+    const totalUsers = Number(userRow.count) || 0;
+    const maleUsers = Number(userRow.maleCount) || 0;
+    const femaleUsers = Number(userRow.femaleCount) || 0;
+    const otherUsers = Number(userRow.otherCount) || Math.max(0, totalUsers - maleUsers - femaleUsers);
     const totalComments = Number(commentsCountRes?.[0]?.count) || 0;
     let totalSubscribers = Number(subscribersCountRes?.[0]?.count) || 0;
     let totalJournalists = Number(journalistsCountRes?.[0]?.count) || 0;
@@ -896,6 +908,9 @@ export const getAdminDashboardStats = createServerFn({ method: "GET" })
       totalArticles,
       totalViews,
       totalUsers,
+      maleUsers,
+      femaleUsers,
+      otherUsers,
       totalComments,
       totalSubscribers,
       totalJournalists,

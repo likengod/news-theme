@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth, requireAdmin } from "@/lib/auth-middleware";
 import { query } from "./db.server";
-import { persistDocumentImage } from "./ad-storage.server";
+import { persistDocumentImage, persistMediaImage } from "./ad-storage.server";
 import { z } from "zod";
 import crypto from "crypto";
 
@@ -236,6 +236,81 @@ export const submitEventRegistration = createServerFn({ method: "POST" })
   });
 
 /**
+ * Get current authenticated user's journalist application status and profile data
+ */
+export const getMyJournalistApplicationStatus = createServerFn({ method: "GET" })
+  .middleware([requireAuth])
+  .handler(async ({ context }) => {
+    const userId = context.userId;
+    const email = context.claims?.email || "";
+
+    // 1. Get profile
+    const profiles = await query("SELECT * FROM profiles WHERE id = ?", [userId]);
+    const profile = profiles[0] || null;
+
+    // 2. Roles
+    const rolesRows = await query("SELECT role FROM user_roles WHERE user_id = ?", [userId]);
+    const isJournalist =
+      rolesRows.some((r: any) =>
+        ["journalist", "author", "editor", "admin"].includes(r.role),
+      ) && Boolean(profile?.journalist_id);
+
+    // 3. Existing application
+    const requests = await query(
+      `SELECT id, status, title, details, created_at
+       FROM inbox_requests
+       WHERE type = 'journalist_application' AND (user_id = ? OR user_email = ?)
+       ORDER BY id DESC LIMIT 1`,
+      [userId, email || profile?.email || ""],
+    );
+
+    let application = null;
+    if (requests.length > 0) {
+      const r = requests[0];
+      let details: any = null;
+      try {
+        if (r.details) details = JSON.parse(r.details);
+      } catch {}
+      application = {
+        id: r.id,
+        status: r.status,
+        createdAt: r.created_at,
+        details,
+      };
+    }
+
+    return {
+      userId,
+      isJournalist,
+      journalistId: profile?.journalist_id || null,
+      validTill: profile?.valid_till || null,
+      profile: profile
+        ? {
+            displayName: profile.display_name || "",
+            email: profile.email || email,
+            phone: profile.phone || "",
+            bloodGroup: profile.blood_group || "",
+            dob: profile.dob || "",
+            fatherName: profile.father_name || "",
+            motherName: profile.mother_name || "",
+            gender: profile.gender || "",
+            maritalStatus: profile.marital_status || "",
+            husbandName: profile.husband_name || "",
+            documentType: profile.document_type || "",
+            documentUrl: profile.document_url || "",
+            avatarUrl: profile.avatar_url || "",
+            address: profile.address || "",
+            state: profile.state || "",
+            country: profile.country || "India",
+            pinCode: profile.pin_code || "",
+            bio: profile.bio || "",
+          }
+        : null,
+      application,
+    };
+  });
+
+/**
  * Submit journalist application (authenticated user)
  */
 export const submitJournalistApplication = createServerFn({ method: "POST" })
@@ -255,7 +330,7 @@ export const submitJournalistApplication = createServerFn({ method: "POST" })
         husbandName: z.string().max(255).optional(),
         documentType: z.string().max(100).optional(),
         documentUrl: z.string().optional(),
-        avatarUrl: z.string().max(500000).optional(),
+        avatarUrl: z.string().optional(),
         address: z.string().max(300).optional(),
         state: z.string().max(80).optional(),
         country: z.string().max(80).optional(),
@@ -267,6 +342,9 @@ export const submitJournalistApplication = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const savedDocUrl = data.documentUrl
       ? persistDocumentImage(data.documentUrl, "doc")
+      : "";
+    const savedAvatarUrl = data.avatarUrl
+      ? persistMediaImage(data.avatarUrl, "avatar")
       : "";
 
     const details = JSON.stringify({
@@ -285,7 +363,7 @@ export const submitJournalistApplication = createServerFn({ method: "POST" })
           : "",
       documentType: data.documentType?.trim() || "",
       documentUrl: savedDocUrl,
-      avatarUrl: data.avatarUrl?.trim() || "",
+      avatarUrl: savedAvatarUrl,
       address: data.address?.trim() || "",
       state: data.state?.trim() || "",
       country: data.country?.trim() || "",
@@ -293,18 +371,79 @@ export const submitJournalistApplication = createServerFn({ method: "POST" })
       bio: data.bio?.trim() || "",
     });
 
-    await query(
-      `INSERT INTO inbox_requests (type, user_id, user_email, user_name, title, details, status)
-       VALUES (?, ?, ?, ?, ?, ?, 'Pending')`,
-      [
-        "journalist_application",
-        context.userId,
-        data.email.trim(),
-        data.displayName.trim(),
-        `Journalist Application — ${data.displayName.trim()}`,
-        details,
-      ],
+    // Check if an existing Pending request exists to update rather than duplicate
+    const existingPending = await query(
+      `SELECT id FROM inbox_requests
+       WHERE type = 'journalist_application' AND status = 'Pending' AND (user_id = ? OR user_email = ?)
+       LIMIT 1`,
+      [context.userId, data.email.trim()],
     );
+
+    if (existingPending.length > 0) {
+      await query(
+        `UPDATE inbox_requests
+         SET user_name = ?, user_email = ?, title = ?, details = ?, created_at = NOW()
+         WHERE id = ?`,
+        [
+          data.displayName.trim(),
+          data.email.trim(),
+          `Journalist Application — ${data.displayName.trim()}`,
+          details,
+          existingPending[0].id,
+        ],
+      );
+    } else {
+      await query(
+        `INSERT INTO inbox_requests (type, user_id, user_email, user_name, title, details, status)
+         VALUES (?, ?, ?, ?, ?, ?, 'Pending')`,
+        [
+          "journalist_application",
+          context.userId,
+          data.email.trim(),
+          data.displayName.trim(),
+          `Journalist Application — ${data.displayName.trim()}`,
+          details,
+        ],
+      );
+    }
+
+    // Also update/sync basic profile fields for the user
+    if (context.userId) {
+      const existingProf = await query("SELECT id FROM profiles WHERE id = ?", [context.userId]);
+      if (existingProf.length > 0) {
+        await query(
+          `UPDATE profiles SET
+             display_name = ?, phone = ?, blood_group = ?, dob = ?,
+             father_name = ?, mother_name = ?, gender = ?, marital_status = ?, husband_name = ?,
+             document_type = COALESCE(?, document_type),
+             document_url = COALESCE(NULLIF(?, ''), document_url),
+             avatar_url = COALESCE(NULLIF(?, ''), avatar_url),
+             address = ?, state = ?, country = ?, pin_code = ?
+           WHERE id = ?`,
+          [
+            data.displayName.trim(),
+            data.phone.trim(),
+            data.bloodGroup?.trim() || "",
+            data.dob?.trim() || "",
+            data.fatherName?.trim() || null,
+            data.motherName?.trim() || null,
+            data.gender?.trim() || null,
+            data.maritalStatus?.trim() || null,
+            data.gender === "Female" && data.maritalStatus === "Married"
+              ? data.husbandName?.trim() || null
+              : null,
+            data.documentType?.trim() || null,
+            savedDocUrl || null,
+            savedAvatarUrl || null,
+            data.address?.trim() || "",
+            data.state?.trim() || "",
+            data.country?.trim() || "India",
+            data.pinCode?.trim() || "",
+            context.userId,
+          ],
+        );
+      }
+    }
 
     return { ok: true };
   });

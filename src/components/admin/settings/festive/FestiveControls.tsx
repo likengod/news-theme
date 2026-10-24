@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Clock, Layers, Sparkles } from "lucide-react";
+import { Clock, Layers, Sparkles, Crown, Lock } from "lucide-react";
 import type { SiteSettings } from "@/lib/site-content";
 import type { FontConfiguration } from "@/lib/font-config";
 import { MediaField } from "@/components/admin/MediaField";
@@ -9,6 +9,8 @@ interface FestiveControlsProps {
   settings: SiteSettings;
   update: <K extends keyof SiteSettings>(key: K, val: SiteSettings[K]) => void;
   fontConfig: FontConfiguration;
+  isEnterprise?: boolean;
+  isEnterprisePlus?: boolean;
 }
 
 const GRADIENT_PRESETS = [
@@ -89,7 +91,7 @@ function ColorOrGradientPicker({
         <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5 self-start sm:self-auto">
           <button
             type="button"
-            onClick={() => onChangeColor(activeColor)}
+            onClick={() => onChangeColor(activeColor || "#000000")}
             className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
               !isGradientMode
                 ? "bg-white text-slate-900 shadow-xs"
@@ -261,7 +263,13 @@ function ColorOrGradientPicker({
   );
 }
 
-export function FestiveControls({ settings, update, fontConfig }: FestiveControlsProps) {
+export function FestiveControls({
+  settings,
+  update,
+  fontConfig,
+  isEnterprise = true,
+  isEnterprisePlus = false,
+}: FestiveControlsProps) {
   return (
     <div className="lg:col-span-7 space-y-6">
       {/* ── SECTION 1: CUSTOM ALERT / ROTATING HEADLINE ── */}
@@ -273,10 +281,10 @@ export function FestiveControls({ settings, update, fontConfig }: FestiveControl
           </h3>
         </div>
 
-        {/* Custom Message Input */}
+        {/* Custom Message Input (Available for all Enterprise licenses) */}
         <div>
           <label className="mb-1 block text-xs font-semibold text-slate-700">
-            Alert Headline Text (Optional if image is added)
+            Alert Headline Text {isEnterprisePlus && "(Optional if image is added)"}
           </label>
           <input
             type="text"
@@ -289,36 +297,60 @@ export function FestiveControls({ settings, update, fontConfig }: FestiveControl
             className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-slate-900 focus:outline-none bg-white"
           />
           <p className="mt-1 text-[11px] text-slate-400">
-            Shown when rotating. If an image is uploaded below, the image is displayed directly.
+            {isEnterprisePlus
+              ? "Shown when rotating. If an image is added below, the image is displayed directly."
+              : "Shown when rotating across category titles, top bar, and banners (Enterprise text alert)."}
           </p>
         </div>
 
-        {/* Alert Icon / Badge Image */}
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
-          <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
-            <span className="text-xs font-bold text-slate-800">
-              Alert Badge / Icon Image (Optional)
-            </span>
-            <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 border border-amber-200">
-              Recommended: 32×32px – 48×48px (Icon) or max 120×32px (Badge)
-            </span>
+        {/* Alert Icon / Badge Image - Available ONLY for Enterprise Plus */}
+        {isEnterprisePlus ? (
+          <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+            <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
+              <span className="text-xs font-bold text-slate-800">
+                Alert Badge / Icon Image (Optional)
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-md bg-purple-50 px-2 py-0.5 text-[11px] font-semibold text-purple-700 border border-purple-200">
+                <Crown className="h-3 w-3" /> Enterprise Plus Feature
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 mb-2.5">
+              Attach a logo, festival badge, or emblem (e.g. News Logo, Indian Flag, Festival Badge).
+              <span className="font-semibold text-slate-700">
+                {" "}When an image is added, the alert displays the image directly across category titles, top bar, and banners.
+              </span>
+            </p>
+            <MediaField
+              value={settings.festiveAlertImage || ""}
+              onChange={(url) => update("festiveAlertImage", url)}
+              usage="other"
+              inline={true}
+              compact={true}
+              previewClassName="h-14 w-20 shrink-0 rounded-lg border border-dashed border-slate-300 bg-white flex items-center justify-center overflow-hidden shadow-2xs"
+              emptyLabel="No icon"
+              recommendedSize="32×32 px to 48×48 px (Square) or max 120×32 px (Badge)"
+              hint="Format: PNG with transparent background, SVG, or WebP (max 1 MB)"
+            />
           </div>
-          <p className="text-[11px] text-slate-500 mb-2.5">
-            Attach a logo, festival badge, or emblem (e.g. News Logo, Indian Flag, Festival Badge).
-            <span className="font-semibold text-slate-700">
-              {" "}When an image is added, the alert displays the image directly across category titles, top bar, and banners without needing text.
-            </span>
-          </p>
-          <MediaField
-            value={settings.festiveAlertImage || ""}
-            onChange={(url) => update("festiveAlertImage", url)}
-            usage="other"
-            inline={true}
-            emptyLabel="No alert icon"
-            recommendedSize="32×32 px to 48×48 px (Square) or max 120×32 px (Badge)"
-            hint="Format: PNG with transparent background, SVG, or WebP (max 1 MB)"
-          />
-        </div>
+        ) : (
+          /* Enterprise (Standard): Text only support, Image is locked */
+          <div className="rounded-xl border border-amber-200/80 bg-amber-50/50 p-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-1.5">
+                <Lock className="h-3.5 w-3.5 text-amber-600" />
+                <span className="text-xs font-bold text-slate-800">
+                  Alert Badge / Icon Image Support
+                </span>
+              </div>
+              <span className="inline-flex items-center gap-1 rounded-md bg-amber-100 text-amber-900 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                Enterprise Plus Exclusive
+              </span>
+            </div>
+            <p className="text-xs text-amber-800/90 leading-relaxed">
+              Your <strong>Enterprise</strong> plan supports <strong>Text Alert Messages</strong> above. Upgrading to <strong>Enterprise Plus</strong> unlocks Image Badge & Logo support for festive category titles and alerts.
+            </p>
+          </div>
+        )}
 
         {/* Rotate Delay */}
         <div>

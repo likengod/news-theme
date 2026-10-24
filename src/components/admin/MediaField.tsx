@@ -115,7 +115,7 @@ export function MediaField({
     <div
       className={
         previewClassName ??
-        `flex ${compact ? "h-20" : "h-28"} items-center justify-center overflow-hidden rounded-md border border-dashed ${
+        `flex ${compact ? (inline ? "h-14 w-20 shrink-0" : "h-20") : inline ? "h-20 w-28 shrink-0" : "h-28"} items-center justify-center overflow-hidden rounded-md border border-dashed ${
           dark ? "border-slate-700 bg-slate-900" : "border-slate-200 bg-slate-50"
         }`
       }
@@ -124,12 +124,14 @@ export function MediaField({
         <img
           src={value}
           alt={label ?? "preview"}
-          className="max-h-full max-w-full object-contain p-2"
+          className="max-h-full max-w-full object-contain p-1.5"
         />
       ) : (
-        <div className="text-center text-slate-400">
-          <ImageIcon className="mx-auto h-5 w-5" />
-          <span className="mt-1 block text-[11px] leading-tight">{emptyLabel ?? "No image"}</span>
+        <div className="text-center text-slate-400 p-1">
+          <ImageIcon className={`mx-auto ${compact ? "h-4 w-4" : "h-5 w-5"}`} />
+          <span className={`mt-0.5 block ${compact ? "text-[10px]" : "text-[11px]"} leading-tight`}>
+            {emptyLabel ?? "No image"}
+          </span>
         </div>
       )}
     </div>

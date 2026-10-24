@@ -1,24 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import Papa from "papaparse";
 import {
   Upload,
-  Download,
   ShieldCheck,
   FileArchive,
-  FolderArchive,
-  FileSpreadsheet,
-  ChevronDown,
-  ArrowUpDown,
+  Trash2,
+  X,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { mediaLibrary, trackUpload, formatBytes, type MediaItem } from "@/lib/media-library";
 import { MediaGrid } from "@/components/admin/files/MediaGrid";
@@ -30,9 +18,8 @@ export const Route = createFileRoute("/admin/files")({
 
 function FileManagerPage() {
   const [items, setItems] = useState<MediaItem[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const fileRef = useRef<HTMLInputElement>(null);
-  const zipFileRef = useRef<HTMLInputElement>(null);
-  const csvFileRef = useRef<HTMLInputElement>(null);
 
   const refresh = () => setItems(mediaLibrary.list());
 
@@ -44,6 +31,10 @@ function FileManagerPage() {
   }, []);
 
   const totalSize = items.reduce((s, m) => s + m.size, 0);
+  const selectedBytes = items.reduce((acc, it) => {
+    if (selectedIds.has(it.id)) return acc + (it.size || 0);
+    return acc;
+  }, 0);
 
   const onUpload = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -118,7 +109,6 @@ function FileManagerPage() {
       }
     }
     if (fileRef.current) fileRef.current.value = "";
-    if (zipFileRef.current) zipFileRef.current.value = "";
     if (count) toast.success(`Uploaded ${count} file${count > 1 ? "s" : ""}`);
     refresh();
   };
@@ -148,72 +138,37 @@ function FileManagerPage() {
     );
   };
 
-  const handleExportCsv = () => {
-    if (!items.length) {
-      toast.info("No media items to export.");
-      return;
-    }
-    const exportData = items.map((m) => ({
-      id: m.id,
-      name: m.name,
-      url: m.dataUrl || (m as any).url,
-      altText: m.altText || "",
-      description: m.description || "",
-      size: m.size,
-      type: m.type,
-      createdAt: m.createdAt,
-    }));
-    const csv = Papa.unparse(exportData);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `media-library-${new Date().toISOString().split("T")[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success("CSV export successful!");
-  };
-
-  const handleImportCsv = (file: File) => {
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results: any) => {
-        const rows = results.data as any[];
-        if (!rows || rows.length === 0) {
-          toast.info("No rows found in CSV.");
-          return;
-        }
-        let imported = 0;
-        for (const item of rows) {
-          if (!item.id || !item.name) continue;
-          if (!mediaLibrary.get(item.id)) {
-            mediaLibrary.add({
-              name: item.name,
-              type: item.type || "image/webp",
-              size: Number(item.size) || 0,
-              dataUrl: item.url || item.dataUrl || "",
-              usage: (item.usage as any) || "other",
-              altText: item.altText,
-              description: item.description,
-            });
-            imported++;
-          }
-        }
-        if (imported > 0) {
-          toast.success(`Imported ${imported} media items from CSV`);
-          refresh();
-        } else {
-          toast.info("No new items to import from CSV");
-        }
-      },
-      error: () => toast.error("Failed to parse CSV file"),
-    });
+  const handleExportSelectedZip = async () => {
+    if (selectedIds.size === 0) return;
+    const selectedItems = items.filter((it) => selectedIds.has(it.id));
+    await exportMediaZip(
+      selectedItems.map((m) => ({
+        id: m.id,
+        name: m.name,
+        url: m.dataUrl || (m as any).url,
+        altText: m.altText,
+        description: m.description,
+        size: formatBytes(m.size),
+        rawSize: m.size,
+        type: m.type.startsWith("video/")
+          ? "video"
+          : m.type.startsWith("image/")
+            ? "image"
+            : "document",
+        createdAt: m.createdAt,
+      })),
+      `selected-media-${new Date().toISOString().slice(0, 10)}.zip`,
+    );
   };
 
   const handleDelete = (id: string) => {
     if (!confirm("Delete this file permanently?")) return;
     mediaLibrary.remove(id);
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
     toast.success("File deleted");
     refresh();
   };
@@ -224,6 +179,7 @@ function FileManagerPage() {
     try {
       await mediaLibrary.removeMultiple(ids);
       toast.success(`Deleted ${ids.length} file${ids.length > 1 ? "s" : ""}`);
+      setSelectedIds(new Set());
       refresh();
     } catch (err: any) {
       toast.error(err?.message || "Failed to delete files");
@@ -268,7 +224,7 @@ function FileManagerPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Media & File Library</h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Upload, manage, and reuse images, videos, and news assets across your site (Max 1 MB per file).
+            Upload images below 1 MB. Images must support WebP.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5">
@@ -279,13 +235,68 @@ function FileManagerPage() {
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 sm:py-2 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 transition whitespace-nowrap shadow-xs cursor-pointer w-full sm:w-auto sm:order-last"
           >
             <Upload className="h-4 w-4 shrink-0" />
-            <span>Upload Files / ZIP (&lt; 1 MB)</span>
+            <span>Upload Media (&lt; 1 MB)</span>
           </button>
 
-          {/* Secondary actions row on mobile */}
-          <div className="flex items-center justify-between sm:justify-start gap-1.5 sm:gap-2 w-full sm:w-auto">
-            <div className="flex items-center gap-1.5">
-              {/* Verify Scanner - Standalone */}
+          {/* Secondary actions row / Header Actions */}
+          <div className="flex flex-wrap items-center justify-between sm:justify-start gap-1.5 sm:gap-2 w-full sm:w-auto">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {/* When files are selected: Show options on the LEFT side of Scanner */}
+              {selectedIds.size > 0 ? (
+                <>
+                  <span className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-bold text-rose-950 shadow-2xs">
+                    <span className="flex h-3.5 w-3.5 items-center justify-center rounded bg-rose-600 text-white text-[9px] font-bold">
+                      ✓
+                    </span>
+                    <span>
+                      {selectedIds.size} file{selectedIds.size > 1 ? "s" : ""}
+                    </span>
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={handleExportSelectedZip}
+                    className="inline-flex items-center gap-1 rounded-md border border-amber-300 bg-white px-2 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-50 transition shadow-2xs cursor-pointer"
+                    title={`Download ${selectedIds.size} selected files in a ZIP archive`}
+                  >
+                    <FileArchive className="h-3 w-3 text-amber-600 shrink-0" />
+                    <span>Export ZIP ({selectedIds.size})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedIds(new Set())}
+                    className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition shadow-2xs cursor-pointer"
+                    title="Clear selection"
+                  >
+                    <X className="h-3 w-3 text-slate-500 shrink-0" />
+                    <span>Clear</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteMultiple(Array.from(selectedIds))}
+                    className="inline-flex items-center justify-center rounded-md bg-rose-600 p-1.5 text-white hover:bg-rose-700 transition shadow-xs cursor-pointer"
+                    title={`Delete Selected (${selectedIds.size})`}
+                    aria-label={`Delete ${selectedIds.size} selected files`}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                  </button>
+                </>
+              ) : (
+                /* When no files selected: show global Export ZIP */
+                <button
+                  type="button"
+                  onClick={handleExportZip}
+                  title="Download all media files in a ZIP archive"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition whitespace-nowrap shadow-2xs cursor-pointer"
+                >
+                  <FileArchive className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                  <span>Export ZIP</span>
+                </button>
+              )}
+
+              {/* Verify Scanner - directly to the right */}
               <Link
                 to="/verify-image"
                 target="_blank"
@@ -295,78 +306,14 @@ function FileManagerPage() {
                 <ShieldCheck className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
                 <span>Scanner</span>
               </Link>
-
-              {/* Import / Export Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    title="Import / Export CSV or ZIP backups"
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition whitespace-nowrap shadow-2xs cursor-pointer"
-                  >
-                    <ArrowUpDown className="h-3.5 w-3.5 text-slate-600 shrink-0" />
-                    <span>Import / Export</span>
-                    <ChevronDown className="h-3 w-3 text-slate-400 shrink-0" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-1">
-                  <DropdownMenuLabel className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-2 py-1">
-                    CSV Data
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem
-                    onClick={() => csvFileRef.current?.click()}
-                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
-                  >
-                    <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
-                    Import CSV
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleExportCsv}
-                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
-                  >
-                    <Download className="h-4 w-4 text-emerald-600" />
-                    Export CSV
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator className="my-1" />
-
-                  <DropdownMenuLabel className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-2 py-1">
-                    ZIP Images & Backup
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem
-                    onClick={() => zipFileRef.current?.click()}
-                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
-                  >
-                    <FolderArchive className="h-4 w-4 text-indigo-600" />
-                    Import ZIP Archive
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleExportZip}
-                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer"
-                  >
-                    <FileArchive className="h-4 w-4 text-amber-600" />
-                    Export ZIP Backup
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
 
-            {/* Hidden Inputs for CSV and ZIP */}
+            {/* Hidden Input for Media & ZIP Upload */}
             <input
-              ref={csvFileRef}
+              ref={fileRef}
               type="file"
-              accept=".csv,text/csv"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleImportCsv(file);
-                if (csvFileRef.current) csvFileRef.current.value = "";
-              }}
-              className="hidden"
-            />
-            <input
-              ref={zipFileRef}
-              type="file"
-              accept=".zip,application/zip,application/x-zip-compressed"
+              multiple
+              accept="image/*,video/*,.pdf,.doc,.docx,.zip,application/zip,application/x-zip-compressed"
               onChange={(e) => onUpload(e.target.files)}
               className="hidden"
             />
@@ -396,6 +343,9 @@ function FileManagerPage() {
               ? "image"
               : "document",
         }))}
+        selectedIds={selectedIds}
+        onSelectChange={setSelectedIds}
+        showBatchBanner={false}
         onDelete={handleDelete}
         onDeleteMultiple={handleDeleteMultiple}
         onEdit={handleEdit}

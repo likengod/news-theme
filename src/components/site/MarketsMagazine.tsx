@@ -167,9 +167,11 @@ export function MarketsMagazine({
   const cfg = useHomepageConfig();
   const ctx = useAdSettings();
   const settings = useSiteSettings();
-  const isEnterprise = isEnterpriseLicense(settings) || isEnterprisePlusLicense(settings);
+  const isEnterprise = isEnterpriseLicense(settings);
+  const isEnterprisePlus = isEnterprisePlusLicense(settings);
+  const canAccessAds = isEnterprise || isEnterprisePlus;
 
-  const initialSlides = isEnterprise
+  const initialSlides = canAccessAds
     ? ctx?.adConfig
       ? ctx.adConfig.slots["home2"] || []
       : loadAds("home2")
@@ -186,11 +188,13 @@ export function MarketsMagazine({
   const [slotScript, setSlotScript] = useState(initialScript);
   const [showCustomText, setShowCustomText] = useState(false);
 
-  const hasAd = isEnterprise && (slotMode === "script" ? Boolean(slotScript) : slides.length > 0);
+  const hasAd = canAccessAds && (slotMode === "script" ? Boolean(slotScript) : slides.length > 0);
+
+  const canUseImage = isEnterprisePlus && Boolean(settings.festiveAlertImage);
+  const canUseText = isEnterprise && Boolean(settings.topBarWeatherCustomText);
 
   const hasCustomAlert =
-    settings.festiveThemeEnabled !== false &&
-    (!!settings.topBarWeatherCustomText || !!settings.festiveAlertImage);
+    settings.festiveThemeEnabled !== false && (canUseImage || canUseText);
 
   useEffect(() => {
     if (!hasCustomAlert) {
@@ -312,7 +316,7 @@ export function MarketsMagazine({
           style={badgeStyle}
           suppressHydrationWarning
         >
-          {hasCustomAlert && showCustomText && settings.festiveAlertImage ? (
+          {hasCustomAlert && showCustomText && canUseImage ? (
             <img
               src={settings.festiveAlertImage}
               alt="Alert"

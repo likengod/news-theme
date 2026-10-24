@@ -1,4 +1,5 @@
 import React from "react";
+import { Minus, Plus, Type } from "lucide-react";
 import type { SiteSettings } from "@/lib/site-content";
 import { getContrastRatio, ensureAccessibleColor } from "@/lib/color-utils";
 
@@ -114,6 +115,77 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
           />
         </div>
 
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label htmlFor="taglineFontSize" className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+              <Type className="h-3.5 w-3.5 text-slate-400" />
+              Tagline Font Size (Increase / Reduce)
+            </label>
+            <span className="text-xs font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+              {settings.taglineFontSize || 11}px
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => update("taglineFontSize", Math.max(8, (settings.taglineFontSize || 11) - 1))}
+              className="h-10 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 active:scale-95 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition shadow-xs cursor-pointer"
+              title="Reduce font size by 1px"
+            >
+              <Minus className="h-3.5 w-3.5" />
+              <span>Reduce</span>
+            </button>
+
+            <input
+              id="taglineFontSize"
+              name="taglineFontSize"
+              type="range"
+              min={8}
+              max={28}
+              step={1}
+              value={settings.taglineFontSize || 11}
+              onChange={(e) => update("taglineFontSize", Number(e.target.value))}
+              className="w-full accent-slate-900 h-2 bg-slate-200 rounded-lg cursor-pointer"
+            />
+
+            <button
+              type="button"
+              onClick={() => update("taglineFontSize", Math.min(28, (settings.taglineFontSize || 11) + 1))}
+              className="h-10 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 active:scale-95 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition shadow-xs cursor-pointer"
+              title="Increase font size by 1px"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Increase</span>
+            </button>
+          </div>
+
+          {/* Quick presets */}
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
+            <span className="font-medium text-slate-400 mr-1">Presets:</span>
+            {[
+              { label: "Small (9px)", val: 9 },
+              { label: "Default (11px)", val: 11 },
+              { label: "Medium (13px)", val: 13 },
+              { label: "Large (15px)", val: 15 },
+              { label: "Extra Large (18px)", val: 18 },
+            ].map((preset) => (
+              <button
+                key={preset.val}
+                type="button"
+                onClick={() => update("taglineFontSize", preset.val)}
+                className={`rounded-md px-2 py-0.5 border text-[11px] font-medium transition active:scale-95 cursor-pointer ${
+                  (settings.taglineFontSize || 11) === preset.val
+                    ? "bg-slate-900 text-white border-slate-900 font-semibold shadow-xs"
+                    : "bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200"
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="sm:col-span-2">
           <label htmlFor="metaDescription" className="mb-1 block text-xs font-semibold text-slate-600">
             SEO Meta Description
@@ -193,7 +265,10 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
                       : "THEME"}
                   </span>
                 </div>
-                <div className="mt-1 text-[9px] sm:text-[10px] font-semibold uppercase text-center w-full text-slate-500">
+                <div
+                  className="mt-1 font-semibold uppercase text-center w-full text-slate-500 transition-all duration-150"
+                  style={{ fontSize: `${settings.taglineFontSize || 11}px` }}
+                >
                   {settings.tagline || "BREAKING NEWS · FINANCE · BUSINESS · MARKETS"}
                 </div>
               </div>
@@ -236,7 +311,10 @@ export function BrandInfoSection({ settings, update }: BrandInfoSectionProps) {
                   {settings.logoTextSecondary || "THEME"}
                 </span>
               </div>
-              <div className="mt-1 text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+              <div
+                className="mt-1 font-semibold uppercase tracking-[0.2em] text-slate-500 transition-all duration-150"
+                style={{ fontSize: `${settings.taglineFontSize || 11}px` }}
+              >
                 {settings.tagline || "BREAKING NEWS · FINANCE · BUSINESS · MARKETS"}
               </div>
             </div>

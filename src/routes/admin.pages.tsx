@@ -106,7 +106,7 @@ function PagesPage() {
                   : isWorkWithUs
                     ? "Work With Us Settings"
                     : isEvent
-                      ? "Event Page Settings (শারদ সম্মান)"
+                      ? "Event Page Settings"
                       : active?.title}
               </h2>
               <p className="text-xs text-slate-400">

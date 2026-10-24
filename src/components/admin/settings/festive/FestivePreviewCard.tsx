@@ -14,6 +14,7 @@ interface FestivePreviewCardProps {
   customAlertFontFamilyCss: string;
   rotationAnimStyle: React.CSSProperties;
   triggerTestSwap: () => void;
+  isEnterprisePlus?: boolean;
 }
 
 export function FestivePreviewCard({
@@ -28,8 +29,9 @@ export function FestivePreviewCard({
   customAlertFontFamilyCss,
   rotationAnimStyle,
   triggerTestSwap,
+  isEnterprisePlus = false,
 }: FestivePreviewCardProps) {
-  const hasAlertImage = Boolean(settings.festiveAlertImage);
+  const hasAlertImage = Boolean(isEnterprisePlus && settings.festiveAlertImage);
 
   return (
     <div className="lg:col-span-5 flex flex-col justify-between rounded-xl border border-slate-200 bg-slate-50/70 p-5">

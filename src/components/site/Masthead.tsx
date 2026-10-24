@@ -241,7 +241,19 @@ export function Masthead() {
                       {secondaryWord}
                     </span>
                   </h1>
-                  <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[11px] md:text-xs font-semibold uppercase text-center w-full text-foreground/80 dark:text-foreground/85">
+                  <div
+                    className={`mt-1.5 sm:mt-2 font-semibold uppercase text-center w-full text-foreground/80 dark:text-foreground/85 ${
+                      !s.taglineFontSize ? "text-[9px] sm:text-[11px] md:text-xs" : ""
+                    }`}
+                    style={
+                      s.taglineFontSize
+                        ? {
+                            fontSize: `clamp(${Math.max(8, s.taglineFontSize - 4)}px, 2.5vw, ${s.taglineFontSize}px)`,
+                            lineHeight: 1.3,
+                          }
+                        : undefined
+                    }
+                  >
                     {taglineContent}
                   </div>
                 </div>
@@ -341,7 +353,19 @@ export function Masthead() {
                 )}
               </Link>
               {showText && (
-                <p className="mt-2.5 sm:mt-3 block text-center mx-auto text-[10px] sm:text-[11px] font-semibold uppercase text-foreground/80 dark:text-foreground/85">
+                <p
+                  className={`mt-2.5 sm:mt-3 block text-center mx-auto font-semibold uppercase text-foreground/80 dark:text-foreground/85 ${
+                    !s.taglineFontSize ? "text-[10px] sm:text-[11px]" : ""
+                  }`}
+                  style={
+                    s.taglineFontSize
+                      ? {
+                          fontSize: `clamp(${Math.max(8, s.taglineFontSize - 4)}px, 2.5vw, ${s.taglineFontSize}px)`,
+                          lineHeight: 1.3,
+                        }
+                      : undefined
+                  }
+                >
                   {taglineContent}
                 </p>
               )}

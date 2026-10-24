@@ -33,6 +33,7 @@ export const authClient = {
         const res = await signInServer({ data: credentials });
         if (typeof window !== "undefined") {
           localStorage.setItem(SESSION_KEY, JSON.stringify(res.session));
+          document.cookie = `nt_session=${res.session.access_token}; path=/; max-age=604800; SameSite=Lax`;
         }
         notify("SIGNED_IN", res.session);
         return { data: res, error: null };
@@ -61,6 +62,7 @@ export const authClient = {
         });
         if (typeof window !== "undefined") {
           localStorage.setItem(SESSION_KEY, JSON.stringify(res.session));
+          document.cookie = `nt_session=${res.session.access_token}; path=/; max-age=604800; SameSite=Lax`;
         }
         notify("SIGNED_IN", res.session);
         return { data: res, error: null };
@@ -83,11 +85,15 @@ export const authClient = {
             }
           }
           localStorage.removeItem(SESSION_KEY);
+          document.cookie = "nt_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
         }
         notify("SIGNED_OUT", null);
         return { error: null };
       } catch (err: any) {
-        if (typeof window !== "undefined") localStorage.removeItem(SESSION_KEY);
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(SESSION_KEY);
+          document.cookie = "nt_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+        }
         notify("SIGNED_OUT", null);
         return { error: null };
       }
@@ -101,6 +107,10 @@ export const authClient = {
 
         const local = JSON.parse(raw);
         if (!local?.access_token) return { data: { session: null }, error: null };
+
+        if (typeof document !== "undefined" && !document.cookie.includes("nt_session=")) {
+          document.cookie = `nt_session=${local.access_token}; path=/; max-age=604800; SameSite=Lax`;
+        }
 
         // Cache session validation for 3 minutes to speed up navigation
         const now = Date.now();

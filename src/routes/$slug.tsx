@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { loadSettings } from "@/lib/site-content";
+import { loadSettings, isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
 import { getCategoryData } from "@/lib/taxonomy.functions";
 
 import { CategoryHeader } from "@/components/article-page/CategoryHeader";
@@ -75,9 +75,15 @@ function CategoryPage() {
   }, []);
 
   useEffect(() => {
+    const isEnterprise = isEnterpriseLicense(settings);
+    const isEnterprisePlus = isEnterprisePlusLicense(settings);
+    const canUseImage = isEnterprisePlus && Boolean(settings.festiveAlertImage);
+    const canUseText = isEnterprise && Boolean(settings.topBarWeatherCustomText);
+
     if (
+      !isEnterprise ||
       settings.festiveThemeEnabled === false ||
-      (!settings.topBarWeatherCustomText && !settings.festiveAlertImage)
+      (!canUseImage && !canUseText)
     ) {
       setShowCustomText(false);
       return;
@@ -88,6 +94,7 @@ function CategoryPage() {
     }, delay);
     return () => clearInterval(interval);
   }, [
+    settings.licenseType,
     settings.festiveThemeEnabled,
     settings.topBarWeatherCustomText,
     settings.festiveAlertImage,

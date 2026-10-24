@@ -14,8 +14,8 @@ export function EventPageSettingsCard({
 }: EventPageSettingsCardProps) {
   return (
     <Card
-      title="Event Page Setup (শারদ সম্মান)"
-      subtitle="Configure the event details, custom registration form, button names, and Durga Puja theme options."
+      title="Event Page Setup"
+      subtitle="Configure the event details, custom registration form, button names, and theme options."
     >
       {eventFields.map((f) => (
         <Field key={f.key} f={f} s={settings} update={updateSetting} />
@@ -27,7 +27,7 @@ export function EventPageSettingsCard({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-slate-800">
-                Event Footer Quick Link (ফুটার কুইক লিঙ্ক)
+                Event Footer Quick Link
               </span>
               <span
                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${

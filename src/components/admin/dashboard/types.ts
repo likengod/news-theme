@@ -25,6 +25,9 @@ export interface DashboardData {
   totalArticles: number;
   totalViews: number;
   totalUsers: number;
+  maleUsers?: number;
+  femaleUsers?: number;
+  otherUsers?: number;
   totalComments: number;
   totalSubscribers: number;
   totalJournalists: number;
