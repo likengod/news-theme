@@ -22,7 +22,7 @@ async function main() {
     console.log(`Copied ${fs.readdirSync(clientAssetsDir).length} files to root assets/`);
   }
 
-  console.log('\n=== Step 3: Packaging hostinger-deploy-v1.2.24.zip ===');
+  console.log('\n=== Step 3: Packaging hostinger-deploy-v1.2.25.zip ===');
   const zip = new AdmZip();
 
   function addDirectoryToZip(dirPath, zipPrefix) {
@@ -66,7 +66,7 @@ async function main() {
     }
   }
 
-  const outputPath = path.join(__dirname, '..', 'hostinger-deploy-v1.2.24.zip');
+  const outputPath = path.join(__dirname, '..', 'hostinger-deploy-v1.2.25.zip');
   console.log('\nGenerating ZIP file...');
   const buffer = await zip.generateAsync({
     type: 'nodebuffer',
@@ -76,7 +76,7 @@ async function main() {
 
   fs.writeFileSync(outputPath, buffer);
   const sizeMb = (fs.statSync(outputPath).size / 1024 / 1024).toFixed(2);
-  console.log(`\nSUCCESS! Created: hostinger-deploy-v1.2.24.zip (${sizeMb} MB)`);
+  console.log(`\nSUCCESS! Created: hostinger-deploy-v1.2.25.zip (${sizeMb} MB)`);
 }
 
 main().catch((err) => {

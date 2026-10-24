@@ -28,7 +28,7 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
               className="group block"
             >
               {activeBottomItems[0].img && (
-                <div className="overflow-hidden bg-muted">
+                <div className="overflow-hidden bg-muted aspect-[16/9]">
                   <img
                     src={activeBottomItems[0].img}
                     alt=""
@@ -74,7 +74,7 @@ export function HeroBottomGrid({ cfg, activeBottomItems }: any) {
               className="group block border-t border-border pt-6 md:border-t-0 md:pt-0"
             >
               {activeBottomItems[1].img && (
-                <div className="hidden md:block overflow-hidden bg-muted">
+                <div className="hidden md:block overflow-hidden bg-muted aspect-[16/9]">
                   <img
                     src={activeBottomItems[1].img}
                     alt=""

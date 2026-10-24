@@ -40,7 +40,11 @@ export function LanguageSwitcher() {
 
   useEffect(() => {
     if (typeof document !== "undefined" && document.cookie.includes("googtrans=")) {
-      loadGoogleTranslate();
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(() => loadGoogleTranslate(), { timeout: 3500 });
+      } else {
+        setTimeout(loadGoogleTranslate, 2500);
+      }
     }
   }, []);
 

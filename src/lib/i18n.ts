@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react";
-import translationEN from "../locales/en/translation.json";
-import translationHI from "../locales/hi/translation.json";
-import translationBN from "../locales/bn/translation.json";
+import { translations } from "../locales/translations";
 
-const resources: Record<string, any> = {
-  en: translationEN,
-  hi: translationHI,
-  bn: translationBN,
-};
+const resources: Record<string, any> = translations;
 
 let currentLanguage = "en";
 const listeners = new Set<() => void>();

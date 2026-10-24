@@ -1,0 +1,2 @@
+var e=`v1.2.25`;function t(e){if(!e)return 0;let t=e.replace(/^v/,``).split(`.`).map(e=>parseInt(e,10)||0);return(t[0]||0)*1e6+(t[1]||0)*1e3+(t[2]||0)}export{t as n,e as t};
+//# sourceMappingURL=version-U5_liXLN.js.map

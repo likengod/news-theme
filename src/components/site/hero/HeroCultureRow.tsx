@@ -23,7 +23,7 @@ export function HeroCultureRow({ cfg, activeCultureItems }: any) {
             params={{ slug: c?.slug || "sample" }}
             className="group flex flex-col h-full w-full max-w-full min-w-0"
           >
-            <div className="relative overflow-hidden rounded-lg">
+            <div className="relative overflow-hidden rounded-lg aspect-[16/9] bg-muted">
               <img
                 src={c.img}
                 alt=""

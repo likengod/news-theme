@@ -165,6 +165,8 @@ export function Masthead() {
           ? siteWords.slice(1).join(" ")
           : "";
 
+  const brandAccessibleName = (secondaryWord ? `${primaryWord} ${secondaryWord}` : primaryWord).trim() || s.siteName || "Home";
+
   const taglineContent = s.tagline ? (
     <span className="break-words text-center inline-block">{s.tagline}</span>
   ) : (
@@ -185,7 +187,7 @@ export function Masthead() {
         <div className="mx-auto max-w-7xl px-4 py-5 text-center md:py-6 overflow-hidden">
           {/* 1. Side-by-Side Brand Lockup (Matches Reference Image) */}
           {isSideBySide && (
-            <Link to="/" aria-label={s.siteName || "Home"} className="inline-block max-w-full">
+            <Link to="/" aria-label={brandAccessibleName} className="inline-block max-w-full">
               <div className="inline-flex items-center justify-center gap-3 sm:gap-4 md:gap-5 text-left max-w-full">
                 {/* Logo Mark on the Left */}
                 <div className="shrink-0 flex items-center justify-center">
@@ -263,7 +265,7 @@ export function Masthead() {
 
           {/* 2. Fit Screen / Full Banner Logo */}
           {(!logoFailed && (mode === "logo_fit" || (mode === "logo_only" && isFitScreen)) && !isSideBySide) && (
-            <Link to="/" aria-label={s.siteName || "Home"} className="block w-full">
+            <Link to="/" aria-label={brandAccessibleName} className="block w-full">
               <div className="w-full flex items-center justify-center">
                 {s.logoLight && (
                   <img
@@ -298,7 +300,7 @@ export function Masthead() {
           {/* 3. Stacked Logo + Text or Logo Only (Standard) or Text Only (or Fallback if logo failed) */}
           {!isSideBySide && (logoFailed || (mode !== "logo_fit" && !(mode === "logo_only" && isFitScreen))) && (
             <div>
-              <Link to="/" aria-label={s.siteName || "Home"} className="block">
+              <Link to="/" aria-label={brandAccessibleName} className="block">
                 {showLogo && s.logoLight && (
                   <img
                     src={s.logoLight}

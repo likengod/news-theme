@@ -1,0 +1,2 @@
+var e=(t,n)=>{let r={type:`request`,...n||t};return{options:r,middleware:t=>e({},Object.assign(r,{middleware:t})),validator:t=>e({},Object.assign(r,{validator:t})),client:t=>e({},Object.assign(r,{client:t})),server:t=>e({},Object.assign(r,{server:t}))}},t=e({type:`function`}),n=e({type:`function`});export{t as n,e as r,n as t};
+//# sourceMappingURL=auth-middleware-BwSK_RvR.js.map

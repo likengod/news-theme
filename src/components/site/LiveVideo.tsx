@@ -125,7 +125,7 @@ export function LiveVideo() {
           <button
             type="button"
             onClick={() => setIsPlaying(true)}
-            aria-label={`Play ${liveVideo.title || "Live Stream"}`}
+            aria-label={`LIVE STREAM: Play ${liveVideo.title || "Live Stream"}`}
             className="group/btn relative flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-zinc-900 via-black to-zinc-950 text-white cursor-pointer transition hover:brightness-105 focus:outline-none"
           >
             {liveVideo.thumbnailUrl ? (

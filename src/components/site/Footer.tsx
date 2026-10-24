@@ -67,6 +67,12 @@ export function Footer() {
     !hasLogo || mode === "text_only" || mode === "both" || mode === "both_stacked";
   const isSideBySide = mode === "both" && showLogo && showText;
 
+  const footerBrandName = (
+    (s.logoTextPrimary !== undefined && s.logoTextPrimary !== ""
+      ? `${s.logoTextPrimary} ${s.logoTextSecondary || ""}`
+      : s.logoText || s.siteName) || ""
+  ).trim() || "Home";
+
   // Split links into 2 neat categories for desktop readability and better space distribution:
   // 1. Navigation & Company Links
   const companyLinks = allAvailableLinks.slice(0, 7);
@@ -90,7 +96,7 @@ export function Footer() {
           <div className="flex flex-col items-center text-center md:items-start md:text-left">
             <Link
               to="/"
-              aria-label={s.siteName || "Home"}
+              aria-label={footerBrandName}
               className={`inline-flex max-w-full ${
                 isSideBySide
                   ? "flex-row items-center gap-3 text-left"
