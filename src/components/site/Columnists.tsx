@@ -24,7 +24,22 @@ export function Columnists({ hideTitle }: { hideTitle?: boolean } = {}) {
   const adCtx = useAdSettings();
   const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [items, setItems] = useState<WatchItem[]>([]);
+  const [items, setItems] = useState<WatchItem[]>(() => {
+    if (!reelsCfg?.enabled || !Array.isArray(reelsCfg?.urls)) return [];
+    return reelsCfg.urls.flatMap((url, i) => {
+      const ytId = extractYouTubeId(url);
+      const thumb = ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : "";
+      return {
+        title: `Shorts #${i + 1}`,
+        duration: "1:00",
+        img: thumb,
+        kicker: "Shorts",
+        embedSrc: ytId
+          ? `https://www.youtube-nocookie.com/embed/${ytId}?rel=0&modestbranding=1&playsinline=1&autoplay=1`
+          : "",
+      };
+    });
+  });
 
   useEffect(() => {
     if (!reelsCfg?.enabled) {
