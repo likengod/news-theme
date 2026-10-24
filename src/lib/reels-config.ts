@@ -49,7 +49,8 @@ export const defaultReelsConfig: ReelsConfig = {
 };
 
 import { createServerFn } from "@tanstack/react-start";
-import { requireAuth } from "./auth-middleware";
+import { requireAdmin } from "./auth-middleware";
+import { attachAuth } from "./auth-attacher";
 import { query } from "./db.server";
 
 const KEY = "nt:reels-config:v2";
@@ -88,7 +89,7 @@ export const getReelsConfigServer = createServerFn({ method: "GET" }).handler(
 );
 
 export const saveReelsConfigServer = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
+  .middleware([attachAuth, requireAdmin])
   .validator((cfg: ReelsConfig) => cfg)
   .handler(async ({ data }) => {
     const json = JSON.stringify(data);

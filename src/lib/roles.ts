@@ -93,7 +93,8 @@ function mergeBuiltins(roles: Role[]): Role[] {
 }
 
 import { createServerFn } from "@tanstack/react-start";
-import { requireAuth } from "./auth-middleware";
+import { requireAuth, requireAdmin } from "./auth-middleware";
+import { attachAuth } from "./auth-attacher";
 import { query } from "./db.server";
 
 // ─── Server Functions (MySQL Roles Persistence) ─────────────────────────────
@@ -116,7 +117,7 @@ export const getRolesServer = createServerFn({ method: "GET" }).handler(
 );
 
 export const saveRolesServer = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
+  .middleware([attachAuth, requireAdmin])
   .validator((roles: Role[]) => roles)
   .handler(async ({ data }) => {
     const json = JSON.stringify(data);

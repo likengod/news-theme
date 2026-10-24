@@ -3,8 +3,11 @@ import path from "node:path";
 import { createServerFn } from "@tanstack/react-start";
 import { query } from "./db.server";
 import { persistMediaImage } from "./ad-storage.server";
+import { requireAdmin } from "./auth-middleware";
+import { attachAuth } from "./auth-attacher";
 
 export const uploadMediaServer = createServerFn({ method: "POST" })
+  .middleware([attachAuth, requireAdmin])
   .validator(
     (data: {
       id: string;
@@ -56,6 +59,7 @@ export const getMediaListServer = createServerFn({ method: "GET" }).handler(asyn
 });
 
 export const updateMediaServer = createServerFn({ method: "POST" })
+  .middleware([attachAuth, requireAdmin])
   .validator((data: { id: string; name?: string; altText?: string; description?: string }) => data)
   .handler(async ({ data }) => {
     const updates = [];
@@ -81,6 +85,7 @@ export const updateMediaServer = createServerFn({ method: "POST" })
   });
 
 export const replaceMediaFileServer = createServerFn({ method: "POST" })
+  .middleware([attachAuth, requireAdmin])
   .validator(
     (data: {
       id: string;
@@ -114,6 +119,7 @@ export const replaceMediaFileServer = createServerFn({ method: "POST" })
   });
 
 export const batchUpdateAltTextServer = createServerFn({ method: "POST" })
+  .middleware([attachAuth, requireAdmin])
   .validator((data: { items: { id: string; altText: string }[] }) => data)
   .handler(async ({ data }) => {
     for (const it of data.items) {
@@ -168,6 +174,7 @@ async function removeFileFromDisk(fileUrl?: string) {
 }
 
 export const deleteMediaServer = createServerFn({ method: "POST" })
+  .middleware([attachAuth, requireAdmin])
   .validator((data: { id: string }) => data)
   .handler(async ({ data }) => {
     try {
@@ -181,6 +188,7 @@ export const deleteMediaServer = createServerFn({ method: "POST" })
   });
 
 export const deleteMultipleMediaServer = createServerFn({ method: "POST" })
+  .middleware([attachAuth, requireAdmin])
   .validator((data: { ids: string[] }) => data)
   .handler(async ({ data }) => {
     if (!data.ids || data.ids.length === 0) return { success: true, count: 0 };

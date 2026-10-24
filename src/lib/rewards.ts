@@ -107,7 +107,8 @@ function mergeDefaults(groups: RewardGroup[]): RewardGroup[] {
 }
 
 import { createServerFn } from "@tanstack/react-start";
-import { requireAuth } from "./auth-middleware";
+import { requireAdmin } from "./auth-middleware";
+import { attachAuth } from "./auth-attacher";
 import { query } from "./db.server";
 
 // ─── Server Functions (MySQL Rewards Persistence) ───────────────────────────
@@ -130,7 +131,7 @@ export const getRewardsServer = createServerFn({ method: "GET" }).handler(
 );
 
 export const saveRewardsServer = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
+  .middleware([attachAuth, requireAdmin])
   .validator((groups: RewardGroup[]) => groups)
   .handler(async ({ data }) => {
     const json = JSON.stringify(data);

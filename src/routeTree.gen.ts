@@ -68,7 +68,6 @@ import { Route as ApiRssRouteImport } from './routes/api/rss'
 import { Route as ApiUpdateRouteImport } from './routes/api/update'
 import { Route as ApiUpdatesRouteImport } from './routes/api/updates'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
-import { Route as ApiPublicSeedDemoAdminRouteImport } from './routes/api/public/seed-demo-admin'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -365,11 +364,6 @@ const NewsSlugRoute = NewsSlugRouteImport.update({
   path: '/news/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicSeedDemoAdminRoute = ApiPublicSeedDemoAdminRouteImport.update({
-  id: '/api/public/seed-demo-admin',
-  path: '/api/public/seed-demo-admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -431,7 +425,6 @@ export interface FileRoutesByFullPath {
   '/api/updates': typeof ApiUpdatesRoute
   '/news/$slug': typeof NewsSlugRoute
   '/admin/': typeof AdminIndexRoute
-  '/api/public/seed-demo-admin': typeof ApiPublicSeedDemoAdminRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -492,7 +485,6 @@ export interface FileRoutesByTo {
   '/api/updates': typeof ApiUpdatesRoute
   '/news/$slug': typeof NewsSlugRoute
   '/admin': typeof AdminIndexRoute
-  '/api/public/seed-demo-admin': typeof ApiPublicSeedDemoAdminRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -555,7 +547,6 @@ export interface FileRoutesById {
   '/api/updates': typeof ApiUpdatesRoute
   '/news/$slug': typeof NewsSlugRoute
   '/admin/': typeof AdminIndexRoute
-  '/api/public/seed-demo-admin': typeof ApiPublicSeedDemoAdminRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -619,7 +610,6 @@ export interface FileRouteTypes {
     | '/api/updates'
     | '/news/$slug'
     | '/admin/'
-    | '/api/public/seed-demo-admin'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -680,7 +670,6 @@ export interface FileRouteTypes {
     | '/api/updates'
     | '/news/$slug'
     | '/admin'
-    | '/api/public/seed-demo-admin'
   id:
     | '__root__'
     | '/'
@@ -742,7 +731,6 @@ export interface FileRouteTypes {
     | '/api/updates'
     | '/news/$slug'
     | '/admin/'
-    | '/api/public/seed-demo-admin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -788,7 +776,6 @@ export interface RootRouteChildren {
   ApiUpdateRoute: typeof ApiUpdateRoute
   ApiUpdatesRoute: typeof ApiUpdatesRoute
   NewsSlugRoute: typeof NewsSlugRoute
-  ApiPublicSeedDemoAdminRoute: typeof ApiPublicSeedDemoAdminRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1206,13 +1193,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/seed-demo-admin': {
-      id: '/api/public/seed-demo-admin'
-      path: '/api/public/seed-demo-admin'
-      fullPath: '/api/public/seed-demo-admin'
-      preLoaderRoute: typeof ApiPublicSeedDemoAdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -1301,7 +1281,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUpdateRoute: ApiUpdateRoute,
   ApiUpdatesRoute: ApiUpdatesRoute,
   NewsSlugRoute: NewsSlugRoute,
-  ApiPublicSeedDemoAdminRoute: ApiPublicSeedDemoAdminRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

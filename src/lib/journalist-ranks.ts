@@ -22,7 +22,8 @@ export const DEFAULT_RANKS: JournalistRank[] = [
 ];
 
 import { createServerFn } from "@tanstack/react-start";
-import { requireAuth } from "./auth-middleware";
+import { requireAdmin } from "./auth-middleware";
+import { attachAuth } from "./auth-attacher";
 import { query } from "./db.server";
 
 // ─── Server Functions (MySQL Journalist Ranks Persistence) ──────────────────
@@ -45,7 +46,7 @@ export const getJournalistRanksServer = createServerFn({ method: "GET" }).handle
 );
 
 export const saveJournalistRanksServer = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
+  .middleware([attachAuth, requireAdmin])
   .validator((ranks: JournalistRank[]) => ranks)
   .handler(async ({ data }) => {
     const json = JSON.stringify(data);
