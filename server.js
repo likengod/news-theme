@@ -66,10 +66,12 @@ const SECURITY_HEADERS = {
   "X-Frame-Options": "SAMEORIGIN",
   "X-XSS-Protection": "1; mode=block",
   "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+  "Cross-Origin-Resource-Policy": "cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
   "Content-Security-Policy":
-    "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: fonts.gstatic.com; frame-src 'self' https:; frame-ancestors 'self';",
+    "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; object-src 'none'; base-uri 'self'; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: fonts.gstatic.com; frame-src 'self' https:; frame-ancestors 'self';",
 };
 
 function applySecurityHeaders(res) {

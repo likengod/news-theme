@@ -6,8 +6,8 @@ import {
   type ReelsConfig,
 } from "@/lib/reels-config";
 
-export function useReelsConfig(): ReelsConfig {
-  const [cfg, setCfg] = useState<ReelsConfig>(() => loadReelsConfig());
+export function useReelsConfig(initialConfig?: ReelsConfig): ReelsConfig {
+  const [cfg, setCfg] = useState<ReelsConfig>(() => initialConfig || loadReelsConfig());
 
   useEffect(() => {
     // 1. Sync on local events

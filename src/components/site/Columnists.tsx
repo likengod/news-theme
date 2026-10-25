@@ -15,12 +15,19 @@ import { useAdSettings } from "./AdSettingsContext";
 import { loadAds, injectReelAds } from "@/lib/site-content";
 import { Link } from "@tanstack/react-router";
 import type { WatchItem } from "./ReelViewerModal";
+import type { ReelsConfig } from "@/lib/reels-config";
 
 const ReelViewerModal = lazy(() => import("./ReelViewerModal"));
 
-export function Columnists({ hideTitle }: { hideTitle?: boolean } = {}) {
+export function Columnists({
+  hideTitle,
+  initialConfig,
+}: {
+  hideTitle?: boolean;
+  initialConfig?: ReelsConfig;
+} = {}) {
   const cfg = useHomepageConfig();
-  const reelsCfg = useReelsConfig();
+  const reelsCfg = useReelsConfig(initialConfig);
   const adCtx = useAdSettings();
   const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);

@@ -6,6 +6,7 @@ import { LazySection } from "@/components/site/LazySection";
 import { getHomepageArticles } from "@/lib/articles.functions";
 import { getTags } from "@/lib/taxonomy.functions";
 import { getSiteSettingsServer } from "@/lib/site-content";
+import { getReelsConfigServer } from "@/lib/reels-config";
 import { getArticleImage } from "@/lib/news-data";
 import Footer from "@/components/site/Footer";
 
@@ -22,7 +23,7 @@ const HOME_DESC =
 export const Route = createFileRoute("/")({
   loader: async () => {
     try {
-      const [articles, tags, settings] = await Promise.all([
+      const [articles, tags, settings, reelsConfig] = await Promise.all([
         getHomepageArticles({ data: 40 }).catch((err) => {
           console.warn(
             "[Homepage Loader] getHomepageArticles fallback to empty:",
@@ -35,11 +36,13 @@ export const Route = createFileRoute("/")({
           return [];
         }),
         getSiteSettingsServer().catch(() => null),
+        getReelsConfigServer().catch(() => null),
       ]);
       return {
         articles: Array.isArray(articles) ? articles : [],
         tags: Array.isArray(tags) ? tags : [],
         settings,
+        reelsConfig,
       };
     } catch (err) {
       console.error("[Homepage Loader] Top-level error, rendering fallback:", err);
@@ -93,7 +96,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { articles: dbArticles, tags: dbTags } = Route.useLoaderData();
+  const { articles: dbArticles, tags: dbTags, reelsConfig } = Route.useLoaderData();
   const usedIds = new Set<number>();
 
   return (
@@ -104,7 +107,7 @@ function Home() {
       <main className="mx-auto max-w-7xl px-4 py-4 md:py-10 w-full max-w-full min-w-0 overflow-x-clip">
         {/* On Mobile Devices (< md): Render Watch section directly below Header */}
         <div className="block md:hidden border-b border-border mb-2 pb-2 overflow-hidden">
-          <Columnists hideTitle />
+          <Columnists hideTitle initialConfig={reelsConfig} />
         </div>
 
         <HeroBoard articles={dbArticles} tags={dbTags} />
@@ -112,7 +115,7 @@ function Home() {
         {/* On Desktop Devices (>= md): Render Watch section after HeroBoard */}
         <div className="hidden md:block">
           <LazySection minHeight={200} rootMargin="400px">
-            <Columnists />
+            <Columnists initialConfig={reelsConfig} />
           </LazySection>
         </div>
 

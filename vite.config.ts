@@ -13,11 +13,23 @@ export default defineConfig({
   server: {
     port: 3099,
     host: true,
+    headers: {
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "SAMEORIGIN",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    },
   },
   preview: {
     port: 3099,
     host: true,
     allowedHosts: ["todaytripura.com", "www.todaytripura.com", "localhost"],
+    headers: {
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "SAMEORIGIN",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    },
   },
   build: {
     emptyOutDir: true,
