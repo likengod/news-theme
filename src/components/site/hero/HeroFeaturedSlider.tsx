@@ -54,14 +54,26 @@ export default function HeroFeaturedSlider({
   const plugins = React.useMemo(() => {
     return [
       Autoplay({
-        delay: slideInterval,
+        delay: Math.max(slideInterval, 6000),
         stopOnInteraction: false,
         stopOnMouseEnter: true,
         active: autoSlide && showMultiple,
-        playOnInit: autoSlide && showMultiple,
+        playOnInit: false,
       }),
     ];
   }, [slideInterval, autoSlide, showMultiple]);
+
+  React.useEffect(() => {
+    if (!api || !autoSlide || !showMultiple) return;
+    // Defer autoplay start by 7s so initial paint & LCP measurement settle on slide 0
+    const timer = setTimeout(() => {
+      const autoplay = (api.plugins() as any)?.autoplay;
+      if (autoplay && typeof autoplay.play === "function") {
+        autoplay.play();
+      }
+    }, 7000);
+    return () => clearTimeout(timer);
+  }, [api, autoSlide, showMultiple]);
 
   const carouselItems: React.ReactNode[] = [];
   leads.forEach((featured: any, index: number) => {
@@ -76,7 +88,7 @@ export default function HeroFeaturedSlider({
               alt=""
               aria-hidden="true"
               loading={index === 0 ? "eager" : "lazy"}
-              fetchPriority={index === 0 ? "high" : "auto"}
+              fetchPriority={index === 0 ? "high" : "low"}
               decoding={index === 0 ? "sync" : "async"}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
               width={800}
