@@ -351,6 +351,7 @@ export async function downloadAndExtractTarball(): Promise<{ success: boolean; l
 export async function executeGitPullCore() {
   await ensureDeployTable();
 
+  const beforeHash = git("rev-parse --short HEAD");
   const authRemote = getAuthenticatedGitUrl();
 
   // 1. Configure safe directory on Linux & disable SSL verify for hosts with outdated cert stores
@@ -370,19 +371,22 @@ export async function executeGitPullCore() {
   git('config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"');
 
   // 3. Fetch from origin (or direct URL if remote lookup fails)
-  let fetchResult = git("fetch --depth=1 origin main");
+  let fetchResult = git("fetch --depth=1 origin main:refs/remotes/origin/main");
   if (fetchResult.includes("fatal") || fetchResult.includes("unknown error")) {
-    fetchResult = git(`fetch --depth=1 ${authRemote} main`);
+    fetchResult = git(`fetch --depth=1 ${authRemote} main:refs/remotes/origin/main`);
   }
 
   // 4. Force checkout / reset to FETCH_HEAD directly
   git("branch -M main");
-  let pullResult = git("checkout -f -B main FETCH_HEAD");
+  let pullResult = git("reset --hard refs/remotes/origin/main");
   if (!pullResult || pullResult.includes("fatal")) {
-    pullResult = git("reset --hard FETCH_HEAD");
+    pullResult = git("checkout -f -B main refs/remotes/origin/main");
   }
   if (!pullResult || pullResult.includes("fatal")) {
-    pullResult = git("reset --hard origin/main");
+    pullResult = git("checkout -f -B main FETCH_HEAD");
+  }
+  if (!pullResult || pullResult.includes("fatal")) {
+    pullResult = git("reset --hard FETCH_HEAD");
   }
 
   // If Git failed (e.g. fresh ZIP install without Git commits or dubious ownership), fallback to direct HTTPS release extraction

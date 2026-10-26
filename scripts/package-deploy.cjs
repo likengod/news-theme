@@ -4,16 +4,20 @@ const { execSync } = require('child_process');
 const AdmZip = require('jszip');
 
 async function main() {
-  console.log('=== Step 1: Running Production Build ===');
+  const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+  const version = pkg.version || '1.2.25';
+
+  console.log(`=== Step 1: Running Production Build for v${version} ===`);
   execSync('npm run build', { stdio: 'inherit' });
 
   console.log('\n=== Step 2: Syncing assets directory ===');
   const clientAssetsDir = path.join(__dirname, '..', 'dist', 'client', 'assets');
   const rootAssetsDir = path.join(__dirname, '..', 'assets');
 
-  if (!fs.existsSync(rootAssetsDir)) {
-    fs.mkdirSync(rootAssetsDir, { recursive: true });
+  if (fs.existsSync(rootAssetsDir)) {
+    fs.rmSync(rootAssetsDir, { recursive: true, force: true });
   }
+  fs.mkdirSync(rootAssetsDir, { recursive: true });
 
   if (fs.existsSync(clientAssetsDir)) {
     for (const f of fs.readdirSync(clientAssetsDir)) {
@@ -22,7 +26,7 @@ async function main() {
     console.log(`Copied ${fs.readdirSync(clientAssetsDir).length} files to root assets/`);
   }
 
-  console.log('\n=== Step 3: Packaging hostinger-deploy-v1.2.25.zip ===');
+  console.log(`\n=== Step 3: Packaging hostinger-full-deploy-v${version}.zip ===`);
   const zip = new AdmZip();
 
   function addDirectoryToZip(dirPath, zipPrefix) {
@@ -55,6 +59,10 @@ async function main() {
     'ecosystem.config.cjs',
     'package.json',
     'package-lock.json',
+    'app.config.ts',
+    'vite.config.ts',
+    'tsconfig.json',
+    'components.json',
     '.env',
   ];
 
@@ -66,7 +74,6 @@ async function main() {
     }
   }
 
-  const outputPath = path.join(__dirname, '..', 'hostinger-deploy-v1.2.25.zip');
   console.log('\nGenerating ZIP file...');
   const buffer = await zip.generateAsync({
     type: 'nodebuffer',
@@ -74,9 +81,16 @@ async function main() {
     compressionOptions: { level: 6 },
   });
 
-  fs.writeFileSync(outputPath, buffer);
-  const sizeMb = (fs.statSync(outputPath).size / 1024 / 1024).toFixed(2);
-  console.log(`\nSUCCESS! Created: hostinger-deploy-v1.2.25.zip (${sizeMb} MB)`);
+  const fullDeployPath = path.join(__dirname, '..', `hostinger-full-deploy-v${version}.zip`);
+  const deployPath = path.join(__dirname, '..', `hostinger-deploy-v${version}.zip`);
+
+  fs.writeFileSync(fullDeployPath, buffer);
+  fs.writeFileSync(deployPath, buffer);
+
+  const sizeMb = (fs.statSync(fullDeployPath).size / 1024 / 1024).toFixed(2);
+  console.log(`\nSUCCESS! Created:`);
+  console.log(`1) hostinger-full-deploy-v${version}.zip (${sizeMb} MB)`);
+  console.log(`2) hostinger-deploy-v${version}.zip (${sizeMb} MB)`);
 }
 
 main().catch((err) => {
