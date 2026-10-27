@@ -5,6 +5,7 @@ import { loadSettings, isEnterpriseLicense, isEnterprisePlusLicense } from "@/li
 import { slugify } from "@/lib/news-data";
 import { Share2, Check } from "lucide-react";
 import { toast } from "sonner";
+import { ArticleLikeButton } from "./ArticleLikeButton";
 
 const FESTIVE_GRADIENT_MAP: Record<string, string> = {
   "indian-flag": "linear-gradient(to right, #FF9933, #000080, #138808)",
@@ -16,20 +17,24 @@ const FESTIVE_GRADIENT_MAP: Record<string, string> = {
 };
 
 type Props = {
+  articleId?: number;
   title: string;
   author: string;
   date: string;
   views: number;
+  likes?: number;
   category?: string;
   deck?: string;
   shareUrl?: string;
 };
 
 export function ArticleHeader({
+  articleId,
   title,
   author,
   date,
   views,
+  likes = 0,
   category = "News",
   deck,
   shareUrl,
@@ -192,6 +197,11 @@ export function ArticleHeader({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Interactive Like Button */}
+          {articleId ? (
+            <ArticleLikeButton articleId={articleId} initialLikes={likes} />
+          ) : null}
+
           {/* Quick Share Button */}
           <button
             type="button"

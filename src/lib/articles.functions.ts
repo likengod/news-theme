@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireAuth, requireAdmin } from "@/lib/auth-middleware";
 import { query } from "./db.server";
 import { getRequest } from "@tanstack/react-start/server";
+import crypto from "crypto";
 import { slugify } from "./news-data";
 import { getClientIp, checkRateLimit } from "./security.server";
 import {
@@ -937,11 +938,12 @@ export const getAdminDashboardStats = createServerFn({ method: "GET" })
   });
 
 /**
- * Public: Like an article with write-behind buffering and anti-spam rate limiting.
+ * Public: Like an article with 3NF duplicate-prevention, write-behind buffering, and anti-spam rate limiting.
  */
 export const likeArticleServer = createServerFn({ method: "POST" })
-  .validator((articleId: number) => Number(articleId))
-  .handler(async ({ data: articleId }) => {
+  .validator((data: { articleId: number; clientToken?: string }) => data)
+  .handler(async ({ data }) => {
+    const articleId = Number(data.articleId);
     if (!articleId || isNaN(articleId) || articleId <= 0) {
       throw new Error("Invalid article ID");
     }
@@ -949,15 +951,92 @@ export const likeArticleServer = createServerFn({ method: "POST" })
     const req = getRequest();
     const ip = getClientIp(req);
 
-    // Rate-limit likes: max 10 likes per 5 minutes per IP
-    const check = checkRateLimit(`like:${ip}:${articleId}`, 10, 5 * 60 * 1000);
+    // Rate-limit likes: max 15 like attempts per 5 minutes per IP
+    const check = checkRateLimit(`like:${ip}:${articleId}`, 15, 5 * 60 * 1000);
     if (!check.allowed) {
       throw new Error("You are liking too quickly. Please wait a moment.");
     }
 
-    // High-performance write-behind in RAM
+    const rawToken = String(data.clientToken || "").trim();
+    const tokenBasis = rawToken || ip;
+    const tokenHash = crypto.createHash("sha256").update(tokenBasis + ":today_tripura_like").digest("hex").slice(0, 32);
+    const ipHash = crypto.createHash("sha256").update(ip + ":tripura_salt").digest("hex").slice(0, 32);
+
+    // 1. Check optional authenticated user session
+    let userId: string | null = null;
+    try {
+      const cookieHeader = req.headers.get("cookie") || "";
+      const match = cookieHeader.match(/(?:^|;\s*)(?:nt_session|session_token)=([^;]+)/);
+      if (match) {
+        const sessionToken = decodeURIComponent(match[1]);
+        const sessions = await query("SELECT user_id FROM sessions WHERE id = ? AND expires_at > NOW() LIMIT 1", [sessionToken]);
+        if (sessions.length > 0) {
+          userId = sessions[0].user_id;
+        }
+      }
+    } catch {}
+
+    // 2. 3NF Normalized duplicate prevention (Composite Unique constraint on article_id + client_token)
+    try {
+      const insertResult: any = await query(
+        "INSERT IGNORE INTO article_likes (article_id, user_id, client_token, ip_hash) VALUES (?, ?, ?, ?)",
+        [articleId, userId, tokenHash, ipHash]
+      );
+
+      // If affectedRows is 0, duplicate like detected!
+      if (insertResult?.affectedRows === 0) {
+        const rows = await query("SELECT likes FROM articles WHERE id = ? LIMIT 1", [articleId]);
+        const currentLikes = (Number(rows[0]?.likes) || 0) + getPendingLikes(articleId);
+        return {
+          success: false,
+          alreadyLiked: true,
+          message: "You have already liked this article",
+          likes: currentLikes,
+        };
+      }
+    } catch (err: any) {
+      console.warn("[Article Like] Notice:", err.message);
+    }
+
+    // 3. High-performance write-behind in RAM buffer (committed in 15s batches)
     recordBufferedLike(articleId);
-    return { success: true, pendingLikes: getPendingLikes(articleId) };
+    const rows = await query("SELECT likes FROM articles WHERE id = ? LIMIT 1", [articleId]);
+    const updatedLikes = (Number(rows[0]?.likes) || 0) + getPendingLikes(articleId);
+
+    return {
+      success: true,
+      alreadyLiked: false,
+      message: "Thank you for liking!",
+      likes: updatedLikes,
+    };
+  });
+
+/**
+ * Public: Check if the current visitor / user has already liked an article.
+ */
+export const checkArticleLikedServer = createServerFn({ method: "POST" })
+  .validator((data: { articleId: number; clientToken?: string }) => data)
+  .handler(async ({ data }) => {
+    const articleId = Number(data.articleId);
+    if (!articleId || isNaN(articleId) || articleId <= 0) {
+      return { liked: false };
+    }
+
+    const req = getRequest();
+    const ip = getClientIp(req);
+    const rawToken = String(data.clientToken || "").trim();
+    const tokenBasis = rawToken || ip;
+    const tokenHash = crypto.createHash("sha256").update(tokenBasis + ":today_tripura_like").digest("hex").slice(0, 32);
+
+    try {
+      const rows = await query(
+        "SELECT id FROM article_likes WHERE article_id = ? AND client_token = ? LIMIT 1",
+        [articleId, tokenHash]
+      );
+      return { liked: rows.length > 0 };
+    } catch {
+      return { liked: false };
+    }
   });
 
 /**

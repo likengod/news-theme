@@ -14,8 +14,10 @@
   - Installed and configured **Repomix v1.18.1** (`repomix.config.json` with XML output, Secretlint security check, and `.gitignore` integration).
   - Added `npm run repomix` script for instant single-file repository context extraction (410 source files packed in ~3s).
   - Implemented **3-Zone Delta Boundary** governance (`DELTA_SPEC.md`) and project task tracking (`BACKLOG.md`).
-- [x] **Write-Behind Caching Engine**:
+- [x] **Write-Behind Caching Engine & 3NF Normalized Like System**:
   - Implemented memory-buffered counters for article views and likes in `src/lib/write-behind-cache.server.ts`.
+  - Created 3NF normalized `article_likes` table with composite unique constraint `(article_id, client_token)` to guarantee 1-like-per-user duplicate prevention.
+  - Interactive `ArticleLikeButton` with live count, solid red heart ❤️ state, optimistic updates, and Write-Behind batching.
   - Batch commit every 15s to MySQL to eliminate database row locking during breaking news traffic spikes.
   - Graceful shutdown hooks (`SIGTERM`, `SIGINT`) to prevent loss of buffered counters on server restarts.
 - [x] **3-Tier Edge Cache-Control Headers**:

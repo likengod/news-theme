@@ -2,6 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import { getPublicArticleBySlug } from "./articles.functions";
 
 export interface ArticlePageData {
+  id?: number;
   slug: string;
   title: string;
   category: string;
@@ -121,6 +122,7 @@ export async function getArticleData(slug: string): Promise<ArticlePageData | nu
     }
 
     return {
+      id: art.id ? Number(art.id) : undefined,
       slug: art.slug,
       title: art.title || "",
       category: art.category || "News",

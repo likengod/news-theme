@@ -329,10 +329,12 @@ function ArticlePage() {
           )}
           <article className="article-post-main relative w-full min-w-0 flex-1">
             <ArticleHeader
+              articleId={data.id}
               title={data.title}
               author={data.author}
               date={data.date}
               views={data.views}
+              likes={data.likes}
               category={data.category}
               deck={data.excerpt}
               shareUrl={shareUrl}

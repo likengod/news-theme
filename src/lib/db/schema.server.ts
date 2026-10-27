@@ -173,6 +173,28 @@ export async function runQuickMigrations(
     // Engine or MySQL version without fulltext on innodb, safely ignore
   }
 
+  // 8. 3NF Normalized article_likes table with composite unique constraint
+  try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS article_likes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        article_id INT NOT NULL,
+        user_id VARCHAR(100) DEFAULT NULL,
+        client_token VARCHAR(64) NOT NULL,
+        ip_hash VARCHAR(64) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_article_user_like (article_id, client_token),
+        INDEX idx_article_likes (article_id, created_at DESC),
+        INDEX idx_client_token (client_token),
+        FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE
+      )
+    `);
+  } catch (err: any) {
+    if (!err.message?.includes("already exists")) {
+      console.warn("[Migration] article_likes notice:", err.message);
+    }
+  }
+
   quickMigrationsRan = true;
 }
 
@@ -444,6 +466,22 @@ export async function createTablesAndIndexes(
       alt_text TEXT,
       description TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // 9.8 Create article_likes table (3NF normalized like tracking)
+  await query(`
+    CREATE TABLE IF NOT EXISTS article_likes (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      article_id INT NOT NULL,
+      user_id VARCHAR(100) DEFAULT NULL,
+      client_token VARCHAR(64) NOT NULL,
+      ip_hash VARCHAR(64) DEFAULT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY uq_article_user_like (article_id, client_token),
+      INDEX idx_article_likes (article_id, created_at DESC),
+      INDEX idx_client_token (client_token),
+      FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE
     )
   `);
 
