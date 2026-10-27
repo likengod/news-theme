@@ -409,8 +409,15 @@ const server = createServer(async (req, res) => {
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         res.setHeader("X-Cache", "HIT");
-        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-        res.setHeader("Pragma", "no-cache");
+        if (isPublicGet) {
+          // Semi-Dynamic: allow Edge CDN (Cloudflare) to micro-cache for 60s, stale-while-revalidate for 120s
+          res.setHeader("Cache-Control", "public, max-age=10, s-maxage=60, stale-while-revalidate=120");
+          res.setHeader("Vary", "Accept-Encoding, Cookie");
+        } else {
+          // Dynamic / Private: admin, auth, logged-in session, mutations
+          res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
+          res.setHeader("Pragma", "no-cache");
+        }
         applySecurityHeaders(res);
         const cssLink = getMainCssLink();
         if (cssLink) res.setHeader("Link", cssLink);
@@ -461,9 +468,16 @@ const server = createServer(async (req, res) => {
     if (isHtml) {
       const cssLink = getMainCssLink();
       if (cssLink) res.setHeader("Link", cssLink);
-      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-      res.setHeader("Pragma", "no-cache");
-      res.setHeader("Expires", "0");
+      if (isPublicGet) {
+        // Semi-Dynamic: allow Edge CDN (Cloudflare) to micro-cache for 60s, stale-while-revalidate for 120s
+        res.setHeader("Cache-Control", "public, max-age=10, s-maxage=60, stale-while-revalidate=120");
+        res.setHeader("Vary", "Accept-Encoding, Cookie");
+      } else {
+        // Dynamic / Private: admin, auth, logged-in session, mutations
+        res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+      }
     }
 
     // Read full response body
