@@ -121,6 +121,18 @@ export async function runQuickMigrations(
     }
   }
 
+  // Ensure likes column exists on articles table
+  try {
+    const likeCols = await query("SHOW COLUMNS FROM articles LIKE 'likes'");
+    if (likeCols.length === 0) {
+      await query("ALTER TABLE articles ADD COLUMN likes INT DEFAULT 0");
+    }
+  } catch (err: any) {
+    if (!err.message?.includes("Duplicate column name")) {
+      console.warn("[Migration] articles.likes notice:", err.message);
+    }
+  }
+
   // 5. Ensure comments table has parent_id
   try {
     const commCols = await query("SHOW COLUMNS FROM comments LIKE 'parent_id'");
@@ -151,11 +163,11 @@ export async function runQuickMigrations(
     console.warn("[Migration] Index creation notice:", e?.message);
   }
 
-  // 7. Full-text search index for ultra-fast title & summary queries
+  // 7. Full-text search index for ultra-fast title & excerpt queries
   try {
     const ftIndex = await query("SHOW INDEX FROM articles WHERE Key_name = 'ft_articles_search'");
     if (ftIndex.length === 0) {
-      await query("ALTER TABLE articles ADD FULLTEXT INDEX ft_articles_search (title, summary)");
+      await query("ALTER TABLE articles ADD FULLTEXT INDEX ft_articles_search (title, excerpt)");
     }
   } catch (e: any) {
     // Engine or MySQL version without fulltext on innodb, safely ignore
