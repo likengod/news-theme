@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/yamadashy/repomix/main/repomix.schema.json",
+  "output": {
+    "filePath": "repomix-output.xml",
+    "style": "xml",
+    "removeComments": false,
+    "removeEmptyLines": true,
+    "showLineNumbers": true
+  },
+  "include": [
+    "src/**/*",
+    "server.js",
+    "package.json",
+    "ecosystem.config.cjs",
+    "vite.config.ts",
+    "app.config.ts",
+    "tsconfig.json"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "dist/**",
+      "assets/**",
+      "node_modules/**",
+      "*.zip",
+      "*.log",
+      ".env*",
+      "uploads/**",
+      "repomix-output.*"
+    ]
+  }
+}

@@ -39,6 +39,7 @@ db-config.json.bak
 # Deploy archives & local caches
 *.zip
 .gemini
+repomix-output.*
 
 # Temp directories & files
 tmp/
