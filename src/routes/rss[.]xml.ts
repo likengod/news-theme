@@ -18,7 +18,11 @@ export const Route = createFileRoute("/rss.xml")({
             const req = getRequest();
             const proto = req.headers.get("x-forwarded-proto") ?? "https";
             const host = req.headers.get("host") ?? "todaytripura.com";
-            origin = `${proto}://${host}`;
+            if (host && !host.includes("localhost") && !host.includes("127.0.0.1") && !host.includes("0.0.0.0")) {
+              origin = `${proto}://${host}`;
+            } else {
+              origin = "https://todaytripura.com";
+            }
           } catch {
             origin = "https://todaytripura.com";
           }
@@ -38,7 +42,8 @@ export const Route = createFileRoute("/rss.xml")({
               }
               if (
                 parsed?.seoCanonicalBaseUrl &&
-                !parsed.seoCanonicalBaseUrl.includes("domainname.com")
+                !parsed.seoCanonicalBaseUrl.includes("domainname.com") &&
+                !parsed.seoCanonicalBaseUrl.includes("localhost")
               ) {
                 origin = parsed.seoCanonicalBaseUrl.replace(/\/$/, "");
               }

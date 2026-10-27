@@ -37,5 +37,5 @@ Disallow: /
 User-agent: Diffbot
 Disallow: /
 
-Sitemap: http://localhost:3099/sitemap.xml
-Sitemap: http://localhost:3099/news-sitemap.xml
+Sitemap: https://todaytripura.com/sitemap.xml
+Sitemap: https://todaytripura.com/news-sitemap.xml
