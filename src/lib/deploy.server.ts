@@ -30,6 +30,28 @@ export function getAuthenticatedGitUrl(customRepo?: string, customPat?: string):
   return rawRepo;
 }
 
+export async function getGitConfigFromDb(): Promise<{ remoteUrl: string; pat: string; branch: string; authUrl: string }> {
+  let remoteUrl = PERMANENT_GIT_REPO;
+  let pat = PERMANENT_GIT_PAT;
+  let branch = PERMANENT_GIT_BRANCH;
+
+  try {
+    const rows = await query(
+      "SELECT value FROM site_settings WHERE setting_key = 'site_settings_data'",
+    );
+    if (rows && rows.length > 0 && rows[0].value) {
+      const settings = typeof rows[0].value === "string" ? JSON.parse(rows[0].value) : rows[0].value;
+      if (settings.gitRemoteUrl) remoteUrl = settings.gitRemoteUrl.trim();
+      if (settings.gitAccessToken) pat = settings.gitAccessToken.trim();
+      if (settings.gitBranch) branch = settings.gitBranch.trim();
+    }
+  } catch {}
+
+  const authUrl = getAuthenticatedGitUrl(remoteUrl, pat);
+  return { remoteUrl, pat, branch, authUrl };
+}
+
+
 // â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function parseSemver(v: string) {
@@ -48,6 +70,7 @@ export function getSpawnEnv(): NodeJS.ProcessEnv {
     "/usr/local/bin",
     "/usr/bin",
     "/bin",
+    "/opt/alt/alt-nodejs24/root/usr/bin",
     "/opt/alt/alt-nodejs22/root/usr/bin",
     "/opt/alt/alt-nodejs20/root/usr/bin",
     "/opt/alt/alt-nodejs18/root/usr/bin",
@@ -66,6 +89,7 @@ export function getNpmCommand(): string | null {
     path.join(nodeBinDir, process.platform === "win32" ? "npm.cmd" : "npm"),
     "/usr/local/bin/npm",
     "/usr/bin/npm",
+    "/opt/alt/alt-nodejs24/root/usr/bin/npm",
     "/opt/alt/alt-nodejs22/root/usr/bin/npm",
     "/opt/alt/alt-nodejs20/root/usr/bin/npm",
     "/opt/alt/alt-nodejs18/root/usr/bin/npm",
@@ -216,7 +240,7 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
   let ahead = 0;
   let behind = 0;
 
-  const authRemote = getAuthenticatedGitUrl();
+  const { authUrl: authRemote } = await getGitConfigFromDb();
   if (isGitInstalled) {
     if (!remote || !remote.includes(PERMANENT_GIT_PAT)) {
       git(`remote set-url origin ${authRemote}`);
@@ -275,7 +299,7 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
 
 // â”€â”€â”€ Git Pull â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-export async function downloadAndExtractTarball(): Promise<{ success: boolean; log: string }> {
+export async function downloadAndExtractTarball(customPat?: string): Promise<{ success: boolean; log: string }> {
   const tarUrl = "https://codeload.github.com/likengod/news-theme/tar.gz/refs/heads/main";
   const tmpDir = os.tmpdir();
   const archivePath = path.join(tmpDir, `update-${Date.now()}.tar.gz`);
@@ -297,9 +321,12 @@ export async function downloadAndExtractTarball(): Promise<{ success: boolean; l
   try {
     await new Promise<void>((resolve, reject) => {
       const https = require("https");
-      const req = https.get(tarUrl, { headers: { "User-Agent": "NewsThemeAutoUpdater" } }, (res: any) => {
+      const reqHeaders: Record<string, string> = { "User-Agent": "NewsThemeAutoUpdater" };
+    const token = customPat || PERMANENT_GIT_PAT;
+    if (token) reqHeaders["Authorization"] = `token ${token}`;
+    const req = https.get(tarUrl, { headers: reqHeaders }, (res: any) => {
         if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-          https.get(res.headers.location, { headers: { "User-Agent": "NewsThemeAutoUpdater" } }, (r2: any) => {
+          https.get(res.headers.location, { headers: reqHeaders }, (r2: any) => {
             const out = fs.createWriteStream(archivePath);
             r2.pipe(out);
             out.on("finish", () => out.close(() => resolve()));
@@ -352,7 +379,7 @@ export async function executeGitPullCore() {
   await ensureDeployTable();
 
   const beforeHash = git("rev-parse --short HEAD");
-  const authRemote = getAuthenticatedGitUrl();
+  const { remoteUrl, pat, branch, authUrl: authRemote } = await getGitConfigFromDb();
 
   // 1. Configure safe directory on Linux & disable SSL verify for hosts with outdated cert stores
   git("config --global --add safe.directory *");
@@ -391,7 +418,7 @@ export async function executeGitPullCore() {
 
   // If Git failed (e.g. fresh ZIP install without Git commits or dubious ownership), fallback to direct HTTPS release extraction
   if (pullResult.includes("fatal") || pullResult.includes("unknown revision") || pullResult.includes("error")) {
-    const directRes = await downloadAndExtractTarball();
+    const directRes = await downloadAndExtractTarball(pat);
     pullResult = directRes.log;
   }
 
