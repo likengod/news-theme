@@ -105,7 +105,7 @@ export function generateRootHead(loaderData: any) {
     "@context": "https://schema.org",
     "@type": s?.seoOrganizationType || "NewsMediaOrganization",
     name: s?.seoNewsPublicationName || siteTitle,
-    url: canonicalBase || "http://localhost:3099",
+    url: (canonicalBase && !canonicalBase.includes("localhost")) ? canonicalBase : "https://todaytripura.com",
     description: desc,
   };
   if (s?.logoLight || canonicalBase) {

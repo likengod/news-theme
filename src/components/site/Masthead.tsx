@@ -88,11 +88,16 @@ export function Masthead() {
   const [canScrollRight, setCanScrollRight] = useState(false);
 
   const checkScroll = () => {
-    const el = navScrollRef.current;
-    if (!el) return;
-    const hasOverflow = el.scrollWidth > el.clientWidth + 2;
-    setCanScrollLeft(el.scrollLeft > 4);
-    setCanScrollRight(hasOverflow && el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+    if (typeof window === "undefined") return;
+    window.requestAnimationFrame(() => {
+      const el = navScrollRef.current;
+      if (!el) return;
+      const hasOverflow = el.scrollWidth > el.clientWidth + 2;
+      const nextLeft = el.scrollLeft > 4;
+      const nextRight = hasOverflow && el.scrollLeft < el.scrollWidth - el.clientWidth - 4;
+      setCanScrollLeft((prev) => (prev !== nextLeft ? nextLeft : prev));
+      setCanScrollRight((prev) => (prev !== nextRight ? nextRight : prev));
+    });
   };
 
   useEffect(() => {
@@ -117,7 +122,7 @@ export function Masthead() {
     el.addEventListener("wheel", onWheel, { passive: false });
     const observer = new ResizeObserver(() => checkScroll());
     observer.observe(el);
-    window.addEventListener("resize", checkScroll);
+    window.addEventListener("resize", checkScroll, { passive: true });
 
     return () => {
       el.removeEventListener("wheel", onWheel);

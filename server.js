@@ -121,19 +121,19 @@ function sendStaticFile(filePath, req, res, host, parsedPath) {
   if (MIME_TYPES[ext]) {
     res.setHeader("Content-Type", MIME_TYPES[ext]);
   }
-  if (ext === ".css") {
-    res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
-  } else if (
+  if (
     parsedPath.startsWith("/assets/") ||
     parsedPath.startsWith("/fonts/") ||
     [".woff2", ".woff", ".ttf", ".otf"].includes(ext)
   ) {
     res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  } else if (ext === ".css") {
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
   } else if (
     parsedPath.startsWith("/uploads/") ||
     [".ico", ".svg", ".webp", ".jpg", ".jpeg", ".png", ".gif"].includes(ext)
   ) {
-    res.setHeader("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
+    res.setHeader("Cache-Control", "public, max-age=2592000, stale-while-revalidate=86400");
   } else {
     res.setHeader("Cache-Control", "public, max-age=86400");
   }

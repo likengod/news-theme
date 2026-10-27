@@ -4,11 +4,18 @@ export function ReadingProgress() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    let ticking = false;
     const onScroll = () => {
-      const h = document.documentElement;
-      const scrolled = h.scrollTop;
-      const max = h.scrollHeight - h.clientHeight;
-      setProgress(max > 0 ? Math.min(100, (scrolled / max) * 100) : 0);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const h = document.documentElement;
+          const scrolled = h.scrollTop;
+          const max = h.scrollHeight - h.clientHeight;
+          setProgress(max > 0 ? Math.min(100, (scrolled / max) * 100) : 0);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });

@@ -34,7 +34,7 @@ export default defineConfig({
   build: {
     emptyOutDir: true,
     sourcemap: true,
-    modulePreload: true,
+    modulePreload: { polyfill: false },
     cssCodeSplit: true,
     cssMinify: "lightningcss",
     chunkSizeWarningLimit: 1000,
@@ -55,6 +55,9 @@ export default defineConfig({
             id.includes("node_modules/@tanstack/query-core")
           ) {
             return "vendor-tanstack-query";
+          }
+          if (id.includes("node_modules/lucide-react/")) {
+            return "vendor-icons";
           }
         },
       },
