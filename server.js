@@ -495,8 +495,6 @@ const server = createServer(async (req, res) => {
         }
       } catch {}
     }
-      } catch {}
-    }
 
     const acceptEncoding = (req.headers["accept-encoding"] || "").toLowerCase();
     const isCompressible =
