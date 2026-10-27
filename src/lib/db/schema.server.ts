@@ -464,6 +464,7 @@ export async function createTablesAndIndexes(
   // Optimized Composite Indexes for High-Traffic Queries
   await safeCreateIndex("articles", "idx_articles_status_date_id", "status, date DESC, id DESC");
   await safeCreateIndex("articles", "idx_articles_journalist_status", "journalistId, status");
+  await safeCreateIndex("articles", "ft_articles_search", "title, excerpt", "FULLTEXT");
   await safeCreateIndex("profiles", "idx_profiles_phone", "phone");
   await safeCreateIndex("profiles", "idx_profiles_points", "points DESC");
   await safeCreateIndex("profiles", "idx_profiles_active_points", "active, points DESC");

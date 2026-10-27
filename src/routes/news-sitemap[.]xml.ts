@@ -8,17 +8,17 @@ export const Route = createFileRoute("/news-sitemap.xml")({
       GET: async () => {
         try {
           // Resolve domain origin
-          let origin = "https://vanguardtripura.com";
-          let publicationName = "News Vanguard 24x7";
-          let publicationLang = "en";
+          let origin = "https://todaytripura.com";
+          let publicationName = "Today Tripura";
+          let publicationLang = "bn";
 
           try {
             const req = getRequest();
             const proto = req.headers.get("x-forwarded-proto") ?? "https";
-            const host = req.headers.get("host") ?? "vanguardtripura.com";
+            const host = req.headers.get("host") ?? "todaytripura.com";
             origin = `${proto}://${host}`;
           } catch {
-            origin = "https://vanguardtripura.com";
+            origin = "https://todaytripura.com";
           }
 
           // Check settings for siteName, publicationName, and canonical domain

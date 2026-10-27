@@ -27,6 +27,13 @@ function notify(event: string, session: any) {
   }
 }
 
+function setSessionCookie(token: string) {
+  if (typeof document === "undefined") return;
+  const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+  const secure = isHttps ? "; Secure" : "";
+  document.cookie = `nt_session=${token}; path=/; max-age=604800; SameSite=Lax${secure}`;
+}
+
 export const authClient = {
   auth: {
     async signInWithPassword(credentials: { email: string; password?: string; hp_trap?: string }) {
@@ -34,7 +41,7 @@ export const authClient = {
         const res = await signInServer({ data: credentials });
         if (typeof window !== "undefined") {
           localStorage.setItem(SESSION_KEY, JSON.stringify(res.session));
-          document.cookie = `nt_session=${res.session.access_token}; path=/; max-age=604800; SameSite=Lax`;
+          setSessionCookie(res.session.access_token);
         }
         notify("SIGNED_IN", res.session);
         return { data: res, error: null };
@@ -65,7 +72,7 @@ export const authClient = {
         });
         if (typeof window !== "undefined") {
           localStorage.setItem(SESSION_KEY, JSON.stringify(res.session));
-          document.cookie = `nt_session=${res.session.access_token}; path=/; max-age=604800; SameSite=Lax`;
+          setSessionCookie(res.session.access_token);
         }
         notify("SIGNED_IN", res.session);
         return { data: res, error: null };
@@ -112,7 +119,7 @@ export const authClient = {
         if (!local?.access_token) return { data: { session: null }, error: null };
 
         if (typeof document !== "undefined" && !document.cookie.includes("nt_session=")) {
-          document.cookie = `nt_session=${local.access_token}; path=/; max-age=604800; SameSite=Lax`;
+          setSessionCookie(local.access_token);
         }
 
         // Cache session validation for 3 minutes to speed up navigation

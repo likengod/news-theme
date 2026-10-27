@@ -139,13 +139,19 @@ export async function query(sql: string, params: any[] = []): Promise<any> {
   return results;
 }
 
-export async function safeCreateIndex(tableName: string, indexName: string, columnsSql: string) {
+export async function safeCreateIndex(
+  tableName: string,
+  indexName: string,
+  columnsSql: string,
+  indexType?: string,
+) {
   try {
     const existing = await query(`SHOW INDEX FROM \`${tableName}\` WHERE Key_name = ?`, [
       indexName,
     ]);
     if (existing.length === 0) {
-      await query(`CREATE INDEX \`${indexName}\` ON \`${tableName}\`(${columnsSql})`);
+      const typeClause = indexType ? `${indexType} ` : "";
+      await query(`CREATE ${typeClause}INDEX \`${indexName}\` ON \`${tableName}\`(${columnsSql})`);
     }
   } catch (err: any) {
     // Table or database initialization note

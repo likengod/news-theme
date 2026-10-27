@@ -151,7 +151,7 @@ export const Route = createFileRoute("/news/$slug")({
             mainEntityOfPage: { "@type": "WebPage", "@id": url },
             description: data.excerpt,
             articleSection: data.category,
-            inLanguage: "en",
+            inLanguage: /[\u0980-\u09FF]/.test((data.title || "") + (data.excerpt || "")) ? "bn" : "en",
             keywords: data.category,
             isAccessibleForFree: data.access_level !== "Premium",
             publishingPrinciples: `${origin}/editorial-policy`,
