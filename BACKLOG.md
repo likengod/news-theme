@@ -17,9 +17,14 @@
 - [x] **Write-Behind Caching Engine & 3NF Normalized Like System**:
   - Implemented memory-buffered counters for article views and likes in `src/lib/write-behind-cache.server.ts`.
   - Created 3NF normalized `article_likes` table with composite unique constraint `(article_id, client_token)` to guarantee 1-like-per-user duplicate prevention.
-  - Interactive `ArticleLikeButton` with live count, solid red heart ❤️ state, optimistic updates, and Write-Behind batching.
+  - Clean, flat Facebook-style `ArticleLikeButton` with thumbs-up icon (`ThumbsUp` from `lucide-react`), live count, optimistic updates, and Write-Behind batching without bouncing animations or card borders.
   - Batch commit every 15s to MySQL to eliminate database row locking during breaking news traffic spikes.
   - Graceful shutdown hooks (`SIGTERM`, `SIGINT`) to prevent loss of buffered counters on server restarts.
+- [x] **Lighthouse Core Web Vitals & Cache Optimization**:
+  - Assets in `/assets/*` and hashed CSS/JS given 1-year immutable caching (`max-age=31536000, immutable`).
+  - Image files given 30-day client cache with `stale-while-revalidate`.
+  - Eliminated synchronous DOM measurement layout thrashing (forced reflow) in `Masthead.tsx` and `ReadingProgress.tsx` with `requestAnimationFrame`.
+  - Code-split icon dependencies into separate `vendor-icons` chunks to minimize unused JS and main-thread execution time.
 - [x] **3-Tier Edge Cache-Control Headers**:
   - Implemented in `server.js`:
     - Static Assets (`/assets/*`, `.webp`, `.css`, `.js`): `public, max-age=31536000, immutable`.
