@@ -1,7 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth, requireAdmin } from "@/lib/auth-middleware";
 import { query } from "./db.server";
+import { getRequest } from "@tanstack/react-start/server";
 import { slugify } from "./news-data";
+import { getClientIp, checkRateLimit } from "./security.server";
+import {
+  recordBufferedView,
+  getPendingViews,
+  recordBufferedLike,
+  getPendingLikes,
+  getWriteBehindStats,
+} from "./write-behind-cache.server";
 
 export type ArticleRow = {
   id: number;
@@ -642,13 +651,17 @@ export const getPublicArticleBySlug = createServerFn({ method: "GET" })
       return null;
     }
 
-    // Increment view count in background
-    query("UPDATE articles SET views = views + 1 WHERE id = ?", [row.id]).catch((err) => {
-      console.error("[MySQL] Failed to increment views:", err);
-    });
+    // High-performance Write-Behind: record view instantaneously in RAM buffer.
+    // Batched to MySQL every 15s to eliminate InnoDB row-locking during traffic surges.
+    recordBufferedView(row.id);
+
+    const pendingViews = getPendingViews(row.id);
+    const pendingLikes = getPendingLikes(row.id);
 
     return {
       ...row,
+      views: Number(row.views || 0) + pendingViews,
+      likes: Number((row as any).likes || 0) + pendingLikes,
       featured: Boolean(row.featured),
     };
   });
@@ -921,5 +934,38 @@ export const getAdminDashboardStats = createServerFn({ method: "GET" })
       categoryStats: categoryStats || [],
       currencySymbol: "₹",
     };
+  });
+
+/**
+ * Public: Like an article with write-behind buffering and anti-spam rate limiting.
+ */
+export const likeArticleServer = createServerFn({ method: "POST" })
+  .validator((articleId: number) => Number(articleId))
+  .handler(async ({ data: articleId }) => {
+    if (!articleId || isNaN(articleId) || articleId <= 0) {
+      throw new Error("Invalid article ID");
+    }
+
+    const req = getRequest();
+    const ip = getClientIp(req);
+
+    // Rate-limit likes: max 10 likes per 5 minutes per IP
+    const check = checkRateLimit(`like:${ip}:${articleId}`, 10, 5 * 60 * 1000);
+    if (!check.allowed) {
+      throw new Error("You are liking too quickly. Please wait a moment.");
+    }
+
+    // High-performance write-behind in RAM
+    recordBufferedLike(articleId);
+    return { success: true, pendingLikes: getPendingLikes(articleId) };
+  });
+
+/**
+ * Diagnostic metrics for Write-Behind engine.
+ */
+export const getArticleWriteBehindStatsServer = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async () => {
+    return getWriteBehindStats();
   });
 

@@ -303,10 +303,14 @@ export async function createTablesAndIndexes(
     )
   `);
 
-  // Ensure access_level column exists on articles table (retroactive update)
+  // Ensure access_level and likes columns exist on articles table (retroactive update)
   const columns = await query("SHOW COLUMNS FROM articles LIKE 'access_level'");
   if (columns.length === 0) {
     await query("ALTER TABLE articles ADD COLUMN access_level VARCHAR(50) DEFAULT 'Free'");
+  }
+  const likeCols = await query("SHOW COLUMNS FROM articles LIKE 'likes'");
+  if (likeCols.length === 0) {
+    await query("ALTER TABLE articles ADD COLUMN likes INT DEFAULT 0");
   }
 
   // Ensure bank and delete_requested columns exist on profiles table (retroactive update)

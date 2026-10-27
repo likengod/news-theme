@@ -15,6 +15,7 @@ export interface ArticlePageData {
   imageCredit?: string;
   paragraphs: string[];
   views: number;
+  likes?: number;
   excerpt: string;
   tags?: string[];
   access_level?: "Free" | "Premium";
@@ -133,6 +134,7 @@ export async function getArticleData(slug: string): Promise<ArticlePageData | nu
       imageCredit: art.imageCredit || "",
       paragraphs,
       views: Number(art.views) || 0,
+      likes: Number((art as any).likes) || 0,
       excerpt: art.excerpt || art.title || "",
       tags: parsedTags,
       access_level: art.access_level || "Free",
