@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart } from "lucide-react";
+import { ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
 import { likeArticleServer, checkArticleLikedServer } from "@/lib/articles.functions";
 
@@ -26,7 +26,6 @@ export function ArticleLikeButton({ articleId, initialLikes = 0 }: ArticleLikeBu
   const [likes, setLikes] = useState<number>(initialLikes);
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [bumping, setBumping] = useState<boolean>(false);
 
   useEffect(() => {
     setLikes(initialLikes);
@@ -53,14 +52,11 @@ export function ArticleLikeButton({ articleId, initialLikes = 0 }: ArticleLikeBu
     }
 
     if (isLiked) {
-      toast.info("You've already appreciated this story ❤️");
+      toast.info("You've already liked this story 👍");
       return;
     }
 
     setLoading(true);
-    setBumping(true);
-    setTimeout(() => setBumping(false), 400);
-
     const clientToken = getOrCreateClientToken();
 
     // Optimistic UI update
@@ -78,10 +74,10 @@ export function ArticleLikeButton({ articleId, initialLikes = 0 }: ArticleLikeBu
       if (res?.alreadyLiked) {
         setIsLiked(true);
         if (typeof res.likes === "number") setLikes(res.likes);
-        toast.info("You already liked this story ❤️");
+        toast.info("You already liked this story 👍");
       } else if (res?.success) {
         if (typeof res.likes === "number") setLikes(res.likes);
-        toast.success("Thank you for liking! ❤️");
+        toast.success("Thank you for liking! 👍");
       }
     } catch (err: any) {
       // Revert optimistic update on rate limit or error
@@ -100,16 +96,18 @@ export function ArticleLikeButton({ articleId, initialLikes = 0 }: ArticleLikeBu
       disabled={loading}
       title={isLiked ? "You liked this article" : "Like this article"}
       aria-label="Like article"
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 border ${
+      className={`inline-flex items-center gap-1.5 py-1 px-1.5 text-xs font-semibold transition-colors rounded ${
         isLiked
-          ? "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900/60 shadow-sm"
-          : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
-      } ${bumping ? "scale-110" : "scale-100"} active:scale-95`}
+          ? "text-[#1877F2] dark:text-[#3a8fff]"
+          : "text-slate-600 hover:text-[#1877F2] dark:text-slate-400 dark:hover:text-[#3a8fff]"
+      }`}
     >
-      <Heart
-        className={`h-3.5 w-3.5 transition-colors ${
-          isLiked ? "fill-red-500 text-red-500" : "text-slate-500 dark:text-slate-400"
-        } ${bumping ? "animate-bounce" : ""}`}
+      <ThumbsUp
+        className={`h-4 w-4 ${
+          isLiked
+            ? "fill-[#1877F2] text-[#1877F2] dark:fill-[#3a8fff] dark:text-[#3a8fff]"
+            : "text-current"
+        }`}
       />
       <span className="tabular-nums">
         {likes > 0 ? likes.toLocaleString("en-IN") : "Like"}
