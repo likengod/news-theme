@@ -211,37 +211,37 @@ function ContactPage() {
                 <li>
                   <span className="font-semibold text-foreground">News tips:</span>{" "}
                   <a
-                    href={`mailto:${s.emailNewsTips || "tips@northeasttimeline.com"}`}
+                    href={`mailto:${s.emailNewsTips || "tips@todaytripura.com"}`}
                     className="hover:text-foreground hover:underline"
                   >
-                    {s.emailNewsTips || "tips@northeasttimeline.com"}
+                    {s.emailNewsTips || "tips@todaytripura.com"}
                   </a>
                 </li>
                 <li>
                   <span className="font-semibold text-foreground">Advertising:</span>{" "}
                   <a
-                    href={`mailto:${s.emailAdvertising || "ads@northeasttimeline.com"}`}
+                    href={`mailto:${s.emailAdvertising || "ads@todaytripura.com"}`}
                     className="hover:text-foreground hover:underline"
                   >
-                    {s.emailAdvertising || "ads@northeasttimeline.com"}
+                    {s.emailAdvertising || "ads@todaytripura.com"}
                   </a>
                 </li>
                 <li>
                   <span className="font-semibold text-foreground">Careers:</span>{" "}
                   <a
-                    href={`mailto:${s.emailCareers || "careers@northeasttimeline.com"}`}
+                    href={`mailto:${s.emailCareers || "careers@todaytripura.com"}`}
                     className="hover:text-foreground hover:underline"
                   >
-                    {s.emailCareers || "careers@northeasttimeline.com"}
+                    {s.emailCareers || "careers@todaytripura.com"}
                   </a>
                 </li>
                 <li>
                   <span className="font-semibold text-foreground">Corrections:</span>{" "}
                   <a
-                    href={`mailto:${s.emailCorrections || "corrections@northeasttimeline.com"}`}
+                    href={`mailto:${s.emailCorrections || "corrections@todaytripura.com"}`}
                     className="hover:text-foreground hover:underline"
                   >
-                    {s.emailCorrections || "corrections@northeasttimeline.com"}
+                    {s.emailCorrections || "corrections@todaytripura.com"}
                   </a>
                 </li>
               </ul>
