@@ -116,7 +116,33 @@ export function CommentsSection({
     }
   };
 
-  useEffect(() => { if (articleSlug) loadComments(); }, [articleSlug]);
+  useEffect(() => {
+    if (!articleSlug) return;
+    loadComments();
+
+    // Option A: Smart Background Polling for real-time discussion updates (every 45s)
+    const interval = setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        getCommentsFn({ data: articleSlug })
+          .then((res) => {
+            setAllComments(
+              res.map((r: any) => ({
+                id: r.id,
+                user: r.user,
+                email: r.email,
+                body: r.body,
+                date: r.date,
+                createdAt: r.createdAt,
+                parentId: r.parentId ?? null,
+              })),
+            );
+          })
+          .catch(() => {});
+      }
+    }, 45000);
+
+    return () => clearInterval(interval);
+  }, [articleSlug]);
 
   const submitComment = async (e: React.FormEvent, parentId?: number | null) => {
     e.preventDefault();

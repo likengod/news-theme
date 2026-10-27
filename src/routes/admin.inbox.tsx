@@ -89,6 +89,23 @@ function AdminInboxPage() {
 
   useEffect(() => {
     load();
+
+    // Smart Background Polling (Option A): Checks for new messages & applications every 30s
+    const pollTimer = setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        Promise.all([
+          adminGetInboxRequests({ data: { type: filterType, status: filterStatus } }),
+          adminGetInboxSummary(),
+        ])
+          .then(([reqRes, sumRes]) => {
+            setRequests(reqRes.requests || []);
+            setSummary(sumRes.summary || []);
+          })
+          .catch(() => {});
+      }
+    }, 30000);
+
+    return () => clearInterval(pollTimer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType, filterStatus]);
 
