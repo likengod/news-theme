@@ -91,6 +91,59 @@ export function checkRateLimit(
   };
 }
 
+// ─── Token Bucket Rate Limiting Engine ────────────────────────────────────────
+
+interface TokenBucketRecord {
+  tokens: number;
+  lastRefill: number;
+}
+
+const tokenBucketStore = new Map<string, TokenBucketRecord>();
+
+/**
+ * Token Bucket Rate Limiter:
+ * - capacity: Maximum burst capacity (e.g. 5 tokens).
+ * - refillWindowSeconds: Time required to refill from 0 to full capacity.
+ * Allows smooth bursts up to capacity, while enforcing steady refill rate.
+ */
+export function checkTokenBucket(
+  key: string,
+  capacity: number,
+  refillWindowSeconds: number,
+): { allowed: boolean; remaining: number; retryAfterSeconds: number } {
+  const now = Date.now();
+  const refillRatePerMs = capacity / (refillWindowSeconds * 1000);
+
+  let bucket = tokenBucketStore.get(key);
+  if (!bucket) {
+    bucket = { tokens: capacity, lastRefill: now };
+    tokenBucketStore.set(key, bucket);
+  }
+
+  // Refill tokens based on elapsed time since last request
+  const elapsedMs = Math.max(0, now - bucket.lastRefill);
+  bucket.tokens = Math.min(capacity, bucket.tokens + elapsedMs * refillRatePerMs);
+  bucket.lastRefill = now;
+
+  if (bucket.tokens >= 1) {
+    bucket.tokens -= 1;
+    return {
+      allowed: true,
+      remaining: Math.floor(bucket.tokens),
+      retryAfterSeconds: 0,
+    };
+  }
+
+  const missing = 1 - bucket.tokens;
+  const retryAfterSeconds = Math.ceil(missing / (refillRatePerMs * 1000));
+  return {
+    allowed: false,
+    remaining: 0,
+    retryAfterSeconds: Math.max(1, retryAfterSeconds),
+  };
+}
+
+
 // ─── Layer 2: Account & Login Protection ────────────────────────────────────
 
 const FAILED_LOGIN_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
@@ -151,6 +204,54 @@ export function validateHoneypot(trapValue?: string | null) {
     throw new Error("Automated submission detected. Request rejected.");
   }
 }
+
+// ─── Forgot Password Rate Limiting (Dual-Key Defense) ─────────────────────────
+
+export const FORGOT_EMAIL_LIMIT = 5;
+export const FORGOT_EMAIL_WINDOW_MS = 30 * 60 * 1000; // 30 minutes (Max 5 per 30 min)
+export const FORGOT_IP_LIMIT = 5;
+export const FORGOT_IP_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
+/**
+ * Enforces dual-key rate limiting on forgot password:
+ * 1. Target Email Key: forgot:email:${cleanEmail} -> Max 5 per 30 minutes
+ * 2. Client IP Key: forgot:ip:${ip} -> Max 5 per 15 minutes
+ * 3. Honeypot Trap check
+ */
+export function checkForgotPasswordRateLimit(
+  email: string,
+  ip: string,
+  trapValue?: string | null,
+) {
+  // 1. Anti-bot honeypot check
+  validateHoneypot(trapValue);
+
+  const cleanEmail = (email || "").trim().toLowerCase();
+  if (!cleanEmail) {
+    throw new Error("Email address is required.");
+  }
+
+  // 2. Target Email Key: forgot:email:${cleanEmail} -> Max 5 per 30 min (Token Bucket)
+  const emailKey = `forgot:email:${cleanEmail}`;
+  const emailRes = checkTokenBucket(emailKey, FORGOT_EMAIL_LIMIT, FORGOT_EMAIL_WINDOW_MS / 1000);
+  if (!emailRes.allowed) {
+    const minutes = Math.ceil(emailRes.retryAfterSeconds / 60);
+    throw new Error(
+      `Too many password reset requests for ${cleanEmail}. For security, please wait ${minutes} minute${minutes > 1 ? "s" : ""} before requesting another link.`,
+    );
+  }
+
+  // 3. Client IP Key: forgot:ip:${ip} -> Max 5 per 15 min (Token Bucket)
+  const ipKey = `forgot:ip:${ip}`;
+  const ipRes = checkTokenBucket(ipKey, FORGOT_IP_LIMIT, FORGOT_IP_WINDOW_MS / 1000);
+  if (!ipRes.allowed) {
+    const minutes = Math.ceil(ipRes.retryAfterSeconds / 60);
+    throw new Error(
+      `Too many password reset requests from this network. Please wait ${minutes} minute${minutes > 1 ? "s" : ""} before trying again.`,
+    );
+  }
+}
+
 
 // ─── Layer 3: Subscription & Order Flood Protection ─────────────────────────
 

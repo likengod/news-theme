@@ -9,6 +9,7 @@ import {
   getSessionServer,
   getUserServer,
   getProfileServer,
+  requestPasswordResetServer,
 } from "@/lib/auth.functions";
 
 const SESSION_KEY = "nt:mysql_session:v1";
@@ -162,8 +163,24 @@ export const authClient = {
       };
     },
 
-    async resetPasswordForEmail(_email: string) {
-      return { data: {}, error: null };
+    async resetPasswordForEmail(
+      email: string,
+      options?: { redirectTo?: string; hp_trap?: string },
+    ) {
+      try {
+        const res = await requestPasswordResetServer({
+          data: {
+            email,
+            hp_trap: options?.hp_trap,
+          },
+        });
+        return { data: res, error: null };
+      } catch (err: any) {
+        return {
+          data: null,
+          error: { message: err.message || "Failed to request password reset" },
+        };
+      }
     },
 
     async updateUser(_attributes: any) {

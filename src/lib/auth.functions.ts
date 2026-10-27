@@ -12,6 +12,7 @@ import {
   clearLoginRateLimit,
   checkSignupRateLimit,
   validateHoneypot,
+  checkForgotPasswordRateLimit,
 } from "./security.server";
 
 // Generator for public_user_id (10 digits)
@@ -476,4 +477,38 @@ export const requestCurrentUserAccountDeletion = createServerFn({ method: "POST"
   .handler(async ({ context }) => {
     await query("UPDATE profiles SET delete_requested = TRUE WHERE id = ?", [context.userId]);
     return { ok: true };
+  });
+
+/**
+ * Server function to handle password reset requests with dual-key token bucket rate limiting.
+ * Target Email Key: forgot:email:${cleanEmail} (Max 5 per 30 min)
+ * Client IP Key: forgot:ip:${ip} (Max 5 per 15 min)
+ */
+export const requestPasswordResetServer = createServerFn({ method: "POST" })
+  .validator((data) =>
+    z
+      .object({
+        email: z.string().trim().email("Invalid email address"),
+        hp_trap: z.string().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const req = getRequest();
+    const ip = getClientIp(req);
+
+    // Apply honeypot and dual-key token bucket rate limiting
+    checkForgotPasswordRateLimit(data.email, ip, data.hp_trap);
+
+    const cleanEmail = data.email.trim().toLowerCase();
+    const users = await query("SELECT id, email FROM users WHERE LOWER(email) = ?", [cleanEmail]);
+
+    if (users.length > 0) {
+      // Future-proof: hook into SMTP/mailer when configured
+    }
+
+    return {
+      success: true,
+      message: "If an account exists for that email, a reset link is on the way.",
+    };
   });

@@ -34,8 +34,10 @@ function ForgotPasswordPage() {
       return;
     }
     setLoading(true);
-    const { error } = await (supabase.auth as any).resetPasswordForEmail(parsed.data.email, {
+    const hp_trap = (fd.get("hp_trap") as string) || "";
+    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
       redirectTo: `${window.location.origin}/reset-password`,
+      hp_trap,
     });
     setLoading(false);
     if (error) return toast.error((error as any).message);
@@ -63,6 +65,15 @@ function ForgotPasswordPage() {
             </p>
           ) : (
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              {/* Anti-bot honeypot field - invisible to human users */}
+              <input
+                type="text"
+                name="hp_trap"
+                tabIndex={-1}
+                autoComplete="off"
+                style={{ position: "absolute", opacity: 0, zIndex: -1, pointerEvents: "none", height: 0, width: 0 }}
+                aria-hidden="true"
+              />
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" name="email" type="email" autoComplete="email" required />
