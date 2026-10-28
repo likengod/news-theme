@@ -32,6 +32,7 @@ export type FieldDef = {
   guideUrl?: string;
   toggleKey?: keyof SiteSettings;
   toggleLabel?: string;
+  isSecret?: boolean;
 };
 
 export function Field({
@@ -164,24 +165,36 @@ export function IntegrationField({
                 />
               ) : (
                 <div className="relative">
-                  <input
-                    type={showValue ? "text" : "password"}
-                    value={localValue}
-                    placeholder={f.placeholder}
-                    onChange={(e) => setLocalValue(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 px-3 py-1.5 pr-8 text-xs focus:border-slate-900 focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowValue(!showValue)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showValue ? (
-                      <EyeOff className="h-3.5 w-3.5" />
-                    ) : (
-                      <Eye className="h-3.5 w-3.5" />
-                    )}
-                  </button>
+                  {f.isSecret === false ? (
+                    <input
+                      type="text"
+                      value={localValue}
+                      placeholder={f.placeholder}
+                      onChange={(e) => setLocalValue(e.target.value)}
+                      className="w-full rounded-md border border-slate-200 px-3 py-1.5 text-xs focus:border-slate-900 focus:outline-none"
+                    />
+                  ) : (
+                    <>
+                      <input
+                        type={showValue ? "text" : "password"}
+                        value={localValue}
+                        placeholder={f.placeholder}
+                        onChange={(e) => setLocalValue(e.target.value)}
+                        className="w-full rounded-md border border-slate-200 px-3 py-1.5 pr-8 text-xs focus:border-slate-900 focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowValue(!showValue)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      >
+                        {showValue ? (
+                          <EyeOff className="h-3.5 w-3.5" />
+                        ) : (
+                          <Eye className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

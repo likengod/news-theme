@@ -171,6 +171,32 @@ const socialMediaFields: FieldDef[] = [
   },
 ];
 
+const gitFields: FieldDef[] = [
+  {
+    key: "gitRemoteUrl",
+    label: "Git Remote URL",
+    hint: "HTTPS URL of your upstream update repository.",
+    placeholder: "https://github.com/likengod/news-theme.git",
+    guideUrl: "https://github.com/likengod/news-theme",
+    isSecret: false,
+  },
+  {
+    key: "gitBranch",
+    label: "Deployment Branch",
+    hint: "Branch to pull from and deploy (default: main).",
+    placeholder: "main",
+    isSecret: false,
+  },
+  {
+    key: "gitAccessToken",
+    label: "Personal Access Token (PAT)",
+    hint: "Required only for private repositories. For public repos, leave empty.",
+    placeholder: "ghp_xxxxxxxxxxxx",
+    guideUrl: "https://github.com/settings/tokens",
+    isSecret: true,
+  },
+];
+
 export function IntegrationsTab({ s, update }: { s: any; update: any }) {
   const canSeeGitConfig = true;
   return (
@@ -245,148 +271,63 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
           title="Git Connect / CI-CD"
           subtitle="Connect your Git repository for continuous deployment. Manage deployments from Admin &rarr; Website Update."
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-gradient-to-r from-slate-900 to-slate-800 p-4">
-            <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white/10">
-                <GitBranch className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-white">CI/CD Pipeline (Auto-Connected)</p>
-                <p className="text-xs text-slate-300">
-                  Permanent Upstream:{" "}
-                  <span className="font-mono text-emerald-400 font-semibold">
-                    likengod/news-theme
-                  </span>
-                </p>
-              </div>
-            </div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 text-xs font-semibold text-emerald-300">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Active & Ready
-            </span>
+          <div className="space-y-3">
+            {gitFields.map((f) => (
+              <IntegrationField key={f.key} f={f} s={s} update={update} />
+            ))}
           </div>
 
-          {canSeeGitConfig ? (
-            <>
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-medium text-slate-700">Git Remote URL</label>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
-                    Built-in Permanent Default
-                  </span>
-                </div>
-                <input
-                  value={s.gitRemoteUrl || "https://github.com/likengod/news-theme.git"}
-                  placeholder="https://github.com/likengod/news-theme.git"
-                  onChange={(e) => update("gitRemoteUrl", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 px-3 py-2 font-mono text-xs focus:border-slate-900 focus:outline-none"
-                />
-                <p className="mt-1 text-[11px] text-slate-500">
-                  HTTPS URL of your upstream update repository.
-                </p>
-              </div>
+          <div className="space-y-3 pt-2 border-t border-slate-100">
+            <Toggle
+              label="Auto-deploy on pull"
+              checked={s.gitAutoDeploy}
+              onChange={(v) => update("gitAutoDeploy", v)}
+              hint="When enabled, pulling latest code will automatically trigger a production build."
+            />
 
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Branch</label>
-                <input
-                  value={s.gitBranch || "main"}
-                  placeholder="main"
-                  onChange={(e) => update("gitBranch", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
-                />
-                <p className="mt-1 text-[11px] text-slate-500">
-                  Branch to pull from and deploy (default: main).
-                </p>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-medium text-slate-700">
-                    Personal Access Token (PAT)
-                  </label>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                    Optional
-                  </span>
-                </div>
-                <input
-                  type="password"
-                  value={s.gitAccessToken || ""}
-                  placeholder="ghp_..."
-                  onChange={(e) => update("gitAccessToken", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 px-3 py-2 font-mono text-xs focus:border-slate-900 focus:outline-none"
-                  autoComplete="off"
-                />
-                <p className="mt-1 text-[11px] text-slate-500">
-                  Required only for private repositories. For public repos, leave empty.
-                </p>
-              </div>
-            </>
-          ) : (
-            <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-center mb-6">
-              <p className="text-sm font-medium text-slate-800">Connection Settings Hidden</p>
-              <p className="mt-1 text-xs text-slate-500">
-                Repository configuration is only visible to Enterprise Plus users.
-              </p>
+            <div className="rounded-md bg-amber-50 p-2.5 text-xs text-amber-800">
+              <strong>Security note:</strong> Build and deploy commands run on the server. Only admin
+              users can trigger deployments from <strong>Admin &rarr; Website Update</strong>.
             </div>
-          )}
 
-          <Toggle
-            label="Auto-deploy on pull"
-            checked={s.gitAutoDeploy}
-            onChange={(v) => update("gitAutoDeploy", v)}
-            hint="When enabled, pulling latest code will automatically trigger a production build."
-          />
-
-          <div className="rounded-md bg-amber-50 p-3 text-xs text-amber-800">
-            <strong>Security note:</strong> Build and deploy commands run on the server. Only admin
-            users can trigger deployments from <strong>Admin &rarr; Website Update</strong>.
+            <details className="rounded-md border border-slate-200 bg-slate-50/70 p-2.5 text-xs text-slate-700">
+              <summary className="font-semibold text-slate-700 cursor-pointer select-none">
+                View CI/CD Guides & Documentation
+              </summary>
+              <div className="mt-2.5 space-y-2.5">
+                <GuideList
+                  items={[
+                    {
+                      label: "GitHub - Generate Personal Access Token",
+                      url: "https://github.com/settings/tokens",
+                    },
+                    {
+                      label: "GitLab - Generate Access Token",
+                      url: "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html",
+                    },
+                    {
+                      label: "Bitbucket - App Passwords",
+                      url: "https://bitbucket.org/account/settings/app-passwords/",
+                    },
+                    {
+                      label: "GitHub - Creating a Repository",
+                      url: "https://docs.github.com/en/get-started/quickstart/create-a-repo",
+                    },
+                    { label: "GitHub Actions - CI/CD", url: "https://docs.github.com/en/actions" },
+                    { label: "Vercel - Git Integration", url: "https://vercel.com/docs/git" },
+                    {
+                      label: "Netlify - Build & Deploy",
+                      url: "https://docs.netlify.com/configure-builds/overview/",
+                    },
+                    {
+                      label: "Cloudflare Pages - Git Integration",
+                      url: "https://developers.cloudflare.com/pages/get-started/git-integration/",
+                    },
+                  ]}
+                />
+              </div>
+            </details>
           </div>
-
-          <details className="rounded-md border border-slate-200 bg-slate-50/70 p-3 text-xs text-slate-700">
-            <summary className="font-semibold text-slate-700 cursor-pointer select-none">
-              View CI/CD Guides & Documentation
-            </summary>
-            <div className="mt-3 space-y-3">
-              <GuideList
-                items={[
-                  {
-                    label: "GitHub - Generate Personal Access Token",
-                    url: "https://github.com/settings/tokens",
-                  },
-                  {
-                    label: "GitLab - Generate Access Token",
-                    url: "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html",
-                  },
-                  {
-                    label: "Bitbucket - App Passwords",
-                    url: "https://bitbucket.org/account/settings/app-passwords/",
-                  },
-                  {
-                    label: "GitHub - Creating a Repository",
-                    url: "https://docs.github.com/en/get-started/quickstart/create-a-repo",
-                  },
-                  { label: "GitHub Actions - CI/CD", url: "https://docs.github.com/en/actions" },
-                  { label: "Vercel - Git Integration", url: "https://vercel.com/docs/git" },
-                  {
-                    label: "Netlify - Build & Deploy",
-                    url: "https://docs.netlify.com/configure-builds/overview/",
-                  },
-                  {
-                    label: "Cloudflare Pages - Git Integration",
-                    url: "https://developers.cloudflare.com/pages/get-started/git-integration/",
-                  },
-                ]}
-              />
-              <div className="rounded border border-slate-200 bg-white p-2.5 text-[11px] text-slate-600">
-                <ol className="list-decimal space-y-1 pl-4">
-                  <li>Paste Git remote URL and branch above, then <strong>Save</strong>.</li>
-                  <li>Go to <strong>Admin &rarr; Website Update</strong> to view repo status.</li>
-                  <li>Click <strong>Pull Latest</strong> to fetch new commits from remote.</li>
-                  <li>Click <strong>Build & Deploy</strong> to compile and deploy production build.</li>
-                </ol>
-              </div>
-            </div>
-          </details>
         </Card>
 
         {/* CDN & Edge Cache Acceleration (Placed right side of Git Connect) */}
