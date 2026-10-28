@@ -2,11 +2,20 @@
 
 > **Project:** Today Tripura (`news-timeline`)  
 > **Target Production Domain:** `https://todaytripura.com`  
-> **Current Version:** `1.2.26`  
+> **Current Version:** `1.2.27`  
 > **Hosting & Environment:** Hostinger Cloud / VPS (Node.js + MySQL + PM2)  
 > **Architecture:** TanStack Start (SSR) + React 19 + Tailwind CSS + Vite + Write-Behind RAM Cache + 3-Tier Edge CDN  
 
 ---
+
+## 🏆 Completed Milestones (v1.2.27)
+
+- [x] **Full Security Vulnerability Hardening (0 Vulnerabilities Audit)**:
+  - Upgraded **`zod`** to `4.6.7` resolving collection validation memory exhaustion (`CVE-2023-54404`).
+  - Elevated **`dompurify`** directly to `3.4.17` in root dependencies (`GHSA-cg2g-xh64-v4q7`, `GHSA-c6gr-qvv4-5v3f`, `GHSA-6688-9rhm-gjv2`).
+  - Overrode **`serialize-javascript`** to `7.1.4` (`CVE-2026-115897`, `CVE-2026-97711`).
+  - Overrode **`undici`** to `7.30.1`, **`@tanstack/start-server-core`** to `1.169.45`, **`vite`** to `8.3.5`, **`sharp`** to `0.35.5`, and **`h3`** to `1.15.11`.
+  - Zero-vulnerability audit verification across all 600 dependencies (`npm audit --audit-level=low` -> 0 vulnerabilities).
 
 ## 🏆 Completed Milestones (v1.2.26)
 
