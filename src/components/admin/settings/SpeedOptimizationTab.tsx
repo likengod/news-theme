@@ -1,7 +1,8 @@
-import React from "react";
-import { Lock, RefreshCw, Save } from "lucide-react";
+import React, { useState } from "react";
+import { Lock, RefreshCw, Save, Zap, Globe } from "lucide-react";
 import { toast } from "sonner";
-import { clearAllCachesServer, type SiteSettings } from "@/lib/site-content";
+import { type SiteSettings } from "@/lib/site-content";
+import { purgeEdgeCdnServer } from "@/lib/cdn.functions";
 import { Card, Toggle } from "./SettingsHelpers";
 
 interface SpeedOptimizationTabProps {
@@ -19,6 +20,8 @@ export function SpeedOptimizationTab({
   onNavigateActivate,
   onSave,
 }: SpeedOptimizationTabProps) {
+  const [isCleaning, setIsCleaning] = useState(false);
+  const activeProvider = s.cdnProvider && s.cdnProvider !== "none" ? s.cdnProvider : "Local Server";
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <Card
@@ -140,19 +143,26 @@ export function SpeedOptimizationTab({
 
       <Card
         title="Manual Cleanup & Optimization"
-        subtitle="Instantly clear temporary files, purge unused CSS, and reset server caches to improve speed."
+        subtitle="Instantly clear temporary files, purge unused CSS, reset server caches, and flush Edge CDN caches to improve speed."
       >
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <h4 className="text-sm font-semibold text-amber-900 mb-1">Clean Website Cache</h4>
-          <p className="text-xs text-amber-700 mb-4">
-            Click this button if your recent changes aren't appearing or if the website feels
-            sluggish. It will remove temporary files, unused cache data, and unused CSS to
-            speed up the website.
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-semibold text-amber-900">Clean Website & Purge Edge Cache</h4>
+            <span className="inline-flex items-center gap-1 rounded bg-amber-200/60 px-2 py-0.5 text-[11px] font-medium text-amber-900 uppercase tracking-wide">
+              <Globe className="h-3 w-3" /> CDN: {activeProvider}
+            </span>
+          </div>
+          <p className="text-xs text-amber-700 mb-4 leading-relaxed">
+            Click this button if your recent changes aren&apos;t appearing or if the website feels
+            sluggish. It removes temporary files, clears server RAM micro-caches, deletes orphaned uploads, and dispatches a full cache purge to your Edge CDN (Cloudflare, BunnyCDN, Fastly, or Custom Webhook).
           </p>
           <button
+            type="button"
+            disabled={isCleaning}
             onClick={async () => {
+              setIsCleaning(true);
               try {
-                const res = await clearAllCachesServer();
+                const res = await purgeEdgeCdnServer();
                 for (let i = localStorage.length - 1; i >= 0; i--) {
                   const key = localStorage.key(i);
                   if (key && (key.startsWith("nt:") || key.startsWith("nt_"))) {
@@ -162,15 +172,18 @@ export function SpeedOptimizationTab({
                     }
                   }
                 }
-                toast.success(res.message || "Website cache successfully cleared!");
+                toast.success(res.message || "Website cache and Edge CDN successfully purged!");
                 setTimeout(() => window.location.reload(), 1500);
-              } catch (e) {
-                toast.error("Failed to clear website cache.");
+              } catch (e: any) {
+                toast.error(e?.message || "Failed to clear website cache.");
+              } finally {
+                setIsCleaning(false);
               }
             }}
-            className="inline-flex items-center gap-2 rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-amber-700 transition"
+            className="inline-flex items-center gap-2 rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-amber-700 transition active:scale-95 disabled:opacity-50"
           >
-            <RefreshCw className="h-4 w-4" /> Clean & Speed Up Website
+            <RefreshCw className={`h-4 w-4 ${isCleaning ? "animate-spin" : ""}`} />
+            {isCleaning ? "Cleaning & Purging Edge CDN..." : "Clean & Speed Up Website"}
           </button>
         </div>
       </Card>
