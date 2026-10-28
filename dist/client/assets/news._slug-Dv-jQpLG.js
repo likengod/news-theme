@@ -1,0 +1,1 @@
+export{t as notFoundComponent}from"./news._slug-DmWe0XIF.js";

@@ -2,14 +2,21 @@
 
 > **Project:** Today Tripura (`news-timeline`)  
 > **Target Production Domain:** `https://todaytripura.com`  
-> **Current Version:** `1.2.25`  
+> **Current Version:** `1.2.26`  
 > **Hosting & Environment:** Hostinger Cloud / VPS (Node.js + MySQL + PM2)  
 > **Architecture:** TanStack Start (SSR) + React 19 + Tailwind CSS + Vite + Write-Behind RAM Cache + 3-Tier Edge CDN  
 
 ---
 
-## 🏆 Completed Milestones (v1.2.25)
+## 🏆 Completed Milestones (v1.2.26)
 
+- [x] **Universal Multi-Provider Edge CDN & Cache Invalidation**:
+  - Implemented multi-provider edge cache purging in `src/lib/cdn.functions.ts` supporting Cloudflare (`purge_cache`), BunnyCDN (`purgeCache`), Fastly (`purge_all`), AWS CloudFront, and custom webhooks.
+  - Wired into **Speed Optimization Tab** (`Clean & Speed Up Website` triggers RAM + disk + Edge CDN invalidation simultaneously).
+  - Media delivery URL rewriter (`resolveCdnMediaUrl`) offloading `/uploads/` assets to high-speed edge distribution.
+- [x] **Unified Git Connect & CDN UI Governance**:
+  - Consolidated Git Connect into a single unified row (`GitSettingsCard.tsx`) with status badge (`Configured` / `Not Configured`), inline editor for Remote URL, Branch, PAT token, and Auto-deploy on pull.
+  - Consolidated CDN acceleration into a single unified row (`CdnSettingsCard.tsx`) with dynamic credentials and instant edge purge actions.
 - [x] **Tooling & AI Governance**:
   - Installed and configured **Repomix v1.18.1** (`repomix.config.json` with XML output, Secretlint security check, and `.gitignore` integration).
   - Added `npm run repomix` script for instant single-file repository context extraction (410 source files packed in ~3s).

@@ -1,0 +1,2 @@
+import{i as e}from"./rolldown-runtime-COiEfhsA.js";import{jr as t}from"./vendor-icons-CPc5vPaa.js";var n=e(t(),1);function r(){let[e,t]=n.useState(!1);return n.useEffect(()=>{let e=window.matchMedia(`(max-width: 767px)`),n=e=>{t(e.matches)};return e.addEventListener(`change`,n),t(e.matches),()=>{e.removeEventListener(`change`,n)}},[]),!!e}export{r as t};
+//# sourceMappingURL=use-mobile-CDlY4yCA.js.map
