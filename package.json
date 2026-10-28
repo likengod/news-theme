@@ -82,7 +82,7 @@
     "hono": "^4.13.13",
     "h3": "^1.15.11",
     "esbuild": "^0.28.2",
-    "serialize-javascript": "^7.1.2",
+    "serialize-javascript": "^7.1.4",
     "dompurify": "^3.4.17",
     "seroval": "^1.6.9",
     "seroval-plugins": "^1.6.9",
