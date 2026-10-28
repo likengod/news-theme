@@ -176,10 +176,6 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
   return (
     <div className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="lg:col-span-2">
-          <CdnSettingsCard s={s} update={update} />
-        </div>
-
         <Card
           title="Analytics & Marketing"
           subtitle="Paste IDs only - scripts load automatically on every page."
@@ -345,61 +341,56 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
             <strong>Security note:</strong> Build and deploy commands run on the server. Only admin
             users can trigger deployments from <strong>Admin &rarr; Website Update</strong>.
           </div>
+
+          <details className="rounded-md border border-slate-200 bg-slate-50/70 p-3 text-xs text-slate-700">
+            <summary className="font-semibold text-slate-700 cursor-pointer select-none">
+              View CI/CD Guides & Documentation
+            </summary>
+            <div className="mt-3 space-y-3">
+              <GuideList
+                items={[
+                  {
+                    label: "GitHub - Generate Personal Access Token",
+                    url: "https://github.com/settings/tokens",
+                  },
+                  {
+                    label: "GitLab - Generate Access Token",
+                    url: "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html",
+                  },
+                  {
+                    label: "Bitbucket - App Passwords",
+                    url: "https://bitbucket.org/account/settings/app-passwords/",
+                  },
+                  {
+                    label: "GitHub - Creating a Repository",
+                    url: "https://docs.github.com/en/get-started/quickstart/create-a-repo",
+                  },
+                  { label: "GitHub Actions - CI/CD", url: "https://docs.github.com/en/actions" },
+                  { label: "Vercel - Git Integration", url: "https://vercel.com/docs/git" },
+                  {
+                    label: "Netlify - Build & Deploy",
+                    url: "https://docs.netlify.com/configure-builds/overview/",
+                  },
+                  {
+                    label: "Cloudflare Pages - Git Integration",
+                    url: "https://developers.cloudflare.com/pages/get-started/git-integration/",
+                  },
+                ]}
+              />
+              <div className="rounded border border-slate-200 bg-white p-2.5 text-[11px] text-slate-600">
+                <ol className="list-decimal space-y-1 pl-4">
+                  <li>Paste Git remote URL and branch above, then <strong>Save</strong>.</li>
+                  <li>Go to <strong>Admin &rarr; Website Update</strong> to view repo status.</li>
+                  <li>Click <strong>Pull Latest</strong> to fetch new commits from remote.</li>
+                  <li>Click <strong>Build & Deploy</strong> to compile and deploy production build.</li>
+                </ol>
+              </div>
+            </div>
+          </details>
         </Card>
 
-        <Card title="CI/CD Setup Guide">
-          <GuideList
-            items={[
-              {
-                label: "GitHub - Generate Personal Access Token",
-                url: "https://github.com/settings/tokens",
-              },
-              {
-                label: "GitLab - Generate Access Token",
-                url: "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html",
-              },
-              {
-                label: "Bitbucket - App Passwords",
-                url: "https://bitbucket.org/account/settings/app-passwords/",
-              },
-              {
-                label: "GitHub - Creating a Repository",
-                url: "https://docs.github.com/en/get-started/quickstart/create-a-repo",
-              },
-              { label: "GitHub Actions - CI/CD", url: "https://docs.github.com/en/actions" },
-              { label: "Vercel - Git Integration", url: "https://vercel.com/docs/git" },
-              {
-                label: "Netlify - Build & Deploy",
-                url: "https://docs.netlify.com/configure-builds/overview/",
-              },
-              {
-                label: "Cloudflare Pages - Git Integration",
-                url: "https://developers.cloudflare.com/pages/get-started/git-integration/",
-              },
-            ]}
-          />
-          <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-              How it works
-            </p>
-            <ol className="list-decimal space-y-1.5 pl-4 text-xs text-slate-700">
-              <li>
-                Paste your Git remote URL and branch above, then <strong>Save</strong>.
-              </li>
-              <li>
-                Go to <strong>Admin &rarr; Website Update</strong> to view repo status.
-              </li>
-              <li>
-                Click <strong>Pull Latest</strong> to fetch new commits from your remote.
-              </li>
-              <li>
-                Click <strong>Build & Deploy</strong> to compile and deploy the production build.
-              </li>
-              <li>View deployment history and build logs right from the admin panel.</li>
-              <li>View deployment history and build logs right from the admin panel.</li>
-            </ol>
-          </div>
-        </Card>
+        {/* CDN & Edge Cache Acceleration (Placed right side of Git Connect) */}
+        <CdnSettingsCard s={s} update={update} />
       </div>
     </div>
   );
