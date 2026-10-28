@@ -9,6 +9,7 @@ import {
 import { ShieldCheck, Crown, Sparkles, GitBranch } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { CdnSettingsCard } from "./CdnSettingsCard";
 
 const integrationFields: FieldDef[] = [
   {
@@ -175,6 +176,10 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
   return (
     <div className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-2">
+        <div className="lg:col-span-2">
+          <CdnSettingsCard s={s} update={update} />
+        </div>
+
         <Card
           title="Analytics & Marketing"
           subtitle="Paste IDs only - scripts load automatically on every page."

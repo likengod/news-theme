@@ -65,6 +65,24 @@ export type SiteSettings = {
   stripePublicKey?: string;
   stripeSecretKey?: string;
 
+  // CDN & Edge Cache Settings
+  cdnProvider?: "none" | "cloudflare" | "bunny" | "cloudfront" | "fastly" | "custom";
+  cdnMediaBaseUrl?: string; // e.g. "https://cdn.todaytripura.com" or "https://todaytripura.b-cdn.net"
+  cdnEnabled?: boolean;
+  // Cloudflare
+  cloudflareZoneId?: string;
+  cloudflareApiToken?: string;
+  // BunnyCDN
+  bunnyPullZoneId?: string;
+  bunnyAccessKey?: string;
+  // AWS CloudFront
+  cloudfrontDistributionId?: string;
+  // Fastly
+  fastlyServiceId?: string;
+  fastlyApiKey?: string;
+  // Custom / Webhook Purge URL
+  cdnPurgeWebhookUrl?: string;
+
   // Subscription Page Settings
   subscriptionTitle?: string;
   subscriptionIntro?: string;
@@ -420,6 +438,18 @@ export const defaultSettings: SiteSettings = {
   razorpayKeySecret: "",
   stripePublicKey: "",
   stripeSecretKey: "",
+
+  cdnProvider: "none",
+  cdnMediaBaseUrl: "",
+  cdnEnabled: false,
+  cloudflareZoneId: "",
+  cloudflareApiToken: "",
+  bunnyPullZoneId: "",
+  bunnyAccessKey: "",
+  cloudfrontDistributionId: "",
+  fastlyServiceId: "",
+  fastlyApiKey: "",
+  cdnPurgeWebhookUrl: "",
 
   subscriptionTitle: "Support Independent Journalism",
   subscriptionIntro:

@@ -163,18 +163,41 @@ export function slugify(input: any): string {
 
 export const LOCAL_IMAGES = [heroImg, fedImg, techImg, oilImg, cryptoImg, wsImg, tradeImg];
 
+import { loadSettings } from "@/lib/site-content";
+
+export function resolveCdnMediaUrl(url?: string): string {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+  if (!trimmed || trimmed === "/placeholder.svg" || trimmed.includes("placeholder")) {
+    return trimmed;
+  }
+
+  // If it is an /uploads/ relative path, check if CDN media URL is configured and enabled
+  if (trimmed.startsWith("/uploads/")) {
+    try {
+      const s = typeof window !== "undefined" ? loadSettings() : null;
+      if (s?.cdnEnabled && s?.cdnMediaBaseUrl?.trim()) {
+        const cleanBase = s.cdnMediaBaseUrl.trim().replace(/\/+$/, "");
+        return `${cleanBase}${trimmed}`;
+      }
+    } catch {}
+  }
+
+  return trimmed;
+}
+
 export function getArticleImage(img?: string, index?: number): string {
   if (!img || typeof img !== "string" || img.trim() === "" || img === "/placeholder.svg" || img.includes("placeholder")) {
     const idx = Math.abs(index ?? 0) % LOCAL_IMAGES.length;
     return LOCAL_IMAGES[idx];
   }
 
-  const clean = img.trim();
+  let clean = img.trim();
 
   // Normalize full domain URLs pointing to /uploads/ to relative /uploads/ paths
   if (/^https?:\/\/[^/]+\/uploads\/(.*)$/i.test(clean)) {
-    return clean.replace(/^https?:\/\/[^/]+\/uploads\//i, "/uploads/");
+    clean = clean.replace(/^https?:\/\/[^/]+\/uploads\//i, "/uploads/");
   }
 
-  return clean;
+  return resolveCdnMediaUrl(clean);
 }
