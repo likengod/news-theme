@@ -10,6 +10,7 @@ import { ShieldCheck, Crown, Sparkles, GitBranch } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { CdnSettingsCard } from "./CdnSettingsCard";
+import { GitSettingsCard } from "./GitSettingsCard";
 
 const integrationFields: FieldDef[] = [
   {
@@ -171,31 +172,6 @@ const socialMediaFields: FieldDef[] = [
   },
 ];
 
-const gitFields: FieldDef[] = [
-  {
-    key: "gitRemoteUrl",
-    label: "Git Remote URL",
-    hint: "HTTPS URL of your upstream update repository.",
-    placeholder: "https://github.com/likengod/news-theme.git",
-    guideUrl: "https://github.com/likengod/news-theme",
-    isSecret: false,
-  },
-  {
-    key: "gitBranch",
-    label: "Deployment Branch",
-    hint: "Branch to pull from and deploy (default: main).",
-    placeholder: "main",
-    isSecret: false,
-  },
-  {
-    key: "gitAccessToken",
-    label: "Personal Access Token (PAT)",
-    hint: "Required only for private repositories. For public repos, leave empty.",
-    placeholder: "ghp_xxxxxxxxxxxx",
-    guideUrl: "https://github.com/settings/tokens",
-    isSecret: true,
-  },
-];
 
 export function IntegrationsTab({ s, update }: { s: any; update: any }) {
   const canSeeGitConfig = true;
@@ -267,68 +243,7 @@ export function IntegrationsTab({ s, update }: { s: any; update: any }) {
         </Card>
 
         {/* Git Connect / CI-CD */}
-        <Card
-          title="Git Connect / CI-CD"
-          subtitle="Connect your Git repository for continuous deployment. Manage deployments from Admin &rarr; Website Update."
-        >
-          <div className="space-y-3">
-            {gitFields.map((f) => (
-              <IntegrationField key={f.key} f={f} s={s} update={update} />
-            ))}
-          </div>
-
-          <div className="space-y-3 pt-2 border-t border-slate-100">
-            <Toggle
-              label="Auto-deploy on pull"
-              checked={s.gitAutoDeploy}
-              onChange={(v) => update("gitAutoDeploy", v)}
-              hint="When enabled, pulling latest code will automatically trigger a production build."
-            />
-
-            <div className="rounded-md bg-amber-50 p-2.5 text-xs text-amber-800">
-              <strong>Security note:</strong> Build and deploy commands run on the server. Only admin
-              users can trigger deployments from <strong>Admin &rarr; Website Update</strong>.
-            </div>
-
-            <details className="rounded-md border border-slate-200 bg-slate-50/70 p-2.5 text-xs text-slate-700">
-              <summary className="font-semibold text-slate-700 cursor-pointer select-none">
-                View CI/CD Guides & Documentation
-              </summary>
-              <div className="mt-2.5 space-y-2.5">
-                <GuideList
-                  items={[
-                    {
-                      label: "GitHub - Generate Personal Access Token",
-                      url: "https://github.com/settings/tokens",
-                    },
-                    {
-                      label: "GitLab - Generate Access Token",
-                      url: "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html",
-                    },
-                    {
-                      label: "Bitbucket - App Passwords",
-                      url: "https://bitbucket.org/account/settings/app-passwords/",
-                    },
-                    {
-                      label: "GitHub - Creating a Repository",
-                      url: "https://docs.github.com/en/get-started/quickstart/create-a-repo",
-                    },
-                    { label: "GitHub Actions - CI/CD", url: "https://docs.github.com/en/actions" },
-                    { label: "Vercel - Git Integration", url: "https://vercel.com/docs/git" },
-                    {
-                      label: "Netlify - Build & Deploy",
-                      url: "https://docs.netlify.com/configure-builds/overview/",
-                    },
-                    {
-                      label: "Cloudflare Pages - Git Integration",
-                      url: "https://developers.cloudflare.com/pages/get-started/git-integration/",
-                    },
-                  ]}
-                />
-              </div>
-            </details>
-          </div>
-        </Card>
+        <GitSettingsCard s={s} update={update} />
 
         {/* CDN & Edge Cache Acceleration (Placed right side of Git Connect) */}
         <CdnSettingsCard s={s} update={update} />
