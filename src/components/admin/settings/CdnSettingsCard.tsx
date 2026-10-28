@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Globe,
   Zap,
   RefreshCw,
   ExternalLink,
@@ -10,6 +9,7 @@ import {
   Edit2,
   Eye,
   EyeOff,
+  Globe,
 } from "lucide-react";
 import { toast } from "sonner";
 import { type SiteSettings, saveSettings } from "@/lib/site-content";
@@ -23,11 +23,10 @@ interface CdnSettingsCardProps {
 
 export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
   const [purging, setPurging] = useState(false);
-  const [isEditingProvider, setIsEditingProvider] = useState(false);
-  const [isEditingMedia, setIsEditingMedia] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [showToken, setShowToken] = useState(false);
 
-  // Local state for editing provider
+  // Local state for all CDN settings
   const [localProvider, setLocalProvider] = useState<string>(s.cdnProvider || "none");
   const [localCfZone, setLocalCfZone] = useState<string>(s.cloudflareZoneId || "");
   const [localCfToken, setLocalCfToken] = useState<string>(s.cloudflareApiToken || "");
@@ -38,7 +37,6 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
   const [localFastlyKey, setLocalFastlyKey] = useState<string>(s.fastlyApiKey || "");
   const [localWebhook, setLocalWebhook] = useState<string>(s.cdnPurgeWebhookUrl || "");
 
-  // Local state for editing media URL
   const [localMediaBase, setLocalMediaBase] = useState<string>(s.cdnMediaBaseUrl || "");
   const [localCdnEnabled, setLocalCdnEnabled] = useState<boolean>(!!s.cdnEnabled);
 
@@ -58,10 +56,10 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
     isProviderConfigured = Boolean(s.cdnPurgeWebhookUrl?.trim());
   }
 
-  // Check if media delivery is configured
   const isMediaConfigured = Boolean(s.cdnEnabled && s.cdnMediaBaseUrl?.trim());
+  const isOverallConfigured = isProviderConfigured || isMediaConfigured;
 
-  const handleSaveProvider = async () => {
+  const handleSave = async () => {
     update("cdnProvider", localProvider as any);
     update("cloudflareZoneId", localCfZone);
     update("cloudflareApiToken", localCfToken);
@@ -71,6 +69,8 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
     update("fastlyServiceId", localFastlyService);
     update("fastlyApiKey", localFastlyKey);
     update("cdnPurgeWebhookUrl", localWebhook);
+    update("cdnMediaBaseUrl", localMediaBase);
+    update("cdnEnabled", localCdnEnabled);
 
     const newSettings: SiteSettings = {
       ...s,
@@ -83,18 +83,20 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
       fastlyServiceId: localFastlyService,
       fastlyApiKey: localFastlyKey,
       cdnPurgeWebhookUrl: localWebhook,
+      cdnMediaBaseUrl: localMediaBase,
+      cdnEnabled: localCdnEnabled,
     };
 
     try {
       await saveSettings(newSettings);
-      toast.success("CDN Provider settings saved successfully");
-      setIsEditingProvider(false);
+      toast.success("CDN & Edge settings saved successfully");
+      setIsEditing(false);
     } catch {
       toast.error("Failed to save CDN settings");
     }
   };
 
-  const handleCancelProvider = () => {
+  const handleCancel = () => {
     setLocalProvider(s.cdnProvider || "none");
     setLocalCfZone(s.cloudflareZoneId || "");
     setLocalCfToken(s.cloudflareApiToken || "");
@@ -104,32 +106,9 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
     setLocalFastlyService(s.fastlyServiceId || "");
     setLocalFastlyKey(s.fastlyApiKey || "");
     setLocalWebhook(s.cdnPurgeWebhookUrl || "");
-    setIsEditingProvider(false);
-  };
-
-  const handleSaveMedia = async () => {
-    update("cdnMediaBaseUrl", localMediaBase);
-    update("cdnEnabled", localCdnEnabled);
-
-    const newSettings: SiteSettings = {
-      ...s,
-      cdnMediaBaseUrl: localMediaBase,
-      cdnEnabled: localCdnEnabled,
-    };
-
-    try {
-      await saveSettings(newSettings);
-      toast.success("CDN Media Delivery settings saved successfully");
-      setIsEditingMedia(false);
-    } catch {
-      toast.error("Failed to save CDN Media settings");
-    }
-  };
-
-  const handleCancelMedia = () => {
     setLocalMediaBase(s.cdnMediaBaseUrl || "");
     setLocalCdnEnabled(!!s.cdnEnabled);
-    setIsEditingMedia(false);
+    setIsEditing(false);
   };
 
   const handlePurge = async () => {
@@ -139,7 +118,7 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
       if (res.success) {
         toast.success(res.message || "Edge CDN cache successfully purged!");
       } else {
-        toast.error(res.message || "Failed to purge Edge CDN cache.");
+        toast.error(res.message || "Cache purge failed. Check your CDN credentials.");
       }
     } catch (err: any) {
       toast.error(err?.message || "Failed to trigger edge cache purge.");
@@ -149,7 +128,7 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
   };
 
   const providers = [
-    { id: "none", name: "None (Disabled)", guideUrl: "" },
+    { id: "none", name: "None (Disabled - Origin Direct)", guideUrl: "" },
     { id: "cloudflare", name: "Cloudflare (Reverse Proxy & Edge Purge)", guideUrl: "https://dash.cloudflare.com" },
     { id: "bunny", name: "BunnyCDN (Pull Zone & Media CDN)", guideUrl: "https://dash.bunny.net" },
     { id: "cloudfront", name: "AWS CloudFront (Amazon Global CDN)", guideUrl: "https://console.aws.amazon.com/cloudfront" },
@@ -157,10 +136,10 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
     { id: "custom", name: "Custom / Webhook (Any CDN)", guideUrl: "" },
   ];
 
-  const currentProviderObj = providers.find((p) => p.id === (isEditingProvider ? localProvider : provider)) || providers[0];
+  const currentProviderObj = providers.find((p) => p.id === (isEditing ? localProvider : provider)) || providers[0];
 
-  const sampleUrl = s.cdnMediaBaseUrl
-    ? `${s.cdnMediaBaseUrl.replace(/\/+$/, "")}/uploads/media/tripura-news.webp`
+  const sampleUrl = (isEditing ? localMediaBase : s.cdnMediaBaseUrl)
+    ? `${(isEditing ? localMediaBase : s.cdnMediaBaseUrl || "").replace(/\/+$/, "")}/uploads/media/tripura-news.webp`
     : "/uploads/media/tripura-news.webp";
 
   return (
@@ -169,15 +148,16 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
       subtitle="Connect Cloudflare, BunnyCDN, AWS CloudFront, Fastly, or any custom CDN to accelerate media delivery, cut server bandwidth, and purge edge caches with 1 click."
     >
       <div className="space-y-3">
-        {/* ROW 1: Edge CDN Provider (Exact IntegrationField format) */}
+        {/* Single unified CDN Integration Row */}
         <div className="rounded-md border border-slate-200 bg-white p-2.5 hover:border-slate-300 transition-colors">
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <p className="text-[13px] font-medium text-slate-800">
-                Edge CDN Provider {provider !== "none" ? `(${currentProviderObj.name.split(" ")[0]})` : ""}
+              <p className="text-[13px] font-medium text-slate-800 flex items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5 text-slate-600" />
+                Edge CDN & Media Acceleration {provider !== "none" ? `(${currentProviderObj.name.split(" ")[0]})` : ""}
               </p>
               <div className="flex items-center gap-2">
-                {isProviderConfigured ? (
+                {isOverallConfigured ? (
                   <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
                     <CheckCircle2 className="h-3 w-3" /> Configured
                   </span>
@@ -204,27 +184,59 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              {!isEditingProvider && (
+              {!isEditing && (
                 <button
                   type="button"
-                  onClick={() => setIsEditingProvider(true)}
-                  className="flex items-center gap-1.5 rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200"
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-1.5 rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors"
                 >
                   <Edit2 className="h-3 w-3" />
-                  {isProviderConfigured ? "Update" : "Setup"}
+                  {isOverallConfigured ? "Update" : "Setup"}
                 </button>
               )}
             </div>
           </div>
 
-          {/* Expanded Inline Editor for Provider */}
-          {isEditingProvider && (
-            <div className="mt-2.5 border-t border-slate-100 pt-2.5 space-y-3">
+          {/* Collapsed summary when not editing */}
+          {!isEditing && (
+            <div className="mt-1.5 text-[11px] text-slate-500">
+              {isOverallConfigured ? (
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span>
+                    Provider: <strong className="text-slate-700">{currentProviderObj.name.split(" ")[0]}</strong>
+                  </span>
+                  <span>•</span>
+                  <span>
+                    Media Delivery:{" "}
+                    {s.cdnEnabled && s.cdnMediaBaseUrl ? (
+                      <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-slate-700">{s.cdnMediaBaseUrl}</code>
+                    ) : (
+                      <span className="text-slate-500">Origin direct</span>
+                    )}
+                  </span>
+                  <span>•</span>
+                  <span>
+                    Edge Purge:{" "}
+                    <strong className={isProviderConfigured ? "text-emerald-600" : "text-slate-500"}>
+                      {isProviderConfigured ? "Ready" : "Credentials needed"}
+                    </strong>
+                  </span>
+                </div>
+              ) : (
+                <p>No CDN connected. Media and pages are served directly from the origin server. Click Setup to configure Cloudflare, BunnyCDN, or AWS.</p>
+              )}
+            </div>
+          )}
+
+          {/* Expanded unified editor */}
+          {isEditing && (
+            <div className="mt-3 space-y-4 rounded-md bg-slate-50/80 p-3 border border-slate-200/80">
+              {/* Provider Selector */}
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">
-                  Select Provider
+                <label className="block text-xs font-semibold text-slate-700">
+                  Select CDN Provider <span className="text-rose-500">*</span>
                 </label>
-                <div className="relative">
+                <div className="relative mt-1">
                   <select
                     value={localProvider}
                     onChange={(e) => setLocalProvider(e.target.value)}
@@ -236,82 +248,104 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
                       </option>
                     ))}
                   </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </div>
+                  <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
                 </div>
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Select your content delivery network to enable automated edge purge and fast global caching.
+                </p>
               </div>
 
+              {/* Dynamic Provider Requirements */}
               {localProvider === "cloudflare" && (
-                <div className="grid gap-2.5 sm:grid-cols-2">
+                <div className="space-y-3 rounded-md border border-blue-100 bg-blue-50/50 p-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-blue-900">Cloudflare API Credentials</span>
+                    <a
+                      href="https://dash.cloudflare.com/profile/api-tokens"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:underline"
+                    >
+                      Get API Token <ExternalLink className="h-2.5 w-2.5" />
+                    </a>
+                  </div>
+
                   <div>
-                    <label className="mb-1 block text-[11px] font-medium text-slate-700">
-                      Cloudflare Zone ID
-                    </label>
+                    <label className="block text-[11px] font-medium text-slate-700">Zone ID</label>
                     <input
                       type="text"
                       value={localCfZone}
                       onChange={(e) => setLocalCfZone(e.target.value)}
-                      placeholder="e.g. 023e105f4ecef8ad..."
-                      className="w-full rounded-md border border-slate-200 px-3 py-1.5 font-mono text-xs focus:border-slate-900 focus:outline-none"
+                      placeholder="e.g. 023e105f4ecef8ad9ca31a8372d0c353"
+                      className="mt-1 w-full rounded border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs focus:border-slate-900 focus:outline-none"
                     />
+                    <p className="mt-0.5 text-[10px] text-slate-500">Found on your Cloudflare domain overview page on the bottom right.</p>
                   </div>
+
                   <div>
-                    <label className="mb-1 block text-[11px] font-medium text-slate-700">
-                      API Bearer Token
-                    </label>
-                    <div className="relative">
+                    <label className="block text-[11px] font-medium text-slate-700">API Token (Zone:Cache Purge)</label>
+                    <div className="relative mt-1">
                       <input
                         type={showToken ? "text" : "password"}
                         value={localCfToken}
                         onChange={(e) => setLocalCfToken(e.target.value)}
-                        placeholder="Cloudflare API Bearer Token"
-                        className="w-full rounded-md border border-slate-200 px-3 py-1.5 pr-8 font-mono text-xs focus:border-slate-900 focus:outline-none"
+                        placeholder="••••••••••••••••••••••••••••••••••••••••"
+                        className="w-full rounded border border-slate-200 bg-white px-2.5 py-1 pr-8 font-mono text-xs focus:border-slate-900 focus:outline-none"
                       />
                       <button
                         type="button"
                         onClick={() => setShowToken(!showToken)}
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                       >
-                        {showToken ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        {showToken ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                       </button>
                     </div>
+                    <p className="mt-0.5 text-[10px] text-slate-500">API Token with permissions: Zone - Cache Purge - Purge.</p>
                   </div>
                 </div>
               )}
 
               {localProvider === "bunny" && (
-                <div className="grid gap-2.5 sm:grid-cols-2">
+                <div className="space-y-3 rounded-md border border-amber-100 bg-amber-50/50 p-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-amber-900">BunnyCDN Pull Zone Credentials</span>
+                    <a
+                      href="https://dash.bunny.net/cdn"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1 text-[11px] font-medium text-amber-700 hover:underline"
+                    >
+                      Bunny Dashboard <ExternalLink className="h-2.5 w-2.5" />
+                    </a>
+                  </div>
+
                   <div>
-                    <label className="mb-1 block text-[11px] font-medium text-slate-700">
-                      Pull Zone ID
-                    </label>
+                    <label className="block text-[11px] font-medium text-slate-700">Pull Zone ID</label>
                     <input
                       type="text"
                       value={localBunnyZone}
                       onChange={(e) => setLocalBunnyZone(e.target.value)}
                       placeholder="e.g. 123456"
-                      className="w-full rounded-md border border-slate-200 px-3 py-1.5 font-mono text-xs focus:border-slate-900 focus:outline-none"
+                      className="mt-1 w-full rounded border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs focus:border-slate-900 focus:outline-none"
                     />
                   </div>
+
                   <div>
-                    <label className="mb-1 block text-[11px] font-medium text-slate-700">
-                      API Access Key
-                    </label>
-                    <div className="relative">
+                    <label className="block text-[11px] font-medium text-slate-700">Account API Access Key</label>
+                    <div className="relative mt-1">
                       <input
                         type={showToken ? "text" : "password"}
                         value={localBunnyKey}
                         onChange={(e) => setLocalBunnyKey(e.target.value)}
-                        placeholder="BunnyCDN API Key"
-                        className="w-full rounded-md border border-slate-200 px-3 py-1.5 pr-8 font-mono text-xs focus:border-slate-900 focus:outline-none"
+                        placeholder="••••••••••••••••••••••••••••••••••••••••"
+                        className="w-full rounded border border-slate-200 bg-white px-2.5 py-1 pr-8 font-mono text-xs focus:border-slate-900 focus:outline-none"
                       />
                       <button
                         type="button"
                         onClick={() => setShowToken(!showToken)}
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                       >
-                        {showToken ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        {showToken ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                       </button>
                     </div>
                   </div>
@@ -319,167 +353,137 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
               )}
 
               {localProvider === "cloudfront" && (
-                <div>
-                  <label className="mb-1 block text-[11px] font-medium text-slate-700">
-                    CloudFront Distribution ID
-                  </label>
-                  <input
-                    type="text"
-                    value={localCfDist}
-                    onChange={(e) => setLocalCfDist(e.target.value)}
-                    placeholder="e.g. E1234567890ABC"
-                    className="w-full rounded-md border border-slate-200 px-3 py-1.5 font-mono text-xs focus:border-slate-900 focus:outline-none"
-                  />
+                <div className="space-y-3 rounded-md border border-emerald-100 bg-emerald-50/50 p-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-emerald-900">AWS CloudFront Distribution</span>
+                    <a
+                      href="https://console.aws.amazon.com/cloudfront"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1 text-[11px] font-medium text-emerald-700 hover:underline"
+                    >
+                      AWS Console <ExternalLink className="h-2.5 w-2.5" />
+                    </a>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-700">Distribution ID</label>
+                    <input
+                      type="text"
+                      value={localCfDist}
+                      onChange={(e) => setLocalCfDist(e.target.value)}
+                      placeholder="e.g. E1A2B3C4D5E6F7"
+                      className="mt-1 w-full rounded border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs focus:border-slate-900 focus:outline-none"
+                    />
+                  </div>
                 </div>
               )}
 
               {localProvider === "fastly" && (
-                <div className="grid gap-2.5 sm:grid-cols-2">
+                <div className="space-y-3 rounded-md border border-red-100 bg-red-50/50 p-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-red-900">Fastly Service Credentials</span>
+                    <a
+                      href="https://manage.fastly.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1 text-[11px] font-medium text-red-700 hover:underline"
+                    >
+                      Fastly Portal <ExternalLink className="h-2.5 w-2.5" />
+                    </a>
+                  </div>
+
                   <div>
-                    <label className="mb-1 block text-[11px] font-medium text-slate-700">
-                      Service ID
-                    </label>
+                    <label className="block text-[11px] font-medium text-slate-700">Service ID</label>
                     <input
                       type="text"
                       value={localFastlyService}
                       onChange={(e) => setLocalFastlyService(e.target.value)}
-                      placeholder="Fastly Service ID"
-                      className="w-full rounded-md border border-slate-200 px-3 py-1.5 font-mono text-xs focus:border-slate-900 focus:outline-none"
+                      placeholder="e.g. SU1z6GM9SGxkqUQwoQ3Wx1"
+                      className="mt-1 w-full rounded border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs focus:border-slate-900 focus:outline-none"
                     />
                   </div>
+
                   <div>
-                    <label className="mb-1 block text-[11px] font-medium text-slate-700">
-                      API Token
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showToken ? "text" : "password"}
-                        value={localFastlyKey}
-                        onChange={(e) => setLocalFastlyKey(e.target.value)}
-                        placeholder="Fastly API Token"
-                        className="w-full rounded-md border border-slate-200 px-3 py-1.5 pr-8 font-mono text-xs focus:border-slate-900 focus:outline-none"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowToken(!showToken)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                      >
-                        {showToken ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                      </button>
-                    </div>
+                    <label className="block text-[11px] font-medium text-slate-700">API Key</label>
+                    <input
+                      type={showToken ? "text" : "password"}
+                      value={localFastlyKey}
+                      onChange={(e) => setLocalFastlyKey(e.target.value)}
+                      placeholder="••••••••••••••••••••••••••••••••••••••••"
+                      className="mt-1 w-full rounded border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs focus:border-slate-900 focus:outline-none"
+                    />
                   </div>
                 </div>
               )}
 
               {localProvider === "custom" && (
-                <div>
-                  <label className="mb-1 block text-[11px] font-medium text-slate-700">
-                    Purge Webhook URL (POST)
-                  </label>
-                  <input
-                    type="url"
-                    value={localWebhook}
-                    onChange={(e) => setLocalWebhook(e.target.value)}
-                    placeholder="https://api.yourcdn.com/purge-hook"
-                    className="w-full rounded-md border border-slate-200 px-3 py-1.5 font-mono text-xs focus:border-slate-900 focus:outline-none"
-                  />
+                <div className="space-y-3 rounded-md border border-purple-100 bg-purple-50/50 p-2.5">
+                  <span className="text-xs font-semibold text-purple-900">Custom Webhook Integration</span>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-700">Purge Webhook URL (POST)</label>
+                    <input
+                      type="url"
+                      value={localWebhook}
+                      onChange={(e) => setLocalWebhook(e.target.value)}
+                      placeholder="https://api.my-custom-cdn.com/purge-all"
+                      className="mt-1 w-full rounded border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs focus:border-slate-900 focus:outline-none"
+                    />
+                    <p className="mt-0.5 text-[10px] text-slate-500">
+                      When cache purge is triggered, the server will send an authenticated HTTP POST request to this webhook.
+                    </p>
+                  </div>
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={handleCancelProvider}
-                  className="flex h-[30px] items-center justify-center rounded-md bg-slate-100 px-3 text-[11px] font-medium text-slate-600 hover:bg-slate-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveProvider}
-                  className="flex h-[30px] items-center justify-center rounded-md bg-slate-900 px-3.5 text-[11px] font-medium text-white hover:bg-slate-800"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+              {/* Media URL rewrite section */}
+              <div className="pt-3 border-t border-slate-200 space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700">
+                    CDN Media Delivery Host URL (Optional)
+                  </label>
+                  <input
+                    type="url"
+                    value={localMediaBase}
+                    onChange={(e) => setLocalMediaBase(e.target.value)}
+                    placeholder="https://cdn.todaytripura.com"
+                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 font-mono text-xs focus:border-slate-900 focus:outline-none"
+                  />
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    Prepend this URL to all article images and media files to offload server traffic.
+                  </p>
+                </div>
 
-        {/* ROW 2: CDN Media Delivery URL (Exact IntegrationField format) */}
-        <div className="rounded-md border border-slate-200 bg-white p-2.5 hover:border-slate-300 transition-colors">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <p className="text-[13px] font-medium text-slate-800">
-                CDN Media Delivery URL
-              </p>
-              <div className="flex items-center gap-2">
-                {isMediaConfigured ? (
-                  <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
-                    <CheckCircle2 className="h-3 w-3" /> Configured
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-[11px] font-medium text-rose-500">
-                    <XCircle className="h-3 w-3" /> Not Configured
-                  </span>
+                <Toggle
+                  label="Enable CDN Media URL Rewriting"
+                  checked={localCdnEnabled}
+                  onChange={(v) => setLocalCdnEnabled(v)}
+                  hint="When enabled, frontend images resolve to the CDN media host URL."
+                />
+
+                {localMediaBase && (
+                  <div className="rounded border border-slate-200 bg-white p-2 text-[11px] text-slate-600">
+                    <span className="font-semibold text-slate-700">Live Preview:</span>{" "}
+                    <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-slate-800">{sampleUrl}</code>
+                  </div>
                 )}
               </div>
-            </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              {!isEditingMedia && (
+              {/* Save & Cancel buttons */}
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
                 <button
                   type="button"
-                  onClick={() => setIsEditingMedia(true)}
-                  className="flex items-center gap-1.5 rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200"
-                >
-                  <Edit2 className="h-3 w-3" />
-                  {isMediaConfigured ? "Update" : "Setup"}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Expanded Inline Editor for Media URL */}
-          {isEditingMedia && (
-            <div className="mt-2.5 border-t border-slate-100 pt-2.5 space-y-3">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">
-                  CDN Media Host URL
-                </label>
-                <input
-                  type="url"
-                  value={localMediaBase}
-                  onChange={(e) => setLocalMediaBase(e.target.value)}
-                  placeholder="https://cdn.todaytripura.com"
-                  className="w-full rounded-md border border-slate-200 px-3 py-1.5 font-mono text-xs focus:border-slate-900 focus:outline-none"
-                />
-                <p className="mt-1 text-[11px] text-slate-500">
-                  Prepend this URL to all article images and /uploads/ media.
-                </p>
-              </div>
-
-              <Toggle
-                label="Enable CDN Media Delivery"
-                checked={localCdnEnabled}
-                onChange={(v) => setLocalCdnEnabled(v)}
-                hint="When enabled, frontend images resolve to the CDN media base URL."
-              />
-
-              <div className="flex items-center justify-end gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={handleCancelMedia}
-                  className="flex h-[30px] items-center justify-center rounded-md bg-slate-100 px-3 text-[11px] font-medium text-slate-600 hover:bg-slate-200"
+                  onClick={handleCancel}
+                  className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
-                  onClick={handleSaveMedia}
-                  className="flex h-[30px] items-center justify-center rounded-md bg-slate-900 px-3.5 text-[11px] font-medium text-white hover:bg-slate-800"
+                  onClick={handleSave}
+                  className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800 transition-colors"
                 >
-                  Save
+                  Save CDN Settings
                 </button>
               </div>
             </div>
@@ -488,7 +492,7 @@ export function CdnSettingsCard({ s, update }: CdnSettingsCardProps) {
       </div>
 
       {/* Action Bar: Purge Cache Button & Notice */}
-      <div className="pt-3 border-t border-slate-100 space-y-3">
+      <div className="mt-4 pt-3 border-t border-slate-100 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
