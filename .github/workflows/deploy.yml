@@ -92,6 +92,11 @@ jobs:
             # Build production assets
             npm run build
 
+            # LiteSpeed Web Server (Hostinger/cPanel) graceful auto-reload trigger
+            mkdir -p tmp
+            touch tmp/restart.txt
+            pkill -9 -f "lsnode" 2>/dev/null || true
+
             # Restart application (supports PM2, npx pm2, systemd, or background node)
             if command -v pm2 >/dev/null 2>&1; then
               pm2 reload all || pm2 restart all

@@ -53,6 +53,10 @@ async function main() {
   console.log('Adding assets/...');
   addDirectoryToZip(path.join(__dirname, '..', 'assets'), 'assets');
 
+  // Include LiteSpeed auto-reload trigger
+  console.log('Adding tmp/restart.txt for LiteSpeed auto-reload...');
+  zip.file('tmp/restart.txt', String(Date.now()));
+
   // Add root files
   const rootFilesToInclude = [
     'server.js',

@@ -1,0 +1,2 @@
+import{An as e}from"./vendor-icons-CPc5vPaa.js";import{t}from"./vendor-react-CLkCxypd.js";import{t as n}from"./news-data-C2Ayi4Fb.js";var r=t();function i({count:t,className:i=``}){let a=typeof t==`number`?t:Number(t)||0;return(0,r.jsxs)(`span`,{className:`inline-flex items-center gap-1 text-[11px] text-muted-foreground ${i}`,children:[(0,r.jsx)(e,{className:`h-3 w-3 shrink-0`}),(0,r.jsxs)(`span`,{children:[n(a),` views`]})]})}export{i as t};
+//# sourceMappingURL=Views-NRQN7-OJ.js.map
