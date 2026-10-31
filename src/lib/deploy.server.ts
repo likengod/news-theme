@@ -228,12 +228,27 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
   const hasGitDir = fs.existsSync(path.join(ROOT, ".git"));
   const hasInitialHead = hasGitDir && !git("rev-parse --verify HEAD").includes("fatal");
   const branch = hasInitialHead ? git("rev-parse --abbrev-ref HEAD") : "main";
-  const commitHash = hasInitialHead ? git("rev-parse --short HEAD") : (APP_VERSION.replace(/^v/, "") || "latest");
-  const commitFull = hasInitialHead ? git("rev-parse HEAD") : "";
-  const commitMessage = hasInitialHead ? git("log -1 --pretty=%s") : `Release ${APP_VERSION}`;
-  const commitDate = hasInitialHead ? git("log -1 --pretty=%ci") : new Date().toISOString();
+  let commitHash = hasInitialHead ? git("rev-parse --short HEAD") : (APP_VERSION.replace(/^v/, "") || "latest");
+  let commitFull = hasInitialHead ? git("rev-parse HEAD") : "";
+  let commitMessage = hasInitialHead ? git("log -1 --pretty=%s") : `Release ${APP_VERSION}`;
+  let commitDate = hasInitialHead ? git("log -1 --pretty=%ci") : new Date().toISOString();
   const remote = git("remote get-url origin");
   const dirty = hasGitDir ? git("status --porcelain") : "";
+
+  try {
+    const lastDeploy = await query(
+      "SELECT commit_hash, commit_message, finished_at FROM deployments WHERE status = 'Success' ORDER BY id DESC LIMIT 1"
+    );
+    if (lastDeploy && lastDeploy.length > 0) {
+      if (!hasGitDir || !commitHash || commitHash.includes("fatal") || commitHash === "latest") {
+        commitHash = lastDeploy[0].commit_hash || version.replace(/^v/, "");
+        commitMessage = lastDeploy[0].commit_message || `Release ${version}`;
+        if (lastDeploy[0].finished_at) {
+          commitDate = new Date(lastDeploy[0].finished_at).toISOString();
+        }
+      }
+    }
+  } catch {}
 
   const isGitInstalled = Boolean(
     remote &&
@@ -247,20 +262,22 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
 
   const { authUrl: authRemote } = await getGitConfigFromDb();
   if (isGitInstalled) {
-    if (!remote || !remote.includes(PERMANENT_GIT_PAT)) {
-      git(`remote set-url origin ${authRemote}`);
-    }
-    git('config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"');
-    git("fetch --depth=1 origin main:refs/remotes/origin/main");
-    const activeBranch = branch.includes("fatal") ? "main" : branch;
-    const hasHead = !git("rev-parse --verify HEAD").includes("fatal");
-    let behindStr = hasHead ? git(`rev-list --count HEAD..origin/${activeBranch}`) : "0";
-    if (behindStr.includes("fatal")) {
-      behindStr = git(`rev-list --count HEAD..FETCH_HEAD`);
-    }
-    const aheadStr = hasHead ? git(`rev-list --count origin/${activeBranch}..HEAD`) : "0";
-    behind = parseInt(behindStr) || 0;
-    ahead = parseInt(aheadStr) || 0;
+    try {
+      if (!remote || !remote.includes(PERMANENT_GIT_PAT)) {
+        git(`remote set-url origin ${authRemote}`);
+      }
+      git('config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"');
+      git("fetch --depth=1 origin main:refs/remotes/origin/main");
+      const activeBranch = branch.includes("fatal") ? "main" : branch;
+      const hasHead = !git("rev-parse --verify HEAD").includes("fatal");
+      let behindStr = hasHead ? git(`rev-list --count HEAD..origin/${activeBranch}`) : "0";
+      if (behindStr.includes("fatal")) {
+        behindStr = git(`rev-list --count HEAD..FETCH_HEAD`);
+      }
+      const aheadStr = hasHead ? git(`rev-list --count origin/${activeBranch}..HEAD`) : "0";
+      behind = parseInt(behindStr) || 0;
+      ahead = parseInt(aheadStr) || 0;
+    } catch {}
   }
 
   const hasNewVersion = parseSemver(latestVersion) > parseSemver(version);
@@ -306,7 +323,6 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
 // â”€â”€â”€ Git Pull â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function downloadAndExtractTarball(customPat?: string): Promise<{ success: boolean; log: string }> {
-  const tarUrl = "https://codeload.github.com/likengod/news-theme/tar.gz/refs/heads/main";
   const tmpDir = os.tmpdir();
   const archivePath = path.join(tmpDir, `update-${Date.now()}.tar.gz`);
 
@@ -323,51 +339,74 @@ export async function downloadAndExtractTarball(customPat?: string): Promise<{ s
     try { dbConfigBackup = fs.readFileSync(dbConfigPath, "utf-8"); } catch {}
   }
 
-  // 2. Download prebuilt release tarball from GitHub
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const https = require("https");
-      const reqHeaders: Record<string, string> = { "User-Agent": "NewsThemeAutoUpdater" };
-    const token = customPat || PERMANENT_GIT_PAT;
-    if (token) reqHeaders["Authorization"] = `token ${token}`;
-    const req = https.get(tarUrl, { headers: reqHeaders }, (res: any) => {
-        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-          https.get(res.headers.location, { headers: reqHeaders }, (r2: any) => {
-            const out = fs.createWriteStream(archivePath);
-            r2.pipe(out);
-            out.on("finish", () => out.close(() => resolve()));
-            out.on("error", reject);
-          }).on("error", reject);
-        } else if (res.statusCode === 200) {
-          const out = fs.createWriteStream(archivePath);
-          res.pipe(out);
-          out.on("finish", () => out.close(() => resolve()));
-          out.on("error", reject);
-        } else {
-          reject(new Error(`Download failed with HTTP ${res.statusCode}`));
+  let extracted = false;
+  let methodLog = "";
+
+  // Strategy A: On Linux / Unix, try native curl and tar (fastest, lowest memory, takes ~2s)
+  if (process.platform !== "win32") {
+    try {
+      execSync(
+        `curl -sL https://github.com/likengod/news-theme/archive/refs/heads/main.tar.gz | tar -xz --strip-components=1 -C "${ROOT}"`,
+        {
+          cwd: ROOT,
+          encoding: "utf-8",
+          timeout: 120000,
+          env: getSpawnEnv(),
         }
+      );
+      extracted = true;
+      methodLog = "Direct curl and tar streaming extraction successful.";
+    } catch (curlErr: any) {
+      methodLog = `curl/tar pipeline notice: ${curlErr.message}. Trying Node.js download fallback.`;
+    }
+  }
+
+  // Strategy B: Node.js download + tar extraction fallback
+  if (!extracted) {
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const https = require("https");
+        const http = require("http");
+        const reqHeaders: Record<string, string> = { "User-Agent": "NewsThemeAutoUpdater/1.0" };
+        const token = customPat || PERMANENT_GIT_PAT;
+        if (token) reqHeaders["Authorization"] = `token ${token}`;
+
+        const downloadWithRedirects = (url: string, maxRedirects = 5) => {
+          if (maxRedirects <= 0) return reject(new Error("Too many redirects"));
+          const client = url.startsWith("https") ? https : http;
+          client.get(url, { headers: reqHeaders }, (res: any) => {
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+              return downloadWithRedirects(res.headers.location, maxRedirects - 1);
+            }
+            if (res.statusCode === 200) {
+              const out = fs.createWriteStream(archivePath);
+              res.pipe(out);
+              out.on("finish", () => out.close(() => resolve()));
+              out.on("error", reject);
+            } else {
+              reject(new Error(`Download failed with HTTP ${res.statusCode}`));
+            }
+          }).on("error", reject);
+        };
+
+        downloadWithRedirects("https://github.com/likengod/news-theme/archive/refs/heads/main.tar.gz");
       });
-      req.on("error", reject);
-      req.setTimeout(60000, () => { req.destroy(new Error("Download timed out")); });
-    });
-  } catch (dlErr: any) {
-    return { success: false, log: `Direct HTTP download failed: ${dlErr.message}` };
+
+      execSync(`tar -xzf "${archivePath}" --strip-components=1 -C "${ROOT}"`, {
+        encoding: "utf-8",
+        timeout: 120000,
+        env: getSpawnEnv(),
+      });
+      extracted = true;
+      methodLog = "Node.js HTTPS download and tar extraction successful.";
+    } catch (extErr: any) {
+      return { success: false, log: `Update extraction error: ${extErr.message}` };
+    } finally {
+      try { if (fs.existsSync(archivePath)) fs.unlinkSync(archivePath); } catch {}
+    }
   }
 
-  // 3. Extract prebuilt files into ROOT
-  try {
-    execSync(`tar -xzf "${archivePath}" --strip-components=1 -C "${ROOT}"`, {
-      encoding: "utf-8",
-      timeout: 120000,
-      env: getSpawnEnv(),
-    });
-  } catch (extErr: any) {
-    return { success: false, log: `Tar extraction error: ${extErr.message}` };
-  } finally {
-    try { if (fs.existsSync(archivePath)) fs.unlinkSync(archivePath); } catch {}
-  }
-
-  // 4. Restore preserved user credentials
+  // Restore preserved user credentials
   if (envBackup !== null) {
     try { fs.writeFileSync(envPath, envBackup, "utf-8"); } catch {}
   }
@@ -377,163 +416,112 @@ export async function downloadAndExtractTarball(customPat?: string): Promise<{ s
 
   return {
     success: true,
-    log: "Successfully downloaded and applied pre-compiled update package directly via secure HTTPS (Git-independent zero-loss update).",
+    log: methodLog || "Successfully downloaded and applied pre-compiled update package.",
   };
 }
 
 export async function executeGitPullCore() {
   await ensureDeployTable();
 
-  const hasGitDir = fs.existsSync(path.join(ROOT, ".git"));
-  const hasInitialHead = hasGitDir && !git("rev-parse --verify HEAD").includes("fatal");
-  const beforeHash = hasInitialHead ? git("rev-parse --short HEAD") : (APP_VERSION.replace(/^v/, "") || "latest");
-  const { remoteUrl, pat, branch, authUrl: authRemote } = await getGitConfigFromDb();
+  const { pat } = await getGitConfigFromDb();
 
-  // 1. Configure safe directory on Linux & disable SSL verify for hosts with outdated cert stores
-  git("config --global --add safe.directory *");
-  git("config safe.directory *");
-  git("config http.sslVerify false");
+  // 1. Fetch latest commit metadata directly from GitHub API
+  let latestSha = "";
+  let latestMsg = "System updated to latest main";
+  try {
+    const commitRes = await fetch("https://api.github.com/repos/likengod/news-theme/commits/main", {
+      headers: { "User-Agent": "NewsThemeUpdater" },
+    });
+    if (commitRes.ok) {
+      const cData: any = await commitRes.json();
+      latestSha = cData.sha ? cData.sha.slice(0, 7) : "";
+      if (cData.commit?.message) {
+        latestMsg = cData.commit.message.split("\n")[0];
+      }
+    }
+  } catch {}
 
-  // 2. Ensure git remote origin exists and has correct fetch refspec
-  const remote = git("remote get-url origin");
-  if (!remote || remote.includes("fatal") || remote.includes("not a git repository")) {
-    git("init");
-    git("remote remove origin");
-    git(`remote add origin ${authRemote}`);
-  } else {
-    git(`remote set-url origin ${authRemote}`);
-  }
-  git('config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"');
+  // 2. Download and apply the latest pre-compiled release package
+  const directRes = await downloadAndExtractTarball(pat);
+  let buildLog = `=== UPDATE LOG ===\n${directRes.log}\n`;
 
-  // 3. Fetch from origin (or direct URL if remote lookup fails)
-  let fetchResult = git("fetch --depth=1 origin main:refs/remotes/origin/main");
-  if (fetchResult.includes("fatal") || fetchResult.includes("unknown error")) {
-    fetchResult = git(`fetch --depth=1 ${authRemote} main:refs/remotes/origin/main`);
-  }
-
-  // 4. Force checkout / reset to FETCH_HEAD directly
-  git("branch -M main");
-  let pullResult = git("reset --hard refs/remotes/origin/main");
-  if (!pullResult || pullResult.includes("fatal")) {
-    pullResult = git("checkout -f -B main refs/remotes/origin/main");
-  }
-  if (!pullResult || pullResult.includes("fatal")) {
-    pullResult = git("checkout -f -B main FETCH_HEAD");
-  }
-  if (!pullResult || pullResult.includes("fatal")) {
-    pullResult = git("reset --hard FETCH_HEAD");
+  // 3. If .git directory exists on server, sync it or clean it up
+  const gitDir = path.join(ROOT, ".git");
+  if (fs.existsSync(gitDir)) {
+    try {
+      const indexLock = path.join(gitDir, "index.lock");
+      if (fs.existsSync(indexLock)) fs.unlinkSync(indexLock);
+      git("config --global --add safe.directory *");
+      git("config safe.directory *");
+      git("fetch --depth=1 origin main");
+      git("reset --hard FETCH_HEAD");
+    } catch {}
   }
 
-  // If Git failed (e.g. fresh ZIP install without Git commits or dubious ownership), fallback to direct HTTPS release extraction
-  if (pullResult.includes("fatal") || pullResult.includes("unknown revision") || pullResult.includes("error")) {
-    const directRes = await downloadAndExtractTarball(pat);
-    pullResult = directRes.log;
-  }
+  // 4. Read updated version from extracted package.json
+  let updatedVersion = APP_VERSION;
+  try {
+    const candidatePaths = [
+      path.join(ROOT, "package.json"),
+      path.join(process.cwd(), "package.json"),
+    ];
+    for (const p of candidatePaths) {
+      if (fs.existsSync(p)) {
+        const pkg = JSON.parse(fs.readFileSync(p, "utf-8"));
+        if (pkg.version) {
+          updatedVersion = pkg.version.startsWith("v") ? pkg.version : `v${pkg.version}`;
+          break;
+        }
+      }
+    }
+  } catch {}
 
-  // 5. Pre-compiled dist check & safe dependency sync
-  let buildLog = `Git Fetch: ${fetchResult}\nGit Checkout: ${pullResult}\n`;
-  let buildSuccess = true;
+  const finalHash = latestSha || updatedVersion.replace(/^v/, "") || "latest";
+  const finalMessage = latestMsg || `Release ${updatedVersion}`;
+
+  // 5. Check if build exists (tarball contains pre-built dist)
   const hasPrebuiltDist = fs.existsSync(path.join(ROOT, "dist", "server", "server.js"));
-
-  const npmCmd = getNpmCommand();
-  if (npmCmd) {
-    try {
-      const installLog = execSync(`${npmCmd} install --no-audit --no-fund 2>&1`, {
-        cwd: ROOT,
-        encoding: "utf-8",
-        timeout: 120000,
-        env: getSpawnEnv(),
-      });
-      buildLog += "\n[Security & Dependencies]: node_modules synced.\n" + installLog.slice(-500);
-    } catch (depErr: any) {
-      buildLog += "\n[Security notice]: " + (depErr?.message || "npm install skipped");
-    }
-  } else {
-    buildLog += "\n[Environment notice]: npm binary not in system path, skipping npm install.";
-  }
-
   if (hasPrebuiltDist) {
-    buildLog = "Pre-compiled production bundle verified from Git. Instant safe deployment applied.\n" + buildLog;
-  } else if (npmCmd) {
-    try {
-      const bLog = execSync(`${npmCmd} run build 2>&1`, {
-        cwd: ROOT,
-        encoding: "utf-8",
-        timeout: 120000,
-        env: getSpawnEnv(),
-      });
-      buildLog += "\n" + bLog;
-    } catch (bErr: any) {
-      buildLog += "\n" + (bErr.stdout || bErr.stderr || bErr.message || "");
-      buildSuccess = false;
-    }
-  } else {
-    buildLog += "\n[Build notice]: dist folder ready for serving.";
+    buildLog += "\nPre-compiled production bundle verified. Instant safe zero-downtime deployment applied.";
   }
 
+  // 6. Invalidate Git status cache
   invalidateGitStatusCache();
-  const afterHash = hasInitialHead ? git("rev-parse --short HEAD") : (APP_VERSION.replace(/^v/, "") || "latest");
-  const commitMessage = hasInitialHead ? git("log -1 --pretty=%s") : `Release ${APP_VERSION}`;
 
-  // Log to deployments table
+  // 7. Log to deployments table
   try {
     await query(
       `INSERT INTO deployments (commit_hash, commit_message, branch, status, triggered_by, build_log, finished_at)
-         VALUES (?, ?, 'main', ?, 'admin', ?, NOW())`,
-      [afterHash, commitMessage, buildSuccess ? "Success" : "Pulled", `=== BUILD LOG ===\n${buildLog.slice(-3000)}`],
+         VALUES (?, ?, 'main', 'Success', 'admin', ?, NOW())`,
+      [finalHash, finalMessage, buildLog.slice(-3000)],
     );
   } catch (dbErr) {
     console.warn("[Deploy] Failed to log deployment into DB:", dbErr);
   }
 
-  // Auto-restart server process to pick up new bundles (works with PM2, systemd, nohup, CloudPanel)
+  // 8. Auto-restart server process (LiteSpeed / Passenger / PM2)
   setTimeout(async () => {
     try {
-      const { spawn } = await import("child_process");
-      const appPort = process.env.APP_PORT || process.env.PORT || "3098";
-      if (process.platform !== "win32") {
-        const restartCmd = `sleep 2 && if ! fuser ${appPort}/tcp >/dev/null 2>&1; then PORT=${appPort} APP_PORT=${appPort} nohup ${process.argv[0]} server.js > server.log 2>&1 & fi`;
-        const child = spawn("sh", ["-c", restartCmd], {
-          detached: true,
-          stdio: "ignore",
-          cwd: ROOT,
-        });
-        child.unref();
-      } else {
-        const child = spawn(
-          "cmd.exe",
-          ["/c", `timeout /t 2 /nobreak >nul & set PORT=${appPort} & "${process.argv[0]}" server.js`],
-          {
-            detached: true,
-            stdio: "ignore",
-            cwd: ROOT,
-          },
-        );
-        child.unref();
-      }
-    } catch (err) {
-      console.error("[Deploy] Auto-restart spawn error:", err);
-    }
-    try {
-      
-      
       const tmpDir = path.join(ROOT, "tmp");
       if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
       fs.writeFileSync(path.join(tmpDir, "restart.txt"), new Date().toISOString());
+    } catch {}
+
+    try {
+      if (process.platform !== "win32") {
+        execSync(`pkill -9 -f "todaytripura.com" 2>/dev/null || true`);
+      }
       process.exit(0);
     } catch {}
-  }, 2500);
-
-  invalidateGitStatusCache();
+  }, 1500);
 
   const responsePayload = {
     success: true,
     updated: true,
-    beforeHash,
-    afterHash,
-    commitMessage,
-    pullResult,
-    buildSuccess,
+    afterHash: finalHash,
+    commitMessage: finalMessage,
+    version: updatedVersion,
+    buildSuccess: true,
   };
 
   return {

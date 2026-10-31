@@ -64,6 +64,7 @@ import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminTagsRouteImport } from './routes/admin.tags'
 import { Route as AdminUpdatesRouteImport } from './routes/admin.updates'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiRssRouteImport } from './routes/api/rss'
 import { Route as ApiUpdateRouteImport } from './routes/api/update'
 import { Route as ApiUpdatesRouteImport } from './routes/api/updates'
@@ -344,6 +345,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRssRoute = ApiRssRouteImport.update({
   id: '/api/rss',
   path: '/api/rss',
@@ -420,6 +426,7 @@ export interface FileRoutesByFullPath {
   '/admin/tags': typeof AdminTagsRoute
   '/admin/updates': typeof AdminUpdatesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/rss': typeof ApiRssRoute
   '/api/update': typeof ApiUpdateRoute
   '/api/updates': typeof ApiUpdatesRoute
@@ -480,6 +487,7 @@ export interface FileRoutesByTo {
   '/admin/tags': typeof AdminTagsRoute
   '/admin/updates': typeof AdminUpdatesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/rss': typeof ApiRssRoute
   '/api/update': typeof ApiUpdateRoute
   '/api/updates': typeof ApiUpdatesRoute
@@ -542,6 +550,7 @@ export interface FileRoutesById {
   '/admin/tags': typeof AdminTagsRoute
   '/admin/updates': typeof AdminUpdatesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/rss': typeof ApiRssRoute
   '/api/update': typeof ApiUpdateRoute
   '/api/updates': typeof ApiUpdatesRoute
@@ -605,6 +614,7 @@ export interface FileRouteTypes {
     | '/admin/tags'
     | '/admin/updates'
     | '/admin/users'
+    | '/api/health'
     | '/api/rss'
     | '/api/update'
     | '/api/updates'
@@ -665,6 +675,7 @@ export interface FileRouteTypes {
     | '/admin/tags'
     | '/admin/updates'
     | '/admin/users'
+    | '/api/health'
     | '/api/rss'
     | '/api/update'
     | '/api/updates'
@@ -726,6 +737,7 @@ export interface FileRouteTypes {
     | '/admin/tags'
     | '/admin/updates'
     | '/admin/users'
+    | '/api/health'
     | '/api/rss'
     | '/api/update'
     | '/api/updates'
@@ -772,6 +784,7 @@ export interface RootRouteChildren {
   WatchRoute: typeof WatchRoute
   WithdrawPointsRoute: typeof WithdrawPointsRoute
   WorkWithUsRoute: typeof WorkWithUsRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   ApiRssRoute: typeof ApiRssRoute
   ApiUpdateRoute: typeof ApiUpdateRoute
   ApiUpdatesRoute: typeof ApiUpdatesRoute
@@ -1165,6 +1178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rss': {
       id: '/api/rss'
       path: '/api/rss'
@@ -1277,6 +1297,7 @@ const rootRouteChildren: RootRouteChildren = {
   WatchRoute: WatchRoute,
   WithdrawPointsRoute: WithdrawPointsRoute,
   WorkWithUsRoute: WorkWithUsRoute,
+  ApiHealthRoute: ApiHealthRoute,
   ApiRssRoute: ApiRssRoute,
   ApiUpdateRoute: ApiUpdateRoute,
   ApiUpdatesRoute: ApiUpdatesRoute,
