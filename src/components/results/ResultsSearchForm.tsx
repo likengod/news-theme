@@ -1,10 +1,13 @@
 import React, { useId } from "react";
-import { Search, RefreshCw, ExternalLink, GraduationCap, Building2, HelpCircle } from "lucide-react";
-import { SUPPORTED_BOARDS } from "@/lib/results-api";
+import { Search, RefreshCw, GraduationCap, Building2 } from "lucide-react";
+import {
+  SUPPORTED_BOARDS,
+  type ExamBoardConfig,
+} from "@/lib/results-api";
 
 interface ResultsSearchFormProps {
+  selectedBoard: ExamBoardConfig;
   selectedBoardId: string;
-  selectedBoard: (typeof SUPPORTED_BOARDS)[number];
   selectedExamId: string;
   setSelectedExamId: (id: string) => void;
   rollNo: string;
@@ -19,8 +22,8 @@ interface ResultsSearchFormProps {
 }
 
 export function ResultsSearchForm({
-  selectedBoardId,
   selectedBoard,
+  selectedBoardId,
   selectedExamId,
   setSelectedExamId,
   rollNo,
@@ -39,13 +42,11 @@ export function ResultsSearchForm({
   const regInputId = useId();
   const yearSelectId = useId();
 
-  const isTbse = selectedBoardId === "tbse";
-
   return (
-    <div className="mb-8 print:hidden rounded-2xl border border-border bg-card/70 backdrop-blur-sm p-5 sm:p-7 shadow-sm transition-all">
+    <div className="mb-8 print:hidden space-y-6">
       {/* Quick Board Selection Tabs */}
-      <div className="mb-6 pb-4 border-b border-border/80">
-        <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2.5">
+      <div className="pb-3 border-b border-border/60">
+        <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
           বোর্ড / বিশ্ববিদ্যালয় নির্বাচন করুন (Select Board / University)
         </label>
         <div className="flex flex-wrap items-center gap-2">
@@ -59,7 +60,7 @@ export function ResultsSearchForm({
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   active
                     ? "bg-red-600 text-white shadow-xs"
-                    : "bg-muted/70 text-foreground hover:bg-muted hover:text-red-600 border border-border/60"
+                    : "bg-muted/60 text-foreground hover:bg-muted hover:text-red-600 border border-border/60"
                 }`}
               >
                 <Building2 className="h-3.5 w-3.5 shrink-0" />
@@ -151,28 +152,19 @@ export function ResultsSearchForm({
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label htmlFor={regInputId} className="text-xs font-bold text-foreground uppercase tracking-wider">
-                রেজিস্ট্রেশন নম্বর (Reg No)
+                রেজিস্ট্রেশন নম্বর (Registration No - Optional)
               </label>
-              {isTbse ? (
-                <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-800">
-                  TBSE নিয়মে আবশ্যক
-                </span>
-              ) : (
-                <span className="text-[10px] text-muted-foreground font-medium">
-                  ঐচ্ছিক (Optional)
-                </span>
-              )}
             </div>
             <input
               id={regInputId}
               type="text"
               value={regNo}
               onChange={(e) => setRegNo(e.target.value)}
-              placeholder={isTbse ? "যেমন: 1403/2026 (অ্যাডমিট কার্ড অনুযায়ী)" : "ঐচ্ছিক রেজিস্ট্রেশন নম্বর..."}
+              placeholder="Optional registration no..."
               className="w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm font-medium text-foreground focus:border-red-600 focus:ring-2 focus:ring-red-600/20 focus:outline-none transition"
             />
             <p className="mt-1 text-[11px] text-muted-foreground">
-              {isTbse ? "টিবিএসই বোর্ডের মার্কশিটের জন্য" : "প্রয়োজন অনুযায়ী দিতে পারেন"}
+              প্রয়োজন অনুযায়ী দিতে পারেন (ঐচ্ছিক)
             </p>
           </div>
 
@@ -206,7 +198,7 @@ export function ResultsSearchForm({
           </div>
         </div>
 
-        {/* Action Buttons & Notice */}
+        {/* Action Button & Notice */}
         <div className="pt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-border/60">
           <div className="text-xs text-muted-foreground flex items-center gap-1.5">
             <GraduationCap className="h-4 w-4 text-red-600 shrink-0" />
@@ -215,35 +207,23 @@ export function ResultsSearchForm({
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            <a
-              href="https://tripuraresults.nic.in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background hover:bg-muted text-foreground text-xs font-bold px-3.5 py-2.5 transition cursor-pointer"
-            >
-              <span>সরকারি NIC পোর্টাল</span>
-              <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-            </a>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white font-extrabold px-5 py-2.5 text-xs sm:text-sm shadow-sm transition disabled:opacity-50 cursor-pointer"
-            >
-              {isLoading ? (
-                <>
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                  <span>যাচাই হচ্ছে...</span>
-                </>
-              ) : (
-                <>
-                  <Search className="h-4 w-4" />
-                  <span>ফলাফল দেখুন (Check Result)</span>
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white font-extrabold px-6 py-2.5 text-xs sm:text-sm shadow-sm transition disabled:opacity-50 cursor-pointer self-end sm:self-auto"
+          >
+            {isLoading ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                <span>যাচাই হচ্ছে...</span>
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4" />
+                <span>ফলাফল দেখুন (Check Result)</span>
+              </>
+            )}
+          </button>
         </div>
       </form>
     </div>
