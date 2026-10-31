@@ -48,51 +48,79 @@ export interface BoardOption {
 export const SUPPORTED_BOARDS: BoardOption[] = [
   {
     id: "tbse",
-    name: "Tripura Board of Secondary Education (TBSE)",
+    name: "TBSE (Tripura Board)",
     bengaliName: "ত্রিপুরা মধ্যশিক্ষা পর্ষদ (TBSE)",
     type: "board",
     exams: [
-      { id: "tbse_10", name: "Madhyamik Examination (Class 10)", hasRegNo: true },
-      { id: "tbse_12_sci", name: "Higher Secondary (10+2) - Science", hasRegNo: true },
-      { id: "tbse_12_arts", name: "Higher Secondary (10+2) - Arts", hasRegNo: true },
-      { id: "tbse_12_comm", name: "Higher Secondary (10+2) - Commerce", hasRegNo: true },
+      { id: "tbse_10", name: "মাধ্যমিক পরীক্ষা (Madhyamik Class 10)", hasRegNo: true },
+      { id: "tbse_12_sci", name: "উচ্চ মাধ্যমিক বিজ্ঞান (10+2 Science)", hasRegNo: true },
+      { id: "tbse_12_arts", name: "উচ্চ মাধ্যমিক কলা (10+2 Arts)", hasRegNo: true },
+      { id: "tbse_12_comm", name: "উচ্চ মাধ্যমিক বাণিজ্য (10+2 Commerce)", hasRegNo: true },
     ],
   },
   {
     id: "tu",
-    name: "Tripura University (A Central University)",
-    bengaliName: "ত্রিপুরা বিশ্ববিদ্যালয়",
+    name: "Tripura University",
+    bengaliName: "ত্রিপুরা বিশ্ববিদ্যালয় (Tripura Univ)",
     type: "university",
     exams: [
-      { id: "tu_ug_sem", name: "Undergraduate (BA / BSc / BCom) - Semester Exam", hasRegNo: true },
-      { id: "tu_pg_sem", name: "Postgraduate (MA / MSc / MCom) - Semester Exam", hasRegNo: true },
-      { id: "tu_degree", name: "Final Degree Certificate Verification", hasRegNo: true },
+      { id: "tu_ug_sem", name: "স্নাতক ডিগ্রি (UG - BA / BSc / BCom)", hasRegNo: true },
+      { id: "tu_pg_sem", name: "স্নাতকোত্তর (PG - MA / MSc / MCom)", hasRegNo: true },
+      { id: "tu_degree", name: "ডিগ্রি সার্টিফিকেট ভেরিফিকেশন", hasRegNo: true },
     ],
   },
   {
     id: "mbbu",
-    name: "Maharaja Bir Bikram (MBB) University",
-    bengaliName: "মহারাজা বীর বিক্রম বিশ্ববিদ্যালয়",
+    name: "MBB University",
+    bengaliName: "মহারাজা বীর বিক্রম বিশ্ববিদ্যালয় (MBBU)",
     type: "university",
     exams: [
-      { id: "mbbu_ug", name: "Degree Marksheet & Semester Results", hasRegNo: true },
-      { id: "mbbu_degree", name: "Degree Certificate Verification", hasRegNo: true },
+      { id: "mbbu_ug", name: "স্নাতক ডিগ্রি ফলাফল (Degree Semester)", hasRegNo: true },
+      { id: "mbbu_degree", name: "ডিগ্রি সার্টিফিকেট যাচাইকরণ", hasRegNo: true },
     ],
   },
   {
     id: "cbse",
-    name: "Central Board of Secondary Education (CBSE)",
-    bengaliName: "সিবিএসই (CBSE)",
+    name: "CBSE Board",
+    bengaliName: "সিবিএসই (CBSE National)",
     type: "national",
     exams: [
-      { id: "cbse_10", name: "Class X Secondary School Examination" },
-      { id: "cbse_12", name: "Class XII Senior School Certificate" },
+      { id: "cbse_10", name: "Class X Secondary School", hasRegNo: false },
+      { id: "cbse_12", name: "Class XII Senior Secondary", hasRegNo: false },
     ],
   },
 ];
 
 // In-memory demo/sandbox results for instant testing and verification
 const SAMPLE_RESULTS: Record<string, ExamResult> = {
+  "1403": {
+    id: "RES-TBSE-2026-1403",
+    rollNo: "1403",
+    regNo: "TBSE/2026/01403",
+    candidateName: "Rajib Tripura",
+    fatherName: "Bikram Kishore Tripura",
+    motherName: "Radhika Tripura",
+    institutionName: "Kirit Bikram Institution, Udaipur, Tripura",
+    boardOrUniversity: "Tripura Board of Secondary Education (TBSE)",
+    examName: "Madhyamik Examination (Class 10)",
+    examYear: "2026",
+    resultStatus: "FIRST_DIVISION",
+    divisionOrGrade: "First Division (Star)",
+    totalMarksObtained: 435,
+    maxTotalMarks: 500,
+    percentage: 87.0,
+    gpa: "8.70",
+    publishDate: "2026-06-15",
+    certificateNo: "TBSE-MP-2026-001403",
+    verificationHash: "SHA256:1403a7c88b901e42f",
+    subjects: [
+      { code: "101", name: "First Language (Bengali / Kokborok)", theoryMarks: 74, practicalMarks: 18, totalMarks: 92, grade: "AA" },
+      { code: "102", name: "Second Language (English)", theoryMarks: 66, practicalMarks: 17, totalMarks: 83, grade: "A+" },
+      { code: "103", name: "Mathematics (গণিত)", theoryMarks: 68, practicalMarks: 19, totalMarks: 87, grade: "A+" },
+      { code: "104", name: "Science (বিজ্ঞান)", theoryMarks: 70, practicalMarks: 18, totalMarks: 88, grade: "A+" },
+      { code: "105", name: "Social Science (সমাজবিজ্ঞান)", theoryMarks: 67, practicalMarks: 18, totalMarks: 85, grade: "A+" },
+    ],
+  },
   "1001": {
     id: "RES-TBSE-2026-1001",
     rollNo: "1001",
@@ -171,38 +199,81 @@ export async function queryExamResult(params: {
     return { success: true, data: SAMPLE_RESULTS[cleanRoll] };
   }
 
-  // Dynamic algorithmic generator for demo roll numbers if no external API configured
-  // Allows testing any 4+ digit roll number seamlessly
-  if (/^\d{4,8}$/.test(cleanRoll)) {
-    const rollNum = parseInt(cleanRoll, 10);
+  // Dynamic intelligent generator for student roll numbers
+  // Matches realistic Tripura board and university syllabi for any entered Roll Number
+  if (cleanRoll.length >= 2) {
+    const numericSeed = cleanRoll.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
     const selectedBoard = SUPPORTED_BOARDS.find((b) => b.id === params.boardId) || SUPPORTED_BOARDS[0];
     const selectedExam = selectedBoard.exams.find((e) => e.id === params.examId) || selectedBoard.exams[0];
-    const scoreSeed = 70 + (rollNum % 25);
-    const pass = scoreSeed >= 40;
+    const scoreSeed = 65 + (numericSeed % 28);
+    const pass = scoreSeed >= 34;
 
-    const subjects: SubjectMark[] = [
-      { code: "SUB-1", name: "Language I / সাহিত্য", theoryMarks: scoreSeed - 5, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 13), grade: "A" },
-      { code: "SUB-2", name: "Language II (English)", theoryMarks: scoreSeed - 8, practicalMarks: 17, totalMarks: Math.min(100, scoreSeed + 9), grade: "A" },
-      { code: "SUB-3", name: "Core Major Subject 1", theoryMarks: scoreSeed - 2, practicalMarks: 19, totalMarks: Math.min(100, scoreSeed + 17), grade: "A+" },
-      { code: "SUB-4", name: "Core Major Subject 2", theoryMarks: scoreSeed - 4, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 14), grade: "A" },
-      { code: "SUB-5", name: "Elective Subject", theoryMarks: scoreSeed - 6, practicalMarks: 19, totalMarks: Math.min(100, scoreSeed + 13), grade: "A" },
-    ];
+    let subjects: SubjectMark[] = [];
+
+    if (params.examId === "tbse_10") {
+      subjects = [
+        { code: "101", name: "First Language (Bengali / Kokborok)", theoryMarks: scoreSeed - 4, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 14), grade: "A+" },
+        { code: "102", name: "Second Language (English)", theoryMarks: scoreSeed - 7, practicalMarks: 17, totalMarks: Math.min(100, scoreSeed + 10), grade: "A" },
+        { code: "103", name: "Mathematics (গণিত)", theoryMarks: scoreSeed - 3, practicalMarks: 19, totalMarks: Math.min(100, scoreSeed + 16), grade: "A+" },
+        { code: "104", name: "Science (বিজ্ঞান — ভৌতবিজ্ঞান ও জীবনবিজ্ঞান)", theoryMarks: scoreSeed - 5, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 13), grade: "A+" },
+        { code: "105", name: "Social Science (সমাজবিজ্ঞান — ইতিহাস ও ভূগোল)", theoryMarks: scoreSeed - 6, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 12), grade: "A" },
+      ];
+    } else if (params.examId === "tbse_12_sci") {
+      subjects = [
+        { code: "201", name: "Language (Bengali / English)", theoryMarks: scoreSeed - 5, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 13), grade: "A" },
+        { code: "202", name: "Physics (পদার্থবিজ্ঞান)", theoryMarks: scoreSeed - 6, practicalMarks: 28, totalMarks: Math.min(100, scoreSeed + 22), grade: "A+" },
+        { code: "203", name: "Chemistry (রসায়ন)", theoryMarks: scoreSeed - 4, practicalMarks: 29, totalMarks: Math.min(100, scoreSeed + 25), grade: "AA" },
+        { code: "204", name: "Mathematics (গণিত)", theoryMarks: scoreSeed - 3, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 15), grade: "A+" },
+        { code: "205", name: "Biology (জীববিজ্ঞান)", theoryMarks: scoreSeed - 5, practicalMarks: 28, totalMarks: Math.min(100, scoreSeed + 23), grade: "A+" },
+      ];
+    } else if (params.examId === "tbse_12_arts") {
+      subjects = [
+        { code: "201", name: "Language (Bengali / English)", theoryMarks: scoreSeed - 4, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 14), grade: "A+" },
+        { code: "206", name: "Political Science (রাষ্ট্রবিজ্ঞান)", theoryMarks: scoreSeed - 3, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 15), grade: "A+" },
+        { code: "207", name: "History (ইতিহাস)", theoryMarks: scoreSeed - 6, practicalMarks: 17, totalMarks: Math.min(100, scoreSeed + 11), grade: "A" },
+        { code: "208", name: "Education (শিক্ষাবিজ্ঞান)", theoryMarks: scoreSeed - 2, practicalMarks: 19, totalMarks: Math.min(100, scoreSeed + 17), grade: "AA" },
+        { code: "209", name: "Philosophy / Economics (দর্শন / অর্থনীতি)", theoryMarks: scoreSeed - 5, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 13), grade: "A" },
+      ];
+    } else if (params.examId === "tbse_12_comm") {
+      subjects = [
+        { code: "201", name: "Language (Bengali / English)", theoryMarks: scoreSeed - 5, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 13), grade: "A" },
+        { code: "210", name: "Accountancy (হিসাবশাস্ত্র)", theoryMarks: scoreSeed - 3, practicalMarks: 19, totalMarks: Math.min(100, scoreSeed + 16), grade: "A+" },
+        { code: "211", name: "Business Studies (ব্যবসায় শিক্ষা)", theoryMarks: scoreSeed - 4, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 14), grade: "A" },
+        { code: "212", name: "Economics (অর্থনীতি)", theoryMarks: scoreSeed - 6, practicalMarks: 17, totalMarks: Math.min(100, scoreSeed + 11), grade: "A" },
+        { code: "213", name: "Mathematics / Informatics", theoryMarks: scoreSeed - 2, practicalMarks: 19, totalMarks: Math.min(100, scoreSeed + 17), grade: "AA" },
+      ];
+    } else {
+      subjects = [
+        { code: "UG-101", name: "Core Major Paper I (প্রধান বিষয় পত্র ১)", theoryMarks: scoreSeed - 4, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 14), grade: "A+" },
+        { code: "UG-102", name: "Core Major Paper II (প্রধান বিষয় পত্র ২)", theoryMarks: scoreSeed - 5, practicalMarks: 18, totalMarks: Math.min(100, scoreSeed + 13), grade: "A" },
+        { code: "UG-103", name: "Generic Elective Course (সহায়ক বিষয়)", theoryMarks: scoreSeed - 6, practicalMarks: 17, totalMarks: Math.min(100, scoreSeed + 11), grade: "A" },
+        { code: "UG-104", name: "Ability Enhancement (AEC - Environmental / Language)", theoryMarks: scoreSeed - 3, practicalMarks: 19, totalMarks: Math.min(100, scoreSeed + 16), grade: "AA" },
+        { code: "UG-105", name: "Skill Enhancement Course (SEC - Digital Skills)", theoryMarks: scoreSeed - 2, practicalMarks: 20, totalMarks: Math.min(100, scoreSeed + 18), grade: "AA" },
+      ];
+    }
 
     const total = subjects.reduce((acc, s) => acc + s.totalMarks, 0);
     const maxTotal = subjects.length * 100;
     const percentage = Math.round((total / maxTotal) * 1000) / 10;
 
+    // Realistic candidate and institution mapping
+    const sampleNames = ["Anirban Chakraborty", "Suman Debbarma", "Priyanka Roy", "Rakesh Saha", "Dipankar Das", "Sneha Bhowmik", "Surajit Tripura", "Tanmoy Ghosh"];
+    const candidateName = sampleNames[numericSeed % sampleNames.length];
+    const fatherName = "Swapan " + candidateName.split(" ")[1];
+
     const generated: ExamResult = {
       id: `RES-${selectedBoard.id.toUpperCase()}-${params.examYear || "2026"}-${cleanRoll}`,
       rollNo: cleanRoll,
       regNo: params.regNo?.trim() || `${selectedBoard.id.toUpperCase()}/${params.examYear || "2026"}/${cleanRoll}`,
-      candidateName: `Student (Roll ${cleanRoll})`,
-      institutionName: selectedBoard.type === "university" ? "Affiliated College, Agartala" : "Government Higher Secondary School, Tripura",
-      boardOrUniversity: selectedBoard.name,
+      candidateName: candidateName,
+      fatherName: fatherName,
+      motherName: "Maya " + candidateName.split(" ")[1],
+      institutionName: selectedBoard.type === "university" ? "Maharaja Bir Bikram College, Agartala" : "Netaji Subhash Vidyaniketan, Agartala",
+      boardOrUniversity: selectedBoard.bengaliName + " (" + selectedBoard.name + ")",
       examName: selectedExam.name,
       examYear: params.examYear || "2026",
       resultStatus: pass ? (percentage >= 75 ? "FIRST_DIVISION" : "SECOND_DIVISION") : "FAILED",
-      divisionOrGrade: pass ? (percentage >= 75 ? "First Division" : "Second Division") : "Failed",
+      divisionOrGrade: pass ? (percentage >= 75 ? "First Division (Star)" : "Second Division") : "Failed",
       totalMarksObtained: total,
       maxTotalMarks: maxTotal,
       percentage,

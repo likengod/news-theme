@@ -32,7 +32,7 @@ function ResultsPage() {
     SUPPORTED_BOARDS.find((b) => b.id === selectedBoardId) || SUPPORTED_BOARDS[0];
 
   const [selectedExamId, setSelectedExamId] = useState(selectedBoard.exams[0].id);
-  const [rollNo, setRollNo] = useState("1001");
+  const [rollNo, setRollNo] = useState("1403");
   const [regNo, setRegNo] = useState("");
   const [examYear, setExamYear] = useState("2026");
 
@@ -87,17 +87,17 @@ function ResultsPage() {
 
       <main className="flex-1 mx-auto max-w-4xl px-4 py-8 w-full">
         {/* Banner Title */}
-        <div className="text-center max-w-2xl mx-auto space-y-2 mb-8">
-          <div className="inline-flex items-center gap-2 rounded-full bg-red-100 dark:bg-red-950/50 px-3 py-1 text-xs font-bold text-red-700 dark:text-red-400">
+        <div className="text-center max-w-3xl mx-auto space-y-3 mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full bg-red-50 dark:bg-red-950/60 px-3.5 py-1 text-xs font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/60 shadow-xs">
             <GraduationCap className="h-4 w-4" />
-            <span>ত্রিপুরা পরীক্ষার ফলাফল ও সার্টিফিকেট পোর্টাল</span>
+            <span>ত্রিপুরা পরীক্ষা ফলাফল ও সার্টিফিকেট যাচাই গেটওয়ে (Tripura Results Portal)</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Online Marksheet &amp; Degree Certificate Verification
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-foreground">
+            Online Marksheet &amp; Certificate Verification
           </h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            ত্রিপুরা মধ্যশিক্ষা পর্ষদ (TBSE), ত্রিপুরা বিশ্ববিদ্যালয় এবং অন্যান্য পরীক্ষার মার্কশিট ও
-            ডিগ্রি ফলাফল সহজেই চেক ও ডাউনলোড করুন।
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            ত্রিপুরা মধ্যশিক্ষা পর্ষদ (TBSE) মাধ্যমিক, উচ্চ মাধ্যমিক, ত্রিপুরা বিশ্ববিদ্যালয় এবং অন্যান্য শিক্ষা বোর্ডের
+            মার্কশিট ও ডিগ্রি ফলাফল তাৎক্ষণিক যাচাই করুন অথবা সরাসরি সরকারি NIC সার্ভারে চেক করুন।
           </p>
         </div>
 
