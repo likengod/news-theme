@@ -107,7 +107,7 @@ export function getNpmCommand(): string | null {
 
 export function git(cmd: string): string {
   try {
-    return execSync(`git -c safe.directory=* -c http.sslVerify=false ${cmd}`, {
+    return execSync(`git -c "safe.directory=*" -c http.sslVerify=false ${cmd} 2>/dev/null`, {
       cwd: ROOT,
       encoding: "utf-8",
       timeout: 120000,
@@ -222,11 +222,12 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
     }
   } catch {}
 
-  const branch = git("rev-parse --abbrev-ref HEAD");
-  const commitHash = git("rev-parse --short HEAD");
-  const commitFull = git("rev-parse HEAD");
-  const commitMessage = git("log -1 --pretty=%s");
-  const commitDate = git("log -1 --pretty=%ci");
+  const hasInitialHead = !git("rev-parse --verify HEAD").includes("fatal");
+  const branch = hasInitialHead ? git("rev-parse --abbrev-ref HEAD") : "main";
+  const commitHash = hasInitialHead ? git("rev-parse --short HEAD") : (APP_VERSION.replace(/^v/, "") || "latest");
+  const commitFull = hasInitialHead ? git("rev-parse HEAD") : "";
+  const commitMessage = hasInitialHead ? git("log -1 --pretty=%s") : `Release ${APP_VERSION}`;
+  const commitDate = hasInitialHead ? git("log -1 --pretty=%ci") : new Date().toISOString();
   const remote = git("remote get-url origin");
   const dirty = git("status --porcelain");
 
@@ -248,11 +249,12 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
     git('config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"');
     git("fetch --depth=1 origin main:refs/remotes/origin/main");
     const activeBranch = branch.includes("fatal") ? "main" : branch;
-    let behindStr = git(`rev-list --count HEAD..origin/${activeBranch}`);
+    const hasHead = !git("rev-parse --verify HEAD").includes("fatal");
+    let behindStr = hasHead ? git(`rev-list --count HEAD..origin/${activeBranch}`) : "0";
     if (behindStr.includes("fatal")) {
       behindStr = git(`rev-list --count HEAD..FETCH_HEAD`);
     }
-    const aheadStr = git(`rev-list --count origin/${activeBranch}..HEAD`);
+    const aheadStr = hasHead ? git(`rev-list --count origin/${activeBranch}..HEAD`) : "0";
     behind = parseInt(behindStr) || 0;
     ahead = parseInt(aheadStr) || 0;
   }
@@ -465,7 +467,7 @@ export async function executeGitPullCore() {
 
   invalidateGitStatusCache();
   const afterHash = git("rev-parse --short HEAD");
-  const commitMessage = git("log -1 --pretty=%s");
+  const commitMessage = hasInitialHead ? git("log -1 --pretty=%s") : `Release ${APP_VERSION}`;
 
   // Log to deployments table
   try {
@@ -540,9 +542,10 @@ export async function executeGitPullCore() {
 export async function executeBuildProjectCore() {
   await ensureDeployTable();
 
-  const branch = git("rev-parse --abbrev-ref HEAD");
-  const commitHash = git("rev-parse --short HEAD");
-  const commitMessage = git("log -1 --pretty=%s");
+  const hasInitialHead = !git("rev-parse --verify HEAD").includes("fatal");
+  const branch = hasInitialHead ? git("rev-parse --abbrev-ref HEAD") : "main";
+  const commitHash = hasInitialHead ? git("rev-parse --short HEAD") : (APP_VERSION.replace(/^v/, "") || "latest");
+  const commitMessage = hasInitialHead ? git("log -1 --pretty=%s") : `Release ${APP_VERSION}`;
 
   const result = await query(
     `INSERT INTO deployments (commit_hash, commit_message, branch, status, triggered_by)
@@ -598,8 +601,9 @@ export async function executeBuildProjectCore() {
 export async function executePatchDependenciesCore() {
   await ensureDeployTable();
 
-  const branch = git("rev-parse --abbrev-ref HEAD");
-  const commitHash = git("rev-parse --short HEAD");
+  const hasInitialHead = !git("rev-parse --verify HEAD").includes("fatal");
+  const branch = hasInitialHead ? git("rev-parse --abbrev-ref HEAD") : "main";
+  const commitHash = hasInitialHead ? git("rev-parse --short HEAD") : (APP_VERSION.replace(/^v/, "") || "latest");
   const commitMessage = "Security patch: node_modules dependency sync";
 
   const result = await query(
