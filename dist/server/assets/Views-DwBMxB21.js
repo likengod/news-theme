@@ -1,0 +1,14 @@
+import { t as formatViews } from "./news-data-CJoNlB-7.js";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { Eye } from "lucide-react";
+// src/components/site/Views.tsx
+function Views({ count, className = "" }) {
+	const c = typeof count === "number" ? count : Number(count) || 0;
+	return /* @__PURE__ */ jsxs("span", {
+		className: `inline-flex items-center gap-1 text-[11px] text-muted-foreground ${className}`,
+		children: [/* @__PURE__ */ jsx(Eye, { className: "h-3 w-3 shrink-0" }), /* @__PURE__ */ jsxs("span", { children: [formatViews(c), " views"] })]
+	});
+}
+export { Views as t };
+
+//# sourceMappingURL=Views-DwBMxB21.js.map

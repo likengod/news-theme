@@ -232,7 +232,7 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
   const commitFull = hasInitialHead ? git("rev-parse HEAD") : "";
   const commitMessage = hasInitialHead ? git("log -1 --pretty=%s") : `Release ${APP_VERSION}`;
   const commitDate = hasInitialHead ? git("log -1 --pretty=%ci") : new Date().toISOString();
-  const remote = hasGitDir ? git("remote get-url origin") : "";
+  const remote = git("remote get-url origin");
   const dirty = hasGitDir ? git("status --porcelain") : "";
 
   const isGitInstalled = Boolean(
@@ -384,7 +384,9 @@ export async function downloadAndExtractTarball(customPat?: string): Promise<{ s
 export async function executeGitPullCore() {
   await ensureDeployTable();
 
-  const beforeHash = git("rev-parse --short HEAD");
+  const hasGitDir = fs.existsSync(path.join(ROOT, ".git"));
+  const hasInitialHead = hasGitDir && !git("rev-parse --verify HEAD").includes("fatal");
+  const beforeHash = hasInitialHead ? git("rev-parse --short HEAD") : (APP_VERSION.replace(/^v/, "") || "latest");
   const { remoteUrl, pat, branch, authUrl: authRemote } = await getGitConfigFromDb();
 
   // 1. Configure safe directory on Linux & disable SSL verify for hosts with outdated cert stores
@@ -393,7 +395,7 @@ export async function executeGitPullCore() {
   git("config http.sslVerify false");
 
   // 2. Ensure git remote origin exists and has correct fetch refspec
-  const remote = hasGitDir ? git("remote get-url origin") : "";
+  const remote = git("remote get-url origin");
   if (!remote || remote.includes("fatal") || remote.includes("not a git repository")) {
     git("init");
     git("remote remove origin");
@@ -470,7 +472,7 @@ export async function executeGitPullCore() {
   }
 
   invalidateGitStatusCache();
-  const afterHash = git("rev-parse --short HEAD");
+  const afterHash = hasInitialHead ? git("rev-parse --short HEAD") : (APP_VERSION.replace(/^v/, "") || "latest");
   const commitMessage = hasInitialHead ? git("log -1 --pretty=%s") : `Release ${APP_VERSION}`;
 
   // Log to deployments table
