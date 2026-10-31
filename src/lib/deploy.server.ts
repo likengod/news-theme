@@ -106,6 +106,9 @@ export function getNpmCommand(): string | null {
 }
 
 export function git(cmd: string): string {
+  if (!cmd.startsWith("init") && !cmd.startsWith("clone") && !cmd.startsWith("config") && !fs.existsSync(path.join(ROOT, ".git"))) {
+    return "not a git repository";
+  }
   try {
     return execSync(`git -c "safe.directory=*" -c http.sslVerify=false ${cmd} 2>/dev/null`, {
       cwd: ROOT,
@@ -222,14 +225,15 @@ export async function executeGetGitStatusCore(forceRefresh?: boolean) {
     }
   } catch {}
 
-  const hasInitialHead = !git("rev-parse --verify HEAD").includes("fatal");
+  const hasGitDir = fs.existsSync(path.join(ROOT, ".git"));
+  const hasInitialHead = hasGitDir && !git("rev-parse --verify HEAD").includes("fatal");
   const branch = hasInitialHead ? git("rev-parse --abbrev-ref HEAD") : "main";
   const commitHash = hasInitialHead ? git("rev-parse --short HEAD") : (APP_VERSION.replace(/^v/, "") || "latest");
   const commitFull = hasInitialHead ? git("rev-parse HEAD") : "";
   const commitMessage = hasInitialHead ? git("log -1 --pretty=%s") : `Release ${APP_VERSION}`;
   const commitDate = hasInitialHead ? git("log -1 --pretty=%ci") : new Date().toISOString();
-  const remote = git("remote get-url origin");
-  const dirty = git("status --porcelain");
+  const remote = hasGitDir ? git("remote get-url origin") : "";
+  const dirty = hasGitDir ? git("status --porcelain") : "";
 
   const isGitInstalled = Boolean(
     remote &&
@@ -389,7 +393,7 @@ export async function executeGitPullCore() {
   git("config http.sslVerify false");
 
   // 2. Ensure git remote origin exists and has correct fetch refspec
-  const remote = git("remote get-url origin");
+  const remote = hasGitDir ? git("remote get-url origin") : "";
   if (!remote || remote.includes("fatal") || remote.includes("not a git repository")) {
     git("init");
     git("remote remove origin");
@@ -542,7 +546,8 @@ export async function executeGitPullCore() {
 export async function executeBuildProjectCore() {
   await ensureDeployTable();
 
-  const hasInitialHead = !git("rev-parse --verify HEAD").includes("fatal");
+  const hasGitDir = fs.existsSync(path.join(ROOT, ".git"));
+  const hasInitialHead = hasGitDir && !git("rev-parse --verify HEAD").includes("fatal");
   const branch = hasInitialHead ? git("rev-parse --abbrev-ref HEAD") : "main";
   const commitHash = hasInitialHead ? git("rev-parse --short HEAD") : (APP_VERSION.replace(/^v/, "") || "latest");
   const commitMessage = hasInitialHead ? git("log -1 --pretty=%s") : `Release ${APP_VERSION}`;
@@ -601,7 +606,8 @@ export async function executeBuildProjectCore() {
 export async function executePatchDependenciesCore() {
   await ensureDeployTable();
 
-  const hasInitialHead = !git("rev-parse --verify HEAD").includes("fatal");
+  const hasGitDir = fs.existsSync(path.join(ROOT, ".git"));
+  const hasInitialHead = hasGitDir && !git("rev-parse --verify HEAD").includes("fatal");
   const branch = hasInitialHead ? git("rev-parse --abbrev-ref HEAD") : "main";
   const commitHash = hasInitialHead ? git("rev-parse --short HEAD") : (APP_VERSION.replace(/^v/, "") || "latest");
   const commitMessage = "Security patch: node_modules dependency sync";
