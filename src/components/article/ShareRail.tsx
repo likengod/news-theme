@@ -1,5 +1,4 @@
-import { FaFacebookF, FaTwitter, FaLinkedinIn, FaWhatsapp } from "react-icons/fa6";
-import { FaTelegramPlane } from "react-icons/fa";
+import { FaFacebookF, FaTwitter, FaLinkedinIn, FaWhatsapp, FaTelegram as FaTelegramPlane } from "react-icons/fa6";
 import { Bookmark, Link2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";

@@ -491,12 +491,12 @@ export function buildSectionCssVars(config: FontConfiguration): string {
 
   for (const section of FONT_SECTIONS) {
     const fontId = config.sectionMapping[section.key as FontSectionKey];
-    let family = `"Noto Serif Bengali", "SolaimanLipi", "Kalpurush", Georgia, serif`;
+    let family = `"Noto Serif Bengali", "SolaimanLipi", "Kalpurush", "Bengali Serif Fallback", Georgia, serif`;
 
     if (fontId) {
       const font = getFontById(fontId, config.fonts);
       if (font) {
-        family = `"${font.family}", "Noto Serif Bengali", "SolaimanLipi", "Kalpurush", Georgia, serif`;
+        family = `"${font.family}", "Noto Serif Bengali", "SolaimanLipi", "Kalpurush", "Bengali Serif Fallback", Georgia, serif`;
       }
     }
 

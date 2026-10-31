@@ -59,6 +59,7 @@ async function main() {
 
   // Add root files
   const rootFilesToInclude = [
+    '.htaccess',
     'server.js',
     'ecosystem.config.cjs',
     'package.json',

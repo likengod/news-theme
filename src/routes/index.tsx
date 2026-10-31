@@ -105,10 +105,12 @@ function Home() {
       <Header breakingArticles={dbArticles} />
 
       <main className="mx-auto max-w-7xl px-4 py-4 md:py-10 w-full max-w-full min-w-0 overflow-x-clip">
-        {/* On Mobile Devices (< md): Render Watch section directly below Header */}
-        <div className="block md:hidden border-b border-border mb-2 pb-2 overflow-hidden">
-          <Columnists hideTitle initialConfig={reelsConfig} />
-        </div>
+        {/* On Mobile Devices (< md): Render Watch section directly below Header only when active */}
+        {reelsConfig?.enabled && Array.isArray(reelsConfig?.urls) && reelsConfig.urls.length > 0 && (
+          <div className="block md:hidden border-b border-border mb-2 pb-2 overflow-hidden min-h-[180px]">
+            <Columnists hideTitle initialConfig={reelsConfig} />
+          </div>
+        )}
 
         <HeroBoard articles={dbArticles} tags={dbTags} />
 

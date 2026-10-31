@@ -92,6 +92,21 @@ export function generateRootHead(loaderData: any) {
   const links: Array<Record<string, any>> = [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
     { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+    {
+      rel: "preload",
+      href: "/fonts/solaimanlipi-normal.woff2",
+      as: "font",
+      type: "font/woff2",
+      crossOrigin: "anonymous",
+    },
+    {
+      rel: "preload",
+      href: "/fonts/solaimanlipi-bold.woff2",
+      as: "font",
+      type: "font/woff2",
+      crossOrigin: "anonymous",
+    },
+    { rel: "preload", href: appCss, as: "style" },
     { rel: "stylesheet", href: appCss },
     {
       rel: "alternate",
@@ -129,26 +144,17 @@ export function generateRootHead(loaderData: any) {
     },
   ];
 
-  const asyncFonts = s?.asyncFontsEnabled ?? true;
-
   if (googleFontsUrl && typeof googleFontsUrl === "string" && googleFontsUrl.trim()) {
-    if (asyncFonts) {
-      // Non-render-blocking font loading: preload the stylesheet and dynamically append it
-      links.push({
-        rel: "preload",
-        as: "style",
-        href: googleFontsUrl,
-      });
-      scripts.push({
-        children: `(function(){var append=function(){var l=document.createElement('link');l.rel='stylesheet';l.href=${JSON.stringify(googleFontsUrl)};document.head.appendChild(l);};if(typeof requestAnimationFrame==='function'){requestAnimationFrame(append);}else{setTimeout(append,0);}})();`,
-      });
-    } else {
-      // Standard render-blocking stylesheet
-      links.push({
-        rel: "stylesheet",
-        href: googleFontsUrl,
-      });
-    }
+    // High-priority preload and stylesheet for Google Fonts
+    links.push({
+      rel: "preload",
+      as: "style",
+      href: googleFontsUrl,
+    });
+    links.push({
+      rel: "stylesheet",
+      href: googleFontsUrl,
+    });
   }
 
   return {

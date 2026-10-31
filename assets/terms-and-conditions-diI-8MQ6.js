@@ -1,2 +1,0 @@
-import{t as e}from"./vendor-react-CLkCxypd.js";import{s as t}from"./index-BFZv_fTL.js";import{t as n}from"./PolicyLayout-Bve6U_oo.js";var r=e();function i(){let e=t.useLoaderData();return(0,r.jsx)(n,{title:e?.title||``,intro:e?.intro||``,sections:e?.sections&&e.sections.length>0?e.sections.map(e=>({heading:e.heading,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e.body}})})):[{heading:e?.title||``,body:(0,r.jsx)(`div`,{dangerouslySetInnerHTML:{__html:e?.body||``}})}]})}export{i as component};
-//# sourceMappingURL=terms-and-conditions-diI-8MQ6.js.map

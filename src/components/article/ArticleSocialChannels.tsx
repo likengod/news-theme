@@ -1,5 +1,4 @@
-import { FaWhatsapp } from "react-icons/fa6";
-import { FaTelegramPlane } from "react-icons/fa";
+import { FaWhatsapp, FaTelegram as FaTelegramPlane } from "react-icons/fa6";
 import { ExternalLink } from "lucide-react";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 

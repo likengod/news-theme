@@ -8,8 +8,7 @@ import {
   Archive,
   ExternalLink,
 } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa6";
-import { FaTelegramPlane } from "react-icons/fa";
+import { FaWhatsapp, FaTelegram as FaTelegramPlane } from "react-icons/fa6";
 import type { SiteSettings } from "@/lib/site-content";
 
 interface RightSidebarConfigSectionProps {

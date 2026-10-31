@@ -131,9 +131,9 @@ export function Footer() {
               )}
               {showText && (
                 <div
-                  className="text-2xl uppercase leading-none"
+                  className="text-2xl uppercase leading-none min-h-[1.1em] flex items-center"
                   style={{
-                    fontFamily: '"Inter", system-ui, sans-serif',
+                    fontFamily: 'var(--font-headlines, "Noto Serif Bengali", "SolaimanLipi", serif)',
                     fontWeight: 800,
                     letterSpacing: "0.05em",
                   }}

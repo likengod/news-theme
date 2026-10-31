@@ -189,7 +189,7 @@ export function Masthead() {
   return (
     <>
       <header className="border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 py-5 text-center md:py-6 overflow-hidden">
+        <div className="mx-auto max-w-7xl px-4 py-5 text-center md:py-6 overflow-hidden min-h-[82px] sm:min-h-[105px] md:min-h-[125px] flex flex-col justify-center">
           {/* 1. Side-by-Side Brand Lockup (Matches Reference Image) */}
           {isSideBySide && (
             <Link to="/" aria-label={brandAccessibleName} className="inline-block max-w-full">
@@ -227,9 +227,9 @@ export function Masthead() {
                 {/* Brand Title (Two-tone) & Tagline on the Right */}
                 <div className="flex flex-col justify-center items-center text-center min-w-0 w-full">
                   <h1
-                    className="leading-none text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase font-extrabold text-center"
+                    className="leading-none text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase font-extrabold text-center min-h-[1.1em] flex items-center justify-center flex-wrap"
                     style={{
-                      fontFamily: 'var(--font-headlines, "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif)',
+                      fontFamily: 'var(--font-headlines, "Noto Serif Bengali", "SolaimanLipi", serif)',
                       fontWeight: 800,
                       letterSpacing: "0.05em",
                     }}
@@ -249,7 +249,7 @@ export function Masthead() {
                     </span>
                   </h1>
                   <div
-                    className={`mt-1.5 sm:mt-2 font-semibold uppercase text-center w-full text-foreground/80 dark:text-foreground/85 ${
+                    className={`mt-1.5 sm:mt-2 font-semibold uppercase text-center w-full text-foreground/80 dark:text-foreground/85 min-h-[16px] sm:min-h-[18px] ${
                       !s.taglineFontSize ? "text-[9px] sm:text-[11px] md:text-xs" : ""
                     }`}
                     style={
@@ -334,9 +334,9 @@ export function Masthead() {
                 )}
                 {showText ? (
                   <h1
-                    className="leading-none text-3xl sm:text-5xl md:text-6xl lg:text-7xl uppercase"
+                    className="leading-none text-3xl sm:text-5xl md:text-6xl lg:text-7xl uppercase min-h-[1.1em] flex items-center justify-center flex-wrap"
                     style={{
-                      fontFamily: 'var(--font-headlines, "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif)',
+                      fontFamily: 'var(--font-headlines, "Noto Serif Bengali", "SolaimanLipi", serif)',
                       fontWeight: 800,
                       letterSpacing: "0.05em",
                     }}
@@ -361,7 +361,7 @@ export function Masthead() {
               </Link>
               {showText && (
                 <p
-                  className={`mt-2.5 sm:mt-3 block text-center mx-auto font-semibold uppercase text-foreground/80 dark:text-foreground/85 ${
+                  className={`mt-2.5 sm:mt-3 block text-center mx-auto font-semibold uppercase text-foreground/80 dark:text-foreground/85 min-h-[16px] sm:min-h-[18px] ${
                     !s.taglineFontSize ? "text-[10px] sm:text-[11px]" : ""
                   }`}
                   style={

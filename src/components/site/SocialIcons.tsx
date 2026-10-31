@@ -7,8 +7,8 @@ import {
   FaWhatsapp,
   FaYoutube,
   FaLinkedinIn,
+  FaTelegram as FaTelegramPlane,
 } from "react-icons/fa6";
-import { FaTelegramPlane } from "react-icons/fa";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 
 export type SocialKey =
