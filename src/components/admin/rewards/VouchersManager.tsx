@@ -17,6 +17,10 @@ import {
   Check,
   X,
   RotateCcw,
+  Boxes,
+  KeyRound,
+  History,
+  Tag,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -39,6 +43,7 @@ export const ICON_OPTIONS: { name: string; label: string; icon: React.ComponentT
   { name: "Coffee", label: "Cafe / Drinks", icon: Coffee },
   { name: "Zap", label: "Recharge / Utility", icon: Zap },
   { name: "Ticket", label: "Ticket / Event", icon: Ticket },
+  { name: "Tag", label: "Discount Coupon", icon: Tag },
 ];
 
 export const COLOR_OPTIONS = [
@@ -66,6 +71,8 @@ export function VouchersManager() {
   const [vouchers, setVouchers] = useState<Voucher[]>(() => loadVouchers());
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
   const [isNew, setIsNew] = useState(false);
+  const [rawCodesInput, setRawCodesInput] = useState("");
+  const [historyVoucher, setHistoryVoucher] = useState<Voucher | null>(null);
 
   useEffect(() => {
     getVouchersServer()
@@ -88,12 +95,19 @@ export function VouchersManager() {
       featured: false,
       freeUnlock: false,
       enabled: true,
+      stockType: "codes_pool",
+      stock: 50,
+      codesPool: [],
+      claimedCodes: [],
+      description: "",
     });
+    setRawCodesInput("");
     setIsNew(true);
   };
 
   const handleOpenEdit = (v: Voucher) => {
     setEditingVoucher({ ...v });
+    setRawCodesInput((v.codesPool || []).join("\n"));
     setIsNew(false);
   };
 
@@ -121,9 +135,20 @@ export function VouchersManager() {
       return toast.error("Please provide a voucher title");
     }
 
+    // Process promo codes pool if chosen
+    let updatedVoucher = { ...editingVoucher };
+    if (editingVoucher.stockType === "codes_pool") {
+      const parsedCodes = rawCodesInput
+        .split("\n")
+        .map((c) => c.trim())
+        .filter(Boolean);
+      updatedVoucher.codesPool = parsedCodes;
+      updatedVoucher.stock = parsedCodes.length;
+    }
+
     const next = isNew
-      ? [...vouchers, editingVoucher]
-      : vouchers.map((v) => (v.id === editingVoucher.id ? editingVoucher : v));
+      ? [...vouchers, updatedVoucher]
+      : vouchers.map((v) => (v.id === updatedVoucher.id ? updatedVoucher : v));
 
     setVouchers(next);
     saveVouchers(next);
@@ -144,17 +169,13 @@ export function VouchersManager() {
         <div>
           <div className="flex items-center gap-2">
             <Gift className="h-5 w-5 text-rose-500" />
-            <h2 className="text-base font-bold text-slate-900">Available Vouchers & Gift Cards</h2>
+            <h2 className="text-base font-bold text-slate-900">Available Vouchers, Gift Cards & Promo Inventory</h2>
             <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
               {vouchers.length} Total
             </span>
           </div>
           <p className="mt-1 text-xs text-slate-500">
-            Add, edit, or remove reward vouchers that users can claim on the withdrawal page (
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] font-mono text-slate-700">
-              /withdraw-points
-            </code>
-            ).
+            Manage your store coupons, pre-loaded local discount promo codes (50%, 60%, 70%), wallet gift cards, and live withdrawal stock.
           </p>
         </div>
 
@@ -174,7 +195,7 @@ export function VouchersManager() {
             className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-rose-700 transition"
           >
             <Plus className="h-4 w-4" />
-            Add Voucher
+            Add New Voucher / Promo Pool
           </button>
         </div>
       </div>
@@ -185,6 +206,13 @@ export function VouchersManager() {
           const Icon = getVoucherIconComponent(v.icon);
           const colors = getVoucherColorClasses(v.color);
           const isOff = v.enabled === false;
+          const remainingStock =
+            v.stockType === "codes_pool"
+              ? (v.codesPool || []).length
+              : v.stockType === "limited"
+                ? (v.stock ?? 0)
+                : null;
+          const claimedCount = (v.claimedCodes || []).length;
 
           return (
             <div
@@ -230,26 +258,67 @@ export function VouchersManager() {
                     {v.tag || "Reward"}
                   </p>
                   <h3 className="mt-0.5 text-sm font-bold text-slate-900 leading-snug">{v.title}</h3>
-                  <p className="mt-1.5 text-xs text-slate-500">
-                    Cost:{" "}
-                    <span className="font-bold text-slate-900">
-                      {v.cost === 0 ? "Free" : `₹${v.cost} (${v.cost} pts)`}
-                    </span>
-                  </p>
+                  {v.description && (
+                    <p className="mt-1 text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                      {v.description}
+                    </p>
+                  )}
+
+                  <div className="mt-2.5 flex items-center justify-between text-xs">
+                    <p className="text-slate-500">
+                      Cost:{" "}
+                      <span className="font-bold text-slate-900">
+                        {v.cost === 0 ? "Free" : `₹${v.cost} (${v.cost} pts)`}
+                      </span>
+                    </p>
+
+                    {/* Stock badge */}
+                    {v.stockType === "unlimited" ? (
+                      <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">
+                        <Boxes className="h-3 w-3" /> Unlimited
+                      </span>
+                    ) : (
+                      <span
+                        className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-bold ${
+                          (remainingStock ?? 0) > 5
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : (remainingStock ?? 0) > 0
+                              ? "bg-amber-50 text-amber-700 border border-amber-200"
+                              : "bg-red-50 text-red-700 border border-red-200"
+                        }`}
+                      >
+                        <Boxes className="h-3 w-3" />
+                        {(remainingStock ?? 0) > 0 ? `${remainingStock} in stock` : "Out of stock"}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Buttons & Claimed counter */}
               <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-                <button
-                  type="button"
-                  onClick={() => handleToggleEnabled(v.id)}
-                  className={`text-[11px] font-semibold transition ${
-                    isOff ? "text-emerald-600 hover:underline" : "text-slate-400 hover:text-slate-600"
-                  }`}
-                >
-                  {isOff ? "Enable" : "Disable"}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleEnabled(v.id)}
+                    className={`text-[11px] font-semibold transition ${
+                      isOff ? "text-emerald-600 hover:underline" : "text-slate-400 hover:text-slate-600"
+                    }`}
+                  >
+                    {isOff ? "Enable" : "Disable"}
+                  </button>
+
+                  {claimedCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setHistoryVoucher(v)}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800"
+                    >
+                      <History className="h-3 w-3" />
+                      {claimedCount} claimed
+                    </button>
+                  )}
+                </div>
 
                 <div className="flex items-center gap-1.5">
                   <button
@@ -275,15 +344,60 @@ export function VouchersManager() {
         })}
       </div>
 
-      {/* Add / Edit Voucher Modal */}
-      {editingVoucher && (
+      {/* Claimed Codes History Modal */}
+      {historyVoucher && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl overflow-hidden border border-slate-100">
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50/50">
               <div className="flex items-center gap-2">
+                <History className="h-5 w-5 text-indigo-500" />
+                <h3 className="text-base font-bold text-slate-900">
+                  Claimed Redemption Codes: {historyVoucher.title}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHistoryVoucher(null)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-6 max-h-96 overflow-y-auto space-y-2">
+              {(historyVoucher.claimedCodes || []).length === 0 ? (
+                <p className="text-center text-sm text-slate-400 py-6">No codes claimed yet.</p>
+              ) : (
+                historyVoucher.claimedCodes!.map((c, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 bg-slate-50/50 text-xs"
+                  >
+                    <div>
+                      <p className="font-mono font-bold text-slate-900 text-sm">{c.code}</p>
+                      <p className="text-[11px] text-slate-500">
+                        {new Date(c.claimedAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-800">
+                      Redeemed
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add / Edit Voucher Modal */}
+      {editingVoucher && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+          <div className="w-full max-w-xl rounded-2xl bg-white shadow-2xl overflow-hidden border border-slate-100 my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50/50">
+              <div className="flex items-center gap-2">
                 <Gift className="h-5 w-5 text-rose-500" />
                 <h3 className="text-base font-bold text-slate-900">
-                  {isNew ? "Add New Voucher" : "Edit Voucher"}
+                  {isNew ? "Add New Voucher / Promo Pool" : "Edit Voucher & Inventory"}
                 </h3>
               </div>
               <button
@@ -305,7 +419,20 @@ export function VouchersManager() {
                   required
                   value={editingVoucher.title}
                   onChange={(e) => setEditingVoucher({ ...editingVoucher, title: e.target.value })}
-                  placeholder="e.g. Amazon Gift Card ₹500, Phone Recharge ₹299"
+                  placeholder="e.g. Agartala Fashion 50% Off, Flipkart Wallet ₹500, Swiggy ₹200"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                  Description / Store Offer Terms
+                </label>
+                <input
+                  type="text"
+                  value={editingVoucher.description || ""}
+                  onChange={(e) => setEditingVoucher({ ...editingVoucher, description: e.target.value })}
+                  placeholder="e.g. Valid at Agartala store on purchases above ₹1,000. Show code at counter."
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                 />
               </div>
@@ -326,7 +453,7 @@ export function VouchersManager() {
                     placeholder="e.g. 500 (0 for Free)"
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                   />
-                  <span className="text-[10px] text-slate-400">0 means Free for users</span>
+                  <span className="text-[10px] text-slate-400">0 means Free for readers</span>
                 </div>
 
                 <div>
@@ -337,10 +464,104 @@ export function VouchersManager() {
                     type="text"
                     value={editingVoucher.tag}
                     onChange={(e) => setEditingVoucher({ ...editingVoucher, tag: e.target.value })}
-                    placeholder="e.g. Shopping, Mobile, Food, Cash"
+                    placeholder="e.g. Local Store, Shopping, Food, Mobile"
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                   />
                 </div>
+              </div>
+
+              {/* Stock & Delivery Mode */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-900">
+                  Inventory & Stock Delivery Mode
+                </label>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingVoucher({ ...editingVoucher, stockType: "codes_pool" })}
+                    className={`p-2.5 rounded-lg border text-left transition ${
+                      editingVoucher.stockType === "codes_pool"
+                        ? "border-rose-500 bg-white text-rose-700 shadow-xs ring-1 ring-rose-500"
+                        : "border-slate-200 bg-white/70 text-slate-600 hover:bg-white"
+                    }`}
+                  >
+                    <p className="font-bold text-xs flex items-center gap-1.5">
+                      <KeyRound className="h-3.5 w-3.5 text-rose-500" /> Pre-loaded Codes
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-1">Paste 50, 60 unique promo codes</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditingVoucher({ ...editingVoucher, stockType: "limited" })}
+                    className={`p-2.5 rounded-lg border text-left transition ${
+                      editingVoucher.stockType === "limited"
+                        ? "border-rose-500 bg-white text-rose-700 shadow-xs ring-1 ring-rose-500"
+                        : "border-slate-200 bg-white/70 text-slate-600 hover:bg-white"
+                    }`}
+                  >
+                    <p className="font-bold text-xs flex items-center gap-1.5">
+                      <Boxes className="h-3.5 w-3.5 text-indigo-500" /> Limited Stock
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-1">Set numeric limit (e.g. 50 items)</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditingVoucher({ ...editingVoucher, stockType: "unlimited" })}
+                    className={`p-2.5 rounded-lg border text-left transition ${
+                      editingVoucher.stockType === "unlimited"
+                        ? "border-rose-500 bg-white text-rose-700 shadow-xs ring-1 ring-rose-500"
+                        : "border-slate-200 bg-white/70 text-slate-600 hover:bg-white"
+                    }`}
+                  >
+                    <p className="font-bold text-xs flex items-center gap-1.5">
+                      <Crown className="h-3.5 w-3.5 text-amber-500" /> Unlimited
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-1">Always available to readers</p>
+                  </button>
+                </div>
+
+                {editingVoucher.stockType === "codes_pool" && (
+                  <div className="mt-3 space-y-1.5 pt-2 border-t border-slate-200">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-700">
+                        Paste Unique Promo Codes (One code per line):
+                      </label>
+                      <span className="rounded bg-rose-100 px-2 py-0.5 text-[11px] font-bold text-rose-700">
+                        {rawCodesInput.split("\n").filter((c) => c.trim()).length} Codes in Pool
+                      </span>
+                    </div>
+                    <textarea
+                      rows={5}
+                      value={rawCodesInput}
+                      onChange={(e) => setRawCodesInput(e.target.value)}
+                      placeholder={`AGARTALA50-A101\nAGARTALA50-B202\nAGARTALA50-C303\n...`}
+                      className="w-full font-mono text-xs rounded-lg border border-slate-200 p-2.5 bg-white text-slate-800 focus:border-rose-500 focus:outline-none"
+                    />
+                    <p className="text-[11px] text-slate-500">
+                      💡 Each reader who claims this voucher will instantly receive one unused code from this pool. Once all codes are claimed, it automatically shows "Out of Stock" on the withdrawal page.
+                    </p>
+                  </div>
+                )}
+
+                {editingVoucher.stockType === "limited" && (
+                  <div className="mt-3 pt-2 border-t border-slate-200">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Available Stock Quantity:
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={editingVoucher.stock ?? 50}
+                      onChange={(e) =>
+                        setEditingVoucher({ ...editingVoucher, stock: Math.max(0, Number(e.target.value)) })
+                      }
+                      className="w-48 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium bg-white"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Icon Selection */}

@@ -3,6 +3,12 @@ import { query } from "./db.server";
 import { requireAdmin } from "./auth-middleware";
 import { attachAuth } from "./auth-attacher";
 
+export type ClaimedCodeRecord = {
+  code: string;
+  userId?: string;
+  claimedAt: string;
+};
+
 export type Voucher = {
   id: string;
   title: string;
@@ -13,6 +19,11 @@ export type Voucher = {
   featured?: boolean;
   freeUnlock?: boolean;
   enabled?: boolean;
+  description?: string;
+  stockType?: "unlimited" | "limited" | "codes_pool";
+  stock?: number;
+  codesPool?: string[];
+  claimedCodes?: ClaimedCodeRecord[];
 };
 
 export const DEFAULT_VOUCHERS: Voucher[] = [
@@ -26,6 +37,8 @@ export const DEFAULT_VOUCHERS: Voucher[] = [
     featured: true,
     freeUnlock: true,
     enabled: true,
+    stockType: "unlimited",
+    description: "Instant 6 months full access to all exclusive stories, audio articles, and ad-free experience.",
   },
   {
     id: "recharge299",
@@ -35,6 +48,9 @@ export const DEFAULT_VOUCHERS: Voucher[] = [
     icon: "Smartphone",
     color: "sky",
     enabled: true,
+    stockType: "limited",
+    stock: 50,
+    description: "Mobile recharge voucher valid for Jio, Airtel, Vi, and BSNL numbers across India.",
   },
   {
     id: "flipkart500",
@@ -44,6 +60,9 @@ export const DEFAULT_VOUCHERS: Voucher[] = [
     icon: "ShoppingBag",
     color: "indigo",
     enabled: true,
+    stockType: "limited",
+    stock: 30,
+    description: "Digital Flipkart gift card code sent to your wallet. Redeem on Flipkart for any item.",
   },
   {
     id: "amazon500",
@@ -53,6 +72,9 @@ export const DEFAULT_VOUCHERS: Voucher[] = [
     icon: "ShoppingBag",
     color: "orange",
     enabled: true,
+    stockType: "limited",
+    stock: 40,
+    description: "Amazon Pay gift voucher balance redeemable on amazon.in shopping and bill payments.",
   },
   {
     id: "swiggy500",
@@ -62,6 +84,9 @@ export const DEFAULT_VOUCHERS: Voucher[] = [
     icon: "UtensilsCrossed",
     color: "rose",
     enabled: true,
+    stockType: "limited",
+    stock: 25,
+    description: "Swiggy food delivery and Instamart balance voucher code.",
   },
   {
     id: "zomato500",
@@ -71,6 +96,9 @@ export const DEFAULT_VOUCHERS: Voucher[] = [
     icon: "UtensilsCrossed",
     color: "red",
     enabled: true,
+    stockType: "limited",
+    stock: 25,
+    description: "Zomato online food order discount card.",
   },
 ];
 
@@ -104,6 +132,75 @@ export const saveVouchersServer = createServerFn({ method: "POST" })
       [json, json],
     );
     return { success: true };
+  });
+
+export const redeemVoucherServer = createServerFn({ method: "POST" })
+  .validator((d: { voucherId: string; userId?: string }) => d)
+  .handler(async ({ data }) => {
+    const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'vouchers_config'");
+    let vouchers: Voucher[] = DEFAULT_VOUCHERS;
+    if (rows && rows.length > 0 && rows[0].value) {
+      try {
+        vouchers = typeof rows[0].value === "string" ? JSON.parse(rows[0].value) : rows[0].value;
+      } catch {}
+    }
+
+    const vIndex = vouchers.findIndex((item) => item.id === data.voucherId);
+    if (vIndex === -1) {
+      throw new Error("Voucher not found");
+    }
+
+    const v = vouchers[vIndex];
+    if (v.enabled === false) {
+      throw new Error("This voucher is currently inactive");
+    }
+
+    // Check stock if limited
+    if (v.stockType === "limited" && typeof v.stock === "number" && v.stock <= 0) {
+      throw new Error("Sorry, this voucher is out of stock!");
+    }
+
+    let codeToDeliver = "";
+    if (v.stockType === "codes_pool") {
+      v.codesPool = v.codesPool || [];
+      if (v.codesPool.length === 0) {
+        throw new Error("Sorry, all promo codes for this voucher have been claimed!");
+      }
+      codeToDeliver = v.codesPool.shift()!;
+      v.stock = v.codesPool.length;
+      v.claimedCodes = v.claimedCodes || [];
+      v.claimedCodes.push({
+        code: codeToDeliver,
+        userId: data.userId || "anonymous",
+        claimedAt: new Date().toISOString(),
+      });
+    } else if (v.stockType === "limited" && typeof v.stock === "number") {
+      v.stock = Math.max(0, v.stock - 1);
+      codeToDeliver = `NT-${v.id.toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+      v.claimedCodes = v.claimedCodes || [];
+      v.claimedCodes.push({
+        code: codeToDeliver,
+        userId: data.userId || "anonymous",
+        claimedAt: new Date().toISOString(),
+      });
+    } else {
+      codeToDeliver = `NT-${v.id.toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    }
+
+    // Save updated stock state back to MySQL
+    const json = JSON.stringify(vouchers);
+    await query(
+      `INSERT INTO site_settings (setting_key, value) VALUES ('vouchers_config', ?)
+       ON DUPLICATE KEY UPDATE value = ?`,
+      [json, json],
+    );
+
+    return {
+      success: true,
+      code: codeToDeliver,
+      remainingStock: v.stockType === "codes_pool" ? v.codesPool?.length : v.stock,
+      vouchers,
+    };
   });
 
 export function loadVouchers(): Voucher[] {

@@ -15,6 +15,7 @@ import {
   type Voucher,
   loadVouchers,
   getVouchersServer,
+  redeemVoucherServer,
 } from "@/lib/vouchers";
 import {
   getVoucherIconComponent,
@@ -97,35 +98,53 @@ function WithdrawPointsPage() {
     }
     if (state.balance < v.cost) return toast.error("Not enough points");
 
+    const remainingStock =
+      v.stockType === "codes_pool"
+        ? (v.codesPool || []).length
+        : v.stockType === "limited"
+          ? (v.stock ?? 0)
+          : null;
+    if (remainingStock !== null && remainingStock <= 0) {
+      return toast.error("Sorry, this voucher is currently out of stock!");
+    }
+
     try {
-      // Submit withdrawal request to admin inbox
-      await submitWithdrawRequest({
+      // 1. Redeem on server (pops from pre-loaded promo code pool if available)
+      let finalCode = "";
+      try {
+        const res = await redeemVoucherServer({
+          data: {
+            voucherId: v.id,
+            userId: userId || undefined,
+          },
+        });
+        finalCode = res.code;
+        if (res.vouchers) {
+          setVouchers(res.vouchers.filter((item) => item.enabled !== false));
+        }
+      } catch (srvErr: any) {
+        finalCode = `NT-${v.id.toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+      }
+
+      // 2. Submit withdrawal log to admin inbox
+      submitWithdrawRequest({
         data: {
           voucherId: v.id,
           voucherTitle: v.title,
           amount: v.cost,
           paymentMethod: "voucher",
         },
-      });
+      }).catch(() => {});
 
-      const code = `NT-${v.id.toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
       const next: State = {
         balance: state.balance - v.cost,
-        claimed: { ...state.claimed, [v.id]: code },
+        claimed: { ...state.claimed, [v.id]: finalCode },
       };
       save(userId, next);
       setState(next);
-      toast.success(`Withdrawal request submitted! Code: ${code}`);
+      toast.success(`Voucher claimed! Your Code: ${finalCode}`);
     } catch (err: any) {
-      // If server function fails (e.g. not logged in via MySQL session), still allow client-side claim
-      const code = `NT-${v.id.toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-      const next: State = {
-        balance: state.balance - v.cost,
-        claimed: { ...state.claimed, [v.id]: code },
-      };
-      save(userId, next);
-      setState(next);
-      toast.success(`Voucher claimed! Code: ${code}`);
+      toast.error(err?.message || "Failed to claim voucher");
     }
   };
 
@@ -209,14 +228,23 @@ function WithdrawPointsPage() {
               const Icon = getVoucherIconComponent(v.icon);
               const colors = getVoucherColorClasses(v.color);
               const claimedCode = state.claimed[v.id];
-              const locked = !canWithdraw || (!v.freeUnlock && !hasClaimedFree);
+              const remainingStock =
+                v.stockType === "codes_pool"
+                  ? (v.codesPool || []).length
+                  : v.stockType === "limited"
+                    ? (v.stock ?? 0)
+                    : null;
+              const isOutOfStock = remainingStock !== null && remainingStock <= 0;
+              const locked = !canWithdraw || (!v.freeUnlock && !hasClaimedFree) || isOutOfStock;
               return (
                 <div
                   key={v.id}
                   className={`relative overflow-hidden rounded-xl border p-5 transition ${
-                    v.featured
-                      ? "border-amber-300 bg-amber-50/60 dark:bg-amber-950/20"
-                      : "border-border bg-card"
+                    isOutOfStock
+                      ? "border-dashed border-border bg-muted/30 opacity-75"
+                      : v.featured
+                        ? "border-amber-300 bg-amber-50/60 dark:bg-amber-950/20"
+                        : "border-border bg-card"
                   }`}
                 >
                   {v.featured && (
@@ -233,12 +261,34 @@ function WithdrawPointsPage() {
                     {v.tag}
                   </p>
                   <p className="mt-1 text-sm font-bold leading-snug">{v.title}</p>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Cost:{" "}
-                    <span className="font-semibold text-foreground">
-                      {v.cost === 0 ? "Free" : `₹${v.cost}`}
-                    </span>
-                  </p>
+                  {v.description && (
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                      {v.description}
+                    </p>
+                  )}
+
+                  <div className="mt-2.5 flex items-center justify-between text-xs">
+                    <p className="text-muted-foreground">
+                      Cost:{" "}
+                      <span className="font-semibold text-foreground">
+                        {v.cost === 0 ? "Free" : `₹${v.cost}`}
+                      </span>
+                    </p>
+
+                    {remainingStock !== null && (
+                      <span
+                        className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                          remainingStock > 5
+                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                            : remainingStock > 0
+                              ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                              : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
+                        }`}
+                      >
+                        {remainingStock > 0 ? `${remainingStock} in stock` : "Out of Stock"}
+                      </span>
+                    )}
+                  </div>
 
                   {claimedCode ? (
                     <div className="mt-3 rounded-md border border-emerald-300 bg-emerald-50 p-2 text-xs dark:bg-emerald-950/40">
@@ -263,7 +313,7 @@ function WithdrawPointsPage() {
                       }`}
                     >
                       {locked ? <Lock className="h-3 w-3" /> : <Check className="h-3 w-3" />}
-                      {locked ? "Locked" : v.featured ? "Claim Free" : "Redeem"}
+                      {isOutOfStock ? "Out of Stock" : locked ? "Locked" : v.featured ? "Claim Free" : "Redeem"}
                     </button>
                   )}
                 </div>
