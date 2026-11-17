@@ -254,6 +254,12 @@ export function TopBar() {
                   </p>
                 </SheetHeader>
                 <form
+                  action="/search"
+                  method="GET"
+                  toolname="searchNews"
+                  tooldescription="Search news articles, topics, and breaking stories on Today Tripura"
+                  data-toolname="searchNews"
+                  data-tooldescription="Search news articles, topics, and breaking stories on Today Tripura"
                   onSubmit={(e) => {
                     e.preventDefault();
                     const fd = new FormData(e.currentTarget);

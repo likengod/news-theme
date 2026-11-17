@@ -36,7 +36,7 @@ export function Footer() {
       ? [{ label: t("footer.verifiedJournalist"), to: "/verified-journalist" }]
       : []),
     { label: t("footer.privacyPolicy"), to: "/privacy-policy" },
-    { label: t("footer.terms"), to: "/terms-and-conditions" },
+    { label: t("footer.terms"), to: "/terms" },
     { label: t("footer.cookiePolicy"), to: "/cookie-policy" },
     { label: t("footer.refundPolicy"), to: "/refund-policy" },
     { label: t("footer.disclaimer"), to: "/disclaimer" },
@@ -296,10 +296,22 @@ export function Footer() {
         </div>
 
         {/* Bottom Card Container */}
-        <div className="mt-6 flex flex-col items-center justify-between gap-2.5 rounded-xl border border-border/80 bg-muted/40 px-3.5 sm:px-5 py-3 text-xs text-muted-foreground shadow-xs md:flex-row">
-          <p className="font-medium text-center md:text-left whitespace-nowrap text-[10.5px] min-[360px]:text-[11.5px] sm:text-xs tracking-tight sm:tracking-normal overflow-hidden text-ellipsis max-w-full">
-            {copyright}
-          </p>
+        <div className="mt-6 flex flex-col items-center justify-between gap-3 rounded-xl border border-border/80 bg-muted/40 px-3.5 sm:px-5 py-3 text-xs text-muted-foreground shadow-xs md:flex-row">
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-left">
+            <p className="font-medium whitespace-nowrap text-[10.5px] min-[360px]:text-[11.5px] sm:text-xs tracking-tight sm:tracking-normal overflow-hidden text-ellipsis max-w-full">
+              {copyright}
+            </p>
+            <nav aria-label="Legal & Contact Links" className="flex items-center gap-2 text-[11px] text-muted-foreground">
+              <span className="hidden sm:inline text-border">•</span>
+              <Link to="/about" className="hover:text-foreground hover:underline">About</Link>
+              <span className="text-border">•</span>
+              <Link to="/contact" className="hover:text-foreground hover:underline">Contact</Link>
+              <span className="text-border">•</span>
+              <Link to="/terms" className="hover:text-foreground hover:underline">Terms</Link>
+              <span className="text-border">•</span>
+              <Link to="/privacy-policy" className="hover:text-foreground hover:underline">Privacy</Link>
+            </nav>
+          </div>
 
           <p className="flex flex-wrap items-center justify-center gap-1.5 md:justify-end text-[11px] sm:text-xs">
             <span>{t("footer.builtBy")}:</span>

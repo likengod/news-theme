@@ -80,6 +80,18 @@ function applySecurityHeaders(res) {
   }
 }
 
+function applyLinkHeaders(res) {
+  const cssLink = getMainCssLink();
+  const linkParts = [
+    '</llms.txt>; rel="alternate"; type="text/markdown"',
+    '</llms-full.txt>; rel="alternate"; type="text/markdown"',
+  ];
+  if (cssLink) {
+    linkParts.push(cssLink);
+  }
+  res.setHeader("Link", linkParts.join(", "));
+}
+
 function sendStaticFile(filePath, req, res, host, parsedPath) {
   const ext = path.extname(filePath).toLowerCase();
 
@@ -232,29 +244,106 @@ const server = createServer(async (req, res) => {
       return;
     }
 
-    // Instant fast-path for /robots.txt (prevents crawler/Lighthouse timeout)
-    if (parsedPath === "/robots.txt") {
-      const robotsDirs = [
-        path.join(__dirname, "public/robots.txt"),
-        path.join(__dirname, "dist/client/robots.txt"),
+    // Fast-path MCP Server Card (SEP-1649)
+    if (parsedPath === "/.well-known/mcp/server-card.json" || parsedPath === "/.well-known/mcp") {
+      const cardDirs = [
+        path.join(__dirname, "public/.well-known/mcp/server-card.json"),
+        path.join(__dirname, "dist/client/.well-known/mcp/server-card.json"),
       ];
-      for (const rPath of robotsDirs) {
-        if (fs.existsSync(rPath)) {
-          const content = fs.readFileSync(rPath, "utf-8");
+      for (const cPath of cardDirs) {
+        if (fs.existsSync(cPath)) {
           applySecurityHeaders(res);
           res.statusCode = 200;
-          res.setHeader("Content-Type", "text/plain; charset=utf-8");
-          res.setHeader("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
-          res.end(content);
+          res.setHeader("Content-Type", "application/json; charset=utf-8");
+          res.setHeader("Cache-Control", "public, max-age=86400");
+          fs.createReadStream(cPath).pipe(res);
           return;
         }
       }
-      // Fallback valid robots.txt if physical file is missing
+      applySecurityHeaders(res);
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.end(JSON.stringify({
+        "$schema": "https://modelcontextprotocol.io/schemas/server-card/v1.json",
+        "name": "Today Tripura MCP Server",
+        "version": "1.2.34",
+        "description": "Official MCP server for Today Tripura",
+        "endpoint": "/api/mcp",
+        "capabilities": { "tools": { "listChanged": false } }
+      }));
+      return;
+    }
+
+    // Fast-path MCP endpoint
+    if (parsedPath === "/api/mcp") {
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({
+        status: "ok",
+        server: "Today Tripura MCP Server",
+        version: "1.2.34",
+        tools: ["search_news", "get_latest_news"]
+      }));
+      return;
+    }
+
+    // Instant fast-path for /robots.txt (prevents crawler/Lighthouse timeout & includes dynamic Sitemap & Content-Signal)
+    if (parsedPath === "/robots.txt") {
+      const hostClean = host.split(":")[0];
       applySecurityHeaders(res);
       res.statusCode = 200;
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      res.setHeader("Cache-Control", "public, max-age=86400");
-      res.end("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\nDisallow: /api/*\nDisallow: /setup\n\n# Explicitly Block AI Scrapers (Default Protection Mode)\nUser-agent: GPTBot\nDisallow: /\nUser-agent: OAI-SearchBot\nDisallow: /\nUser-agent: ClaudeBot\nDisallow: /\nUser-agent: PerplexityBot\nDisallow: /\nUser-agent: Google-Extended\nDisallow: /\nUser-agent: CCBot\nDisallow: /\n\nSitemap: https://" + host + "/sitemap.xml\nSitemap: https://" + host + "/news-sitemap.xml\n");
+      res.setHeader("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
+      res.end(
+        "User-agent: *\n" +
+        "Allow: /\n" +
+        "Disallow: /admin\n" +
+        "Disallow: /admin/*\n" +
+        "Disallow: /api/*\n" +
+        "Disallow: /setup\n\n" +
+        "Content-Signal: search=yes, ai-train=no\n\n" +
+        "# Explicitly Block AI Scrapers\n" +
+        "User-agent: GPTBot\nDisallow: /\n" +
+        "User-agent: OAI-SearchBot\nDisallow: /\n" +
+        "User-agent: ChatGPT-User\nDisallow: /\n" +
+        "User-agent: ClaudeBot\nDisallow: /\n" +
+        "User-agent: PerplexityBot\nDisallow: /\n" +
+        "User-agent: Google-Extended\nDisallow: /\n" +
+        "User-agent: Applebot-Extended\nDisallow: /\n" +
+        "User-agent: CCBot\nDisallow: /\n" +
+        "User-agent: Bytespider\nDisallow: /\n" +
+        "User-agent: Diffbot\nDisallow: /\n\n" +
+        "Sitemap: https://" + hostClean + "/sitemap.xml\n" +
+        "Sitemap: https://" + hostClean + "/news-sitemap.xml\n"
+      );
+      return;
+    }
+
+    // Fast-path Markdown Content Negotiation for AI Agents (Accept: text/markdown)
+    const acceptHeader = (req.headers["accept"] || "").toLowerCase();
+    if (acceptHeader.includes("text/markdown") && req.method === "GET") {
+      const llmsCandidates = [
+        path.join(__dirname, "public/llms.txt"),
+        path.join(__dirname, "dist/client/llms.txt"),
+      ];
+      let mdContent = "";
+      for (const p of llmsCandidates) {
+        if (fs.existsSync(p)) {
+          mdContent = fs.readFileSync(p, "utf-8");
+          break;
+        }
+      }
+      if (!mdContent) {
+        mdContent = "# Today Tripura\n\nPremier digital news publication covering Tripura and Northeast India.\n\n- [Home](https://" + host + "/)\n- [About](https://" + host + "/about)\n- [Contact](https://" + host + "/contact)\n- [Terms](https://" + host + "/terms)\n- [Privacy](https://" + host + "/privacy-policy)\n";
+      }
+      mdContent = mdContent.replace(/https:\/\/todaytripura\.com/g, "https://" + host);
+      applySecurityHeaders(res);
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "text/markdown; charset=utf-8");
+      res.setHeader("Vary", "Accept");
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      res.end(mdContent);
       return;
     }
 
@@ -419,8 +508,7 @@ const server = createServer(async (req, res) => {
           res.setHeader("Pragma", "no-cache");
         }
         applySecurityHeaders(res);
-        const cssLink = getMainCssLink();
-        if (cssLink) res.setHeader("Link", cssLink);
+        applyLinkHeaders(res);
 
         const acceptEncoding = (req.headers["accept-encoding"] || "").toLowerCase();
         if (acceptEncoding.includes("gzip") && cached.gzipped) {
@@ -466,8 +554,7 @@ const server = createServer(async (req, res) => {
     console.log(`[SSR] Content-Type: "${contentType}", Status: ${response.status}, isPublicGet: ${isPublicGet}`);
     const isHtml = contentType.includes("text/html");
     if (isHtml) {
-      const cssLink = getMainCssLink();
-      if (cssLink) res.setHeader("Link", cssLink);
+      applyLinkHeaders(res);
       if (isPublicGet) {
         // Semi-Dynamic: allow Edge CDN (Cloudflare) to micro-cache for 60s, stale-while-revalidate for 120s
         res.setHeader("Cache-Control", "public, max-age=10, s-maxage=60, stale-while-revalidate=120");
@@ -493,8 +580,28 @@ const server = createServer(async (req, res) => {
       bodyBuffer = Buffer.concat(chunks);
     }
 
+    const bodyStr = bodyBuffer.toString("utf-8");
+    const is404 =
+      response.status === 404 ||
+      (isHtml &&
+        (bodyStr.includes("Error 404") ||
+          bodyStr.includes("Category not found") ||
+          bodyStr.includes("Article not found") ||
+          bodyStr.includes("This story is missing from our archive") ||
+          bodyStr.includes("The page you requested could not be located") ||
+          bodyStr.includes("The category you requested could not be located") ||
+          bodyStr.includes("The article you requested could not be located") ||
+          bodyStr.includes("404 - Page Not Found") ||
+          bodyStr.includes("notFoundComponent")));
+
+    if (is404) {
+      res.statusCode = 404;
+    } else {
+      res.statusCode = response.status;
+    }
+
     // Save to SSR Micro-Cache if eligible (15-second TTL for traffic shielding + instant content freshness)
-    if (isPublicGet && response.status === 200 && isHtml && bodyBuffer.length > 0) {
+    if (isPublicGet && res.statusCode === 200 && isHtml && bodyBuffer.length > 0) {
       try {
         const gzipped = zlib.gzipSync(bodyBuffer, { level: 6 });
         SSR_CACHE.set(cacheKey, {

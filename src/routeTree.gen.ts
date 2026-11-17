@@ -41,6 +41,7 @@ import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SubmitNewsRouteImport } from './routes/submit-news'
 import { Route as SubscriptionRouteImport } from './routes/subscription'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
 import { Route as VerifiedJournalistRouteImport } from './routes/verified-journalist'
 import { Route as VerifyImageRouteImport } from './routes/verify-image'
@@ -230,6 +231,11 @@ const SubscriptionRoute = SubscriptionRouteImport.update({
   path: '/subscription',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
   id: '/terms-and-conditions',
   path: '/terms-and-conditions',
@@ -404,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit-news': typeof SubmitNewsRoute
   '/subscription': typeof SubscriptionRoute
+  '/terms': typeof TermsRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/verified-journalist': typeof VerifiedJournalistRoute
   '/verify-image': typeof VerifyImageRoute
@@ -465,6 +472,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit-news': typeof SubmitNewsRoute
   '/subscription': typeof SubscriptionRoute
+  '/terms': typeof TermsRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/verified-journalist': typeof VerifiedJournalistRoute
   '/verify-image': typeof VerifyImageRoute
@@ -528,6 +536,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit-news': typeof SubmitNewsRoute
   '/subscription': typeof SubscriptionRoute
+  '/terms': typeof TermsRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/verified-journalist': typeof VerifiedJournalistRoute
   '/verify-image': typeof VerifyImageRoute
@@ -592,6 +601,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/submit-news'
     | '/subscription'
+    | '/terms'
     | '/terms-and-conditions'
     | '/verified-journalist'
     | '/verify-image'
@@ -653,6 +663,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/submit-news'
     | '/subscription'
+    | '/terms'
     | '/terms-and-conditions'
     | '/verified-journalist'
     | '/verify-image'
@@ -715,6 +726,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/submit-news'
     | '/subscription'
+    | '/terms'
     | '/terms-and-conditions'
     | '/verified-journalist'
     | '/verify-image'
@@ -778,6 +790,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SubmitNewsRoute: typeof SubmitNewsRoute
   SubscriptionRoute: typeof SubscriptionRoute
+  TermsRoute: typeof TermsRoute
   TermsAndConditionsRoute: typeof TermsAndConditionsRoute
   VerifiedJournalistRoute: typeof VerifiedJournalistRoute
   VerifyImageRoute: typeof VerifyImageRoute
@@ -1015,6 +1028,13 @@ declare module '@tanstack/react-router' {
       path: '/subscription'
       fullPath: '/subscription'
       preLoaderRoute: typeof SubscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms-and-conditions': {
@@ -1291,6 +1311,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SubmitNewsRoute: SubmitNewsRoute,
   SubscriptionRoute: SubscriptionRoute,
+  TermsRoute: TermsRoute,
   TermsAndConditionsRoute: TermsAndConditionsRoute,
   VerifiedJournalistRoute: VerifiedJournalistRoute,
   VerifyImageRoute: VerifyImageRoute,

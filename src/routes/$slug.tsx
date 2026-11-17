@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, notFound } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { loadSettings, isEnterpriseLicense, isEnterprisePlusLicense } from "@/lib/site-content";
@@ -27,13 +27,16 @@ export const Route = createFileRoute("/$slug")({
       if (data?.category?.redirectUrl) {
         throw redirect({ href: data.category.redirectUrl });
       }
+      if (!data || !data.category) {
+        throw notFound();
+      }
       return data;
     } catch (err: any) {
-      if (err && typeof err === "object" && ("to" in err || "href" in err || "status" in err || (err as any).isRedirect)) {
+      if (err && typeof err === "object" && ("to" in err || "href" in err || "status" in err || (err as any).isRedirect || (err as any).isNotFound)) {
         throw err;
       }
       console.warn("[Category loader] Error:", err);
-      return null;
+      throw notFound();
     }
   },
   head: ({ params }) => {

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schemas/server-card/v1.json",
+  "name": "Today Tripura MCP Server",
+  "version": "1.2.34",
+  "description": "Official Model Context Protocol (MCP) server for Today Tripura. Exposes tools for searching news, fetching top stories, exploring categories, and inspecting site feeds.",
+  "endpoint": "/api/mcp",
+  "transport": "sse",
+  "capabilities": {
+    "tools": {
+      "listChanged": false
+    },
+    "resources": {
+      "subscribe": false,
+      "listChanged": false
+    },
+    "prompts": {
+      "listChanged": false
+    }
+  },
+  "tools": [
+    {
+      "name": "search_news",
+      "description": "Search latest news, articles, and breaking reports from Today Tripura",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search keywords or topic"
+          }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "get_latest_news",
+      "description": "Retrieve current top news headlines and breaking alerts",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Number of headlines to return (default 10)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_categories",
+      "description": "List all active news categories and topic sections",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ]
+}

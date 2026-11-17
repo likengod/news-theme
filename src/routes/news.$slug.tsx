@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useState, useEffect } from "react";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -79,6 +79,9 @@ export const Route = createFileRoute("/news/$slug")({
         getSiteSettingsServer().catch(() => null),
         getHomepageArticles({ data: 8 }).catch(() => []),
       ]);
+      if (!data) {
+        throw notFound();
+      }
       const siteName = settings?.siteName || "Today Tripura";
       return {
         data,
@@ -86,9 +89,12 @@ export const Route = createFileRoute("/news/$slug")({
         siteName,
         trendingArticles: Array.isArray(trendingArticles) ? trendingArticles : [],
       };
-    } catch (err) {
+    } catch (err: any) {
+      if (err && (err.isNotFound || err.status === 404 || ("status" in err && err.status === 404))) {
+        throw err;
+      }
       console.warn("[Article loader] Error:", err);
-      return { data: null, origin: "", siteName: "Today Tripura", trendingArticles: [] };
+      throw notFound();
     }
   },
   head: ({ loaderData }) => {
