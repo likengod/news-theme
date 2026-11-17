@@ -32,6 +32,7 @@ import { RewardRulesTable } from "@/components/admin/rewards/RewardRulesTable";
 import { JournalistRanksEditor } from "@/components/admin/rewards/JournalistRanksEditor";
 import { SocialLinksEditor } from "@/components/admin/rewards/SocialLinksEditor";
 import { PendingClaimsTable } from "@/components/admin/rewards/PendingClaimsTable";
+import { VouchersManager } from "@/components/admin/rewards/VouchersManager";
 import { Modal, SaveBar } from "@/components/admin/rewards/RewardEditorModal";
 
 export const Route = createFileRoute("/admin/rewards")({
@@ -183,6 +184,9 @@ function RewardsPage() {
 
       {/* Social Links Editor */}
       <SocialLinksEditor />
+
+      {/* Available Vouchers & Gift Cards Manager */}
+      <VouchersManager />
 
       {/* Role Tabs for Reward Rules */}
       <section className="space-y-4">

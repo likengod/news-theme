@@ -4,10 +4,6 @@ import { toast } from "sonner";
 import {
   Wallet,
   Gift,
-  Crown,
-  Smartphone,
-  ShoppingBag,
-  UtensilsCrossed,
   Check,
   Lock,
 } from "lucide-react";
@@ -15,6 +11,15 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { authClient as supabase } from "@/lib/auth-client";
 import { submitWithdrawRequest } from "@/lib/inbox.functions";
+import {
+  type Voucher,
+  loadVouchers,
+  getVouchersServer,
+} from "@/lib/vouchers";
+import {
+  getVoucherIconComponent,
+  getVoucherColorClasses,
+} from "@/components/admin/rewards/VouchersManager";
 
 export const Route = createFileRoute("/withdraw-points")({
   head: () => ({
@@ -30,70 +35,6 @@ export const Route = createFileRoute("/withdraw-points")({
 });
 
 const MIN_WITHDRAW = 256;
-
-type Voucher = {
-  id: string;
-  title: string;
-  cost: number;
-  tag: string;
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
-  featured?: boolean;
-  freeUnlock?: boolean; // free for first withdrawal
-};
-
-const VOUCHERS: Voucher[] = [
-  {
-    id: "premium6m",
-    title: "Premium User — 6 Months Free",
-    cost: 0,
-    tag: "Featured",
-    icon: Crown,
-    color: "amber",
-    featured: true,
-    freeUnlock: true,
-  },
-  {
-    id: "recharge299",
-    title: "Phone Recharge ₹299",
-    cost: 299,
-    tag: "Mobile",
-    icon: Smartphone,
-    color: "sky",
-  },
-  {
-    id: "flipkart500",
-    title: "Flipkart Wallet ₹500",
-    cost: 500,
-    tag: "Shopping",
-    icon: ShoppingBag,
-    color: "indigo",
-  },
-  {
-    id: "amazon500",
-    title: "Amazon Gift Card ₹500",
-    cost: 500,
-    tag: "Shopping",
-    icon: ShoppingBag,
-    color: "orange",
-  },
-  {
-    id: "swiggy500",
-    title: "Swiggy Gift Card ₹500",
-    cost: 500,
-    tag: "Food",
-    icon: UtensilsCrossed,
-    color: "rose",
-  },
-  {
-    id: "zomato500",
-    title: "Zomato Gift Card ₹500",
-    cost: 500,
-    tag: "Food",
-    icon: UtensilsCrossed,
-    color: "red",
-  },
-];
 
 const STORAGE = "nt:withdraw:v1";
 
@@ -115,6 +56,19 @@ function save(userId: string, s: State) {
 function WithdrawPointsPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [state, setState] = useState<State>({ balance: 0, claimed: {} });
+  const [vouchers, setVouchers] = useState<Voucher[]>(() =>
+    loadVouchers().filter((v) => v.enabled !== false),
+  );
+
+  useEffect(() => {
+    getVouchersServer()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setVouchers(data.filter((v) => v.enabled !== false));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -131,7 +85,7 @@ function WithdrawPointsPage() {
 
   const canWithdraw = state.balance >= MIN_WITHDRAW;
   const hasClaimedFree = Object.keys(state.claimed).some(
-    (id) => VOUCHERS.find((v) => v.id === id)?.freeUnlock,
+    (id) => vouchers.find((v) => v.id === id)?.freeUnlock,
   );
 
   const claim = async (v: Voucher) => {
@@ -251,8 +205,9 @@ function WithdrawPointsPage() {
             <Gift className="h-5 w-5 text-rose-500" /> Available Vouchers
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {VOUCHERS.map((v) => {
-              const Icon = v.icon;
+            {vouchers.map((v) => {
+              const Icon = getVoucherIconComponent(v.icon);
+              const colors = getVoucherColorClasses(v.color);
               const claimedCode = state.claimed[v.id];
               const locked = !canWithdraw || (!v.freeUnlock && !hasClaimedFree);
               return (
@@ -270,7 +225,7 @@ function WithdrawPointsPage() {
                     </span>
                   )}
                   <span
-                    className={`mb-3 grid h-10 w-10 place-items-center rounded-full bg-${v.color}-100 text-${v.color}-700`}
+                    className={`mb-3 grid h-10 w-10 place-items-center rounded-full ${colors.bg} ${colors.text}`}
                   >
                     <Icon className="h-5 w-5" />
                   </span>

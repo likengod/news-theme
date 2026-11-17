@@ -1,0 +1,2 @@
+import{i as e}from"./rolldown-runtime-COiEfhsA.js";import{Pr as t}from"./vendor-icons-CGbc1cSg.js";var n=e(t(),1);function r(e){let t=n.useRef({value:e,previous:e});return n.useMemo(()=>(t.current.value!==e&&(t.current.previous=t.current.value,t.current.value=e),t.current.previous),[e])}export{r as t};
+//# sourceMappingURL=dist-C8rglo2r.js.map
