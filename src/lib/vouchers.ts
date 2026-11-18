@@ -326,14 +326,36 @@ export const verifyPromoCodeServer = createServerFn({ method: "POST" })
       }
     }
 
-    // 2. Check if code exists in unredeemed codesPool
+    // 2. Check if code exists in unredeemed codesPool (e.g. admin batch-generated or pre-loaded inventory)
     for (const v of vouchers) {
       if (v.codesPool && Array.isArray(v.codesPool)) {
         const inPool = v.codesPool.some((c) => c.trim().toUpperCase() === searchCode);
         if (inPool) {
+          const voucherInfo = {
+            id: v.id,
+            title: v.title,
+            tag: v.tag,
+            color: v.color,
+            icon: v.icon,
+            description: v.description,
+          };
+          const days = typeof v.expiryDays === "number" && v.expiryDays > 0 ? v.expiryDays : 30;
+          const dummyRecord: ClaimedCodeRecord = {
+            code: searchCode,
+            userId: "direct_store_customer",
+            userName: "Direct Customer",
+            claimedAt: new Date().toISOString(),
+            voucherId: v.id,
+            voucherTitle: v.title,
+            discountDescription: v.description || "",
+            status: "active",
+            expiresAt: new Date(Date.now() + days * 86400000).toISOString(),
+          };
           return {
-            status: "unclaimed_by_user",
-            message: "This promo code exists in inventory but has not been issued to any customer yet.",
+            status: "valid",
+            record: dummyRecord,
+            voucher: voucherInfo,
+            message: `Promo code verified! Ready to apply store discount for "${v.title}".`,
           };
         }
       }
@@ -341,7 +363,7 @@ export const verifyPromoCodeServer = createServerFn({ method: "POST" })
 
     return {
       status: "invalid",
-      message: "Invalid promo code. No record was found for this code.",
+      message: `Invalid promo code "${rawCode}". No matching record or active inventory found.`,
     };
   });
 
@@ -370,6 +392,7 @@ export const claimPromoCodeInStoreServer = createServerFn({ method: "POST" })
     let targetVoucher: Voucher | null = null;
     let targetRecord: ClaimedCodeRecord | null = null;
 
+    // Check claimedCodes first
     for (const v of vouchers) {
       if (v.claimedCodes && Array.isArray(v.claimedCodes)) {
         const found = v.claimedCodes.find(
@@ -383,8 +406,44 @@ export const claimPromoCodeInStoreServer = createServerFn({ method: "POST" })
       }
     }
 
+    // If not in claimedCodes, check if it is in an unredeemed codesPool!
+    if (!targetRecord) {
+      for (const v of vouchers) {
+        if (v.codesPool && Array.isArray(v.codesPool)) {
+          const poolIndex = v.codesPool.findIndex((c) => c.trim().toUpperCase() === searchCode);
+          if (poolIndex !== -1) {
+            // Remove code from pool permanently
+            v.codesPool.splice(poolIndex, 1);
+            v.stock = v.codesPool.length;
+
+            const nowIso = new Date().toISOString();
+            const days = typeof v.expiryDays === "number" && v.expiryDays > 0 ? v.expiryDays : 30;
+            const newRecord: ClaimedCodeRecord = {
+              code: searchCode,
+              userId: "direct_store_customer",
+              userName: "Direct Customer",
+              claimedAt: nowIso,
+              voucherId: v.id,
+              voucherTitle: v.title,
+              discountDescription: v.description || "",
+              status: "used_in_store",
+              usedAt: nowIso,
+              usedByStoreName: (data.storeName || "").trim() || "Local Partner Store",
+              expiresAt: new Date(Date.now() + days * 86400000).toISOString(),
+            };
+
+            v.claimedCodes = v.claimedCodes || [];
+            v.claimedCodes.push(newRecord);
+            targetVoucher = v;
+            targetRecord = newRecord;
+            break;
+          }
+        }
+      }
+    }
+
     if (!targetRecord || !targetVoucher) {
-      throw new Error("Promo code not found or was never issued to a customer.");
+      throw new Error(`Promo code "${rawCode}" not found in inventory.`);
     }
 
     if (targetRecord.status === "used_in_store") {
