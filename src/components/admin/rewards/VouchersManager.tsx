@@ -25,6 +25,8 @@ import {
   Copy,
   Download,
   Search,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -102,6 +104,12 @@ export function VouchersManager() {
   const [genPrefix, setGenPrefix] = useState<string>("STORE50-");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTag, setFilterTag] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 12;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterTag]);
 
   const allTags = useMemo(() => {
     const set = new Set<string>();
@@ -127,6 +135,12 @@ export function VouchersManager() {
       return true;
     });
   }, [vouchers, searchQuery, filterTag]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredVouchers.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, filteredVouchers.length);
+  const paginatedVouchers = filteredVouchers.slice(startIndex, endIndex);
 
   useEffect(() => {
     getVouchersServer()
@@ -364,7 +378,7 @@ export function VouchersManager() {
         </div>
       ) : (
         <div className="mt-3.5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredVouchers.map((v) => {
+          {paginatedVouchers.map((v) => {
             const Icon = getVoucherIconComponent(v.icon);
             const colors = getVoucherColorClasses(v.color);
             const isOff = v.enabled === false;
@@ -507,6 +521,55 @@ export function VouchersManager() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination Controls (Appears when > 12 Gift Cards) */}
+      {totalPages > 1 && (
+        <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 pt-3.5">
+          <p className="text-xs text-slate-500 order-2 sm:order-1">
+            Showing <span className="font-bold text-slate-800">{startIndex + 1}–{endIndex}</span> of{" "}
+            <span className="font-bold text-slate-800">{filteredVouchers.length}</span> gift cards (12 per page)
+          </p>
+
+          <div className="flex items-center gap-1.5 order-1 sm:order-2">
+            <button
+              type="button"
+              disabled={safePage <= 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" /> Prev
+            </button>
+
+            {Array.from({ length: totalPages }).map((_, idx) => {
+              const pageNum = idx + 1;
+              const isActive = pageNum === safePage;
+              return (
+                <button
+                  key={pageNum}
+                  type="button"
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`min-w-[28px] h-7 rounded-lg text-xs font-bold transition shadow-2xs ${
+                    isActive
+                      ? "bg-rose-600 text-white"
+                      : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              disabled={safePage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs"
+            >
+              Next <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
       )}
 
