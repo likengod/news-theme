@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Gift,
   Plus,
@@ -24,6 +24,7 @@ import {
   Wand2,
   Copy,
   Download,
+  Search,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -99,6 +100,33 @@ export function VouchersManager() {
   const [historyVoucher, setHistoryVoucher] = useState<Voucher | null>(null);
   const [genCount, setGenCount] = useState<number>(50);
   const [genPrefix, setGenPrefix] = useState<string>("STORE50-");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterTag, setFilterTag] = useState<string>("all");
+
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    vouchers.forEach((v) => {
+      if (v.tag?.trim()) set.add(v.tag.trim());
+    });
+    return Array.from(set);
+  }, [vouchers]);
+
+  const filteredVouchers = useMemo(() => {
+    return vouchers.filter((v) => {
+      if (filterTag !== "all" && v.tag?.toLowerCase() !== filterTag.toLowerCase()) {
+        return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchesTitle = v.title.toLowerCase().includes(q);
+        const matchesTag = v.tag?.toLowerCase().includes(q);
+        const matchesDesc = v.description?.toLowerCase().includes(q);
+        const matchesCodes = v.codesPool?.some((c) => c.toLowerCase().includes(q));
+        return matchesTitle || matchesTag || matchesDesc || matchesCodes;
+      }
+      return true;
+    });
+  }, [vouchers, searchQuery, filterTag]);
 
   useEffect(() => {
     getVouchersServer()
@@ -266,86 +294,158 @@ export function VouchersManager() {
         </div>
       </div>
 
-      {/* Vouchers Grid Display */}
-      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {vouchers.map((v) => {
-          const Icon = getVoucherIconComponent(v.icon);
-          const colors = getVoucherColorClasses(v.color);
-          const isOff = v.enabled === false;
-          const remainingStock =
-            v.stockType === "codes_pool"
-              ? (v.codesPool || []).length
-              : v.stockType === "limited"
-                ? (v.stock ?? 0)
-                : null;
-          const claimedCount = (v.claimedCodes || []).length;
+      {/* Search and Category Filters */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2.5 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search cards by name, tag, code..."
+            className="w-full rounded-lg border border-slate-200 bg-white pl-8 pr-7 py-1.5 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:border-rose-500 focus:outline-none"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
 
-          return (
-            <div
-              key={v.id}
-              className={`relative flex flex-col justify-between rounded-xl border p-4 transition-all ${
-                isOff
-                  ? "border-dashed border-slate-200 bg-slate-50/70 opacity-60"
-                  : v.featured
-                    ? "border-amber-300 bg-amber-50/40 shadow-xs"
-                    : "border-slate-200 bg-white hover:border-slate-300 shadow-xs"
+        {/* Category Tag Filter Pills */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setFilterTag("all")}
+            className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition ${
+              filterTag === "all"
+                ? "bg-slate-900 text-white shadow-2xs"
+                : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"
+            }`}
+          >
+            All ({vouchers.length})
+          </button>
+          {allTags.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => setFilterTag(tag)}
+              className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition ${
+                filterTag === tag
+                  ? "bg-rose-600 text-white shadow-2xs"
+                  : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"
               }`}
             >
-              <div>
-                {/* Header tags & badges */}
-                <div className="flex items-start justify-between gap-2">
-                  <span
-                    className={`grid h-10 w-10 place-items-center rounded-xl ${colors.bg} ${colors.text} shadow-xs shrink-0`}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </span>
+              {tag}
+            </button>
+          ))}
+        </div>
+      </div>
 
-                  <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                    {v.featured && (
-                      <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase text-white shadow-xs">
-                        Featured
+      {/* Vouchers Grid Display (Small & Compact Size) */}
+      {filteredVouchers.length === 0 ? (
+        <div className="py-10 text-center space-y-2">
+          <Search className="h-6 w-6 text-slate-300 mx-auto" />
+          <p className="text-xs font-bold text-slate-700">No voucher cards match "{searchQuery}"</p>
+          <button
+            type="button"
+            onClick={() => {
+              setSearchQuery("");
+              setFilterTag("all");
+            }}
+            className="text-xs font-semibold text-rose-600 hover:underline"
+          >
+            Clear Search & Filters
+          </button>
+        </div>
+      ) : (
+        <div className="mt-3.5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredVouchers.map((v) => {
+            const Icon = getVoucherIconComponent(v.icon);
+            const colors = getVoucherColorClasses(v.color);
+            const isOff = v.enabled === false;
+            const remainingStock =
+              v.stockType === "codes_pool"
+                ? (v.codesPool || []).length
+                : v.stockType === "limited"
+                  ? (v.stock ?? 0)
+                  : null;
+            const claimedCount = (v.claimedCodes || []).length;
+
+            return (
+              <div
+                key={v.id}
+                className={`relative flex flex-col justify-between rounded-xl border p-3 transition-all ${
+                  isOff
+                    ? "border-dashed border-slate-200 bg-slate-50/70 opacity-60"
+                    : v.featured
+                      ? "border-amber-300 bg-amber-50/30 shadow-2xs"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-2xs"
+                }`}
+              >
+                <div>
+                  {/* Compact Header: Small Icon, Tag, Title, Badges */}
+                  <div className="flex items-start justify-between gap-1.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className={`grid h-7 w-7 place-items-center rounded-lg ${colors.bg} ${colors.text} shadow-2xs shrink-0`}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
                       </span>
-                    )}
-                    {v.freeUnlock && (
-                      <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white shadow-xs">
-                        Free Unlock
-                      </span>
-                    )}
-                    {isOff && (
-                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-600">
-                        Disabled
-                      </span>
-                    )}
+                      <div className="min-w-0">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block truncate">
+                          {v.tag || "Reward"}
+                        </span>
+                        <h3 className="text-xs font-bold text-slate-900 truncate leading-snug" title={v.title}>
+                          {v.title}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      {v.featured && (
+                        <span className="rounded bg-amber-500 px-1.5 py-0.2 text-[9px] font-bold uppercase text-white shadow-2xs">
+                          Featured
+                        </span>
+                      )}
+                      {v.freeUnlock && (
+                        <span className="rounded bg-emerald-600 px-1.5 py-0.2 text-[9px] font-bold uppercase text-white shadow-2xs">
+                          Free
+                        </span>
+                      )}
+                      {isOff && (
+                        <span className="rounded bg-slate-200 px-1.5 py-0.2 text-[9px] font-bold uppercase text-slate-600">
+                          Off
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div className="mt-3">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    {v.tag || "Reward"}
-                  </p>
-                  <h3 className="mt-0.5 text-sm font-bold text-slate-900 leading-snug">{v.title}</h3>
+                  {/* Compact 1-line Description */}
                   {v.description && (
-                    <p className="mt-1 text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                    <p className="mt-1 text-[11px] text-slate-500 line-clamp-1 leading-normal" title={v.description}>
                       {v.description}
                     </p>
                   )}
 
-                  <div className="mt-2.5 flex items-center justify-between text-xs">
-                    <p className="text-slate-500">
-                      Cost:{" "}
-                      <span className="font-bold text-slate-900">
-                        {v.cost === 0 ? "Free" : `₹${v.cost} (${v.cost} pts)`}
-                      </span>
-                    </p>
+                  {/* Compact Cost & Stock Row */}
+                  <div className="mt-2 flex items-center justify-between text-xs pt-1.5 border-t border-slate-100">
+                    <span className="font-bold text-slate-900 text-[11px]">
+                      {v.cost === 0 ? "Free" : `₹${v.cost}`}
+                    </span>
 
                     {/* Stock badge */}
                     {v.stockType === "unlimited" ? (
-                      <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">
-                        <Boxes className="h-3 w-3" /> Unlimited
+                      <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+                        <Boxes className="h-2.5 w-2.5" /> Unlimited
                       </span>
                     ) : (
                       <span
-                        className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-bold ${
+                        className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold ${
                           (remainingStock ?? 0) > 5
                             ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                             : (remainingStock ?? 0) > 0
@@ -353,62 +453,62 @@ export function VouchersManager() {
                               : "bg-red-50 text-red-700 border border-red-200"
                         }`}
                       >
-                        <Boxes className="h-3 w-3" />
+                        <Boxes className="h-2.5 w-2.5" />
                         {(remainingStock ?? 0) > 0 ? `${remainingStock} in stock` : "Out of stock"}
                       </span>
                     )}
                   </div>
                 </div>
-              </div>
 
-              {/* Action Buttons & Claimed counter */}
-              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleToggleEnabled(v.id)}
-                    className={`text-[11px] font-semibold transition ${
-                      isOff ? "text-emerald-600 hover:underline" : "text-slate-400 hover:text-slate-600"
-                    }`}
-                  >
-                    {isOff ? "Enable" : "Disable"}
-                  </button>
-
-                  {claimedCount > 0 && (
+                {/* Compact Actions Footer */}
+                <div className="mt-2.5 flex items-center justify-between border-t border-slate-100 pt-2 text-[11px]">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setHistoryVoucher(v)}
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800"
+                      onClick={() => handleToggleEnabled(v.id)}
+                      className={`text-[10px] font-semibold transition ${
+                        isOff ? "text-emerald-600 hover:underline" : "text-slate-400 hover:text-slate-600"
+                      }`}
                     >
-                      <History className="h-3 w-3" />
-                      {claimedCount} claimed
+                      {isOff ? "Enable" : "Disable"}
                     </button>
-                  )}
-                </div>
 
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleOpenEdit(v)}
-                    className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                  >
-                    <Pencil className="h-3.5 w-3.5 text-slate-500" />
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(v.id)}
-                    className="rounded-md border border-slate-200 bg-white p-1 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition"
-                    title="Delete Voucher"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                    {claimedCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setHistoryVoucher(v)}
+                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-600 hover:text-indigo-800"
+                      >
+                        <History className="h-3 w-3" />
+                        {claimedCount}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(v)}
+                      className="inline-flex items-center gap-1 rounded border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+                    >
+                      <Pencil className="h-3 w-3 text-slate-400" />
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(v.id)}
+                      className="rounded border border-slate-200 bg-white p-1 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition shadow-2xs"
+                      title="Delete Voucher"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Claimed Codes History Modal */}
       {historyVoucher && (
