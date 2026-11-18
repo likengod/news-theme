@@ -21,6 +21,9 @@ import {
   KeyRound,
   History,
   Tag,
+  Wand2,
+  Copy,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -67,12 +70,35 @@ export function getVoucherColorClasses(colorName: string) {
   return match || COLOR_OPTIONS[0];
 }
 
+export function generateUniquePromoCodes(count: number, prefix: string): string[] {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // readable chars without 0/O, 1/I
+  const codes = new Set<string>();
+  let cleanPrefix = (prefix || "PROMO-").trim().toUpperCase();
+  if (!cleanPrefix.endsWith("-") && !cleanPrefix.endsWith("_")) {
+    cleanPrefix += "-";
+  }
+
+  let attempts = 0;
+  while (codes.size < count && attempts < count * 30) {
+    attempts++;
+    let rand = "";
+    for (let i = 0; i < 5; i++) {
+      rand += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    codes.add(`${cleanPrefix}${rand}`);
+  }
+
+  return Array.from(codes);
+}
+
 export function VouchersManager() {
   const [vouchers, setVouchers] = useState<Voucher[]>(() => loadVouchers());
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [rawCodesInput, setRawCodesInput] = useState("");
   const [historyVoucher, setHistoryVoucher] = useState<Voucher | null>(null);
+  const [genCount, setGenCount] = useState<number>(50);
+  const [genPrefix, setGenPrefix] = useState<string>("STORE50-");
 
   useEffect(() => {
     getVouchersServer()
@@ -127,6 +153,45 @@ export function VouchersManager() {
       saveVouchers(DEFAULT_VOUCHERS);
       toast.success("Vouchers reset to defaults");
     }
+  };
+
+  const handleGenerateCodes = (append: boolean = false) => {
+    const count = Math.min(1000, Math.max(1, Number(genCount) || 50));
+    const newCodes = generateUniquePromoCodes(count, genPrefix);
+    if (append) {
+      const existing = rawCodesInput
+        .split("\n")
+        .map((c) => c.trim())
+        .filter(Boolean);
+      const combined = Array.from(new Set([...existing, ...newCodes]));
+      setRawCodesInput(combined.join("\n"));
+      toast.success(`Appended ${newCodes.length} codes! Total: ${combined.length} in pool`);
+    } else {
+      setRawCodesInput(newCodes.join("\n"));
+      toast.success(`Generated ${newCodes.length} unique promo codes!`);
+    }
+  };
+
+  const handleCopyAllCodes = () => {
+    const codes = rawCodesInput.trim();
+    if (!codes) return toast.error("No codes to copy");
+    navigator.clipboard.writeText(codes);
+    toast.success("All promo codes copied to clipboard!");
+  };
+
+  const handleDownloadCodesTxt = () => {
+    const codes = rawCodesInput.trim();
+    if (!codes) return toast.error("No codes to download");
+    const blob = new Blob([codes], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${editingVoucher?.title || "promo-codes"}-list.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Promo codes list downloaded as .txt!");
   };
 
   const handleSaveModal = (e: React.FormEvent) => {
@@ -580,24 +645,145 @@ export function VouchersManager() {
                 </div>
 
                 {editingVoucher.stockType === "codes_pool" && (
-                  <div className="mt-3 space-y-1.5 pt-2 border-t border-slate-200">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-slate-700">
-                        Paste Unique Promo Codes (One code per line):
-                      </label>
-                      <span className="rounded bg-rose-100 px-2 py-0.5 text-[11px] font-bold text-rose-700">
-                        {rawCodesInput.split("\n").filter((c) => c.trim()).length} Codes in Pool
-                      </span>
+                  <div className="mt-3 space-y-3 pt-3 border-t border-slate-200">
+                    {/* Auto-Generator Tool Box */}
+                    <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-3.5 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 text-xs font-bold text-rose-950">
+                          <Wand2 className="h-4 w-4 text-rose-600" />
+                          Auto-Generate Unique Promo Codes
+                        </span>
+                        <span className="text-[10px] text-rose-700 font-semibold bg-white/90 border border-rose-200 px-2 py-0.5 rounded-full shadow-2xs">
+                          Bulk Code Generator
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
+                        {/* Quantity */}
+                        <div className="sm:col-span-4">
+                          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                            How Many Codes?
+                          </label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              min={1}
+                              max={1000}
+                              value={genCount}
+                              onChange={(e) => setGenCount(Math.max(1, Number(e.target.value) || 1))}
+                              placeholder="50"
+                              className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:border-rose-500 focus:outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setGenCount(50)}
+                              className="rounded bg-white px-1.5 py-1.5 text-[10px] font-bold text-slate-600 border border-slate-200 hover:bg-slate-100"
+                              title="Set 50"
+                            >
+                              50
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setGenCount(100)}
+                              className="rounded bg-white px-1.5 py-1.5 text-[10px] font-bold text-slate-600 border border-slate-200 hover:bg-slate-100"
+                              title="Set 100"
+                            >
+                              100
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Prefix */}
+                        <div className="sm:col-span-4">
+                          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                            Code Prefix
+                          </label>
+                          <input
+                            type="text"
+                            value={genPrefix}
+                            onChange={(e) => setGenPrefix(e.target.value.toUpperCase())}
+                            placeholder="STORE50-"
+                            className="w-full font-mono uppercase rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:border-rose-500 focus:outline-none"
+                          />
+                        </div>
+
+                        {/* Generator Buttons */}
+                        <div className="sm:col-span-4 flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleGenerateCodes(false)}
+                            className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-rose-700 active:scale-[0.99] transition"
+                            title="Generate unique codes (Replaces current list)"
+                          >
+                            <Sparkles className="h-3.5 w-3.5" />
+                            Generate {genCount}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleGenerateCodes(true)}
+                            className="inline-flex items-center justify-center rounded-lg border border-rose-300 bg-white px-2.5 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-50 transition"
+                            title="Append to existing list"
+                          >
+                            +Add
+                          </button>
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Textarea Header with Counter & Export Actions */}
+                    <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
+                      <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                        <span>Active Promo Codes Pool:</span>
+                        <span className="rounded bg-rose-100 px-2 py-0.5 text-[11px] font-bold text-rose-700">
+                          {rawCodesInput.split("\n").filter((c) => c.trim()).length} Codes in Pool
+                        </span>
+                      </label>
+
+                      <div className="flex items-center gap-1">
+                        {rawCodesInput.trim() && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleCopyAllCodes}
+                              className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+                              title="Copy all codes to clipboard"
+                            >
+                              <Copy className="h-3 w-3 text-slate-500" /> Copy All
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleDownloadCodesTxt}
+                              className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+                              title="Download .txt list to share with store owner"
+                            >
+                              <Download className="h-3 w-3 text-slate-500" /> Download List (.txt)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm("Clear all promo codes in this box?")) {
+                                  setRawCodesInput("");
+                                }
+                              }}
+                              className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-white px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-50 transition shadow-2xs"
+                              title="Clear all"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
                     <textarea
-                      rows={5}
+                      rows={6}
                       value={rawCodesInput}
                       onChange={(e) => setRawCodesInput(e.target.value)}
                       placeholder={`AGARTALA50-A101\nAGARTALA50-B202\nAGARTALA50-C303\n...`}
                       className="w-full font-mono text-xs rounded-lg border border-slate-200 p-2.5 bg-white text-slate-800 focus:border-rose-500 focus:outline-none"
                     />
                     <p className="text-[11px] text-slate-500">
-                      💡 Each reader who claims this voucher will instantly receive one unused code from this pool. Once all codes are claimed, it automatically shows "Out of Stock" on the withdrawal page.
+                      💡 Each reader who claims this voucher will instantly receive one unused code from this pool. Once all codes are claimed, it automatically shows "Out of Stock" on the withdrawal page. You can click <strong>Download List (.txt)</strong> to send the authorized codes to your partner store owner!
                     </p>
                   </div>
                 )}
