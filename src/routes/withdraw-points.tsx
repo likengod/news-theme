@@ -6,6 +6,8 @@ import {
   Gift,
   Check,
   Lock,
+  QrCode,
+  Sparkles,
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -21,6 +23,7 @@ import {
   getVoucherIconComponent,
   getVoucherColorClasses,
 } from "@/components/admin/rewards/VouchersManager";
+import { VoucherQrModal } from "@/components/vouchers/VoucherQrModal";
 
 export const Route = createFileRoute("/withdraw-points")({
   head: () => ({
@@ -56,10 +59,18 @@ function save(userId: string, s: State) {
 
 function WithdrawPointsPage() {
   const [userId, setUserId] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | undefined>(undefined);
+  const [userEmail, setUserEmail] = useState<string | undefined>(undefined);
   const [state, setState] = useState<State>({ balance: 0, claimed: {} });
   const [vouchers, setVouchers] = useState<Voucher[]>(() =>
     loadVouchers().filter((v) => v.enabled !== false),
   );
+
+  const [selectedQrVoucher, setSelectedQrVoucher] = useState<{
+    voucher: Voucher;
+    code: string;
+    expiresAt?: string;
+  } | null>(null);
 
   useEffect(() => {
     getVouchersServer()
@@ -76,6 +87,8 @@ function WithdrawPointsPage() {
       const u = data.session?.user;
       if (!u) return;
       setUserId(u.id);
+      setUserEmail(u.email);
+      setUserName(u.user_metadata?.display_name || u.user_metadata?.full_name);
       const s = load(u.id);
       const wallet = Number(localStorage.getItem(`nt:points:${u.id}`) ?? "0");
       s.balance = wallet;
@@ -111,19 +124,25 @@ function WithdrawPointsPage() {
     try {
       // 1. Redeem on server (pops from pre-loaded promo code pool if available)
       let finalCode = "";
+      let expiresAt: string | undefined;
       try {
         const res = await redeemVoucherServer({
           data: {
             voucherId: v.id,
             userId: userId || undefined,
+            userName,
+            userEmail,
           },
         });
         finalCode = res.code;
+        expiresAt = res.expiresAt;
         if (res.vouchers) {
           setVouchers(res.vouchers.filter((item) => item.enabled !== false));
         }
       } catch (srvErr: any) {
         finalCode = `NT-${v.id.toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+        const days = typeof v.expiryDays === "number" && v.expiryDays > 0 ? v.expiryDays : 30;
+        expiresAt = new Date(Date.now() + days * 86400000).toISOString();
       }
 
       // 2. Submit withdrawal log to admin inbox
@@ -143,6 +162,13 @@ function WithdrawPointsPage() {
       save(userId, next);
       setState(next);
       toast.success(`Voucher claimed! Your Code: ${finalCode}`);
+
+      // Open QR Pass Modal automatically
+      setSelectedQrVoucher({
+        voucher: v,
+        code: finalCode,
+        expiresAt,
+      });
     } catch (err: any) {
       toast.error(err?.message || "Failed to claim voucher");
     }
@@ -220,9 +246,18 @@ function WithdrawPointsPage() {
 
         {/* Vouchers */}
         <section>
-          <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
-            <Gift className="h-5 w-5 text-rose-500" /> Available Vouchers
-          </h2>
+          <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
+            <h2 className="flex items-center gap-2 text-xl font-bold">
+              <Gift className="h-5 w-5 text-rose-500" /> Available Vouchers
+            </h2>
+            <Link
+              to="/profile"
+              className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-1"
+            >
+              <Sparkles className="h-3.5 w-3.5" /> View My Claimed Passes in Profile
+            </Link>
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {vouchers.map((v) => {
               const Icon = getVoucherIconComponent(v.icon);
@@ -239,7 +274,7 @@ function WithdrawPointsPage() {
               return (
                 <div
                   key={v.id}
-                  className={`relative overflow-hidden rounded-xl border p-5 transition ${
+                  className={`relative overflow-hidden rounded-xl border p-5 transition flex flex-col justify-between ${
                     isOutOfStock
                       ? "border-dashed border-border bg-muted/30 opacity-75"
                       : v.featured
@@ -247,64 +282,81 @@ function WithdrawPointsPage() {
                         : "border-border bg-card"
                   }`}
                 >
-                  {v.featured && (
-                    <span className="absolute right-3 top-3 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
-                      Free
-                    </span>
-                  )}
-                  <span
-                    className={`mb-3 grid h-10 w-10 place-items-center rounded-full ${colors.bg} ${colors.text}`}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    {v.tag}
-                  </p>
-                  <p className="mt-1 text-sm font-bold leading-snug">{v.title}</p>
-                  {v.description && (
-                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                      {v.description}
-                    </p>
-                  )}
-
-                  <div className="mt-2.5 flex items-center justify-between text-xs">
-                    <p className="text-muted-foreground">
-                      Cost:{" "}
-                      <span className="font-semibold text-foreground">
-                        {v.cost === 0 ? "Free" : `₹${v.cost}`}
-                      </span>
-                    </p>
-
-                    {remainingStock !== null && (
-                      <span
-                        className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                          remainingStock > 5
-                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                            : remainingStock > 0
-                              ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                              : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
-                        }`}
-                      >
-                        {remainingStock > 0 ? `${remainingStock} in stock` : "Out of Stock"}
+                  <div>
+                    {v.featured && (
+                      <span className="absolute right-3 top-3 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+                        Free
                       </span>
                     )}
+                    <span
+                      className={`mb-3 grid h-10 w-10 place-items-center rounded-full ${colors.bg} ${colors.text}`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      {v.tag}
+                    </p>
+                    <p className="mt-1 text-sm font-bold leading-snug">{v.title}</p>
+                    {v.description && (
+                      <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                        {v.description}
+                      </p>
+                    )}
+
+                    <div className="mt-2.5 flex items-center justify-between text-xs">
+                      <p className="text-muted-foreground">
+                        Cost:{" "}
+                        <span className="font-semibold text-foreground">
+                          {v.cost === 0 ? "Free" : `₹${v.cost}`}
+                        </span>
+                      </p>
+
+                      {remainingStock !== null && (
+                        <span
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                            remainingStock > 5
+                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                              : remainingStock > 0
+                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
+                          }`}
+                        >
+                          {remainingStock > 0 ? `${remainingStock} in stock` : "Out of Stock"}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {claimedCode ? (
-                    <div className="mt-3 rounded-md border border-emerald-300 bg-emerald-50 p-2 text-xs dark:bg-emerald-950/40">
-                      <p className="font-semibold text-emerald-700 dark:text-emerald-300">
-                        Claimed
-                      </p>
-                      <p className="font-mono text-[11px] text-emerald-900 dark:text-emerald-200">
-                        {claimedCode}
-                      </p>
+                    <div className="mt-4 rounded-xl border border-emerald-300 bg-emerald-50 p-2.5 text-xs dark:bg-emerald-950/40 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-emerald-800 dark:text-emerald-300">
+                          Claimed Code:
+                        </span>
+                        <span className="font-mono font-bold text-emerald-950 dark:text-emerald-100 text-sm">
+                          {claimedCode}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectedQrVoucher({
+                            voucher: v,
+                            code: claimedCode,
+                          })
+                        }
+                        className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-emerald-700 py-2 px-3 text-xs font-bold text-white hover:bg-emerald-800 transition shadow-xs"
+                      >
+                        <QrCode className="h-3.5 w-3.5" />
+                        View QR Pass / Download
+                      </button>
                     </div>
                   ) : (
                     <button
                       type="button"
                       onClick={() => claim(v)}
                       disabled={locked}
-                      className={`mt-3 flex w-full items-center justify-center gap-1 rounded-md px-3 py-2 text-xs font-bold transition ${
+                      className={`mt-4 flex w-full items-center justify-center gap-1 rounded-md px-3 py-2 text-xs font-bold transition ${
                         locked
                           ? "cursor-not-allowed bg-muted text-muted-foreground"
                           : v.featured
@@ -327,6 +379,19 @@ function WithdrawPointsPage() {
           )}
         </section>
       </main>
+
+      {/* QR Code & Voucher Pass Modal */}
+      {selectedQrVoucher && (
+        <VoucherQrModal
+          isOpen={true}
+          onClose={() => setSelectedQrVoucher(null)}
+          voucherTitle={selectedQrVoucher.voucher.title}
+          code={selectedQrVoucher.code}
+          expiresAt={selectedQrVoucher.expiresAt}
+          description={selectedQrVoucher.voucher.description}
+          tag={selectedQrVoucher.voucher.tag}
+        />
+      )}
 
       <Footer />
     </div>

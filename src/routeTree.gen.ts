@@ -17,6 +17,7 @@ import { Route as ApplyRouteImport } from './routes/apply'
 import { Route as ApplyJournalistRouteImport } from './routes/apply-journalist'
 import { Route as ArchiveRouteImport } from './routes/archive'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ClaimOfferRouteImport } from './routes/claim-offer'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as DataDeletionPolicyRouteImport } from './routes/data-deletion-policy'
@@ -109,6 +110,11 @@ const ArchiveRoute = ArchiveRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClaimOfferRoute = ClaimOfferRouteImport.update({
+  id: '/claim-offer',
+  path: '/claim-offer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -386,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/apply-journalist': typeof ApplyJournalistRoute
   '/archive': typeof ArchiveRoute
   '/auth': typeof AuthRoute
+  '/claim-offer': typeof ClaimOfferRoute
   '/contact': typeof ContactRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/data-deletion-policy': typeof DataDeletionPolicyRoute
@@ -448,6 +455,7 @@ export interface FileRoutesByTo {
   '/apply-journalist': typeof ApplyJournalistRoute
   '/archive': typeof ArchiveRoute
   '/auth': typeof AuthRoute
+  '/claim-offer': typeof ClaimOfferRoute
   '/contact': typeof ContactRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/data-deletion-policy': typeof DataDeletionPolicyRoute
@@ -512,6 +520,7 @@ export interface FileRoutesById {
   '/apply-journalist': typeof ApplyJournalistRoute
   '/archive': typeof ArchiveRoute
   '/auth': typeof AuthRoute
+  '/claim-offer': typeof ClaimOfferRoute
   '/contact': typeof ContactRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/data-deletion-policy': typeof DataDeletionPolicyRoute
@@ -577,6 +586,7 @@ export interface FileRouteTypes {
     | '/apply-journalist'
     | '/archive'
     | '/auth'
+    | '/claim-offer'
     | '/contact'
     | '/cookie-policy'
     | '/data-deletion-policy'
@@ -639,6 +649,7 @@ export interface FileRouteTypes {
     | '/apply-journalist'
     | '/archive'
     | '/auth'
+    | '/claim-offer'
     | '/contact'
     | '/cookie-policy'
     | '/data-deletion-policy'
@@ -702,6 +713,7 @@ export interface FileRouteTypes {
     | '/apply-journalist'
     | '/archive'
     | '/auth'
+    | '/claim-offer'
     | '/contact'
     | '/cookie-policy'
     | '/data-deletion-policy'
@@ -766,6 +778,7 @@ export interface RootRouteChildren {
   ApplyJournalistRoute: typeof ApplyJournalistRoute
   ArchiveRoute: typeof ArchiveRoute
   AuthRoute: typeof AuthRoute
+  ClaimOfferRoute: typeof ClaimOfferRoute
   ContactRoute: typeof ContactRoute
   CookiePolicyRoute: typeof CookiePolicyRoute
   DataDeletionPolicyRoute: typeof DataDeletionPolicyRoute
@@ -860,6 +873,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/claim-offer': {
+      id: '/claim-offer'
+      path: '/claim-offer'
+      fullPath: '/claim-offer'
+      preLoaderRoute: typeof ClaimOfferRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -1287,6 +1307,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApplyJournalistRoute: ApplyJournalistRoute,
   ArchiveRoute: ArchiveRoute,
   AuthRoute: AuthRoute,
+  ClaimOfferRoute: ClaimOfferRoute,
   ContactRoute: ContactRoute,
   CookiePolicyRoute: CookiePolicyRoute,
   DataDeletionPolicyRoute: DataDeletionPolicyRoute,

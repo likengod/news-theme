@@ -66,12 +66,21 @@ export function AccountOverview({
             <div className="mt-2 flex items-center gap-2">
               <span className="text-2xl font-bold text-emerald-600">₹{points}</span>
             </div>
-            <Link
-              to="/withdraw-points"
-              className="mt-3 inline-flex items-center gap-1 text-xs text-emerald-600 hover:underline font-medium"
-            >
-              Withdraw points →
-            </Link>
+            <div className="mt-3 flex items-center justify-between flex-wrap gap-2 text-xs font-medium">
+              <Link
+                to="/withdraw-points"
+                className="inline-flex items-center gap-1 text-emerald-600 hover:underline"
+              >
+                Withdraw points →
+              </Link>
+              <Link
+                to="/profile"
+                search={{ tab: "vouchers" }}
+                className="inline-flex items-center gap-1 text-rose-600 hover:underline"
+              >
+                My Vouchers & QR Passes →
+              </Link>
+            </div>
           </div>
         </div>
 

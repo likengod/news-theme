@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   User,
@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Phone,
   Loader2,
+  Gift,
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -26,33 +27,46 @@ import { PasswordSettings } from "@/components/profile/PasswordSettings";
 import { PhoneSettings } from "@/components/profile/PhoneSettings";
 import { BankSettings } from "@/components/profile/BankSettings";
 import { DeleteAccount } from "@/components/profile/DeleteAccount";
+import { UserWalletVouchers } from "@/components/profile/UserWalletVouchers";
 import { ROLE_COLOR, ROLE_LABEL } from "@/components/profile/constants";
+
+type ProfileSearch = {
+  tab?: string;
+};
 
 export const Route = createFileRoute("/profile")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>): ProfileSearch => ({
+    tab: typeof search.tab === "string" ? search.tab : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "My Profile – News Theme" },
       {
         name: "description",
-        content: "Manage your account, password, bank details and subscription on News Theme.",
+        content: "Manage your account, password, bank details, vouchers and subscription on News Theme.",
       },
     ],
   }),
   component: ProfilePage,
 });
 
-type Tab = "overview" | "password" | "phone" | "bank" | "delete";
+type Tab = "overview" | "vouchers" | "password" | "phone" | "bank" | "delete";
 
 function ProfilePage() {
   const navigate = useNavigate();
+  const search = useSearch({ from: "/profile" });
   const getProfile = useServerFn(getCurrentUserProfile);
 
   const siteSettings = useSiteSettings();
   const isEnterprisePlus = isEnterprisePlusLicense(siteSettings);
 
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>(() => {
+    if (search.tab === "vouchers") return "vouchers";
+    return "overview";
+  });
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string>("");
   const [profile, setProfile] = useState<any>(null);
   const [roles, setRoles] = useState<string[]>([]);
   const [points, setPoints] = useState(0);
@@ -62,13 +76,20 @@ function ProfilePage() {
   const [ranks] = useState(() => loadRanks());
 
   useEffect(() => {
+    if (search.tab && ["overview", "vouchers", "password", "phone", "bank", "delete"].includes(search.tab)) {
+      setTab(search.tab as Tab);
+    }
+  }, [search.tab]);
+
+  useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!data.session?.user) {
         navigate({ to: "/auth" });
         return;
       }
-      setToken(data.session.access_token);
       const uid = data.session.user.id;
+      setUserId(uid);
+      setToken(data.session.access_token);
       // Load points from localStorage
       const stored = localStorage.getItem(`nt:points:${uid}`);
       setPoints(stored !== null ? Number(stored) : 0);
@@ -103,6 +124,7 @@ function ProfilePage() {
 
   const navItems: { key: Tab; label: string; icon: React.ElementType }[] = [
     { key: "overview", label: "Overview", icon: User },
+    { key: "vouchers", label: "My Vouchers & QR Passes", icon: Gift },
     { key: "password", label: "Change Password", icon: Lock },
     ...(isJournalist
       ? [
@@ -139,7 +161,7 @@ function ProfilePage() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-slate-900">My Profile</h1>
           <p className="text-sm text-slate-500 mt-0.5">
-            Manage your account settings and preferences
+            Manage your account settings, wallet, and redeemed vouchers
           </p>
         </div>
 
@@ -224,6 +246,8 @@ function ProfilePage() {
                 profile={profile}
               />
             )}
+
+            {tab === "vouchers" && <UserWalletVouchers userId={userId} />}
 
             {tab === "password" && <PasswordSettings />}
 

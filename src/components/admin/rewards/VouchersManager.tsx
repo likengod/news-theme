@@ -100,6 +100,7 @@ export function VouchersManager() {
       codesPool: [],
       claimedCodes: [],
       description: "",
+      expiryDays: 30,
     });
     setRawCodesInput("");
     setIsNew(true);
@@ -367,22 +368,57 @@ export function VouchersManager() {
               {(historyVoucher.claimedCodes || []).length === 0 ? (
                 <p className="text-center text-sm text-slate-400 py-6">No codes claimed yet.</p>
               ) : (
-                historyVoucher.claimedCodes!.map((c, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 bg-slate-50/50 text-xs"
-                  >
-                    <div>
-                      <p className="font-mono font-bold text-slate-900 text-sm">{c.code}</p>
-                      <p className="text-[11px] text-slate-500">
-                        {new Date(c.claimedAt).toLocaleString()}
-                      </p>
+                historyVoucher.claimedCodes!.map((c, i) => {
+                  const isUsedInStore = c.status === "used_in_store";
+                  const isExpired = c.expiresAt && new Date() > new Date(c.expiresAt);
+                  return (
+                    <div
+                      key={i}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 text-xs gap-2"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-slate-900 text-sm tracking-wider">
+                            {c.code}
+                          </span>
+                          {c.userId && (
+                            <span className="text-[10px] text-slate-400 bg-slate-200/60 px-1.5 py-0.2 rounded">
+                              User: {c.userId.slice(0, 8)}...
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          Issued: {new Date(c.claimedAt).toLocaleString()}
+                        </p>
+                        {c.expiresAt && (
+                          <p className="text-[10px] text-slate-400">
+                            Valid until: {new Date(c.expiresAt).toLocaleDateString()}
+                          </p>
+                        )}
+                        {isUsedInStore && c.usedAt && (
+                          <p className="text-[11px] font-semibold text-blue-700 mt-0.5">
+                            ✅ Used at store: {c.usedByStoreName || "Store"} ({new Date(c.usedAt).toLocaleString()})
+                          </p>
+                        )}
+                      </div>
+                      <div className="shrink-0">
+                        {isUsedInStore ? (
+                          <span className="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase text-blue-800">
+                            Used in Store
+                          </span>
+                        ) : isExpired ? (
+                          <span className="rounded bg-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-600">
+                            Expired
+                          </span>
+                        ) : (
+                          <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-800">
+                            Active (Unclaimed in Store)
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-800">
-                      Redeemed
-                    </span>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
@@ -437,7 +473,7 @@ export function VouchersManager() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
                     Points Cost *
@@ -464,9 +500,29 @@ export function VouchersManager() {
                     type="text"
                     value={editingVoucher.tag}
                     onChange={(e) => setEditingVoucher({ ...editingVoucher, tag: e.target.value })}
-                    placeholder="e.g. Local Store, Shopping, Food, Mobile"
+                    placeholder="e.g. Local Store, Shopping, Food"
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    Expiry Validity (Days)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={editingVoucher.expiryDays ?? 30}
+                    onChange={(e) =>
+                      setEditingVoucher({
+                        ...editingVoucher,
+                        expiryDays: Math.max(1, Number(e.target.value) || 30),
+                      })
+                    }
+                    placeholder="e.g. 30"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  />
+                  <span className="text-[10px] text-slate-400">e.g. 30 days after claim</span>
                 </div>
               </div>
 
