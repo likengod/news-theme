@@ -35,6 +35,7 @@ import {
   loadVouchers,
   saveVouchers,
   getVouchersServer,
+  purgeExpiredVoucherCodesServer,
 } from "@/lib/vouchers";
 
 export const ICON_OPTIONS: { name: string; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -189,6 +190,45 @@ export function VouchersManager() {
     }
   };
 
+  const [purgingExpired, setPurgingExpired] = useState(false);
+
+  const expiredCodesCount = useMemo(() => {
+    const now = new Date();
+    return vouchers.reduce((acc, v) => {
+      if (!v.claimedCodes || !Array.isArray(v.claimedCodes)) return acc;
+      return (
+        acc +
+        v.claimedCodes.filter((c) => c.expiresAt && now > new Date(c.expiresAt)).length
+      );
+    }, 0);
+  }, [vouchers]);
+
+  const handlePurgeExpired = async () => {
+    if (expiredCodesCount === 0) {
+      toast.info("No expired promo codes found in database.");
+      return;
+    }
+    if (
+      !confirm(
+        `Permanently delete all ${expiredCodesCount} expired promo codes from the database?\n\nThis will free up MySQL database storage and cannot be undone.`
+      )
+    ) {
+      return;
+    }
+    setPurgingExpired(true);
+    try {
+      const res = await purgeExpiredVoucherCodesServer({});
+      if (res.vouchers) {
+        setVouchers(res.vouchers);
+      }
+      toast.success(res.message || `Deleted ${res.purgedCount} expired codes from database.`);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to purge expired codes");
+    } finally {
+      setPurgingExpired(false);
+    }
+  };
+
   const handleResetDefaults = () => {
     if (confirm("Reset all vouchers back to system defaults?")) {
       setVouchers(DEFAULT_VOUCHERS);
@@ -287,7 +327,19 @@ export function VouchersManager() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {expiredCodesCount > 0 && (
+            <button
+              type="button"
+              disabled={purgingExpired}
+              onClick={handlePurgeExpired}
+              title="Permanently remove expired promo codes from MySQL to reclaim database storage"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 hover:bg-red-100 transition shadow-2xs disabled:opacity-50"
+            >
+              <Trash2 className="h-3.5 w-3.5 text-red-600" />
+              {purgingExpired ? "Purging..." : `Purge Expired (${expiredCodesCount})`}
+            </button>
+          )}
           <button
             type="button"
             onClick={handleResetDefaults}

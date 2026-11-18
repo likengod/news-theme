@@ -128,7 +128,35 @@ export const getVouchersServer = createServerFn({ method: "GET" }).handler(async
     if (rows && rows.length > 0 && rows[0].value) {
       const parsed = typeof rows[0].value === "string" ? JSON.parse(rows[0].value) : rows[0].value;
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed as Voucher[];
+        const vouchers = parsed as Voucher[];
+
+        // Automatic cleanup: permanently prune claimed codes expired for more than 365 days (1 year)
+        // to free up database storage automatically without requiring manual action
+        let changed = false;
+        const oneYearAgo = new Date(Date.now() - 365 * 86400000);
+        for (const v of vouchers) {
+          if (v.claimedCodes && Array.isArray(v.claimedCodes)) {
+            const initialLen = v.claimedCodes.length;
+            v.claimedCodes = v.claimedCodes.filter((c) => {
+              if (!c.expiresAt) return true;
+              return new Date(c.expiresAt) >= oneYearAgo;
+            });
+            if (v.claimedCodes.length !== initialLen) {
+              changed = true;
+            }
+          }
+        }
+
+        if (changed) {
+          const json = JSON.stringify(vouchers);
+          query(
+            `INSERT INTO site_settings (setting_key, value) VALUES ('vouchers_config', ?)
+             ON DUPLICATE KEY UPDATE value = ?`,
+            [json, json],
+          ).catch((e) => console.warn("[Vouchers] Auto-prune save error:", e));
+        }
+
+        return vouchers;
       }
     }
   } catch (err) {
@@ -148,6 +176,56 @@ export const saveVouchersServer = createServerFn({ method: "POST" })
       [json, json],
     );
     return { success: true };
+  });
+
+/**
+ * Permanently purge expired promo and voucher records from the database
+ * Removes records from claimedCodes where new Date() > new Date(record.expiresAt)
+ * Can be triggered on-demand by admin to free up MySQL database storage immediately.
+ */
+export const purgeExpiredVoucherCodesServer = createServerFn({ method: "POST" })
+  .middleware([attachAuth, requireAdmin])
+  .validator((d: { olderThanDays?: number } = {}) => d)
+  .handler(async ({ data }) => {
+    const rows = await query("SELECT value FROM site_settings WHERE setting_key = 'vouchers_config'");
+    let vouchers: Voucher[] = DEFAULT_VOUCHERS;
+    if (rows && rows.length > 0 && rows[0].value) {
+      try {
+        vouchers = typeof rows[0].value === "string" ? JSON.parse(rows[0].value) : rows[0].value;
+      } catch {}
+    }
+
+    const now = new Date();
+    const olderThanMs = (data?.olderThanDays || 0) * 86400000;
+    const cutoffDate = new Date(now.getTime() - olderThanMs);
+
+    let purgedCount = 0;
+    for (const v of vouchers) {
+      if (v.claimedCodes && Array.isArray(v.claimedCodes)) {
+        const initialLen = v.claimedCodes.length;
+        v.claimedCodes = v.claimedCodes.filter((c) => {
+          if (!c.expiresAt) return true;
+          return new Date(c.expiresAt) >= cutoffDate;
+        });
+        purgedCount += initialLen - v.claimedCodes.length;
+      }
+    }
+
+    if (purgedCount > 0) {
+      const json = JSON.stringify(vouchers);
+      await query(
+        `INSERT INTO site_settings (setting_key, value) VALUES ('vouchers_config', ?)
+         ON DUPLICATE KEY UPDATE value = ?`,
+        [json, json],
+      );
+    }
+
+    return {
+      success: true,
+      purgedCount,
+      vouchers,
+      message: `Permanently deleted ${purgedCount} expired promo code records from the database.`,
+    };
   });
 
 /**
