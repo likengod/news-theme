@@ -1,0 +1,2 @@
+import{n as e,t}from"./createServerFn-DXASB4KX.js";import{t as n}from"./auth-middleware-BwSK_RvR.js";import{t as r}from"./auth-attacher-BjJk4eDW.js";var i=t({method:`POST`}).middleware([r,n]).handler(e(`509b385316e86899d89a791a829c18940efbe7f30a57fc190b3d7737b627a870`));export{i as t};
+//# sourceMappingURL=cdn.functions-c_MUvRR9.js.map

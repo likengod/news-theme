@@ -1,2 +1,0 @@
-import{i as e}from"./rolldown-runtime-COiEfhsA.js";import{Pr as t}from"./vendor-icons-CGbc1cSg.js";import{h as n,p as r}from"./vendor-tanstack-router-CXjvI4Hu.js";var i=e(t(),1);function a(e){let t=r();return i.useCallback(async(...r)=>{try{let t=await e(...r);if(n(t))throw t;return t}catch(e){if(n(e))return e.options._fromLocation=t.stores.location.get(),t.navigate(t.resolveRedirect(e).options);throw e}},[t,e])}export{a as t};
-//# sourceMappingURL=useServerFn-DsdA67BA.js.map

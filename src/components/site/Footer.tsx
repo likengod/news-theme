@@ -26,8 +26,6 @@ export function Footer() {
   const showEventLink = s.eventFooterLinkEnabled !== false;
 
   const allAvailableLinks: { label: string; to?: string }[] = [
-    { label: t("footer.about"), to: "/about" },
-    { label: t("footer.contact"), to: "/contact" },
     { label: t("footer.workWithUs"), to: "/work-with-us" },
     { label: t("footer.submitNews"), to: "/submit-news" },
     ...(showEventLink ? [{ label: t("footer.event", "Event"), to: "/event" }] : []),
@@ -35,8 +33,6 @@ export function Footer() {
     ...(isEnterprise
       ? [{ label: t("footer.verifiedJournalist"), to: "/verified-journalist" }]
       : []),
-    { label: t("footer.privacyPolicy"), to: "/privacy-policy" },
-    { label: t("footer.terms"), to: "/terms" },
     { label: t("footer.cookiePolicy"), to: "/cookie-policy" },
     { label: t("footer.refundPolicy"), to: "/refund-policy" },
     { label: t("footer.disclaimer"), to: "/disclaimer" },
@@ -72,19 +68,6 @@ export function Footer() {
       ? `${s.logoTextPrimary} ${s.logoTextSecondary || ""}`
       : s.logoText || s.siteName) || ""
   ).trim() || "Home";
-
-  // Split links into 2 neat categories for desktop readability and better space distribution:
-  // 1. Navigation & Company Links
-  const companyLinks = allAvailableLinks.slice(0, 7);
-  // 2. Policies, Terms & Archives
-  const legalLinks = allAvailableLinks.slice(7);
-
-  const footerWidthClass =
-    s.footerWidth === "full"
-      ? "w-full px-4 sm:px-8 lg:px-12 xl:px-16"
-      : s.footerWidth === "contained"
-        ? "mx-auto max-w-7xl px-4"
-        : "mx-auto max-w-[1600px] px-4 sm:px-8 lg:px-12";
 
   const dividerAccentColor = safeSecondaryColor || s.logoColorSecondary || "#dc2626";
 
