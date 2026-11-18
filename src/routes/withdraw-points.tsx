@@ -8,6 +8,8 @@ import {
   Lock,
   QrCode,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -71,6 +73,17 @@ function WithdrawPointsPage() {
     code: string;
     expiresAt?: string;
   } | null>(null);
+
+  // Responsive Pagination: Desktop default 16 (4x4), Tablet default 12 (4x3), Mobile default 6
+  const [itemsPerPage, setItemsPerPage] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      if (window.innerWidth >= 1280) return 16;
+      if (window.innerWidth >= 768) return 12;
+      return 6;
+    }
+    return 16;
+  });
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
     getVouchersServer()
@@ -176,11 +189,17 @@ function WithdrawPointsPage() {
 
   const progress = Math.min(100, (state.balance / MIN_WITHDRAW) * 100);
 
+  const totalPages = Math.max(1, Math.ceil(vouchers.length / itemsPerPage));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, vouchers.length);
+  const paginatedVouchers = vouchers.slice(startIndex, endIndex);
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-between">
       <Header showTicker={false} showBreakingBar={false} />
 
-      <main className="mx-auto max-w-5xl px-4 py-10 flex-1 w-full">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
         <header className="mb-6 flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -245,21 +264,56 @@ function WithdrawPointsPage() {
         </section>
 
         {/* Vouchers */}
-        <section>
-          <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
-            <h2 className="flex items-center gap-2 text-xl font-bold">
-              <Gift className="h-5 w-5 text-rose-500" /> Available Vouchers
-            </h2>
-            <Link
-              to="/profile"
-              className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-1"
-            >
-              <Sparkles className="h-3.5 w-3.5" /> View My Claimed Passes in Profile
-            </Link>
+        <section id="vouchers-catalog">
+          <div className="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 className="flex items-center gap-2 text-xl font-bold">
+                <Gift className="h-5 w-5 text-rose-500" /> Available Vouchers
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
+                  {vouchers.length} Total
+                </span>
+              </h2>
+              {vouchers.length > 0 && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Showing {startIndex + 1}–{endIndex} of {vouchers.length} vouchers
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Per-Page Selector Pills */}
+              <div className="flex items-center gap-1 text-xs bg-muted/60 p-1 rounded-lg border border-border">
+                <span className="text-[11px] font-medium text-muted-foreground px-1.5 hidden sm:inline">Per page:</span>
+                {[6, 9, 12, 16].map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => {
+                      setItemsPerPage(size);
+                      setCurrentPage(1);
+                    }}
+                    className={`px-2.5 py-1 rounded text-xs font-bold transition ${
+                      itemsPerPage === size
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+
+              <Link
+                to="/profile"
+                className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-1 shrink-0 ml-auto sm:ml-0"
+              >
+                <Sparkles className="h-3.5 w-3.5" /> My Claimed Passes
+              </Link>
+            </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {vouchers.map((v) => {
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+            {paginatedVouchers.map((v) => {
               const Icon = getVoucherIconComponent(v.icon);
               const colors = getVoucherColorClasses(v.color);
               const claimedCode = state.claimed[v.id];
@@ -372,6 +426,65 @@ function WithdrawPointsPage() {
               );
             })}
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border pt-4">
+              <p className="text-xs text-muted-foreground order-2 sm:order-1">
+                Page <span className="font-bold text-foreground">{safeCurrentPage}</span> of{" "}
+                <span className="font-bold text-foreground">{totalPages}</span>
+              </p>
+
+              <div className="flex items-center gap-1.5 order-1 sm:order-2">
+                <button
+                  type="button"
+                  disabled={safeCurrentPage <= 1}
+                  onClick={() => {
+                    setCurrentPage((p) => Math.max(1, p - 1));
+                    document.getElementById("vouchers-catalog")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="inline-flex items-center gap-1 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition shadow-xs"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" /> Previous
+                </button>
+
+                {Array.from({ length: totalPages }).map((_, idx) => {
+                  const pageNum = idx + 1;
+                  const isActive = pageNum === safeCurrentPage;
+                  return (
+                    <button
+                      key={pageNum}
+                      type="button"
+                      onClick={() => {
+                        setCurrentPage(pageNum);
+                        document.getElementById("vouchers-catalog")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className={`min-w-[32px] h-8 rounded-lg text-xs font-bold transition shadow-xs ${
+                        isActive
+                          ? "bg-emerald-600 text-white"
+                          : "border border-border bg-card text-foreground hover:bg-accent"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  disabled={safeCurrentPage >= totalPages}
+                  onClick={() => {
+                    setCurrentPage((p) => Math.min(totalPages, p + 1));
+                    document.getElementById("vouchers-catalog")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="inline-flex items-center gap-1 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition shadow-xs"
+                >
+                  Next <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+
           {!hasClaimedFree && canWithdraw && (
             <p className="mt-4 text-xs text-muted-foreground">
               Tip: Claim the free 6-month Premium first — other vouchers unlock right after.
