@@ -258,10 +258,20 @@ function ClaimOfferPage() {
               </div>
             </div>
 
+            {/* Red Button: Background Red, Text Color White when Claimed */}
+            <button
+              type="button"
+              disabled
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 py-3.5 px-5 text-sm sm:text-base font-black text-white shadow-md cursor-not-allowed opacity-95 transition"
+            >
+              <XCircle className="h-5 w-5" />
+              Already Claimed / Code Locked
+            </button>
+
             <button
               type="button"
               onClick={handleReset}
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-6 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-emerald-800 shadow-xs transition"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-white dark:text-slate-900 px-6 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-slate-800 shadow-xs transition"
             >
               <RotateCcw className="h-4 w-4" /> Verify Another Code
             </button>
@@ -322,6 +332,16 @@ function ClaimOfferPage() {
             <div className="rounded-lg bg-red-100/90 dark:bg-red-900/30 p-2.5 text-center text-xs font-bold text-red-800 dark:text-red-200">
               ⚠️ DO NOT provide discounts for this code. It has already been redeemed once!
             </div>
+
+            {/* Red Button: Background Red, Text Color White when Claimed */}
+            <button
+              type="button"
+              disabled
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 py-3.5 px-5 text-sm sm:text-base font-black text-white shadow-md cursor-not-allowed opacity-95 transition"
+            >
+              <XCircle className="h-5 w-5" />
+              Already Claimed / Grant Discount Blocked
+            </button>
           </div>
         )}
 
@@ -470,7 +490,7 @@ function ClaimOfferPage() {
               </div>
             </div>
 
-            {/* Big Claim Action Button */}
+            {/* Big Claim Action Button: Green Background, White Text when not claimed */}
             <button
               type="button"
               disabled={submitting}
@@ -484,7 +504,7 @@ function ClaimOfferPage() {
               ) : (
                 <>
                   <ShieldCheck className="h-5 w-5" />
-                  Claim Offer & Apply Discount (Mark as Used)
+                  Mark as Claimed / Grant Discount
                 </>
               )}
             </button>
