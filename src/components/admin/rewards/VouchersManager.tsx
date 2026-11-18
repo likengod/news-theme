@@ -328,18 +328,30 @@ export function VouchersManager() {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {expiredCodesCount > 0 && (
-            <button
-              type="button"
-              disabled={purgingExpired}
-              onClick={handlePurgeExpired}
-              title="Permanently remove expired promo codes from MySQL to reclaim database storage"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 hover:bg-red-100 transition shadow-2xs disabled:opacity-50"
-            >
-              <Trash2 className="h-3.5 w-3.5 text-red-600" />
-              {purgingExpired ? "Purging..." : `Purge Expired (${expiredCodesCount})`}
-            </button>
-          )}
+          <button
+            type="button"
+            disabled={purgingExpired}
+            onClick={handlePurgeExpired}
+            title={
+              expiredCodesCount > 0
+                ? `Permanently delete ${expiredCodesCount} expired promo codes from MySQL to reclaim database storage`
+                : "No expired promo codes in database (storage is clean)"
+            }
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold transition shadow-2xs disabled:opacity-50 ${
+              expiredCodesCount > 0
+                ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+            }`}
+          >
+            <Trash2
+              className={`h-3.5 w-3.5 ${
+                expiredCodesCount > 0 ? "text-red-600" : "text-slate-400"
+              }`}
+            />
+            {purgingExpired
+              ? "Purging..."
+              : `Purge Expired (${expiredCodesCount})`}
+          </button>
           <button
             type="button"
             onClick={handleResetDefaults}
