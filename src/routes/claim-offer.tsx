@@ -20,7 +20,6 @@ import {
   Clock,
   Info,
 } from "lucide-react";
-import { toast, Toaster } from "sonner";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import {
@@ -57,6 +56,8 @@ function ClaimOfferPage() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<VerificationResult | null>(null);
+  const [inputError, setInputError] = useState<string | null>(null);
+  const [claimError, setClaimError] = useState<string | null>(null);
   const [storeName, setStoreName] = useState<string>("Local Partner Store");
   const [claimedSuccess, setClaimedSuccess] = useState<boolean>(false);
   const [claimedRecord, setClaimedRecord] = useState<any>(null);
@@ -65,39 +66,20 @@ function ClaimOfferPage() {
   const verifyCode = async (codeToTest: string) => {
     const clean = codeToTest.trim();
     if (!clean) {
-      toast.error("Please enter a promo code first", { position: "top-center" });
+      setInputError("Please enter a promo code first");
+      setResult(null);
       return;
     }
+    setInputError(null);
+    setClaimError(null);
     setLoading(true);
     setClaimedSuccess(false);
     try {
       const res = await verifyPromoCodeServer({ data: { code: clean } });
       setResult(res);
-      if (res.status === "valid") {
-        toast.success("Promo code verified! Ready to claim.", {
-          position: "top-center",
-          duration: 4000,
-        });
-      } else if (res.status === "already_used") {
-        toast.error("Code was ALREADY USED! Duplicate redemption blocked.", {
-          position: "top-center",
-          duration: 5000,
-        });
-      } else if (res.status === "expired") {
-        toast.warning("This promo code has expired.", {
-          position: "top-center",
-          duration: 5000,
-        });
-      } else {
-        toast.error(res.message, {
-          position: "top-center",
-          duration: 4000,
-        });
-      }
     } catch (err: any) {
-      toast.error(err?.message || "Failed to verify promo code", {
-        position: "top-center",
-      });
+      setInputError(err?.message || "Failed to verify promo code");
+      setResult(null);
     } finally {
       setLoading(false);
     }
@@ -114,6 +96,7 @@ function ClaimOfferPage() {
   const handleClaim = async () => {
     const code = codeInput.trim().toUpperCase();
     if (!code) return;
+    setClaimError(null);
     setSubmitting(true);
     try {
       const res = await claimPromoCodeInStoreServer({
@@ -125,12 +108,8 @@ function ClaimOfferPage() {
       setClaimedSuccess(true);
       setClaimedRecord(res.record);
       setResult(null);
-      toast.success(res.message, { position: "top-center", duration: 5000 });
     } catch (err: any) {
-      toast.error(err?.message || "Failed to claim promo code", {
-        position: "top-center",
-        duration: 5000,
-      });
+      setClaimError(err?.message || "Failed to claim promo code");
     } finally {
       setSubmitting(false);
     }
@@ -139,6 +118,8 @@ function ClaimOfferPage() {
   const handleReset = () => {
     setCodeInput("");
     setResult(null);
+    setInputError(null);
+    setClaimError(null);
     setClaimedSuccess(false);
     setClaimedRecord(null);
   };
@@ -146,15 +127,11 @@ function ClaimOfferPage() {
   const copyCodeToClipboard = (txt: string) => {
     navigator.clipboard.writeText(txt);
     setCopied(true);
-    toast.success("Code copied to clipboard!", { position: "top-center" });
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <div className="min-h-screen bg-slate-50/60 dark:bg-background text-foreground flex flex-col justify-between">
-      {/* Centered Sonner Toaster */}
-      <Toaster position="top-center" richColors closeButton />
-
       <Header showTicker={false} showBreakingBar={false} />
 
       <main className="mx-auto max-w-2xl px-4 py-8 sm:py-12 flex-1 w-full">
@@ -182,7 +159,10 @@ function ClaimOfferPage() {
               <input
                 type="text"
                 value={codeInput}
-                onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                onChange={(e) => {
+                  setCodeInput(e.target.value.toUpperCase());
+                  setInputError(null);
+                }}
                 onKeyDown={(e) => e.key === "Enter" && verifyCode(codeInput)}
                 placeholder="e.g. STORE50-A101 or NT-VOUCHER-..."
                 className="w-full font-mono text-sm uppercase rounded-xl border border-slate-200 pl-10 pr-4 py-3 bg-slate-50 font-bold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 dark:border-border dark:bg-muted/40 dark:text-white dark:focus:bg-muted transition"
@@ -205,6 +185,13 @@ function ClaimOfferPage() {
               )}
             </button>
           </div>
+
+          {inputError && (
+            <div className="mt-3 flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs font-bold text-red-700 dark:bg-red-950/40 dark:border-red-900/50 dark:text-red-300">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-red-600" />
+              <span>{inputError}</span>
+            </div>
+          )}
 
           <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
             <Info className="h-3.5 w-3.5 text-slate-400 shrink-0" />
@@ -401,6 +388,12 @@ function ClaimOfferPage() {
         {/* 5. VALID & READY TO CLAIM Screen */}
         {result?.status === "valid" && (
           <div className="rounded-2xl border-2 border-emerald-500 bg-white p-6 sm:p-7 shadow-xl dark:border-emerald-600 dark:bg-card animate-in fade-in duration-200 space-y-5 mb-6">
+            {/* Inline Message inside Verified & Ready section (No floating toast!) */}
+            <div className="flex items-center gap-3 rounded-xl bg-emerald-50 border-2 border-emerald-400 p-3.5 text-xs sm:text-sm font-bold text-emerald-950 dark:bg-emerald-950/60 dark:border-emerald-600 dark:text-emerald-200">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span>Promo code is valid and ready to claim!</span>
+            </div>
+
             {/* Header Badge & Title */}
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
@@ -448,10 +441,17 @@ function ClaimOfferPage() {
                   <button
                     type="button"
                     onClick={() => copyCodeToClipboard(result.record?.code || "")}
-                    className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white transition"
+                    className="inline-flex items-center gap-1 p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white transition"
                     title="Copy Code"
                   >
-                    {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                    {copied ? (
+                      <>
+                        <Check className="h-4 w-4 text-emerald-600" />
+                        <span className="text-[10px] font-bold text-emerald-600">Copied!</span>
+                      </>
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -489,6 +489,14 @@ function ClaimOfferPage() {
                 />
               </div>
             </div>
+
+            {/* Claim Error if any (Inline, No toast) */}
+            {claimError && (
+              <div className="flex items-center gap-2.5 rounded-xl bg-red-50 border-2 border-red-300 p-3.5 text-xs sm:text-sm font-bold text-red-900 dark:bg-red-950/60 dark:border-red-700 dark:text-red-200">
+                <AlertTriangle className="h-5 w-5 text-red-600 shrink-0" />
+                <span>{claimError}</span>
+              </div>
+            )}
 
             {/* Big Claim Action Button: Green Background, White Text when not claimed */}
             <button

@@ -392,7 +392,7 @@ export const claimPromoCodeInStoreServer = createServerFn({ method: "POST" })
     let targetVoucher: Voucher | null = null;
     let targetRecord: ClaimedCodeRecord | null = null;
 
-    // Check claimedCodes first
+    // 1. Check existing claimedCodes first
     for (const v of vouchers) {
       if (v.claimedCodes && Array.isArray(v.claimedCodes)) {
         const found = v.claimedCodes.find(
@@ -406,8 +406,24 @@ export const claimPromoCodeInStoreServer = createServerFn({ method: "POST" })
       }
     }
 
-    // If not in claimedCodes, check if it is in an unredeemed codesPool!
-    if (!targetRecord) {
+    // If already in claimedCodes: verify it wasn't already redeemed in store
+    if (targetRecord) {
+      if (targetRecord.status === "used_in_store") {
+        const usedDate = targetRecord.usedAt ? new Date(targetRecord.usedAt).toLocaleString() : "previously";
+        throw new Error(`This code was ALREADY REDEEMED on ${usedDate} at ${targetRecord.usedByStoreName || "Partner Store"}. Duplicate redemptions are strictly blocked!`);
+      }
+
+      if (targetRecord.expiresAt && new Date() > new Date(targetRecord.expiresAt)) {
+        throw new Error(`This promo code expired on ${new Date(targetRecord.expiresAt).toLocaleDateString()}!`);
+      }
+
+      // Mark this claimed code as used in store now
+      const nowIso = new Date().toISOString();
+      targetRecord.status = "used_in_store";
+      targetRecord.usedAt = nowIso;
+      targetRecord.usedByStoreName = (data.storeName || "").trim() || "Local Partner Store";
+    } else {
+      // 2. If not in claimedCodes, check unredeemed codesPool (admin batch-generated / pre-loaded pool)
       for (const v of vouchers) {
         if (v.codesPool && Array.isArray(v.codesPool)) {
           const poolIndex = v.codesPool.findIndex((c) => c.trim().toUpperCase() === searchCode);
@@ -445,21 +461,6 @@ export const claimPromoCodeInStoreServer = createServerFn({ method: "POST" })
     if (!targetRecord || !targetVoucher) {
       throw new Error(`Promo code "${rawCode}" not found in inventory.`);
     }
-
-    if (targetRecord.status === "used_in_store") {
-      const usedDate = targetRecord.usedAt ? new Date(targetRecord.usedAt).toLocaleString() : "previously";
-      throw new Error(`This code was ALREADY REDEEMED on ${usedDate} at ${targetRecord.usedByStoreName || "Store"}. Duplicate redemptions are strictly blocked!`);
-    }
-
-    if (targetRecord.expiresAt && new Date() > new Date(targetRecord.expiresAt)) {
-      throw new Error(`This promo code has expired on ${new Date(targetRecord.expiresAt).toLocaleDateString()}!`);
-    }
-
-    // Permanently mark as used in store
-    const nowIso = new Date().toISOString();
-    targetRecord.status = "used_in_store";
-    targetRecord.usedAt = nowIso;
-    targetRecord.usedByStoreName = (data.storeName || "").trim() || "Local Partner Store";
 
     // Save to database
     const json = JSON.stringify(vouchers);
