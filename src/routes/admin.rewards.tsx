@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Gift, Award, Lock } from "lucide-react";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { Gift, Award, Lock, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteSettings } from "@/components/site/AdSettingsContext";
 import { isEnterprisePlusLicense } from "@/lib/site-content";
@@ -28,6 +28,7 @@ import {
   updateClaimStatus,
   type PendingClaim,
 } from "@/lib/pending-claims";
+import { loadVouchers, getVouchersServer } from "@/lib/vouchers";
 import { RewardRulesTable } from "@/components/admin/rewards/RewardRulesTable";
 import { JournalistRanksEditor } from "@/components/admin/rewards/JournalistRanksEditor";
 import { SocialLinksEditor } from "@/components/admin/rewards/SocialLinksEditor";
@@ -35,14 +36,31 @@ import { PendingClaimsTable } from "@/components/admin/rewards/PendingClaimsTabl
 import { VouchersManager } from "@/components/admin/rewards/VouchersManager";
 import { Modal, SaveBar } from "@/components/admin/rewards/RewardEditorModal";
 
+type RewardsSearch = {
+  tab?: "rules" | "vouchers";
+};
+
 export const Route = createFileRoute("/admin/rewards")({
+  validateSearch: (search: Record<string, unknown>): RewardsSearch => ({
+    tab: search.tab === "vouchers" ? "vouchers" : "rules",
+  }),
   component: RewardsPage,
 });
 
 function RewardsPage() {
   const navigate = useNavigate();
+  const search = useSearch({ from: "/admin/rewards" });
   const s = useSiteSettings();
   const isEnterprisePlus = isEnterprisePlusLicense(s);
+
+  const [mainTab, setMainTab] = useState<"rules" | "vouchers">(() => search.tab || "rules");
+  const [vouchersCount, setVouchersCount] = useState<number>(() => loadVouchers().length);
+
+  useEffect(() => {
+    if (search.tab && (search.tab === "rules" || search.tab === "vouchers")) {
+      setMainTab(search.tab);
+    }
+  }, [search.tab]);
 
   useEffect(() => {
     if (!isEnterprisePlus) {
@@ -67,6 +85,11 @@ function RewardsPage() {
       .catch(() => {});
     getPendingClaimsServer()
       .then((c) => setClaims(c))
+      .catch(() => {});
+    getVouchersServer()
+      .then((data) => {
+        if (Array.isArray(data)) setVouchersCount(data.length);
+      })
       .catch(() => {});
   }, [isEnterprisePlus]);
 
@@ -164,78 +187,123 @@ function RewardsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Page Header with Right-Side Button */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Rewards & Points Rules</h1>
-          <p className="text-sm text-slate-500">
-            Define earning rules per user role, journalist rank scales, and review social proof
-            claims.
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            {mainTab === "vouchers" ? "Gift Cards & Promo Inventory" : "Rewards & Points Rules"}
+          </h1>
+          <p className="text-sm text-slate-500 mt-0.5">
+            {mainTab === "vouchers"
+              ? "Manage store coupons, pre-loaded promo code pools, gift cards, and live withdrawal stock."
+              : "Define earning rules per user role, journalist rank scales, and review social proof claims."}
           </p>
+        </div>
+
+        {/* Right side navigation options */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMainTab("rules")}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition shadow-xs ${
+              mainTab === "rules"
+                ? "bg-slate-900 text-white"
+                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            <Award className="h-4 w-4" />
+            Rules & Journalist Ranks
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainTab("vouchers")}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition shadow-xs ${
+              mainTab === "vouchers"
+                ? "bg-rose-600 text-white shadow-rose-200 ring-2 ring-rose-500 ring-offset-1"
+                : "border border-rose-200 bg-rose-50/80 text-rose-700 hover:bg-rose-100"
+            }`}
+          >
+            <Gift className={`h-4 w-4 ${mainTab === "vouchers" ? "text-white" : "text-rose-500"}`} />
+            <span>Gift Cards Inventory</span>
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                mainTab === "vouchers"
+                  ? "bg-white text-rose-700"
+                  : "bg-rose-600 text-white"
+              }`}
+            >
+              {vouchersCount} Total
+            </span>
+          </button>
         </div>
       </div>
 
-      {/* Journalist Ranks Tier Editor */}
-      <JournalistRanksEditor
-        ranks={ranksList}
-        onChangeField={handleUpdateRankField}
-        onSave={handleSaveRanks}
-      />
+      {/* Main Content Area based on selected Tab */}
+      {mainTab === "vouchers" ? (
+        <VouchersManager />
+      ) : (
+        <>
+          {/* Journalist Ranks Tier Editor */}
+          <JournalistRanksEditor
+            ranks={ranksList}
+            onChangeField={handleUpdateRankField}
+            onSave={handleSaveRanks}
+          />
 
-      {/* Social Links Editor */}
-      <SocialLinksEditor />
+          {/* Social Links Editor */}
+          <SocialLinksEditor />
 
-      {/* Available Vouchers & Gift Cards Manager */}
-      <VouchersManager />
+          {/* Role Tabs for Reward Rules */}
+          <section className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
+              {groups.map((g) => (
+                <button
+                  key={g.roleId}
+                  onClick={() => setActive(g.roleId)}
+                  className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
+                    active === g.roleId
+                      ? "bg-slate-900 text-white shadow-sm"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {g.label}
+                </button>
+              ))}
+            </div>
 
-      {/* Role Tabs for Reward Rules */}
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
-          {groups.map((g) => (
-            <button
-              key={g.roleId}
-              onClick={() => setActive(g.roleId)}
-              className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
-                active === g.roleId
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
-            >
-              {g.label}
-            </button>
-          ))}
-        </div>
+            {/* Selected Role Rules */}
+            <RewardRulesTable
+              currentGroup={current}
+              onAddRecurring={() => {
+                setRecEdit(newRecurring());
+                setRecIsNew(true);
+              }}
+              onEditRecurring={(item) => {
+                setRecEdit({ ...item });
+                setRecIsNew(false);
+              }}
+              onDeleteRecurring={deleteRecurring}
+              onAddOneTime={() => {
+                setOneEdit(newOneTime());
+                setOneIsNew(true);
+              }}
+              onEditOneTime={(item) => {
+                setOneEdit({ ...item });
+                setOneIsNew(false);
+              }}
+              onDeleteOneTime={deleteOneTime}
+            />
+          </section>
 
-        {/* Selected Role Rules */}
-        <RewardRulesTable
-          currentGroup={current}
-          onAddRecurring={() => {
-            setRecEdit(newRecurring());
-            setRecIsNew(true);
-          }}
-          onEditRecurring={(item) => {
-            setRecEdit({ ...item });
-            setRecIsNew(false);
-          }}
-          onDeleteRecurring={deleteRecurring}
-          onAddOneTime={() => {
-            setOneEdit(newOneTime());
-            setOneIsNew(true);
-          }}
-          onEditOneTime={(item) => {
-            setOneEdit({ ...item });
-            setOneIsNew(false);
-          }}
-          onDeleteOneTime={deleteOneTime}
-        />
-      </section>
-
-      {/* Pending User Claims Table */}
-      <PendingClaimsTable
-        claims={claims}
-        onApprove={handleApproveClaim}
-        onReject={handleRejectClaim}
-      />
+          {/* Pending User Claims Table */}
+          <PendingClaimsTable
+            claims={claims}
+            onApprove={handleApproveClaim}
+            onReject={handleRejectClaim}
+          />
+        </>
+      )}
 
       {/* Recurring Task Modal */}
       {recEdit && (
