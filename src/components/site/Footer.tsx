@@ -33,6 +33,7 @@ export function Footer() {
     ...(isEnterprise
       ? [{ label: t("footer.verifiedJournalist"), to: "/verified-journalist" }]
       : []),
+    { label: t("footer.promoCode", "Promo Code"), to: "/claim-offer" },
     { label: t("footer.cookiePolicy"), to: "/cookie-policy" },
     { label: t("footer.refundPolicy"), to: "/refund-policy" },
     { label: t("footer.disclaimer"), to: "/disclaimer" },
